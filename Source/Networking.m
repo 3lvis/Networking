@@ -24,34 +24,33 @@
     [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
 
     NSString *url = [NSString stringWithFormat:@"%@%@", self.baseURL, path];
+    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:url]];
+    NSOperationQueue *queue = [NSOperationQueue new];
+    [NSURLConnection sendAsynchronousRequest:request
+                                       queue:queue
+                           completionHandler:^(NSURLResponse *response,
+                                               NSData *data,
+                                               NSError *connectionError) {
+                               NSError *error = connectionError;
+                               id JSON;
 
-    NSURLSession *session = [NSURLSession sharedSession];
-    NSURLSessionDataTask *task = [session dataTaskWithURL:[NSURL URLWithString:url]
-                                        completionHandler:^(NSData *data,
-                                                            NSURLResponse *response,
-                                                            NSError *connectionError) {
-                                            NSError *error = connectionError;
-                                            id JSON;
+                               if (data) {
+                                   NSError *serializationError = nil;
+                                   JSON = [NSJSONSerialization JSONObjectWithData:data
+                                                                          options:NSJSONReadingMutableContainers
+                                                                            error:&serializationError];
+                                   if (!error) {
+                                       error = serializationError;
+                                   }
+                               }
 
-                                            if (data) {
-                                                NSError *serializationError = nil;
-                                                JSON = [NSJSONSerialization JSONObjectWithData:data
-                                                                                       options:NSJSONReadingMutableContainers
-                                                                                         error:&serializationError];
-                                                if (!error) {
-                                                    error = serializationError;
-                                                }
-                                            }
-
-                                            dispatch_async(dispatch_get_main_queue(), ^{
-                                                [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
-                                                completion(JSON, error);
-                                            });
-                                        }];
-
-    [task resume];
+                               dispatch_async(dispatch_get_main_queue(), ^{
+                                   [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+                                   completion(JSON, error);
+                               });
+                           }];
 }
- 
+
 + (void)stubGET:(NSString *)path response:(id)JSON
 {
 
