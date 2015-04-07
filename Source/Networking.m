@@ -18,8 +18,8 @@
     return self;
 }
 
-- (void)getPath:(NSString *)path
-     completion:(void (^)(id JSON, NSError *error))completion
+- (void)GET:(NSString *)path
+ completion:(void (^)(id JSON, NSError *error))completion
 {
     [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
 
@@ -44,6 +44,11 @@
                                    completion(JSON, error);
                                });
                            }];
+}
+
++ (void)stubGET:(NSString *)path response:(id)JSON
+{
+    
 }
 
 @end
