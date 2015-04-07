@@ -27,54 +27,51 @@
 
     NSString *url = [NSString stringWithFormat:@"%@%@", self.baseURL, path];
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:url]];
-    NSOperationQueue *queue = [NSOperationQueue new];
-    [NSURLConnection sendAsynchronousRequest:request
-                                       queue:queue
-                           completionHandler:^(NSURLResponse *response,
-                                               NSData *data,
-                                               NSError *connectionError) {
-                               NSError *error = connectionError;
-                               id JSON;
 
-                               if (data) {
-                                   NSError *serializationError = nil;
-                                   JSON = [NSJSONSerialization JSONObjectWithData:data
-                                                                          options:NSJSONReadingMutableContainers
-                                                                            error:&serializationError];
-                                   if (!error) {
-                                       error = serializationError;
-                                   }
-                               }
+    if ([NSObject isUnitTesting]) {
+        NSError *error = nil;
+        NSURLResponse *response = nil;
+        NSData *data = [NSURLConnection sendSynchronousRequest:request
+                                             returningResponse:&response
+                                                         error:&error];
+        id JSON;
+        if (data) {
+            NSError *serializationError = nil;
+            JSON = [NSJSONSerialization JSONObjectWithData:data
+                                                   options:NSJSONReadingMutableContainers
+                                                     error:&serializationError];
+            if (!error) {
+                error = serializationError;
+            }
 
-                               dispatch_async(dispatch_get_main_queue(), ^{
-                                   [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
-                                   completion(JSON, error);
-                               });
-                           }];
-}
-
-- (id)GET:(NSString *)path
-{
-    NSString *url = [NSString stringWithFormat:@"%@%@", self.baseURL, path];
-    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:url]];
-
-    NSError *error = nil;
-    NSURLResponse *response = nil;
-    NSData *data = [NSURLConnection sendSynchronousRequest:request
-                                         returningResponse:&response
-                                                     error:&error];
-    id JSON;
-    if (data) {
-        NSError *serializationError = nil;
-        JSON = [NSJSONSerialization JSONObjectWithData:data
-                                               options:NSJSONReadingMutableContainers
-                                                 error:&serializationError];
-        if (!error) {
-            error = serializationError;
+            completion(JSON, error);
         }
-    }
+    } else {
+        NSOperationQueue *queue = [NSOperationQueue new];
+        [NSURLConnection sendAsynchronousRequest:request
+                                           queue:queue
+                               completionHandler:^(NSURLResponse *response,
+                                                   NSData *data,
+                                                   NSError *connectionError) {
+                                   NSError *error = connectionError;
+                                   id JSON;
 
-    return JSON;
+                                   if (data) {
+                                       NSError *serializationError = nil;
+                                       JSON = [NSJSONSerialization JSONObjectWithData:data
+                                                                              options:NSJSONReadingMutableContainers
+                                                                                error:&serializationError];
+                                       if (!error) {
+                                           error = serializationError;
+                                       }
+                                   }
+
+                                   dispatch_async(dispatch_get_main_queue(), ^{
+                                       [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+                                       completion(JSON, error);
+                                   });
+                               }];
+    }
 }
 
 + (void)stubGET:(NSString *)path response:(id)JSON

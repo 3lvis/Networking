@@ -10,24 +10,15 @@
 
 - (void)testGET
 {
-    XCTestExpectation *expectation = [self expectationWithDescription:@"Networking expectations"];
-
+    __block BOOL success = NO;
     Networking *networking = [[Networking alloc] initWithBaseURL:@"http://api-news.layervault.com/api/v2"];
     [networking GET:@"/stories"
-             completion:^(id JSON, NSError *error) {
-                 XCTAssertNotNil(JSON);
-                 XCTAssertNil(error);
-                 [expectation fulfill];
-             }];
-
-    [self waitForExpectationsWithTimeout:60.0f handler:nil];
-}
-
-- (void)testSynchronousGET
-{
-    Networking *networking = [[Networking alloc] initWithBaseURL:@"http://api-news.layervault.com/api/v2"];
-    id JSON = [networking GET:@"/stories"];
-    XCTAssertNotNil(JSON);
+         completion:^(id JSON, NSError *error) {
+             XCTAssertNotNil(JSON);
+             XCTAssertNil(error);
+             success = YES;
+         }];
+    XCTAssertTrue(success);
 }
 
 - (void)testGetStubs
@@ -37,9 +28,9 @@
     Networking *networking = [[Networking alloc] initWithBaseURL:@"http://api-news.layervault.com/api/v2"];
     [networking GET:@"/stories"
          completion:^(id JSON, NSError *error) {
-        XCTAssertNotNil(JSON);
-        XCTAssertNil(error);
-    }];
+             XCTAssertNotNil(JSON);
+             XCTAssertNil(error);
+         }];
 }
 
 @end
