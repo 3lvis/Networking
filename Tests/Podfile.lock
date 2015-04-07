@@ -1,0 +1,10 @@
+PODS:
+  - NSObject-HYPTesting (1.2)
+
+DEPENDENCIES:
+  - NSObject-HYPTesting
+
+SPEC CHECKSUMS:
+  NSObject-HYPTesting: fadde70c75061b731b313c390e20777aed0a914d
+
+COCOAPODS: 0.36.3

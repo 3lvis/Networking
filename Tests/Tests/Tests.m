@@ -25,15 +25,9 @@
 
 - (void)testSynchronousGET
 {
-    __block BOOL success = NO;
     Networking *networking = [[Networking alloc] initWithBaseURL:@"http://api-news.layervault.com/api/v2"];
-    [networking GET:@"/stories"
-         completion:^(id JSON, NSError *error) {
-             XCTAssertNotNil(JSON);
-             XCTAssertNil(error);
-             success = YES;
-         }];
-    XCTAssertTrue(success);
+    id JSON = [networking GET:@"/stories"];
+    XCTAssertNotNil(JSON);
 }
 
 - (void)testGetStubs

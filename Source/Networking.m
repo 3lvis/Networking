@@ -1,5 +1,7 @@
 #import "Networking.h"
 
+#import "NSObject+HYPTesting.h"
+
 @interface Networking ()
 
 @property (nonatomic, copy) NSString *baseURL;
@@ -49,6 +51,30 @@
                                    completion(JSON, error);
                                });
                            }];
+}
+
+- (id)GET:(NSString *)path
+{
+    NSString *url = [NSString stringWithFormat:@"%@%@", self.baseURL, path];
+    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:url]];
+
+    NSError *error = nil;
+    NSURLResponse *response = nil;
+    NSData *data = [NSURLConnection sendSynchronousRequest:request
+                                         returningResponse:&response
+                                                     error:&error];
+    id JSON;
+    if (data) {
+        NSError *serializationError = nil;
+        JSON = [NSJSONSerialization JSONObjectWithData:data
+                                               options:NSJSONReadingMutableContainers
+                                                 error:&serializationError];
+        if (!error) {
+            error = serializationError;
+        }
+    }
+
+    return JSON;
 }
 
 + (void)stubGET:(NSString *)path response:(id)JSON
