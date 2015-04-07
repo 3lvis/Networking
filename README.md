@@ -3,7 +3,7 @@
 - Super friendly API
 - Minimal implementation
 - Easy stubbing
-- Runs synchronously on automatic testing enviroments
+- Runs synchronously in automatic testing enviroments
 - Free
 
 ## Author
