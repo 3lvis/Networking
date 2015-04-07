@@ -6,7 +6,7 @@
 - Runs synchronously in automatic testing enviroments
 - Free
 
-### GET
+## GET
 
 ```objc
 Networking *networking = [[Networking alloc] initWithBaseURL:@"https://api-news.layervault.com/api/v2"];
@@ -17,7 +17,7 @@ Networking *networking = [[Networking alloc] initWithBaseURL:@"https://api-news.
 }
 ```
 
-### Stubbing GET
+## Stubbing GET
 
 ```objc
 NSArray *stories = @[@{@"id" : @47333,
