@@ -28,7 +28,8 @@
     [Networking stubGET:@"/stories" response:@{@"first_name" : @"Elvis"}];
 
     Networking *networking = [[Networking alloc] initWithBaseURL:@"http://api-news.layervault.com/api/v2"];
-    [networking GET:@"/stories" completion:^(id JSON, NSError *error) {
+    [networking GET:@"/stories"
+         completion:^(id JSON, NSError *error) {
         XCTAssertNotNil(JSON);
         XCTAssertNil(error);
     }];

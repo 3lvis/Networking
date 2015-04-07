@@ -51,7 +51,7 @@
 
 + (void)stubGET:(NSString *)path response:(id)JSON
 {
-    
+
 }
 
 @end
