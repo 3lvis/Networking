@@ -1,19 +1,10 @@
-# Networking
+![Networking](https://raw.githubusercontent.com/3lvis/Networking/master/Images/cover.png)
 
-A thin networking library.
-
-```objc
-@import Foundation;
-@import UIKit;
-
-@interface Networking : NSObject
-
-- (instancetype)initWithBaseURL:(NSString *)baseURL;
-
-- (void)getPath:(NSString *)path completion:(void (^)(id JSON, NSError *error))completion;
-
-@end
-```
+- Super friendly API
+- Minimal implementation
+- Easy stubbing
+- Runs synchronously in automatic testing enviroments
+- Free
 
 ## Author
 
