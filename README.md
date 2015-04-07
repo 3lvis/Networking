@@ -4,7 +4,7 @@ A thin networking library.
 
 ## Author
 
-Elvis Nuñez, hello@nselvis.com
+Elvis Nuñez, elvisnunez@me.com
 
 ## License
 
