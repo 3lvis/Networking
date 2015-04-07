@@ -10,5 +10,6 @@ s.social_media_url = 'https://twitter.com/3lvis'
 s.platform         = :ios, '7.0'
 s.requires_arc     = true
 s.source_files     = 'Source/**/*'
-s.frameworks = 'UIKit', 'Foundation'
+s.frameworks       = 'UIKit', 'Foundation'
+s.dependency 'NSObject-HYPTesting', '~> 1.2'
 end
