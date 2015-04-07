@@ -65,18 +65,7 @@
             NSData *data = [NSURLConnection sendSynchronousRequest:request
                                                  returningResponse:&response
                                                              error:&error];
-            id JSON;
-            if (data) {
-                NSError *serializationError = nil;
-                JSON = [NSJSONSerialization JSONObjectWithData:data
-                                                       options:NSJSONReadingMutableContainers
-                                                         error:&serializationError];
-                if (!error) {
-                    error = serializationError;
-                }
-
-                completion(JSON, error);
-            }
+            completion([self JSONFromData:data], error);
         }
     } else {
         NSOperationQueue *queue = [NSOperationQueue new];
@@ -84,20 +73,8 @@
                                            queue:queue
                                completionHandler:^(NSURLResponse *response,
                                                    NSData *data,
-                                                   NSError *connectionError) {
-                                   NSError *error = connectionError;
-                                   id JSON;
-
-                                   if (data) {
-                                       NSError *serializationError = nil;
-                                       JSON = [NSJSONSerialization JSONObjectWithData:data
-                                                                              options:NSJSONReadingMutableContainers
-                                                                                error:&serializationError];
-                                       if (!error) {
-                                           error = serializationError;
-                                       }
-                                   }
-
+                                                   NSError *error) {
+                                   id JSON = [self JSONFromData:data];
                                    dispatch_async(dispatch_get_main_queue(), ^{
                                        [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
                                        completion(JSON, error);
@@ -109,6 +86,24 @@
 + (void)stubGET:(NSString *)path response:(id)JSON
 {
     [self stubsInstance].stubbedResponses[path] = JSON;
+}
+
+#pragma mark - Private methods
+
+- (id)JSONFromData:(NSData *)data
+{
+    id JSON;
+    if (data) {
+        NSError *serializationError = nil;
+        JSON = [NSJSONSerialization JSONObjectWithData:data
+                                               options:NSJSONReadingMutableContainers
+                                                 error:&serializationError];
+        if (serializationError) {
+            abort();
+        }
+    }
+
+    return JSON;
 }
 
 @end
