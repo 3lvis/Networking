@@ -30,13 +30,16 @@
                                        queue:queue
                            completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
                                NSError *error = connectionError;
+                               id JSON;
 
-                               NSError *serializationError = nil;
-                               NSJSONSerialization *JSON = [NSJSONSerialization JSONObjectWithData:data
-                                                                                           options:NSJSONReadingMutableContainers
-                                                                                             error:&serializationError];
-                               if (!error) {
-                                   error = serializationError;
+                               if (data) {
+                                   NSError *serializationError = nil;
+                                   JSON = [NSJSONSerialization JSONObjectWithData:data
+                                                                          options:NSJSONReadingMutableContainers
+                                                                            error:&serializationError];
+                                   if (!error) {
+                                       error = serializationError;
+                                   }
                                }
 
                                dispatch_async(dispatch_get_main_queue(), ^{
