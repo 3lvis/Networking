@@ -1,4 +1,4 @@
-![Networking](https://raw.githubusercontent.com/3lvis/Networking/master/Images/cover-v2.png)
+![Networking](https://raw.githubusercontent.com/3lvis/Networking/master/Images/cover-v3.png)
 
 - Super friendly API
 - Minimal implementation
