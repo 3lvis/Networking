@@ -42,3 +42,7 @@ Elvis Nuñez, [@3lvis](https://twitter.com/3lvis)
 ## License
 
 **Networking** is available under the MIT license. See the LICENSE file for more info.
+
+## Attribution
+
+The logo typeface comes thanks to [Sanid Jusić](https://dribbble.com/shots/1049674-Free-Colorfull-Triangle-Typeface)
