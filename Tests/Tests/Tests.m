@@ -8,7 +8,7 @@
 
 @implementation Tests
 
-- (void)testGet
+- (void)testGET
 {
     XCTestExpectation *expectation = [self expectationWithDescription:@"Networking expectations"];
 
@@ -19,6 +19,21 @@
                  XCTAssertNil(error);
                  [expectation fulfill];
              }];
+
+    [self waitForExpectationsWithTimeout:60.0f handler:nil];
+}
+
+- (void)testGETWithSLL
+{
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Networking expectations"];
+
+    Networking *networking = [[Networking alloc] initWithBaseURL:@"https://api-news.layervault.com/api/v2"];
+    [networking GET:@"/stories"
+         completion:^(id JSON, NSError *error) {
+             XCTAssertNotNil(JSON);
+             XCTAssertNil(error);
+             [expectation fulfill];
+         }];
 
     [self waitForExpectationsWithTimeout:60.0f handler:nil];
 }
