@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		142FDA881AD4164B00FFBD03 /* Networking.m in Sources */ = {isa = PBXBuildFile; fileRef = 142FDA871AD4164B00FFBD03 /* Networking.m */; };
+		144417681AD416F800B3A545 /* Networking.m in Sources */ = {isa = PBXBuildFile; fileRef = 144417671AD416F800B3A545 /* Networking.m */; };
 		14B564731A06D87B00342CDA /* .travis.yml in Resources */ = {isa = PBXBuildFile; fileRef = 14B564721A06D87B00342CDA /* .travis.yml */; };
 		14C4182E1A01919C00636FD6 /* Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 14C4182D1A01919C00636FD6 /* Tests.m */; };
 		14C4183D1A019A1500636FD6 /* LICENSE.md in Resources */ = {isa = PBXBuildFile; fileRef = 14C418391A019A1500636FD6 /* LICENSE.md */; };
@@ -15,8 +15,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		142FDA861AD4164B00FFBD03 /* Networking.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Networking.h; sourceTree = "<group>"; };
-		142FDA871AD4164B00FFBD03 /* Networking.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Networking.m; sourceTree = "<group>"; };
+		144417661AD416F800B3A545 /* Networking.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Networking.h; sourceTree = "<group>"; };
+		144417671AD416F800B3A545 /* Networking.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Networking.m; sourceTree = "<group>"; };
 		14B564721A06D87B00342CDA /* .travis.yml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = .travis.yml; path = ../.travis.yml; sourceTree = "<group>"; };
 		14C418261A01919C00636FD6 /* Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		14C4182C1A01919C00636FD6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -38,11 +38,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		144417651AD416EF00B3A545 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				144417661AD416F800B3A545 /* Networking.h */,
+				144417671AD416F800B3A545 /* Networking.m */,
+			);
+			name = Source;
+			path = ../Source;
+			sourceTree = "<group>";
+		};
 		14C418111A01919C00636FD6 = {
 			isa = PBXGroup;
 			children = (
 				14C418401A019A1B00636FD6 /* Metadata */,
-				14C418371A01974300636FD6 /* Source */,
+				144417651AD416EF00B3A545 /* Source */,
 				14C4182A1A01919C00636FD6 /* Tests */,
 				14C4181C1A01919C00636FD6 /* Products */,
 			);
@@ -71,16 +81,6 @@
 				14C4182C1A01919C00636FD6 /* Info.plist */,
 			);
 			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		14C418371A01974300636FD6 /* Source */ = {
-			isa = PBXGroup;
-			children = (
-				142FDA861AD4164B00FFBD03 /* Networking.h */,
-				142FDA871AD4164B00FFBD03 /* Networking.m */,
-			);
-			name = Source;
-			path = ../Source;
 			sourceTree = "<group>";
 		};
 		14C418401A019A1B00636FD6 /* Metadata */ = {
@@ -165,7 +165,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				14C4182E1A01919C00636FD6 /* Tests.m in Sources */,
-				142FDA881AD4164B00FFBD03 /* Networking.m in Sources */,
+				144417681AD416F800B3A545 /* Networking.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
