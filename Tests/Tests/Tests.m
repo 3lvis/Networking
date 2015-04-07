@@ -2,25 +2,37 @@
 
 #import "Networking.h"
 
+static NSString * const BaseURL = @"http://httpbin.org";
+
 @interface Tests : XCTestCase
 
 @end
 
 @implementation Tests
 
-- (void)testGet
+- (void)testGET
 {
-    XCTestExpectation *expectation = [self expectationWithDescription:@"Networking expectations"];
+    __block BOOL success = NO;
+    Networking *networking = [[Networking alloc] initWithBaseURL:BaseURL];
+    [networking GET:@"/get"
+         completion:^(id JSON, NSError *error) {
+             XCTAssertNotNil(JSON);
+             XCTAssertNil(error);
+             success = YES;
+         }];
+    XCTAssertTrue(success);
+}
 
-    Networking *networking = [[Networking alloc] initWithBaseURL:@"http://api-news.layervault.com/api/v2"];
-    [networking getPath:@"/stories"
-             completion:^(id JSON, NSError *error) {
-                 XCTAssertNotNil(JSON);
-                 XCTAssertNil(error);
-                 [expectation fulfill];
-             }];
+- (void)testGetStubs
+{
+    [Networking stubGET:@"/stories" response:@{@"first_name" : @"Elvis"}];
 
-    [self waitForExpectationsWithTimeout:60.0f handler:nil];
+    Networking *networking = [[Networking alloc] initWithBaseURL:BaseURL];
+    [networking GET:@"/get"
+         completion:^(id JSON, NSError *error) {
+             XCTAssertNotNil(JSON);
+             XCTAssertNil(error);
+         }];
 }
 
 @end
