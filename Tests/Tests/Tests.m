@@ -28,7 +28,7 @@ static NSString * const BaseURL = @"http://httpbin.org";
     [Networking stubGET:@"/stories" response:@{@"first_name" : @"Elvis"}];
 
     Networking *networking = [[Networking alloc] initWithBaseURL:BaseURL];
-    [networking GET:@"/get"
+    [networking GET:@"/stories"
          completion:^(id JSON, NSError *error) {
              XCTAssertNotNil(JSON);
              XCTAssertNil(error);
