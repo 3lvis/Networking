@@ -13,15 +13,15 @@
 
 #pragma mark - Initializers
 
-+ (Networking *)sharedInstance
++ (Networking *)stubsInstance
 {
-    static Networking *__sharedInstance;
+    static Networking *__stubsInstance;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        __sharedInstance = [[Networking alloc] init];
+        __stubsInstance = [[Networking alloc] init];
     });
 
-    return __sharedInstance;
+    return __stubsInstance;
 }
 
 - (instancetype)initWithBaseURL:(NSString *)baseURL
@@ -56,7 +56,7 @@
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:url]];
 
     if ([NSObject isUnitTesting]) {
-        NSDictionary *responses = [[Networking sharedInstance].stubbedResponses copy];
+        NSDictionary *responses = [[Networking stubsInstance].stubbedResponses copy];
         if (responses[path]) {
             completion(responses[path], nil);
         } else {
@@ -108,7 +108,7 @@
 
 + (void)stubGET:(NSString *)path response:(id)JSON
 {
-    [self sharedInstance].stubbedResponses[path] = JSON;
+    [self stubsInstance].stubbedResponses[path] = JSON;
 }
 
 @end
