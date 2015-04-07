@@ -13,10 +13,11 @@
     XCTestExpectation *expectation = [self expectationWithDescription:@"Networking expectations"];
 
     Networking *networking = [[Networking alloc] initWithBaseURL:@"https://api-news.layervault.com/api/v2"];
-    [networking getPath:@"/stories" completion:^(id JSON, NSError *error) {
-        XCTAssertNotNil(JSON);
-        [expectation fulfill];
-    }];
+    [networking getPath:@"/stories"
+             completion:^(id JSON, NSError *error) {
+                 XCTAssertNotNil(JSON);
+                 [expectation fulfill];
+             }];
 
     [self waitForExpectationsWithTimeout:60.0f handler:nil];
 }
