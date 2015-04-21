@@ -10,8 +10,7 @@ static NSString * const BaseURL = @"http://httpbin.org";
 
 @implementation Tests
 
-- (void)testGET
-{
+- (void)testGET {
     __block BOOL success = NO;
     Networking *networking = [[Networking alloc] initWithBaseURL:BaseURL];
     [networking GET:@"/get"
@@ -23,8 +22,11 @@ static NSString * const BaseURL = @"http://httpbin.org";
     XCTAssertTrue(success);
 }
 
-- (void)testGetStubs
-{
+- (void)testUniqueGET {
+
+}
+
+- (void)testGETStubs {
     [Networking stubGET:@"/stories" response:@{@"name" : @"Elvis"}];
 
     __block BOOL success = NO;
@@ -36,6 +38,66 @@ static NSString * const BaseURL = @"http://httpbin.org";
              success = YES;
          }];
     XCTAssertTrue(success);
+}
+
+- (void)testPUT {
+
+}
+
+- (void)testMultipartPUT {
+
+}
+
+- (void)testPUTStubs {
+
+}
+
+- (void)testPATCH {
+
+}
+
+- (void)testMultipartPATCH {
+
+}
+
+- (void)testPATCHStubs {
+
+}
+
+- (void)testPOST {
+
+}
+
+- (void)testMultipartPOST {
+
+}
+
+- (void)testPOSTStubs {
+
+}
+
+- (void)testDELETE {
+
+}
+
+- (void)testDELETEStubs {
+
+}
+
+- (void)testAPIVersion {
+
+}
+
+- (void)testBasicAuth {
+
+}
+
+- (void)testValueForHTTPHeaderField {
+    // [self.requestSerializer setValue:token forHTTPHeaderField:HeaderTokenKey];
+}
+
+- (void)testRecordingResponses {
+
 }
 
 @end

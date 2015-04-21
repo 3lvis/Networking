@@ -13,8 +13,7 @@
 
 #pragma mark - Initializers
 
-+ (Networking *)stubsInstance
-{
++ (Networking *)stubsInstance {
     static Networking *__stubsInstance;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
@@ -24,8 +23,7 @@
     return __stubsInstance;
 }
 
-- (instancetype)initWithBaseURL:(NSString *)baseURL
-{
+- (instancetype)initWithBaseURL:(NSString *)baseURL {
     self = [super init];
     if (!self) return nil;
 
@@ -36,8 +34,7 @@
 
 #pragma mark - Getters
 
-- (NSMutableDictionary *)stubbedResponses
-{
+- (NSMutableDictionary *)stubbedResponses {
     if (_stubbedResponses) return _stubbedResponses;
 
     _stubbedResponses = [NSMutableDictionary new];
@@ -48,8 +45,7 @@
 #pragma mark - Public methods
 
 - (void)GET:(NSString *)path
- completion:(void (^)(id JSON, NSError *error))completion
-{
+ completion:(void (^)(id JSON, NSError *error))completion {
     [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
 
     NSString *url = [NSString stringWithFormat:@"%@%@", self.baseURL, path];
@@ -83,15 +79,13 @@
     }
 }
 
-+ (void)stubGET:(NSString *)path response:(id)JSON
-{
++ (void)stubGET:(NSString *)path response:(id)JSON {
     [self stubsInstance].stubbedResponses[path] = JSON;
 }
 
 #pragma mark - Private methods
 
-- (id)JSONFromData:(NSData *)data
-{
+- (id)JSONFromData:(NSData *)data {
     id JSON;
     if (data) {
         NSError *serializationError = nil;
