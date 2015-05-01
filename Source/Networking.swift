@@ -24,32 +24,26 @@ class Networking {
       } else {
         var error: NSError?
         var response: NSURLResponse?
-        if let data = NSURLConnection.sendSynchronousRequest(request, returningResponse: &response, error: &error) {
-          let result = data.toJSON()
-          completion(JSON: result.JSON, error: result.error)
-        } else {
-          completion(JSON: nil, error: error)
+
+        let data = NSURLConnection.sendSynchronousRequest(request, returningResponse: &response, error: &error)
+        let result = data?.toJSON()
+
+        if error == nil {
+          error = result?.error
         }
+
+        completion(JSON: result?.JSON, error: error)
       }
     } else {
       UIApplication.sharedApplication().networkActivityIndicatorVisible = true
 
       let queue = NSOperationQueue()
-      NSURLConnection.sendAsynchronousRequest(request, queue: queue, completionHandler: { (response, data, error) -> Void in
+      NSURLConnection.sendAsynchronousRequest(request, queue: queue, completionHandler: { (response, data: NSData?, error) -> Void in
         dispatch_async(dispatch_get_main_queue(), {
           UIApplication.sharedApplication().networkActivityIndicatorVisible = false
-
-          if let response = response, data = data {
-            let result = data.toJSON()
-
-            if let JSON = result.JSON {
-              completion(JSON: result.JSON, error: error)
-            } else {
-              completion(JSON: nil, error: error)
-            }
-          } else {
-            completion(JSON: nil, error: error)
-          }
+          let result = data?.toJSON()
+          var error = error ?? result?.error
+          completion(JSON: result?.JSON, error: error)
         })
       })
     }
