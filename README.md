@@ -22,7 +22,7 @@ networking.GET("/stories", completion: { JSON, error in
 ## Stubbing GET
 
 ```swift
-let stories = [["id" : 47333, "title" : "Site Design: Aquest", "created_at" : "2015-04-06T13:16:36Z"]]
+let stories = [["id" : 47333, "title" : "Site Design: Aquest"]]
 Networking.stubGET("/stories", response: ["stories" : stories])
 
 let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
