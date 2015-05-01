@@ -12,13 +12,7 @@ class Tests: XCTestCase {
       if let JSON = JSON {
         let url = JSON["url"] as! String
         XCTAssertEqual(url, "http://httpbin.org/get")
-
-        if let error = error {
-          fatalError("Error not nil: \(error)")
-        } else {
-          XCTAssertNil(error)
-          success = true
-        }
+        success = true
       }
     })
 
@@ -36,8 +30,6 @@ class Tests: XCTestCase {
         if let error = error {
           XCTAssertNotNil(error)
           success = true
-        } else {
-          fatalError("Error not nil: \(error)")
         }
       }
     })
@@ -54,13 +46,7 @@ class Tests: XCTestCase {
       if let JSON = JSON {
         let value = JSON["name"] as! String
         XCTAssertEqual(value, "Elvis")
-
-        if let error = error {
-          fatalError("Error not nil: \(error)")
-        } else {
-          XCTAssertNil(error)
-          success = true
-        }
+        success = true
       }
     })
 
