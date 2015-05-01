@@ -1,0 +1,69 @@
+import Foundation
+import XCTest
+
+class Tests: XCTestCase {
+  let baseURL = "http://httpbin.org"
+
+  func testGET() {
+    var success = false
+
+    let networking = Networking(baseURL: baseURL)
+    networking.GET("/get", completion: { JSON, error in
+      if let JSON = JSON {
+        let url = JSON["url"] as! String
+        XCTAssertEqual(url, "http://httpbin.org/get")
+
+        if let error = error {
+          fatalError("Error not nil: \(error)")
+        } else {
+          XCTAssertNil(error)
+          success = true
+        }
+      }
+    })
+
+    XCTAssertTrue(success)
+  }
+
+  func testGETWithInvalidPath() {
+    var success = false
+
+    let networking = Networking(baseURL: baseURL)
+    networking.GET("invalidpath", completion: { JSON, error in
+      if let JSON = JSON {
+        fatalError("JSON not nil: \(JSON)")
+      } else {
+        if let error = error {
+          XCTAssertNotNil(error)
+          success = true
+        } else {
+          fatalError("Error not nil: \(error)")
+        }
+      }
+    })
+
+    XCTAssertTrue(success)
+  }
+
+  func testGETStubs() {
+    Networking.stubGET("/stories", response: ["name" : "Elvis"])
+
+    var success = false
+    let networking = Networking(baseURL: baseURL)
+    networking.GET("/stories", completion: { JSON, error in
+      if let JSON = JSON {
+        let value = JSON["name"] as! String
+        XCTAssertEqual(value, "Elvis")
+
+        if let error = error {
+          fatalError("Error not nil: \(error)")
+        } else {
+          XCTAssertNil(error)
+          success = true
+        }
+      }
+    })
+
+    XCTAssertTrue(success)
+  }
+}
