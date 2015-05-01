@@ -45,11 +45,20 @@ class Networking {
 
       let queue = NSOperationQueue()
       NSURLConnection.sendAsynchronousRequest(request, queue: queue, completionHandler: { (response, data, error) -> Void in
-        let result = data?.JSON()
         dispatch_async(dispatch_get_main_queue(), {
           UIApplication.sharedApplication().networkActivityIndicatorVisible = false
 
-          completion(JSON: result!.JSON!, error: error)
+          if let response = response, data = data {
+            let result = data.JSON()
+
+            if let JSON = result.JSON {
+              completion(JSON: result.JSON, error: error)
+            } else {
+              completion(JSON: nil, error: error)
+            }
+          } else {
+            completion(JSON: nil, error: error)
+          }
         })
       })
     }
