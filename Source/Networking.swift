@@ -25,7 +25,7 @@ class Networking {
         var error: NSError?
         var response: NSURLResponse?
         if let data = NSURLConnection.sendSynchronousRequest(request, returningResponse: &response, error: &error) {
-          let result = data.JSON()
+          let result = data.toJSON()
 
           if error == nil {
             error = result.error
@@ -49,7 +49,7 @@ class Networking {
           UIApplication.sharedApplication().networkActivityIndicatorVisible = false
 
           if let response = response, data = data {
-            let result = data.JSON()
+            let result = data.toJSON()
 
             if let JSON = result.JSON {
               completion(JSON: result.JSON, error: error)
@@ -70,7 +70,7 @@ class Networking {
 }
 
 extension NSData {
-  func JSON() -> (JSON: [String : AnyObject]?, error: NSError?) {
+  func toJSON() -> (JSON: [String : AnyObject]?, error: NSError?) {
     var error: NSError?
     let JSON = NSJSONSerialization.JSONObjectWithData(self, options: NSJSONReadingOptions.MutableContainers, error: &error) as? [String : AnyObject]
 
