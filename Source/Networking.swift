@@ -6,7 +6,7 @@ class Networking {
   private let baseURL: NSString
   private var stubbedResponses: [String : [String : AnyObject]]
 
-  static let stubsInstance = Networking(baseURL: "")
+  private static let stubsInstance = Networking(baseURL: "")
 
   init(baseURL: String) {
     self.baseURL = baseURL
@@ -24,8 +24,9 @@ class Networking {
       } else {
         var error: NSError?
         var response: NSURLResponse?
-        let data = NSURLConnection.sendSynchronousRequest(request, returningResponse: &response, error: &error)
-        if let result = data?.JSON() {
+        if let data = NSURLConnection.sendSynchronousRequest(request, returningResponse: &response, error: &error) {
+          let result = data.JSON()
+
           if error == nil {
             error = result.error
           }
@@ -54,15 +55,15 @@ class Networking {
     }
   }
 
-  class func stubGET(path: String, response: AnyObject) {
-
+  class func stubGET(path: String, response: [String : AnyObject]) {
+    stubsInstance.stubbedResponses[path] = response
   }
 }
 
 extension NSData {
   func JSON() -> (JSON: [String : AnyObject]?, error: NSError?) {
     var error: NSError?
-    let JSON = NSJSONSerialization.JSONObjectWithData(self, options: NSJSONReadingOptions.MutableContainers, error: &error) as! [String : AnyObject]
+    let JSON = NSJSONSerialization.JSONObjectWithData(self, options: NSJSONReadingOptions.MutableContainers, error: &error) as? [String : AnyObject]
 
     return (JSON, error)
   }

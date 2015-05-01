@@ -44,4 +44,26 @@ class Tests: XCTestCase {
 
     XCTAssertTrue(success)
   }
+
+  func testGETStubs() {
+    Networking.stubGET("/stories", response: ["name" : "Elvis"])
+
+    var success = false
+    let networking = Networking(baseURL: baseURL)
+    networking.GET("/stories", completion: { JSON, error in
+      if let JSON = JSON {
+        let value = JSON["name"] as! String
+        XCTAssertEqual(value, "Elvis")
+
+        if let error = error {
+          fatalError("Error not nil: \(error)")
+        } else {
+          XCTAssertNil(error)
+          success = true
+        }
+      }
+    })
+
+    XCTAssertTrue(success)
+  }
 }
