@@ -31,11 +31,7 @@ class Networking {
             error = result.error
           }
 
-          if let JSON = result.JSON {
-            completion(JSON: JSON, error: error)
-          } else {
-            completion(JSON: nil, error: error)
-          }
+          completion(JSON: result.JSON, error: error)
         } else {
           completion(JSON: nil, error: error)
         }
