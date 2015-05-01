@@ -26,12 +26,7 @@ class Networking {
         var response: NSURLResponse?
         if let data = NSURLConnection.sendSynchronousRequest(request, returningResponse: &response, error: &error) {
           let result = data.toJSON()
-
-          if error == nil {
-            error = result.error
-          }
-
-          completion(JSON: result.JSON, error: error)
+          completion(JSON: result.JSON, error: result.error)
         } else {
           completion(JSON: nil, error: error)
         }
