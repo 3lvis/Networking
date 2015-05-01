@@ -13,7 +13,14 @@ class Networking {
   }
 
   func GET(path: String, completion: (JSON: [String : AnyObject], error: NSError?) -> ()) {
+    UIApplication.sharedApplication().networkActivityIndicatorVisible = true
 
+    let url = String(format: "%@%@", self.baseURL, path)
+    let request = NSURLRequest(URL: NSURL(string: url)!)
+
+    if NSObject.isUnitTesting() {
+      
+    }
   }
 
   class func stubGET(path: String, response: AnyObject) {

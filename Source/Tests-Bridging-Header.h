@@ -1,0 +1,1 @@
+#import "NSObject+HYPTesting.h"
