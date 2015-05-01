@@ -8,11 +8,38 @@ class Tests: XCTestCase {
     var success = false
 
     let networking = Networking(baseURL: baseURL)
-    networking.GET("/get", completion: { (JSON, error) in
-      let url = JSON["url"] as! String
-      XCTAssertEqual(url, "http://httpbin.org/get")
-      XCTAssertNil(error!)
-      success = true
+    networking.GET("/get", completion: { JSON, error in
+      if let JSON = JSON {
+        let url = JSON["url"] as! String
+        XCTAssertEqual(url, "http://httpbin.org/get")
+
+        if let error = error {
+          fatalError("Error not nil: \(error)")
+        } else {
+          XCTAssertNil(error)
+          success = true
+        }
+      }
+    })
+
+    XCTAssertTrue(success)
+  }
+
+  func testGETWithInvalidPath() {
+    var success = false
+
+    let networking = Networking(baseURL: baseURL)
+    networking.GET("invalidpath", completion: { JSON, error in
+      if let JSON = JSON {
+        fatalError("JSON not nil: \(JSON)")
+      } else {
+        if let error = error {
+          XCTAssertNotNil(error)
+          success = true
+        } else {
+          fatalError("Error not nil: \(error)")
+        }
+      }
     })
 
     XCTAssertTrue(success)

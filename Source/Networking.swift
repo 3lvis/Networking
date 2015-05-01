@@ -13,7 +13,7 @@ class Networking {
     self.stubbedResponses = [String : [String : AnyObject]]()
   }
 
-  func GET(path: String, completion: (JSON: [String : AnyObject], error: NSError?) -> ()) {
+  func GET(path: String, completion: (JSON: [String : AnyObject]?, error: NSError?) -> ()) {
     let url = String(format: "%@%@", self.baseURL, path)
     let request = NSURLRequest(URL: NSURL(string: url)!)
 
@@ -25,12 +25,19 @@ class Networking {
         var error: NSError?
         var response: NSURLResponse?
         let data = NSURLConnection.sendSynchronousRequest(request, returningResponse: &response, error: &error)
-        let result = data?.JSON()
-        if error == nil {
-          error = result!.error
-        }
+        if let result = data?.JSON() {
+          if error == nil {
+            error = result.error
+          }
 
-        completion(JSON: result!.JSON!, error: error)
+          if let JSON = result.JSON {
+            completion(JSON: JSON, error: error)
+          } else {
+            completion(JSON: nil, error: error)
+          }
+        } else {
+          completion(JSON: nil, error: error)
+        }
       }
     } else {
       UIApplication.sharedApplication().networkActivityIndicatorVisible = true
