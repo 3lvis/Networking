@@ -18,9 +18,9 @@ class Networking {
     let url = String(format: "%@%@", self.baseURL, path)
     let request = NSURLRequest(URL: NSURL(string: url)!)
 
-    if NSObject.isUnitTesting() {
-      
-    }
+//    if NSObject.isUnitTesting() {
+//
+//    }
   }
 
   class func stubGET(path: String, response: AnyObject) {
