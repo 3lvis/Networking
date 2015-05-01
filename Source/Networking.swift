@@ -1,5 +1,6 @@
 import Foundation
 import UIKit
+import NSObject_HYPTesting
 
 class Networking {
   private let baseURL: NSString
@@ -19,7 +20,7 @@ class Networking {
     let request = NSURLRequest(URL: NSURL(string: url)!)
 
     if NSObject.isUnitTesting() {
-      
+
     }
   }
 
