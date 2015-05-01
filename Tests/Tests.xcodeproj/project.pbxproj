@@ -7,21 +7,21 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		144417681AD416F800B3A545 /* Networking.m in Sources */ = {isa = PBXBuildFile; fileRef = 144417671AD416F800B3A545 /* Networking.m */; };
+		148C2AC81AF3642D00FD6D44 /* Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 148C2AC71AF3642D00FD6D44 /* Tests.swift */; };
+		14A821B21AE706720012EAF6 /* Networking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14A821B11AE706720012EAF6 /* Networking.swift */; };
 		14B564731A06D87B00342CDA /* .travis.yml in Resources */ = {isa = PBXBuildFile; fileRef = 14B564721A06D87B00342CDA /* .travis.yml */; };
-		14C4182E1A01919C00636FD6 /* Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 14C4182D1A01919C00636FD6 /* Tests.m */; };
 		14C4183D1A019A1500636FD6 /* LICENSE.md in Resources */ = {isa = PBXBuildFile; fileRef = 14C418391A019A1500636FD6 /* LICENSE.md */; };
 		A1386CB4EED137B7B4967EC6 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F2D9E82101CB587C1CF12F98 /* libPods.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		06B01FD262527303AF3E3713 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
-		144417661AD416F800B3A545 /* Networking.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Networking.h; sourceTree = "<group>"; };
-		144417671AD416F800B3A545 /* Networking.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Networking.m; sourceTree = "<group>"; };
+		148C2AC71AF3642D00FD6D44 /* Tests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Tests.swift; sourceTree = "<group>"; };
+		14A821B01AE706720012EAF6 /* Tests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Tests-Bridging-Header.h"; sourceTree = "<group>"; };
+		14A821B11AE706720012EAF6 /* Networking.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Networking.swift; sourceTree = "<group>"; };
 		14B564721A06D87B00342CDA /* .travis.yml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = .travis.yml; path = ../.travis.yml; sourceTree = "<group>"; };
 		14C418261A01919C00636FD6 /* Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		14C4182C1A01919C00636FD6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		14C4182D1A01919C00636FD6 /* Tests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Tests.m; sourceTree = "<group>"; };
 		14C418381A019A1500636FD6 /* CONTRIBUTING.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = CONTRIBUTING.md; path = ../CONTRIBUTING.md; sourceTree = "<group>"; };
 		14C418391A019A1500636FD6 /* LICENSE.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = LICENSE.md; path = ../LICENSE.md; sourceTree = "<group>"; };
 		14C4183B1A019A1500636FD6 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
@@ -44,8 +44,8 @@
 		144417651AD416EF00B3A545 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				144417661AD416F800B3A545 /* Networking.h */,
-				144417671AD416F800B3A545 /* Networking.m */,
+				14A821B11AE706720012EAF6 /* Networking.swift */,
+				14A821B01AE706720012EAF6 /* Tests-Bridging-Header.h */,
 			);
 			name = Source;
 			path = ../Source;
@@ -61,7 +61,9 @@
 				BD9F22FBFCBF020301A313A2 /* Pods */,
 				C1F2C676825F52FD6AA00B46 /* Frameworks */,
 			);
+			indentWidth = 2;
 			sourceTree = "<group>";
+			tabWidth = 2;
 		};
 		14C4181C1A01919C00636FD6 /* Products */ = {
 			isa = PBXGroup;
@@ -74,8 +76,8 @@
 		14C4182A1A01919C00636FD6 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
-				14C4182D1A01919C00636FD6 /* Tests.m */,
 				14C4182B1A01919C00636FD6 /* Supporting Files */,
+				148C2AC71AF3642D00FD6D44 /* Tests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -145,7 +147,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0610;
-				ORGANIZATIONNAME = ORGANIZATION;
+				ORGANIZATIONNAME = "Elvis Nuñez";
 				TargetAttributes = {
 					14C418251A01919C00636FD6 = {
 						CreatedOnToolsVersion = 6.1;
@@ -219,8 +221,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				14C4182E1A01919C00636FD6 /* Tests.m in Sources */,
-				144417681AD416F800B3A545 /* Networking.m in Sources */,
+				14A821B21AE706720012EAF6 /* Networking.swift in Sources */,
+				148C2AC81AF3642D00FD6D44 /* Tests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -315,6 +317,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 06B01FD262527303AF3E3713 /* Pods.debug.xcconfig */;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",
@@ -326,6 +329,8 @@
 				INFOPLIST_FILE = Tests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "../Source/Tests-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
@@ -333,6 +338,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 33937A4CB472BD30A47B9340 /* Pods.release.xcconfig */;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",
@@ -340,6 +346,7 @@
 				INFOPLIST_FILE = Tests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "../Source/Tests-Bridging-Header.h";
 			};
 			name = Release;
 		};
