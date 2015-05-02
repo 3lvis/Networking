@@ -52,4 +52,21 @@ class Tests: XCTestCase {
 
     XCTAssertTrue(success)
   }
+
+  func testGETStubsUsingFile() {
+    Networking.stubGET("/entries", fileName: "entries.json", bundle: NSBundle(forClass: self.classForKeyedArchiver!))
+
+    var success = false
+    let networking = Networking(baseURL: baseURL)
+    networking.GET("/entries", completion: { JSON, error in
+      if let JSON = JSON as? [[String : AnyObject]] {
+        let entry = JSON[0]
+        let value = entry["title"] as! String
+        XCTAssertEqual(value, "Entry 1")
+        success = true
+      }
+    })
+
+    XCTAssertTrue(success)
+  }
 }

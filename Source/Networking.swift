@@ -5,13 +5,13 @@ import JSON
 
 class Networking {
   private let baseURL: NSString
-  private var stubbedResponses: [String : [String : AnyObject]]
+  private var stubbedResponses: [String : AnyObject]
 
   private static let stubsInstance = Networking(baseURL: "")
 
   init(baseURL: String) {
     self.baseURL = baseURL
-    self.stubbedResponses = [String : [String : AnyObject]]()
+    self.stubbedResponses = [String : AnyObject]()
   }
 
   func GET(path: String, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
@@ -20,7 +20,7 @@ class Networking {
 
     if NSObject.isUnitTesting() {
       let responses = Networking.stubsInstance.stubbedResponses
-      if let response: [String : AnyObject] = responses[path] {
+      if let response: AnyObject = responses[path] {
         completion(JSON: response, error: nil)
       } else {
         var connectionError: NSError?
@@ -61,5 +61,10 @@ class Networking {
 
   class func stubGET(path: String, response: [String : AnyObject]) {
     stubsInstance.stubbedResponses[path] = response
+  }
+
+  class func stubGET(path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
+    let (result: AnyObject?, _) = JSON.from(fileName, bundle: bundle)
+    stubsInstance.stubbedResponses[path] = result
   }
 }
