@@ -9,7 +9,7 @@ class Tests: XCTestCase {
 
     let networking = Networking(baseURL: baseURL)
     networking.GET("/get", completion: { JSON, error in
-      if let JSON = JSON {
+      if let JSON: AnyObject = JSON {
         let url = JSON["url"] as! String
         XCTAssertEqual(url, "http://httpbin.org/get")
         success = true
@@ -24,7 +24,7 @@ class Tests: XCTestCase {
 
     let networking = Networking(baseURL: baseURL)
     networking.GET("invalidpath", completion: { JSON, error in
-      if let JSON = JSON {
+      if let JSON: AnyObject = JSON {
         fatalError("JSON not nil: \(JSON)")
       } else {
         if let error = error {
@@ -43,7 +43,7 @@ class Tests: XCTestCase {
     var success = false
     let networking = Networking(baseURL: baseURL)
     networking.GET("/stories", completion: { JSON, error in
-      if let JSON = JSON {
+      if let JSON: AnyObject = JSON {
         let value = JSON["name"] as! String
         XCTAssertEqual(value, "Elvis")
         success = true

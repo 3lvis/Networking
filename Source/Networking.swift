@@ -1,6 +1,7 @@
 import Foundation
 import UIKit
 import NSObject_HYPTesting
+import JSON
 
 class Networking {
   private let baseURL: NSString
@@ -13,7 +14,7 @@ class Networking {
     self.stubbedResponses = [String : [String : AnyObject]]()
   }
 
-  func GET(path: String, completion: (JSON: [String : AnyObject]?, error: NSError?) -> ()) {
+  func GET(path: String, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
     let url = String(format: "%@%@", self.baseURL, path)
     let request = NSURLRequest(URL: NSURL(string: url)!)
 
@@ -22,17 +23,20 @@ class Networking {
       if let response: [String : AnyObject] = responses[path] {
         completion(JSON: response, error: nil)
       } else {
-        var error: NSError?
+        var connectionError: NSError?
         var response: NSURLResponse?
+        var result: AnyObject?
 
-        let data = NSURLConnection.sendSynchronousRequest(request, returningResponse: &response, error: &error)
-        let result = data?.toJSON()
+        if let data = NSURLConnection.sendSynchronousRequest(request, returningResponse: &response, error: &connectionError) {
+          var error: NSError?
+          (result, error) = data.toJSON()
 
-        if error == nil {
-          error = result?.error
+          if connectionError == nil {
+            connectionError = error
+          }
         }
 
-        completion(JSON: result?.JSON, error: error)
+        completion(JSON: result, error: connectionError)
       }
     } else {
       UIApplication.sharedApplication().networkActivityIndicatorVisible = true
@@ -41,9 +45,15 @@ class Networking {
       NSURLConnection.sendAsynchronousRequest(request, queue: queue, completionHandler: { (response, data: NSData?, error) -> Void in
         dispatch_async(dispatch_get_main_queue(), {
           UIApplication.sharedApplication().networkActivityIndicatorVisible = false
-          let result = data?.toJSON()
-          var error = error ?? result?.error
-          completion(JSON: result?.JSON, error: error)
+          var connectionError: NSError?
+          var result: AnyObject?
+          if let data = data {
+            var jsonError: NSError?
+            (result, jsonError) = data.toJSON()
+            connectionError = error ?? jsonError
+          }
+
+          completion(JSON: result, error: connectionError)
         })
       })
     }
@@ -51,14 +61,5 @@ class Networking {
 
   class func stubGET(path: String, response: [String : AnyObject]) {
     stubsInstance.stubbedResponses[path] = response
-  }
-}
-
-extension NSData {
-  func toJSON() -> (JSON: [String : AnyObject]?, error: NSError?) {
-    var error: NSError?
-    let JSON = NSJSONSerialization.JSONObjectWithData(self, options: NSJSONReadingOptions.MutableContainers, error: &error) as? [String : AnyObject]
-
-    return (JSON, error)
   }
 }

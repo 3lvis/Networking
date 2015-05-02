@@ -1,10 +1,22 @@
 PODS:
+  - JSON (3.0.0)
   - NSObject-HYPTesting (1.2)
 
 DEPENDENCIES:
+  - JSON (from `https://github.com/3lvis/JSON.git`)
   - NSObject-HYPTesting
 
+EXTERNAL SOURCES:
+  JSON:
+    :git: https://github.com/3lvis/JSON.git
+
+CHECKOUT OPTIONS:
+  JSON:
+    :commit: 9593a36257c16c951d8ac80ff5d692b7ba5cf407
+    :git: https://github.com/3lvis/JSON.git
+
 SPEC CHECKSUMS:
+  JSON: 55bac5febcd3064cac55355ee9aec0deb710043a
   NSObject-HYPTesting: fadde70c75061b731b313c390e20777aed0a914d
 
 COCOAPODS: 0.36.4
