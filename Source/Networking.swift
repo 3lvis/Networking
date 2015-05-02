@@ -17,31 +17,29 @@ public class Networking {
     let url = String(format: "%@%@", self.baseURL, path)
     let request = NSURLRequest(URL: NSURL(string: url)!)
 
-    if NSObject.isUnitTesting() {
-      let responses = Networking.stubsInstance.stubbedResponses
-      if let response: AnyObject = responses[path] {
-        completion(JSON: response, error: nil)
-      } else {
-        var connectionError: NSError?
-        var response: NSURLResponse?
-        var result: AnyObject?
+    let responses = Networking.stubsInstance.stubbedResponses
+    if let response: AnyObject = responses[path] {
+      completion(JSON: response, error: nil)
+    } else if NSObject.isUnitTesting() {
+      var connectionError: NSError?
+      var response: NSURLResponse?
+      var result: AnyObject?
 
-        if let data = NSURLConnection.sendSynchronousRequest(request, returningResponse: &response, error: &connectionError) {
-          var error: NSError?
-          (result, error) = data.toJSON()
+      if let data = NSURLConnection.sendSynchronousRequest(request, returningResponse: &response, error: &connectionError) {
+        var error: NSError?
+        (result, error) = data.toJSON()
 
-          if connectionError == nil {
-            connectionError = error
-          }
+        if connectionError == nil {
+          connectionError = error
         }
-
-        completion(JSON: result, error: connectionError)
       }
+
+      completion(JSON: result, error: connectionError)
     } else {
       UIApplication.sharedApplication().networkActivityIndicatorVisible = true
 
       let queue = NSOperationQueue()
-      NSURLConnection.sendAsynchronousRequest(request, queue: queue, completionHandler: { (response, data: NSData?, error) -> Void in
+      NSURLConnection.sendAsynchronousRequest(request, queue: queue, completionHandler: { (_, data: NSData?, error) in
         dispatch_async(dispatch_get_main_queue(), {
           UIApplication.sharedApplication().networkActivityIndicatorVisible = false
           var connectionError: NSError?
