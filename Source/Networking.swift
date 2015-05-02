@@ -3,18 +3,17 @@ import UIKit
 import NSObject_HYPTesting
 import JSON
 
-class Networking {
+public class Networking {
   private let baseURL: NSString
   private var stubbedResponses: [String : AnyObject]
-
   private static let stubsInstance = Networking(baseURL: "")
 
-  init(baseURL: String) {
+  public init(baseURL: String) {
     self.baseURL = baseURL
     self.stubbedResponses = [String : AnyObject]()
   }
 
-  func GET(path: String, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
+  public func GET(path: String, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
     let url = String(format: "%@%@", self.baseURL, path)
     let request = NSURLRequest(URL: NSURL(string: url)!)
 
@@ -59,11 +58,11 @@ class Networking {
     }
   }
 
-  class func stubGET(path: String, response: [String : AnyObject]) {
+  public class func stubGET(path: String, response: [String : AnyObject]) {
     stubsInstance.stubbedResponses[path] = response
   }
 
-  class func stubGET(path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
+  public class func stubGET(path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
     let (result: AnyObject?, _) = JSON.from(fileName, bundle: bundle)
     stubsInstance.stubbedResponses[path] = result
   }
