@@ -102,7 +102,7 @@ public class Networking {
                 if let json = json {
                     completion(JSON: json, error: nil)
                 } else {
-                    completion(JSON: nil, error: serializingError)
+                    completion(JSON: nil, error: nil)
                 }
             }
         })
