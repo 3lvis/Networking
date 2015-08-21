@@ -69,7 +69,7 @@ public class Networking {
 
     // MARK: POST
 
-    func POST(path: String, params: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
+    public func POST(path: String, params: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
         let url = String(format: "%@%@", self.baseURL, path)
         let request = NSMutableURLRequest(URL: NSURL(string: url)!)
 
