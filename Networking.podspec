@@ -12,4 +12,5 @@ s.requires_arc     = true
 s.source_files     = 'Source/**/*'
 s.frameworks       = 'UIKit', 'Foundation'
 s.dependency 'NSObject-HYPTesting', '~> 1.2'
+s.dependency 'JSON', '~> 3.0.0'
 end
