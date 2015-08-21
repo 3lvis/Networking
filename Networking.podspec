@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 s.name             = "Networking"
-s.version          = "0..0"
-s.summary          = "Networking library"
+s.version          = "0.4.0"
+s.summary          = "Dead Simple Networking Library"
 s.homepage         = "https://github.com/3lvis/Networking"
 s.license          = 'MIT'
 s.author           = { "Elvis Nuñez" => "elvisnunez@me.com" }
