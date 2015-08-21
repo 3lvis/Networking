@@ -71,9 +71,23 @@ class Tests: XCTestCase {
     }
     
     func testPOST() {
-        let networking = Networking(baseURL: baseURL)
-        networking.POST("ww", params: "ee") { JSON, error in
-            println("wdwdw")
+        let expectation = expectationWithDescription("D")
+
+        let networking = Networking(baseURL: "http://localhost:4567")
+        networking.POST("/login", params: ["username":"jameson", "password":"password"]) { JSON, error in
+
+            if error == nil {
+                println("everything is alright")
+            } else {
+                println("something happened: \(error)")
+            }
+
+//            println(JSON)
+//            println(error)
+//
+            expectation.fulfill()
         }
+
+        waitForExpectationsWithTimeout(5.0, handler: nil)
     }
 }

@@ -69,33 +69,40 @@ public class Networking {
 
     // MARK: POST
 
-    func POST(path: String, params: AnyObject, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
-        // let url = String(format: "%@%@", self.baseURL, path)
-        var request = NSMutableURLRequest(URL: NSURL(string: "http://localhost:4567/login")!)
+    func POST(path: String, params: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
+        let url = String(format: "%@%@", self.baseURL, path)
+        let request = NSMutableURLRequest(URL: NSURL(string: url)!)
+
         var session = NSURLSession.sharedSession()
         request.HTTPMethod = "POST"
-        var params = ["username" : "jameson", "password" : "password"] as [String : String]
-        var error: NSError?
-        request.HTTPBody = NSJSONSerialization.dataWithJSONObject(params, options: nil, error: &error)
+
+        if let params: AnyObject = params {
+            var serializingError: NSError?
+            request.HTTPBody = NSJSONSerialization.dataWithJSONObject(params, options: nil, error: &serializingError)
+            if serializingError != nil {
+                completion(JSON: nil, error: serializingError)
+                return
+            }
+        }
+
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("application/json", forHTTPHeaderField: "Accept")
 
-        var task = session.dataTaskWithRequest(request, completionHandler: { (data, response, error) -> Void in
-            println("Response: \(response)")
+        var task = session.dataTaskWithRequest(request, completionHandler: {data, response, error -> Void in
             var stringData = NSString(data: data, encoding: NSUTF8StringEncoding)
-            println("Body: \(stringData)")
-            var error: NSError?
-            var json = NSJSONSerialization.JSONObjectWithData(data, options: .MutableLeaves, error: &error) as? NSDictionary
+            var serializingError: NSError?
+            var json = NSJSONSerialization.JSONObjectWithData(data, options: .MutableLeaves, error: &serializingError) as? NSDictionary
+
+//            println("Response: \(response)")
+//            println("Body: \(stringData)")
+
             if error != nil {
-                println(error!.localizedDescription)
-                let jsonString = NSString(data: data, encoding: NSUTF8StringEncoding)
-                println("Error could not parse JSON: \(jsonString)")
+                completion(JSON: nil, error: error)
             } else {
                 if let json = json {
-                    // parse JSON
-                    println("Sucess")
+                    completion(JSON: json, error: nil)
                 } else {
-                    println("Could not parse")
+                    completion(JSON: nil, error: serializingError)
                 }
             }
         })
