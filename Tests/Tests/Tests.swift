@@ -69,22 +69,15 @@ class Tests: XCTestCase {
         
         XCTAssertTrue(success)
     }
-    
+
+    // Need to test POST error and POST serializingError
     func testPOST() {
         let expectation = expectationWithDescription("D")
 
-        let networking = Networking(baseURL: "http://localhost:4567")
-        networking.POST("/login", params: ["username":"jameson", "password":"password"]) { JSON, error in
-
-            if error == nil {
-                println("everything is alright")
-            } else {
-                println("something happened: \(error)")
-            }
-
-//            println(JSON)
-//            println(error)
-//
+        let networking = Networking(baseURL: baseURL)
+        networking.POST("/post", params: ["username":"jameson", "password":"password"]) { JSON, error in
+            XCTAssertNotNil(JSON, "JSON not nil")
+            XCTAssertNil(error, "Error")
             expectation.fulfill()
         }
 

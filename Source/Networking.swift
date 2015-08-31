@@ -93,17 +93,16 @@ public class Networking {
             var serializingError: NSError?
             var json = NSJSONSerialization.JSONObjectWithData(data, options: .MutableLeaves, error: &serializingError) as? NSDictionary
 
-//            println("Response: \(response)")
-//            println("Body: \(stringData)")
-
-            if error != nil {
-                completion(JSON: nil, error: error)
-            } else {
+            if error == nil && serializingError == nil {
                 if let json = json {
                     completion(JSON: json, error: nil)
                 } else {
-                    completion(JSON: nil, error: nil)
+                    abort()
                 }
+            } else if error != nil {
+                completion(JSON: nil, error: error)
+            } else if serializingError != nil {
+                completion(JSON: nil, error: serializingError)
             }
         })
         
