@@ -25,13 +25,16 @@ public class Networking {
       var response: NSURLResponse?
       var result: AnyObject?
 
-      if let data = NSURLConnection.sendSynchronousRequest(request, returningResponse: &response, error: &connectionError) {
+      do {
+        let data = try NSURLConnection.sendSynchronousRequest(request, returningResponse: &response)
         var error: NSError?
         (result, error) = data.toJSON()
 
         if connectionError == nil {
           connectionError = error
         }
+      } catch let error as NSError {
+        connectionError = error
       }
 
       completion(JSON: result, error: connectionError)
@@ -61,7 +64,7 @@ public class Networking {
   }
 
   public class func stubGET(path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
-    let (result: AnyObject?, _) = JSON.from(fileName, bundle: bundle)
+    let (result, _) = JSON.from(fileName, bundle: bundle)
     stubsInstance.stubbedResponses[path] = result
   }
 }
