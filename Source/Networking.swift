@@ -27,13 +27,16 @@ public class Networking {
             var response: NSURLResponse?
             var result: AnyObject?
 
-            if let data = NSURLConnection.sendSynchronousRequest(request, returningResponse: &response, error: &connectionError) {
+            do {
+                let data = try NSURLConnection.sendSynchronousRequest(request, returningResponse: &response)
                 var error: NSError?
                 (result, error) = data.toJSON()
 
                 if connectionError == nil {
                     connectionError = error
                 }
+            } catch let error as NSError {
+                connectionError = error
             }
 
             completion(JSON: result, error: connectionError)
@@ -62,8 +65,9 @@ public class Networking {
         stubsInstance.stubbedResponses[path] = response
     }
 
+    // TODO: Return error
     public class func stubGET(path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
-        let (result: AnyObject?, _) = JSON.from(fileName, bundle: bundle)
+        let (result, _) = JSON.from(fileName, bundle: bundle)
         stubsInstance.stubbedResponses[path] = result
     }
 
@@ -73,12 +77,17 @@ public class Networking {
         let url = String(format: "%@%@", self.baseURL, path)
         let request = NSMutableURLRequest(URL: NSURL(string: url)!)
 
-        var session = NSURLSession.sharedSession()
+        let session = NSURLSession.sharedSession()
         request.HTTPMethod = "POST"
 
         if let params: AnyObject = params {
             var serializingError: NSError?
-            request.HTTPBody = NSJSONSerialization.dataWithJSONObject(params, options: nil, error: &serializingError)
+            do {
+                request.HTTPBody = try NSJSONSerialization.dataWithJSONObject(params, options: [])
+            } catch let error as NSError {
+                serializingError = error
+                request.HTTPBody = nil
+            }
             if serializingError != nil {
                 completion(JSON: nil, error: serializingError)
                 return
@@ -88,10 +97,14 @@ public class Networking {
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("application/json", forHTTPHeaderField: "Accept")
 
-        var task = session.dataTaskWithRequest(request, completionHandler: {data, response, error -> Void in
-            var stringData = NSString(data: data, encoding: NSUTF8StringEncoding)
-            var serializingError: NSError?
-            var json = NSJSONSerialization.JSONObjectWithData(data, options: .MutableLeaves, error: &serializingError) as? NSDictionary
+        let task = session.dataTaskWithRequest(request, completionHandler: {data, response, error -> Void in
+            var serializingError: NSError? = nil
+            var json: NSDictionary?
+            do {
+                json = try NSJSONSerialization.JSONObjectWithData(data!, options: .MutableLeaves) as? NSDictionary
+            } catch let error as NSError {
+                serializingError = error
+            }
 
             if error == nil && serializingError == nil {
                 if let json = json {
