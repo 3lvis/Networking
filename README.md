@@ -19,7 +19,7 @@ networking.GET("/stories", completion: { JSON, error in
 ```
 
 
-## Stubbing GET
+### Stubbing GET
 
 ```swift
 let stories = [["id" : 47333, "title" : "Site Design: Aquest"]]
