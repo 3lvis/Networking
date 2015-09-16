@@ -33,6 +33,31 @@ networking.GET("/stories", completion: { JSON, error in
 })
 ```
 
+## POST
+
+```swift
+let networking = Networking(baseURL: "http://httpbin.org")
+networking.POST("/post", params: ["username":"jameson", "password":"password"]) { JSON, error in
+    /*
+    JSON Pretty Print:
+    {
+        "json" : {
+            "username" : "jameson",
+            "password" : "password"
+        },
+        "url" : "http:\/\/httpbin.org\/post",
+        "data" : "{\"password\":\"password\",\"username\":\"jameson\"}",
+        "headers" : {
+            "Accept" : "application\/json",
+            "Content-Type" : "application\/json",
+            "Host" : "httpbin.org",
+            "Content-Length" : "44",
+            "Accept-Language" : "en-us"
+        }
+    }
+    */
+}
+```
 
 ## Author
 
