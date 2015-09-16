@@ -41,20 +41,22 @@ public class Networking {
 
             completion(JSON: result, error: connectionError)
         } else {
-            UIApplication.sharedApplication().networkActivityIndicatorVisible = true
+            dispatch_async(dispatch_get_main_queue(), {
+                UIApplication.sharedApplication().networkActivityIndicatorVisible = true
+            })
 
             let queue = NSOperationQueue()
             NSURLConnection.sendAsynchronousRequest(request, queue: queue, completionHandler: { (_, data: NSData?, error) in
+                var connectionError: NSError?
+                var result: AnyObject?
+                if let data = data {
+                    var jsonError: NSError?
+                    (result, jsonError) = data.toJSON()
+                    connectionError = error ?? jsonError
+                }
+
                 dispatch_async(dispatch_get_main_queue(), {
                     UIApplication.sharedApplication().networkActivityIndicatorVisible = false
-                    var connectionError: NSError?
-                    var result: AnyObject?
-                    if let data = data {
-                        var jsonError: NSError?
-                        (result, jsonError) = data.toJSON()
-                        connectionError = error ?? jsonError
-                    }
-
                     completion(JSON: result, error: connectionError)
                 })
             })
@@ -74,6 +76,10 @@ public class Networking {
     // MARK: POST
 
     public func POST(path: String, params: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
+        dispatch_async(dispatch_get_main_queue(), {
+            UIApplication.sharedApplication().networkActivityIndicatorVisible = true
+        })
+
         let url = String(format: "%@%@", self.baseURL, path)
         let request = NSMutableURLRequest(URL: NSURL(string: url)!)
 
@@ -89,7 +95,9 @@ public class Networking {
                 request.HTTPBody = nil
             }
             if serializingError != nil {
-                completion(JSON: nil, error: serializingError)
+                dispatch_async(dispatch_get_main_queue(), {
+                    completion(JSON: nil, error: serializingError)
+                })
                 return
             }
         }
@@ -106,17 +114,21 @@ public class Networking {
                 serializingError = error
             }
 
-            if error == nil && serializingError == nil {
-                if let json = json {
-                    completion(JSON: json, error: nil)
-                } else {
-                    abort()
+            dispatch_async(dispatch_get_main_queue(), {
+                UIApplication.sharedApplication().networkActivityIndicatorVisible = false
+
+                if error == nil && serializingError == nil {
+                    if let json = json {
+                        completion(JSON: json, error: nil)
+                    } else {
+                        abort()
+                    }
+                } else if error != nil {
+                    completion(JSON: nil, error: error)
+                } else if serializingError != nil {
+                    completion(JSON: nil, error: serializingError)
                 }
-            } else if error != nil {
-                completion(JSON: nil, error: error)
-            } else if serializingError != nil {
-                completion(JSON: nil, error: serializingError)
-            }
+            })
         })
         
         task.resume()
