@@ -59,6 +59,15 @@ networking.POST("/post", params: ["username":"jameson", "password":"password"]) 
 }
 ```
 
+## Installation
+
+**Networking** is available through [CocoaPods](http://cocoapods.org). To install
+it, simply add the following line to your Podfile:
+
+```ruby
+pod 'Networking'
+```
+
 ## Author
 
 Elvis Nuñez, [@3lvis](https://twitter.com/3lvis)
