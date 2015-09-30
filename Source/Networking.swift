@@ -4,7 +4,7 @@ import NSObject_HYPTesting
 import JSON
 
 public class Networking {
-    public let baseURL: String
+    private let baseURL: String
     private var stubbedResponses: [String : AnyObject]
     private static let stubsInstance = Networking(baseURL: "")
 
@@ -132,5 +132,9 @@ public class Networking {
         })
         
         task.resume()
+    }
+
+    public func urlForPath(path: String) -> NSURL {
+        return NSURL(string: self.baseURL + path)!
     }
 }
