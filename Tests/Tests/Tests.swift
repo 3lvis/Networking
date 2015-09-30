@@ -83,4 +83,10 @@ class Tests: XCTestCase {
 
         waitForExpectationsWithTimeout(5.0, handler: nil)
     }
+
+    func testURLForPath() {
+        let networking = Networking(baseURL: baseURL)
+        let url = networking.urlForPath("/hello")
+        XCTAssertEqual(url.absoluteString, "http://httpbin.org/hello")
+    }
 }
