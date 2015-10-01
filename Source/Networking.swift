@@ -16,52 +16,42 @@ public class Networking {
     // MARK: GET
 
     public func GET(path: String, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
-        let url = String(format: "%@%@", self.baseURL, path)
-        let request = NSURLRequest(URL: NSURL(string: url)!)
+        let request = NSURLRequest(URL: self.urlForPath(path))
 
         let responses = Networking.stubsInstance.stubbedResponses
-        if let response: AnyObject = responses[path] {
+        if let response = responses[path] {
             completion(JSON: response, error: nil)
-        } else if NSObject.isUnitTesting() {
+        } else {
+            if NSObject.isUnitTesting() == false {
+                dispatch_async(dispatch_get_main_queue(), {
+                    UIApplication.sharedApplication().networkActivityIndicatorVisible = true
+                })
+            }
+
+            let semaphore = dispatch_semaphore_create(0)
             var connectionError: NSError?
             var result: AnyObject?
-
-            let session = NSURLSession.sharedSession()
-            let dataTask = session.dataTaskWithRequest(request, completionHandler: { (data, response, error) -> Void in
+            NSURLSession.sharedSession().dataTaskWithRequest(request, completionHandler: { data, _, error in
                 if let data = data {
-                    var parsingError: NSError?
-                    (result, parsingError) = data.toJSON()
-
-                    if connectionError == nil {
-                        connectionError = parsingError
-                    }
+                    (result, connectionError) = data.toJSON()
                 } else if let error = error {
                     connectionError = error
                 }
-            })
-            dataTask.resume()
 
-            completion(JSON: result, error: connectionError)
-        } else {
-            dispatch_async(dispatch_get_main_queue(), {
-                UIApplication.sharedApplication().networkActivityIndicatorVisible = true
-            })
-
-            let queue = NSOperationQueue()
-            NSURLConnection.sendAsynchronousRequest(request, queue: queue, completionHandler: { (_, data: NSData?, error) in
-                var connectionError: NSError?
-                var result: AnyObject?
-                if let data = data {
-                    var jsonError: NSError?
-                    (result, jsonError) = data.toJSON()
-                    connectionError = error ?? jsonError
+                if NSObject.isUnitTesting() {
+                    dispatch_semaphore_signal(semaphore)
+                } else {
+                    dispatch_async(dispatch_get_main_queue(), {
+                        UIApplication.sharedApplication().networkActivityIndicatorVisible = false
+                        completion(JSON: result, error: connectionError)
+                    })
                 }
+            }).resume()
 
-                dispatch_async(dispatch_get_main_queue(), {
-                    UIApplication.sharedApplication().networkActivityIndicatorVisible = false
-                    completion(JSON: result, error: connectionError)
-                })
-            })
+            if NSObject.isUnitTesting() {
+                dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
+                completion(JSON: result, error: connectionError)
+            }
         }
     }
 
@@ -135,7 +125,7 @@ public class Networking {
         
         task.resume()
     }
-
+    
     public func urlForPath(path: String) -> NSURL {
         return NSURL(string: self.baseURL + path)!
     }
