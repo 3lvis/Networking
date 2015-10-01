@@ -24,20 +24,22 @@ public class Networking {
             completion(JSON: response, error: nil)
         } else if NSObject.isUnitTesting() {
             var connectionError: NSError?
-            var response: NSURLResponse?
             var result: AnyObject?
 
-            do {
-                let data = try NSURLConnection.sendSynchronousRequest(request, returningResponse: &response)
-                var error: NSError?
-                (result, error) = data.toJSON()
+            let session = NSURLSession.sharedSession()
+            let dataTask = session.dataTaskWithRequest(request, completionHandler: { (data, response, error) -> Void in
+                if let data = data {
+                    var parsingError: NSError?
+                    (result, parsingError) = data.toJSON()
 
-                if connectionError == nil {
+                    if connectionError == nil {
+                        connectionError = parsingError
+                    }
+                } else if let error = error {
                     connectionError = error
                 }
-            } catch let error as NSError {
-                connectionError = error
-            }
+            })
+            dataTask.resume()
 
             completion(JSON: result, error: connectionError)
         } else {
@@ -105,7 +107,7 @@ public class Networking {
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("application/json", forHTTPHeaderField: "Accept")
 
-        let task = session.dataTaskWithRequest(request, completionHandler: {data, response, error -> Void in
+        let task = session.dataTaskWithRequest(request, completionHandler: { data, response, error in
             var serializingError: NSError? = nil
             var json: NSDictionary?
             do {
