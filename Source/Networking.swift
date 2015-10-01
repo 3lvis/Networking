@@ -107,9 +107,9 @@ public class Networking {
 
         let task = session.dataTaskWithRequest(request, completionHandler: {data, response, error -> Void in
             var serializingError: NSError? = nil
-            var json: NSDictionary?
+            var json: AnyObject?
             do {
-                json = try NSJSONSerialization.JSONObjectWithData(data!, options: .MutableLeaves) as? NSDictionary
+                json = try NSJSONSerialization.JSONObjectWithData(data!, options: .MutableLeaves)
             } catch let error as NSError {
                 serializingError = error
             }
