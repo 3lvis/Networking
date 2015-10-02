@@ -59,6 +59,20 @@ networking.POST("/post", params: ["username":"jameson", "password":"password"]) 
 }
 ```
 
+### Stubbing POST
+
+```swift
+let story = ["id" : 47333, "title" : "Site Design: Aquest"]
+Networking.stubPOST("/story", response: story)
+
+let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
+networking.POST("/story", params: ["username":"jameson", "password":"password"]) { JSON, error in
+    if let JSON = JSON {
+      // Story with id: 47333
+    }
+}
+```
+
 ## Installation
 
 **Networking** is available through [CocoaPods](http://cocoapods.org). To install
