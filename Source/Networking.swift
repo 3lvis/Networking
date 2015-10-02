@@ -61,17 +61,13 @@ public class Networking {
         stubsInstance.stubbedGETResponses[path] = response
     }
 
-    public class func stubPOST(path: String, response: AnyObject) {
-        stubsInstance.stubbedPOSTResponses[path] = response
-    }
-
     // TODO: Return error
     public class func stubGET(path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
         let (result, _) = JSON.from(fileName, bundle: bundle)
         stubsInstance.stubbedGETResponses[path] = result
     }
 
-    // MARK: POST
+    // MARK: - POST
 
     public func POST(path: String, params: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
         let request = NSMutableURLRequest(URL: self.urlForPath(path))
@@ -135,6 +131,12 @@ public class Networking {
             }
         }
     }
+    
+    public class func stubPOST(path: String, response: AnyObject) {
+        stubsInstance.stubbedPOSTResponses[path] = response
+    }
+
+    // MARK: - Others
     
     public func urlForPath(path: String) -> NSURL {
         return NSURL(string: self.baseURL + path)!
