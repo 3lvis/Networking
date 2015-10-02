@@ -4,4 +4,4 @@ before_install:
   - gem install cocoapods
 podfile: Tests/Podfile
 script: xcodebuild -workspace Tests/Tests.xcworkspace -scheme Tests -sdk iphonesimulator build test
-sudo: required
+sudo: false
