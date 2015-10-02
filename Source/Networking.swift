@@ -72,58 +72,55 @@ public class Networking {
             UIApplication.sharedApplication().networkActivityIndicatorVisible = true
         })
 
-        let url = String(format: "%@%@", self.baseURL, path)
-        let request = NSMutableURLRequest(URL: NSURL(string: url)!)
-
-        let session = NSURLSession.sharedSession()
+        let request = NSMutableURLRequest(URL: self.urlForPath(path))
         request.HTTPMethod = "POST"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.addValue("application/json", forHTTPHeaderField: "Accept")
 
-        if let params: AnyObject = params {
-            var serializingError: NSError?
+        var serializingError: NSError?
+        if let params = params {
             do {
                 request.HTTPBody = try NSJSONSerialization.dataWithJSONObject(params, options: [])
             } catch let error as NSError {
                 serializingError = error
-                request.HTTPBody = nil
-            }
-            if serializingError != nil {
-                dispatch_async(dispatch_get_main_queue(), {
-                    completion(JSON: nil, error: serializingError)
-                })
-                return
             }
         }
 
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("application/json", forHTTPHeaderField: "Accept")
-
-        let task = session.dataTaskWithRequest(request, completionHandler: { data, response, error in
-            var serializingError: NSError? = nil
-            var json: AnyObject?
-            do {
-                json = try NSJSONSerialization.JSONObjectWithData(data!, options: .MutableLeaves)
-            } catch let error as NSError {
-                serializingError = error
-            }
-
+        if serializingError == serializingError {
             dispatch_async(dispatch_get_main_queue(), {
-                UIApplication.sharedApplication().networkActivityIndicatorVisible = false
-
-                if error == nil && serializingError == nil {
-                    if let json = json {
-                        completion(JSON: json, error: nil)
-                    } else {
-                        abort()
-                    }
-                } else if error != nil {
-                    completion(JSON: nil, error: error)
-                } else if serializingError != nil {
-                    completion(JSON: nil, error: serializingError)
-                }
+                completion(JSON: nil, error: serializingError)
             })
-        })
-        
-        task.resume()
+        } else {
+            NSURLSession.sharedSession().dataTaskWithRequest(request, completionHandler: { data, _, error in
+                if let data = data {
+                    var serializingError: NSError? = nil
+                    var json: AnyObject?
+                    do {
+                        json = try NSJSONSerialization.JSONObjectWithData(data, options: .MutableLeaves)
+                    } catch let error as NSError {
+                        serializingError = error
+                    }
+
+                    dispatch_async(dispatch_get_main_queue(), {
+                        UIApplication.sharedApplication().networkActivityIndicatorVisible = false
+
+                        if error == nil && serializingError == nil {
+                            if let json = json {
+                                completion(JSON: json, error: nil)
+                            } else {
+                                abort()
+                            }
+                        } else if error != nil {
+                            completion(JSON: nil, error: error)
+                        } else if serializingError != nil {
+                            completion(JSON: nil, error: serializingError)
+                        }
+                    })
+                } else {
+
+                }
+            }).resume()
+        }
     }
     
     public func urlForPath(path: String) -> NSURL {

@@ -72,16 +72,17 @@ class Tests: XCTestCase {
 
     // Need to test POST error and POST serializingError
     func testPOST() {
-        let expectation = expectationWithDescription("D")
-
+        var success = false
         let networking = Networking(baseURL: baseURL)
         networking.POST("/post", params: ["username":"jameson", "password":"password"]) { JSON, error in
-            XCTAssertNotNil(JSON, "JSON not nil")
-            XCTAssertNil(error, "Error")
-            expectation.fulfill()
+            if let JSON = JSON {
+                XCTAssertNotNil(JSON, "JSON not nil")
+                XCTAssertNil(error, "Error")
+                success = true
+            }
         }
 
-        waitForExpectationsWithTimeout(5.0, handler: nil)
+        XCTAssertTrue(success)
     }
 
     func testURLForPath() {
