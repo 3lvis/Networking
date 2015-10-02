@@ -70,18 +70,48 @@ class Tests: XCTestCase {
         XCTAssertTrue(success)
     }
 
-    // Need to test POST error and POST serializingError
     func testPOST() {
-        let expectation = expectationWithDescription("D")
-
+        var success = false
         let networking = Networking(baseURL: baseURL)
         networking.POST("/post", params: ["username":"jameson", "password":"password"]) { JSON, error in
-            XCTAssertNotNil(JSON, "JSON not nil")
-            XCTAssertNil(error, "Error")
-            expectation.fulfill()
+            if let JSON = JSON {
+                XCTAssertNotNil(JSON, "JSON not nil")
+                XCTAssertNil(error, "Error")
+                success = true
+            }
         }
 
-        waitForExpectationsWithTimeout(5.0, handler: nil)
+        XCTAssertTrue(success)
+    }
+
+    func testPOSTWithIvalidPath() {
+        var success = false
+        let networking = Networking(baseURL: baseURL)
+        networking.POST("/posdddddt", params: ["username":"jameson", "password":"password"]) { JSON, error in
+            if let error = error {
+                XCTAssertNotNil(error)
+                XCTAssertNil(JSON)
+                success = true
+            }
+        }
+
+        XCTAssertTrue(success)
+    }
+
+    func testPOSTStubs() {
+        Networking.stubPOST("/story", response: [["name" : "Elvis"]])
+
+        var success = false
+        let networking = Networking(baseURL: baseURL)
+        networking.POST("/story", params: ["username":"jameson", "password":"password"]) { JSON, error in
+            if let JSON = JSON as? [[String : String]] {
+                let value = JSON[0]["name"]
+                XCTAssertEqual(value!, "Elvis")
+                success = true
+            }
+        }
+
+        XCTAssertTrue(success)
     }
 
     func testURLForPath() {
