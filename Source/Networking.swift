@@ -68,9 +68,11 @@ public class Networking {
     // MARK: POST
 
     public func POST(path: String, params: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
-        dispatch_async(dispatch_get_main_queue(), {
-            UIApplication.sharedApplication().networkActivityIndicatorVisible = true
-        })
+        if NSObject.isUnitTesting() == false {
+            dispatch_async(dispatch_get_main_queue(), {
+                UIApplication.sharedApplication().networkActivityIndicatorVisible = true
+            })
+        }
 
         let request = NSMutableURLRequest(URL: self.urlForPath(path))
         request.HTTPMethod = "POST"
@@ -86,40 +88,40 @@ public class Networking {
             }
         }
 
-        if serializingError == serializingError {
+        if let serializingError = serializingError {
             dispatch_async(dispatch_get_main_queue(), {
                 completion(JSON: nil, error: serializingError)
             })
         } else {
-            NSURLSession.sharedSession().dataTaskWithRequest(request, completionHandler: { data, _, error in
-                if let data = data {
-                    var serializingError: NSError? = nil
-                    var json: AnyObject?
-                    do {
-                        json = try NSJSONSerialization.JSONObjectWithData(data, options: .MutableLeaves)
-                    } catch let error as NSError {
-                        serializingError = error
-                    }
+            var connectionError: NSError?
+            var result: AnyObject?
+            let semaphore = dispatch_semaphore_create(0)
 
+            NSURLSession.sharedSession().dataTaskWithRequest(request, completionHandler: { data, _, error in
+                connectionError = error
+
+                if let data = data {
+                    do {
+                        result = try NSJSONSerialization.JSONObjectWithData(data, options: .MutableLeaves)
+                    } catch let serializingError as NSError {
+                        connectionError = serializingError
+                    }
+                }
+
+                if NSObject.isUnitTesting() {
+                    dispatch_semaphore_signal(semaphore)
+                } else {
                     dispatch_async(dispatch_get_main_queue(), {
                         UIApplication.sharedApplication().networkActivityIndicatorVisible = false
-
-                        if error == nil && serializingError == nil {
-                            if let json = json {
-                                completion(JSON: json, error: nil)
-                            } else {
-                                abort()
-                            }
-                        } else if error != nil {
-                            completion(JSON: nil, error: error)
-                        } else if serializingError != nil {
-                            completion(JSON: nil, error: serializingError)
-                        }
+                        completion(JSON: result, error: connectionError)
                     })
-                } else {
-
                 }
             }).resume()
+
+            if NSObject.isUnitTesting() {
+                dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
+                completion(JSON: result, error: connectionError)
+            }
         }
     }
     
