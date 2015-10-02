@@ -6,4 +6,4 @@ cache:
 before_install:
   - gem install cocoapods
 podfile: Tests/Podfile
-script: xctool -workspace Tests/Tests.xcworkspace -scheme Tests -sdk iphonesimulator build test
+script: xcodebuild -workspace Tests/Tests.xcworkspace -scheme Tests -sdk iphonesimulator test
