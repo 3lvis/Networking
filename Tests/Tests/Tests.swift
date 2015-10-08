@@ -23,7 +23,7 @@ class Tests: XCTestCase {
         var success = false
 
         let networking = Networking(baseURL: baseURL)
-        networking.GET("invalidpath", completion: { JSON, error in
+        networking.GET("/invalidpath", completion: { JSON, error in
             if let JSON: AnyObject = JSON {
                 fatalError("JSON not nil: \(JSON)")
             } else {
