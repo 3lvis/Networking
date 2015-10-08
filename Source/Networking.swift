@@ -170,10 +170,8 @@ public class Networking {
         print("Error \(error.code): \(error.description)")
         print(" ")
 
-        if let response = response {
-            print("Path: \(response.URL!.absoluteString)")
-            print(" ")
-            print("Response: \(response)")
+        if let request = request {
+            print("Request: \(request)")
             print(" ")
         }
 
@@ -187,8 +185,12 @@ public class Networking {
             print(" ")
         }
 
-        if let request = request {
-            print("Request: \(request)")
+        if let response = response as? NSHTTPURLResponse {
+            print("Response status code: \(response.statusCode)")
+            print(" ")
+            print("Path: \(response.URL!.absoluteString)")
+            print(" ")
+            print("Response: \(response)")
             print(" ")
         }
 
