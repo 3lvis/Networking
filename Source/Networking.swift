@@ -33,7 +33,13 @@ public class Networking {
             let semaphore = dispatch_semaphore_create(0)
             var connectionError: NSError?
             var result: AnyObject?
-            NSURLSession.sharedSession().dataTaskWithRequest(request, completionHandler: { data, _, error in
+            var returnedResponse: NSURLResponse?
+            var returnedData: NSData?
+
+            NSURLSession.sharedSession().dataTaskWithRequest(request, completionHandler: { data, response, error in
+                returnedResponse = response
+                returnedData = data
+
                 if let data = data {
                     (result, connectionError) = data.toJSON()
                 } else if let error = error {
@@ -45,6 +51,7 @@ public class Networking {
                 } else {
                     dispatch_async(dispatch_get_main_queue(), {
                         UIApplication.sharedApplication().networkActivityIndicatorVisible = false
+                        self.logError(data: returnedData, request: request, response: returnedResponse, error: connectionError)
                         completion(JSON: result, error: connectionError)
                     })
                 }
@@ -52,6 +59,7 @@ public class Networking {
 
             if NSObject.isUnitTesting() {
                 dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
+                self.logError(data: returnedData, request: request, response: returnedResponse, error: connectionError)
                 completion(JSON: result, error: connectionError)
             }
         }
@@ -102,15 +110,21 @@ public class Networking {
                 var connectionError: NSError?
                 var result: AnyObject?
                 let semaphore = dispatch_semaphore_create(0)
+                var returnedResponse: NSURLResponse?
+                var returnedData: NSData?
 
-                NSURLSession.sharedSession().dataTaskWithRequest(request, completionHandler: { data, _, error in
+                NSURLSession.sharedSession().dataTaskWithRequest(request, completionHandler: { data, response, error in
+                    returnedResponse = response
                     connectionError = error
+                    returnedData = data
 
                     if let data = data {
                         do {
                             result = try NSJSONSerialization.JSONObjectWithData(data, options: .MutableLeaves)
                         } catch let serializingError as NSError {
-                            connectionError = serializingError
+                            if error == nil {
+                                connectionError = serializingError
+                            }
                         }
                     }
 
@@ -119,6 +133,7 @@ public class Networking {
                     } else {
                         dispatch_async(dispatch_get_main_queue(), {
                             UIApplication.sharedApplication().networkActivityIndicatorVisible = false
+                            self.logError(params, data: returnedData, request: request, response: returnedResponse, error: connectionError)
                             completion(JSON: result, error: connectionError)
                         })
                     }
@@ -126,6 +141,7 @@ public class Networking {
                 
                 if NSObject.isUnitTesting() {
                     dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
+                    self.logError(params, data: returnedData, request: request, response: returnedResponse, error: connectionError)
                     completion(JSON: result, error: connectionError)
                 }
             }
@@ -136,9 +152,49 @@ public class Networking {
         stubsInstance.stubbedPOSTResponses[path] = response
     }
 
-    // MARK: - Others
+    // MARK: - Utilities
     
     public func urlForPath(path: String) -> NSURL {
         return NSURL(string: self.baseURL + path)!
+    }
+
+    // MARK: - Logging
+
+    public func logError(params: AnyObject? = nil, data: NSData?, request: NSURLRequest?, response: NSURLResponse?, error: NSError?) {
+        guard let error = error else { return }
+
+        print(" ")
+        print("========== Networking Error ==========")
+        print(" ")
+
+        print("Error \(error.code): \(error.description)")
+        print(" ")
+
+        if let request = request {
+            print("Request: \(request)")
+            print(" ")
+        }
+
+        if let params = params {
+            print("Params: \(params)")
+            print(" ")
+        }
+
+        if let data = data, stringData = NSString(data: data, encoding: NSUTF8StringEncoding) {
+            print("Data: \(stringData)")
+            print(" ")
+        }
+
+        if let response = response as? NSHTTPURLResponse {
+            print("Response status code: \(response.statusCode)")
+            print(" ")
+            print("Path: \(response.URL!.absoluteString)")
+            print(" ")
+            print("Response: \(response)")
+            print(" ")
+        }
+
+        print("================= ~ ==================")
+        print(" ")
     }
 }
