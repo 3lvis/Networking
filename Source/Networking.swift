@@ -1,7 +1,10 @@
 import Foundation
-import UIKit
 import TestCheck
 import JSON
+
+#if os(iOS)
+    import UIKit
+#endif
 
 public class Networking {
     private let baseURL: String
@@ -24,11 +27,13 @@ public class Networking {
         if let response = responses[path] {
             completion(JSON: response, error: nil)
         } else {
-            if Test.isRunning() == false {
-                dispatch_async(dispatch_get_main_queue(), {
-                    UIApplication.sharedApplication().networkActivityIndicatorVisible = true
-                })
-            }
+            #if os(iOS)
+                if Test.isRunning() == false {
+                    dispatch_async(dispatch_get_main_queue(), {
+                        UIApplication.sharedApplication().networkActivityIndicatorVisible = true
+                    })
+                }
+            #endif
 
             let semaphore = dispatch_semaphore_create(0)
             var connectionError: NSError?
@@ -57,7 +62,10 @@ public class Networking {
                     dispatch_semaphore_signal(semaphore)
                 } else {
                     dispatch_async(dispatch_get_main_queue(), {
-                        UIApplication.sharedApplication().networkActivityIndicatorVisible = false
+                        #if os(iOS)
+                            UIApplication.sharedApplication().networkActivityIndicatorVisible = false
+                        #endif
+
                         self.logError(data: returnedData, request: request, response: returnedResponse, error: connectionError)
                         completion(JSON: result, error: connectionError)
                     })
@@ -100,11 +108,13 @@ public class Networking {
         if let response = responses[path] {
             completion(JSON: response, error: nil)
         } else {
-            if Test.isRunning() == false {
-                dispatch_async(dispatch_get_main_queue(), {
-                    UIApplication.sharedApplication().networkActivityIndicatorVisible = true
-                })
-            }
+            #if os(iOS)
+                if Test.isRunning() == false {
+                    dispatch_async(dispatch_get_main_queue(), {
+                        UIApplication.sharedApplication().networkActivityIndicatorVisible = true
+                    })
+                }
+            #endif
 
             var serializingError: NSError?
             if let params = params {
@@ -145,7 +155,10 @@ public class Networking {
                         dispatch_semaphore_signal(semaphore)
                     } else {
                         dispatch_async(dispatch_get_main_queue(), {
-                            UIApplication.sharedApplication().networkActivityIndicatorVisible = false
+                            #if os(iOS)
+                                UIApplication.sharedApplication().networkActivityIndicatorVisible = false
+                            #endif
+
                             self.logError(params, data: returnedData, request: request, response: returnedResponse, error: connectionError)
                             completion(JSON: result, error: connectionError)
                         })
