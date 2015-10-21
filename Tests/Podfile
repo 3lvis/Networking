@@ -1,4 +1,0 @@
-use_frameworks!
-
-pod 'NSObject-HYPTesting'
-pod 'JSON', git: 'https://github.com/3lvis/JSON.git'

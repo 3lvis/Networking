@@ -11,6 +11,6 @@ s.platform         = :ios, '8.0'
 s.requires_arc     = true
 s.source_files     = 'Source/**/*'
 s.frameworks       = 'UIKit', 'Foundation'
-s.dependency 'NSObject-HYPTesting', '~> 1.2'
-s.dependency 'JSON', '~> 3.1.0'
+s.dependency 'TestCheck', '~> 0.2.1'
+s.dependency 'JSON', '~> 4.0.2'
 end

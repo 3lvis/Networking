@@ -1,6 +1,6 @@
 import Foundation
 import UIKit
-import NSObject_HYPTesting
+import TestCheck
 import JSON
 
 public class Networking {
@@ -24,7 +24,7 @@ public class Networking {
         if let response = responses[path] {
             completion(JSON: response, error: nil)
         } else {
-            if NSObject.isUnitTesting() == false {
+            if Test.isRunning() == false {
                 dispatch_async(dispatch_get_main_queue(), {
                     UIApplication.sharedApplication().networkActivityIndicatorVisible = true
                 })
@@ -40,13 +40,20 @@ public class Networking {
                 returnedResponse = response
                 returnedData = data
 
-                if let data = data {
-                    (result, connectionError) = data.toJSON()
-                } else if let error = error {
-                    connectionError = error
+                do {
+                    if let data = data {
+                        result = try data.toJSON()
+                    } else if let error = error {
+                        connectionError = error
+                    }
+                } catch {
+                    let userInfo : [String: AnyObject] = [
+                        NSLocalizedDescriptionKey: "Converting data to JSON failed"
+                    ]
+                    connectionError = NSError(domain: NSCocoaErrorDomain, code: 98765, userInfo: userInfo)
                 }
 
-                if NSObject.isUnitTesting() {
+                if Test.isRunning() {
                     dispatch_semaphore_signal(semaphore)
                 } else {
                     dispatch_async(dispatch_get_main_queue(), {
@@ -57,7 +64,7 @@ public class Networking {
                 }
             }).resume()
 
-            if NSObject.isUnitTesting() {
+            if Test.isRunning() {
                 dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
                 self.logError(data: returnedData, request: request, response: returnedResponse, error: connectionError)
                 completion(JSON: result, error: connectionError)
@@ -71,8 +78,14 @@ public class Networking {
 
     // TODO: Return error
     public class func stubGET(path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
-        let (result, _) = JSON.from(fileName, bundle: bundle)
-        stubsInstance.stubbedGETResponses[path] = result
+        do {
+            let result = try JSON.from(fileName, bundle: bundle)
+            stubsInstance.stubbedGETResponses[path] = result
+        } catch ParsingError.NotFound {
+            fatalError("We couldn't find \(fileName), are you sure is there?")
+        } catch {
+            fatalError("Converting data to JSON failed")
+        }
     }
 
     // MARK: - POST
@@ -87,7 +100,7 @@ public class Networking {
         if let response = responses[path] {
             completion(JSON: response, error: nil)
         } else {
-            if NSObject.isUnitTesting() == false {
+            if Test.isRunning() == false {
                 dispatch_async(dispatch_get_main_queue(), {
                     UIApplication.sharedApplication().networkActivityIndicatorVisible = true
                 })
@@ -128,7 +141,7 @@ public class Networking {
                         }
                     }
 
-                    if NSObject.isUnitTesting() {
+                    if Test.isRunning() {
                         dispatch_semaphore_signal(semaphore)
                     } else {
                         dispatch_async(dispatch_get_main_queue(), {
@@ -139,7 +152,7 @@ public class Networking {
                     }
                 }).resume()
                 
-                if NSObject.isUnitTesting() {
+                if Test.isRunning() {
                     dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
                     self.logError(params, data: returnedData, request: request, response: returnedResponse, error: connectionError)
                     completion(JSON: result, error: connectionError)
