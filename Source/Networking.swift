@@ -12,6 +12,10 @@ public class Networking {
     private var stubbedPOSTResponses: [String : AnyObject]
     private static let stubsInstance = Networking(baseURL: "")
 
+    /**
+    Base initializer, it creates an instance of `Networking`.
+    - parameter baseURL: The base URL for HTTP requests under `Networking`.
+    */
     public init(baseURL: String) {
         self.baseURL = baseURL
         self.stubbedGETResponses = [String : AnyObject]()
@@ -20,6 +24,11 @@ public class Networking {
 
     // MARK: GET
 
+    /**
+    Makes a GET request to the specified path.
+    - parameter path: The path for the GET request.
+    - parameter completion: A closure that gets called when the GET request is completed, it contains a `JSON` object and an `NSError`.
+    */
     public func GET(path: String, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
         let request = NSURLRequest(URL: self.urlForPath(path))
 
@@ -80,11 +89,23 @@ public class Networking {
         }
     }
 
+    /**
+    Registers a response for a GET request to the specified path. After registering this, every GET request to the path, will return
+    the registered response.
+    - parameter path: The path for the stubbed GET request.
+    - parameter response: An `AnyObject` that will be returned when a GET request is made to the specified path.
+    */
     public class func stubGET(path: String, response: AnyObject) {
         stubsInstance.stubbedGETResponses[path] = response
     }
 
-    // TODO: Return error
+    /**
+    Registers the contents of a file as the response for a GET request to the specified path. After registering this, every GET request to the path, will return
+    the contents of the registered file.
+    - parameter path: The path for the stubbed GET request.
+    - parameter fileName: The name of the file, whose contents will be registered as a reponse.
+    - parameter bundle: The NSBundle where the file is located.
+    */
     public class func stubGET(path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
         do {
             let result = try JSON.from(fileName, bundle: bundle)
@@ -98,6 +119,12 @@ public class Networking {
 
     // MARK: - POST
 
+    /**
+    Makes a POST request to the specified path, using the provided parameters.
+    - parameter path: The path for the GET request.
+    - parameter params: The parameters to be used, they will be serialized using NSJSONSerialization.
+    - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and an `NSError`.
+    */
     public func POST(path: String, params: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
         let request = NSMutableURLRequest(URL: self.urlForPath(path))
         request.HTTPMethod = "POST"
@@ -173,20 +200,49 @@ public class Networking {
             }
         }
     }
-    
+
+    /**
+    Registers a response for a POST request to the specified path. After registering this, every POST request to the path, will return
+    the registered response.
+    - parameter path: The path for the stubbed POST request.
+    - parameter response: An `AnyObject` that will be returned when a POST request is made to the specified path.
+    */
     public class func stubPOST(path: String, response: AnyObject) {
         stubsInstance.stubbedPOSTResponses[path] = response
     }
 
+    /**
+    Registers the contents of a file as the response for a POST request to the specified path. After registering this, every POST request to the path, will return
+    the contents of the registered file.
+    - parameter path: The path for the stubbed POST request.
+    - parameter fileName: The name of the file, whose contents will be registered as a reponse.
+    - parameter bundle: The NSBundle where the file is located.
+    */
+    public class func stubPOST(path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
+        do {
+            let result = try JSON.from(fileName, bundle: bundle)
+            stubsInstance.stubbedPOSTResponses[path] = result
+        } catch ParsingError.NotFound {
+            fatalError("We couldn't find \(fileName), are you sure is there?")
+        } catch {
+            fatalError("Converting data to JSON failed")
+        }
+    }
+
     // MARK: - Utilities
-    
+
+    /**
+    Convenience method to generated a NSURL by appending the provided path to the Networking's base URL.
+    - parameter path: The path to be appended to the base URL.
+    - returns: A NSURL generated after appending the path to the base URL.
+    */
     public func urlForPath(path: String) -> NSURL {
         return NSURL(string: self.baseURL + path)!
     }
 
     // MARK: - Logging
 
-    public func logError(params: AnyObject? = nil, data: NSData?, request: NSURLRequest?, response: NSURLResponse?, error: NSError?) {
+    private func logError(params: AnyObject? = nil, data: NSData?, request: NSURLRequest?, response: NSURLResponse?, error: NSError?) {
         guard let error = error else { return }
 
         print(" ")
