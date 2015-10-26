@@ -38,10 +38,11 @@ class Tests: XCTestCase {
     }
 
     func testGETStubs() {
-        Networking.stubGET("/stories", response: ["name" : "Elvis"])
-
         var success = false
         let networking = Networking(baseURL: baseURL)
+
+        networking.stubGET("/stories", response: ["name" : "Elvis"])
+
         networking.GET("/stories", completion: { JSON, error in
             if let JSON = JSON as? [String : String] {
                 let value = JSON["name"]
@@ -54,10 +55,11 @@ class Tests: XCTestCase {
     }
 
     func testGETStubsUsingFile() {
-        Networking.stubGET("/entries", fileName: "entries.json", bundle: NSBundle(forClass: self.classForKeyedArchiver!))
-
         var success = false
         let networking = Networking(baseURL: baseURL)
+
+        networking.stubGET("/entries", fileName: "entries.json", bundle: NSBundle(forClass: self.classForKeyedArchiver!))
+
         networking.GET("/entries", completion: { JSON, error in
             if let JSON = JSON as? [[String : AnyObject]] {
                 let entry = JSON[0]
@@ -99,10 +101,11 @@ class Tests: XCTestCase {
     }
 
     func testPOSTStubs() {
-        Networking.stubPOST("/story", response: [["name" : "Elvis"]])
-
         var success = false
         let networking = Networking(baseURL: baseURL)
+
+        networking.stubPOST("/story", response: [["name" : "Elvis"]])
+
         networking.POST("/story", params: ["username":"jameson", "password":"password"]) { JSON, error in
             if let JSON = JSON as? [[String : String]] {
                 let value = JSON[0]["name"]
