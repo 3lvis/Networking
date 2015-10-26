@@ -13,6 +13,7 @@ public class Networking {
 
     private let baseURL: String
     private var stubs: [RequestType : [String : AnyObject]]
+    private var session = NSURLSession.sharedSession()
 
     /**
     Base initializer, it creates an instance of `Networking`.
@@ -21,6 +22,19 @@ public class Networking {
     public init(baseURL: String) {
         self.baseURL = baseURL
         self.stubs = [RequestType : [String : AnyObject]]()
+    }
+
+    public func autenticate(username: String, password: String) {
+        let credentialsString = "\(username):\(password)"
+        if let credentialsData = credentialsString.dataUsingEncoding(NSUTF8StringEncoding) {
+            let base64Credentials = credentialsData.base64EncodedStringWithOptions([])
+            let authString = "Basic \(base64Credentials)"
+
+            let config  = NSURLSessionConfiguration.defaultSessionConfiguration()
+            config.HTTPAdditionalHeaders = ["Authorization" : authString]
+
+            self.session = NSURLSession(configuration: config)
+        }
     }
 
     // MARK: GET
@@ -160,7 +174,7 @@ extension Networking {
                 var returnedResponse: NSURLResponse?
                 var returnedData: NSData?
 
-                NSURLSession.sharedSession().dataTaskWithRequest(request, completionHandler: { data, response, error in
+                self.session.dataTaskWithRequest(request, completionHandler: { data, response, error in
                     returnedResponse = response
                     connectionError = error
                     returnedData = data
