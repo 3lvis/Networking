@@ -1,6 +1,7 @@
 ![Networking](https://raw.githubusercontent.com/3lvis/Networking/master/Images/cover-v3.png)
 
 - Super friendly API
+- Optimized for unit testing
 - Minimal implementation
 - Easy stubbing
 - Runs synchronously in automatic testing enviroments
