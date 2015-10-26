@@ -41,9 +41,7 @@ public class Networking {
     - parameter response: An `AnyObject` that will be returned when a GET request is made to the specified path.
     */
     public func stubGET(path: String, response: AnyObject) {
-        var getStubs = self.stubs[.GET] ?? [String : AnyObject]()
-        getStubs[path] = response
-        self.stubs[.GET] = getStubs
+        self.stub(.GET, path: path, response: response)
     }
 
     /**
@@ -54,17 +52,7 @@ public class Networking {
     - parameter bundle: The NSBundle where the file is located.
     */
     public func stubGET(path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
-        do {
-            let result = try JSON.from(fileName, bundle: bundle)
-
-            var getStubs = self.stubs[.GET] ?? [String : AnyObject]()
-            getStubs[path] = result
-            self.stubs[.GET] = getStubs
-        } catch ParsingError.NotFound {
-            fatalError("We couldn't find \(fileName), are you sure is there?")
-        } catch {
-            fatalError("Converting data to JSON failed")
-        }
+        self.stub(.GET, path: path, fileName: fileName, bundle: bundle)
     }
 
     // MARK: - POST
@@ -86,9 +74,7 @@ public class Networking {
     - parameter response: An `AnyObject` that will be returned when a POST request is made to the specified path.
     */
     public func stubPOST(path: String, response: AnyObject) {
-        var postStubs = self.stubs[.POST] ?? [String : AnyObject]()
-        postStubs[path] = response
-        self.stubs[.POST] = postStubs
+        self.stub(.POST, path: path, response: response)
     }
 
     /**
@@ -99,17 +85,7 @@ public class Networking {
     - parameter bundle: The NSBundle where the file is located.
     */
     public func stubPOST(path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
-        do {
-            let result = try JSON.from(fileName, bundle: bundle)
-
-            var getStubs = self.stubs[.POST] ?? [String : AnyObject]()
-            getStubs[path] = result
-            self.stubs[.POST] = getStubs
-        } catch ParsingError.NotFound {
-            fatalError("We couldn't find \(fileName), are you sure is there?")
-        } catch {
-            fatalError("Converting data to JSON failed")
-        }
+        self.stub(.POST, path: path, fileName: fileName, bundle: bundle)
     }
 
     // MARK: - Utilities
@@ -122,8 +98,28 @@ public class Networking {
     public func urlForPath(path: String) -> NSURL {
         return NSURL(string: self.baseURL + path)!
     }
+}
 
+extension Networking {
     // MARK: - Private
+
+    private func stub(requestType: RequestType, path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
+        do {
+            if let result = try JSON.from(fileName, bundle: bundle) {
+                self.stub(requestType, path: path, response: result)
+            }
+        } catch ParsingError.NotFound {
+            fatalError("We couldn't find \(fileName), are you sure is there?")
+        } catch {
+            fatalError("Converting data to JSON failed")
+        }
+    }
+
+    private func stub(requestType: RequestType, path: String, response: AnyObject) {
+        var getStubs = self.stubs[requestType] ?? [String : AnyObject]()
+        getStubs[path] = response
+        self.stubs[requestType] = getStubs
+    }
 
     private func request(requestType: RequestType, path: String, params: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
         let request = NSMutableURLRequest(URL: self.urlForPath(path))
