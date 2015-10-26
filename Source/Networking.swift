@@ -30,63 +30,7 @@ public class Networking {
     - parameter completion: A closure that gets called when the GET request is completed, it contains a `JSON` object and an `NSError`.
     */
     public func GET(path: String, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
-        let request = NSURLRequest(URL: self.urlForPath(path))
-
-        let responses = Networking.stubsInstance.stubbedGETResponses
-        if let response = responses[path] {
-            completion(JSON: response, error: nil)
-        } else {
-            #if os(iOS)
-                if Test.isRunning() == false {
-                    dispatch_async(dispatch_get_main_queue(), {
-                        UIApplication.sharedApplication().networkActivityIndicatorVisible = true
-                    })
-                }
-            #endif
-
-            let semaphore = dispatch_semaphore_create(0)
-            var connectionError: NSError?
-            var result: AnyObject?
-            var returnedResponse: NSURLResponse?
-            var returnedData: NSData?
-
-            NSURLSession.sharedSession().dataTaskWithRequest(request, completionHandler: { data, response, error in
-                returnedResponse = response
-                returnedData = data
-
-                do {
-                    if let data = data {
-                        result = try data.toJSON()
-                    } else if let error = error {
-                        connectionError = error
-                    }
-                } catch {
-                    let userInfo : [String: AnyObject] = [
-                        NSLocalizedDescriptionKey: "Converting data to JSON failed"
-                    ]
-                    connectionError = NSError(domain: NSCocoaErrorDomain, code: 98765, userInfo: userInfo)
-                }
-
-                if Test.isRunning() {
-                    dispatch_semaphore_signal(semaphore)
-                } else {
-                    dispatch_async(dispatch_get_main_queue(), {
-                        #if os(iOS)
-                            UIApplication.sharedApplication().networkActivityIndicatorVisible = false
-                        #endif
-
-                        self.logError(data: returnedData, request: request, response: returnedResponse, error: connectionError)
-                        completion(JSON: result, error: connectionError)
-                    })
-                }
-            }).resume()
-
-            if Test.isRunning() {
-                dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
-                self.logError(data: returnedData, request: request, response: returnedResponse, error: connectionError)
-                completion(JSON: result, error: connectionError)
-            }
-        }
+        self.request(.GET, path: path, params: nil, completion: completion)
     }
 
     /**
@@ -126,12 +70,57 @@ public class Networking {
     - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and an `NSError`.
     */
     public func POST(path: String, params: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
+        self.request(.POST, path: path, params: params, completion: completion)
+    }
+
+    /**
+    Registers a response for a POST request to the specified path. After registering this, every POST request to the path, will return
+    the registered response.
+    - parameter path: The path for the stubbed POST request.
+    - parameter response: An `AnyObject` that will be returned when a POST request is made to the specified path.
+    */
+    public class func stubPOST(path: String, response: AnyObject) {
+        stubsInstance.stubbedPOSTResponses[path] = response
+    }
+
+    /**
+    Registers the contents of a file as the response for a POST request to the specified path. After registering this, every POST request to the path, will return
+    the contents of the registered file.
+    - parameter path: The path for the stubbed POST request.
+    - parameter fileName: The name of the file, whose contents will be registered as a reponse.
+    - parameter bundle: The NSBundle where the file is located.
+    */
+    public class func stubPOST(path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
+        do {
+            let result = try JSON.from(fileName, bundle: bundle)
+            stubsInstance.stubbedPOSTResponses[path] = result
+        } catch ParsingError.NotFound {
+            fatalError("We couldn't find \(fileName), are you sure is there?")
+        } catch {
+            fatalError("Converting data to JSON failed")
+        }
+    }
+
+    public enum RequestType: String {
+        case GET, POST
+    }
+
+    public func request(requestType: RequestType, path: String, params: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
         let request = NSMutableURLRequest(URL: self.urlForPath(path))
-        request.HTTPMethod = "POST"
+        request.HTTPMethod = requestType.rawValue
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("application/json", forHTTPHeaderField: "Accept")
 
-        let responses = Networking.stubsInstance.stubbedPOSTResponses
+        let responses: [String : AnyObject]
+        switch requestType {
+        case .GET:
+            responses = Networking.stubsInstance.stubbedGETResponses
+            break
+        case .POST:
+            responses = Networking.stubsInstance.stubbedPOSTResponses
+            break
+        }
+
         if let response = responses[path] {
             completion(JSON: response, error: nil)
         } else {
@@ -191,41 +180,13 @@ public class Networking {
                         })
                     }
                 }).resume()
-                
+
                 if Test.isRunning() {
                     dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
                     self.logError(params, data: returnedData, request: request, response: returnedResponse, error: connectionError)
                     completion(JSON: result, error: connectionError)
                 }
             }
-        }
-    }
-
-    /**
-    Registers a response for a POST request to the specified path. After registering this, every POST request to the path, will return
-    the registered response.
-    - parameter path: The path for the stubbed POST request.
-    - parameter response: An `AnyObject` that will be returned when a POST request is made to the specified path.
-    */
-    public class func stubPOST(path: String, response: AnyObject) {
-        stubsInstance.stubbedPOSTResponses[path] = response
-    }
-
-    /**
-    Registers the contents of a file as the response for a POST request to the specified path. After registering this, every POST request to the path, will return
-    the contents of the registered file.
-    - parameter path: The path for the stubbed POST request.
-    - parameter fileName: The name of the file, whose contents will be registered as a reponse.
-    - parameter bundle: The NSBundle where the file is located.
-    */
-    public class func stubPOST(path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
-        do {
-            let result = try JSON.from(fileName, bundle: bundle)
-            stubsInstance.stubbedPOSTResponses[path] = result
-        } catch ParsingError.NotFound {
-            fatalError("We couldn't find \(fileName), are you sure is there?")
-        } catch {
-            fatalError("Converting data to JSON failed")
         }
     }
 
