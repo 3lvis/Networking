@@ -24,6 +24,12 @@ public class Networking {
         self.stubs = [RequestType : [String : AnyObject]]()
     }
 
+    /**
+     Authenticates using Basic Authentication, it converts username:password to Base64 then sets the
+     Authorization header to "Basic \(Base64(username:password))"
+     - parameter username: The username to be used
+     - parameter password: The password to be used
+     */
     public func autenticate(username: String, password: String) {
         let credentialsString = "\(username):\(password)"
         if let credentialsData = credentialsString.dataUsingEncoding(NSUTF8StringEncoding) {
@@ -38,6 +44,11 @@ public class Networking {
     }
 
     private var token: String?
+
+    /**
+     Authenticates using a token, sets the Authorization header to "Bearer \(token)"
+     - parameter token: The token to be used
+     */
     public func autenticate(token: String) {
         self.token = token
     }
