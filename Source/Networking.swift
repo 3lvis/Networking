@@ -58,7 +58,7 @@ public class Networking {
     /**
     Makes a GET request to the specified path.
     - parameter path: The path for the GET request.
-    - parameter completion: A closure that gets called when the GET request is completed, it contains a `JSON` object and an `NSError`.
+    - parameter completion: A closure that gets called when the GET request is completed, it contains a `JSON` object and a `NSError`.
     */
     public func GET(path: String, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
         self.request(.GET, path: path, params: nil, completion: completion)
@@ -91,7 +91,7 @@ public class Networking {
     Makes a POST request to the specified path, using the provided parameters.
     - parameter path: The path for the GET request.
     - parameter params: The parameters to be used, they will be serialized using NSJSONSerialization.
-    - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and an `NSError`.
+    - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and a `NSError`.
     */
     public func POST(path: String, params: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
         self.request(.POST, path: path, params: params, completion: completion)
@@ -116,6 +116,36 @@ public class Networking {
     */
     public func stubPOST(path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
         self.stub(.POST, path: path, fileName: fileName, bundle: bundle)
+    }
+
+    // MARK: Image
+
+    /**
+    Downloads an image using the specified path
+    - parameter path: The path where the image is located
+    - parameter completion: A closure that gets called when the image download request is completed, it contains an `UIImage` object and a `NSError`.
+    */
+    public func downloadImage(path: String, completion: (image: UIImage?, error: NSError?) -> ()) {
+        let request = NSMutableURLRequest(URL: self.urlForPath(path))
+        request.HTTPMethod = "GET"
+        request.addValue("image/jpeg", forHTTPHeaderField: "Content-Type")
+        request.addValue("application/json", forHTTPHeaderField: "Accept")
+
+        if let token = token {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+
+        self.session.downloadTaskWithRequest(request, completionHandler: { url, response, error in
+            if let url = url, data = NSData(contentsOfURL: url), image = UIImage(data: data) {
+                dispatch_async(dispatch_get_main_queue(), {
+                    completion(image: image, error: nil)
+                })
+            } else {
+                dispatch_async(dispatch_get_main_queue(), {
+                    completion(image: nil, error: error)
+                })
+            }
+        }).resume()
     }
 
     // MARK: - Utilities
