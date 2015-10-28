@@ -37,6 +37,11 @@ public class Networking {
         }
     }
 
+    private var token: String?
+    public func autenticate(token: String) {
+        self.token = token
+    }
+
     // MARK: GET
 
     /**
@@ -140,6 +145,10 @@ extension Networking {
         request.HTTPMethod = requestType.rawValue
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("application/json", forHTTPHeaderField: "Accept")
+
+        if let token = token {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
 
         let responses = self.stubs[requestType] ?? [String : AnyObject]()
 
