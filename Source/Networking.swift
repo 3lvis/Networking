@@ -128,24 +128,55 @@ public class Networking {
     public func downloadImage(path: String, completion: (image: UIImage?, error: NSError?) -> ()) {
         let request = NSMutableURLRequest(URL: self.urlForPath(path))
         request.HTTPMethod = "GET"
-        request.addValue("image/jpeg", forHTTPHeaderField: "Content-Type")
         request.addValue("application/json", forHTTPHeaderField: "Accept")
 
         if let token = token {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
 
-        self.session.downloadTaskWithRequest(request, completionHandler: { url, response, error in
-            if let url = url, data = NSData(contentsOfURL: url), image = UIImage(data: data) {
+        let semaphore = dispatch_semaphore_create(0)
+        var returnedData: NSData?
+        var returnedImage: UIImage?
+        var returnedError: NSError?
+        var returnedResponse: NSURLResponse?
+
+        #if os(iOS)
+            if Test.isRunning() == false {
                 dispatch_async(dispatch_get_main_queue(), {
-                    completion(image: image, error: nil)
+                    UIApplication.sharedApplication().networkActivityIndicatorVisible = true
                 })
+            }
+        #endif
+
+        self.session.downloadTaskWithRequest(request, completionHandler: { url, response, error in
+            returnedResponse = response
+            returnedError = error
+
+            if let url = url, data = NSData(contentsOfURL: url), image = UIImage(data: data) {
+                returnedData = data
+                returnedImage = image
+            }
+
+            if Test.isRunning() {
+                dispatch_semaphore_signal(semaphore)
             } else {
                 dispatch_async(dispatch_get_main_queue(), {
-                    completion(image: nil, error: error)
+                    #if os(iOS)
+                        UIApplication.sharedApplication().networkActivityIndicatorVisible = false
+                    #endif
+
+                    self.logError(nil, data: returnedData, request: request, response: response, error: error)
+                    completion(image: returnedImage, error: error)
                 })
             }
         }).resume()
+
+        if Test.isRunning() {
+            dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
+
+            self.logError(nil, data: returnedData, request: request, response: returnedResponse, error: returnedError)
+            completion(image: returnedImage, error: returnedError)
+        }
     }
 
     // MARK: - Utilities
