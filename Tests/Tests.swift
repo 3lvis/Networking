@@ -9,13 +9,13 @@ class Tests: XCTestCase {
 
 extension Tests {
     func testSynchronousGET() {
-        var success = false
+        var synchronous = false
         let networking = Networking(baseURL: baseURL)
         networking.GET("/get", completion: { JSON, error in
-            success = true
+            synchronous = true
         })
 
-        XCTAssertTrue(success)
+        XCTAssertTrue(synchronous)
     }
 
     func testGET() {
@@ -68,13 +68,13 @@ extension Tests {
 
 extension Tests {
     func testSynchronousPOST() {
-        var success = false
+        var synchronous = false
         let networking = Networking(baseURL: baseURL)
         networking.POST("/post", params: nil) { JSON, error in
-            success = true
+            synchronous = true
         }
 
-        XCTAssertTrue(success)
+        XCTAssertTrue(synchronous)
     }
 
     func testPOST() {
@@ -106,6 +106,8 @@ extension Tests {
     }
 }
 
+// MARK: Other
+
 extension Tests {
     func testBasicAuth() {
         let networking = Networking(baseURL: baseURL)
@@ -123,5 +125,17 @@ extension Tests {
         let networking = Networking(baseURL: baseURL)
         let url = networking.urlForPath("/hello")
         XCTAssertEqual(url.absoluteString, "http://httpbin.org/hello")
+    }
+
+    func testImageDownload() {
+        var synchronous = false
+
+        let networking = Networking(baseURL: baseURL)
+        networking.downloadImage("/image/png") { image, error in
+            XCTAssertNotNil(image)
+            synchronous = true
+        }
+
+        XCTAssertTrue(synchronous)
     }
 }
