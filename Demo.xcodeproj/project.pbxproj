@@ -8,12 +8,14 @@
 
 /* Begin PBXBuildFile section */
 		1443C8E41BD7A30A00AE5BD4 /* entries.json in Resources */ = {isa = PBXBuildFile; fileRef = 1443C8E31BD7A30A00AE5BD4 /* entries.json */; };
+		146A0A9C1BE245B600D0CD35 /* pig.png in Resources */ = {isa = PBXBuildFile; fileRef = 146A0A9B1BE245B600D0CD35 /* pig.png */; };
 		14A139B41AEFC72B00AD732F /* Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14A139B31AEFC72B00AD732F /* Tests.swift */; };
 		BAF1E3DD92A9CD1E3D38F2E1 /* Pods.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3E46227AAAC2B1D3B0DAF2B0 /* Pods.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		1443C8E31BD7A30A00AE5BD4 /* entries.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = entries.json; sourceTree = "<group>"; };
+		146A0A9B1BE245B600D0CD35 /* pig.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = pig.png; sourceTree = "<group>"; };
 		146D72AC1AB782920058798C /* Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		146D72B11AB782920058798C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		14A139B31AEFC72B00AD732F /* Tests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Tests.swift; sourceTree = "<group>"; };
@@ -64,6 +66,7 @@
 			isa = PBXGroup;
 			children = (
 				1443C8E31BD7A30A00AE5BD4 /* entries.json */,
+				146A0A9B1BE245B600D0CD35 /* pig.png */,
 				14A139B31AEFC72B00AD732F /* Tests.swift */,
 				146D72B01AB782920058798C /* Supporting Files */,
 			);
@@ -169,6 +172,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				146A0A9C1BE245B600D0CD35 /* pig.png in Resources */,
 				1443C8E41BD7A30A00AE5BD4 /* entries.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

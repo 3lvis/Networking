@@ -134,6 +134,10 @@ extension Tests {
         let networking = Networking(baseURL: baseURL)
         networking.downloadImage("/image/png") { image, error in
             XCTAssertNotNil(image)
+            let pigImage = UIImage(named: "pig.png", inBundle: NSBundle(forClass: Tests.self), compatibleWithTraitCollection: nil)!
+            let pigImageData = UIImagePNGRepresentation(pigImage)
+            let imageData = UIImagePNGRepresentation(image!)
+            XCTAssertEqual(pigImageData, imageData)
             synchronous = true
         }
 
