@@ -183,6 +183,12 @@ public class Networking {
         }
     }
 
+    /**
+     Registers an UIImage for a downlaod request to the specified path. After registering this, every download request to the path, will return
+     the registered UIImage.
+     - parameter path: The path for the stubbed image download.
+     - parameter image: A UIImage that will be returned when there's a request to the registered path
+     */
     public func stubImageDownload(path: String, image: UIImage) {
         self.stub(.GET, path: path, response: image)
     }
