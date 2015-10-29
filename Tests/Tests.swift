@@ -71,7 +71,7 @@ extension Tests {
     func testSynchronousPOST() {
         var synchronous = false
         let networking = Networking(baseURL: baseURL)
-        networking.POST("/post", params: nil) { JSON, error in
+        networking.POST("/post", parameters: nil) { JSON, error in
             synchronous = true
         }
 
@@ -80,7 +80,7 @@ extension Tests {
 
     func testPOST() {
         let networking = Networking(baseURL: baseURL)
-        networking.POST("/post", params: ["username":"jameson", "password":"password"]) { JSON, error in
+        networking.POST("/post", parameters: ["username":"jameson", "password":"password"]) { JSON, error in
             XCTAssertNotNil(JSON!, "JSON not nil")
             XCTAssertNil(error, "Error")
         }
@@ -88,7 +88,7 @@ extension Tests {
 
     func testPOSTWithIvalidPath() {
         let networking = Networking(baseURL: baseURL)
-        networking.POST("/posdddddt", params: ["username":"jameson", "password":"password"]) { JSON, error in
+        networking.POST("/posdddddt", parameters: ["username":"jameson", "password":"password"]) { JSON, error in
             XCTAssertNotNil(error)
             XCTAssertNil(JSON)
         }
@@ -99,7 +99,7 @@ extension Tests {
 
         networking.stubPOST("/story", response: [["name" : "Elvis"]])
 
-        networking.POST("/story", params: ["username":"jameson", "password":"password"]) { JSON, error in
+        networking.POST("/story", parameters: ["username":"jameson", "password":"password"]) { JSON, error in
             let JSON = JSON as! [[String : String]]
             let value = JSON[0]["name"]
             XCTAssertEqual(value!, "Elvis")

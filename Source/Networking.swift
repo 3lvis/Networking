@@ -61,7 +61,7 @@ public class Networking {
     - parameter completion: A closure that gets called when the GET request is completed, it contains a `JSON` object and a `NSError`.
     */
     public func GET(path: String, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
-        self.request(.GET, path: path, params: nil, completion: completion)
+        self.request(.GET, path: path, parameters: nil, completion: completion)
     }
 
     /**
@@ -90,11 +90,11 @@ public class Networking {
     /**
     Makes a POST request to the specified path, using the provided parameters.
     - parameter path: The path for the GET request.
-    - parameter params: The parameters to be used, they will be serialized using NSJSONSerialization.
+    - parameter parameters: The parameters to be used, they will be serialized using NSJSONSerialization.
     - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and a `NSError`.
     */
-    public func POST(path: String, params: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
-        self.request(.POST, path: path, params: params, completion: completion)
+    public func POST(path: String, parameters: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
+        self.request(.POST, path: path, parameters: parameters, completion: completion)
     }
 
     /**
@@ -220,7 +220,7 @@ extension Networking {
         self.stubs[requestType] = getStubs
     }
 
-    private func request(requestType: RequestType, path: String, params: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
+    private func request(requestType: RequestType, path: String, parameters: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
         if let responses = self.stubs[requestType], response = responses[path] {
             completion(JSON: response, error: nil)
         } else {
@@ -242,9 +242,9 @@ extension Networking {
             #endif
 
             var serializingError: NSError?
-            if let params = params {
+            if let parameters = parameters {
                 do {
-                    request.HTTPBody = try NSJSONSerialization.dataWithJSONObject(params, options: [])
+                    request.HTTPBody = try NSJSONSerialization.dataWithJSONObject(parameters, options: [])
                 } catch let error as NSError {
                     serializingError = error
                 }
@@ -284,7 +284,7 @@ extension Networking {
                                 UIApplication.sharedApplication().networkActivityIndicatorVisible = false
                             #endif
 
-                            self.logError(params, data: returnedData, request: request, response: returnedResponse, error: connectionError)
+                            self.logError(parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError)
                             completion(JSON: result, error: connectionError)
                         })
                     }
@@ -292,14 +292,14 @@ extension Networking {
 
                 if Test.isRunning() {
                     dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
-                    self.logError(params, data: returnedData, request: request, response: returnedResponse, error: connectionError)
+                    self.logError(parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError)
                     completion(JSON: result, error: connectionError)
                 }
             }
         }
     }
 
-    private func logError(params: AnyObject? = nil, data: NSData?, request: NSURLRequest?, response: NSURLResponse?, error: NSError?) {
+    private func logError(parameters: AnyObject? = nil, data: NSData?, request: NSURLRequest?, response: NSURLResponse?, error: NSError?) {
         guard let error = error else { return }
 
         print(" ")
@@ -314,8 +314,8 @@ extension Networking {
             print(" ")
         }
 
-        if let params = params {
-            print("Params: \(params)")
+        if let parameters = parameters {
+            print("parameters: \(parameters)")
             print(" ")
         }
 
