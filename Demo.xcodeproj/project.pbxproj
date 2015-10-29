@@ -7,14 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1443C8E21BD7A30200AE5BD4 /* Networking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1443C8E11BD7A30200AE5BD4 /* Networking.swift */; settings = {ASSET_TAGS = (); }; };
-		1443C8E41BD7A30A00AE5BD4 /* entries.json in Resources */ = {isa = PBXBuildFile; fileRef = 1443C8E31BD7A30A00AE5BD4 /* entries.json */; settings = {ASSET_TAGS = (); }; };
+		1443C8E41BD7A30A00AE5BD4 /* entries.json in Resources */ = {isa = PBXBuildFile; fileRef = 1443C8E31BD7A30A00AE5BD4 /* entries.json */; };
 		14A139B41AEFC72B00AD732F /* Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14A139B31AEFC72B00AD732F /* Tests.swift */; };
 		BAF1E3DD92A9CD1E3D38F2E1 /* Pods.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3E46227AAAC2B1D3B0DAF2B0 /* Pods.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		1443C8E11BD7A30200AE5BD4 /* Networking.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Networking.swift; sourceTree = "<group>"; };
 		1443C8E31BD7A30A00AE5BD4 /* entries.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = entries.json; sourceTree = "<group>"; };
 		146D72AC1AB782920058798C /* Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		146D72B11AB782920058798C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -45,7 +43,6 @@
 			isa = PBXGroup;
 			children = (
 				14C136501AB7849300B7B07A /* Metadata */,
-				14C0AF841BD6D4370009ECBE /* Source */,
 				146D72AF1AB782920058798C /* Tests */,
 				146D72941AB782920058798C /* Products */,
 				A6ECFB9372A5F73BAFE9A84B /* Pods */,
@@ -79,14 +76,6 @@
 				146D72B11AB782920058798C /* Info.plist */,
 			);
 			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		14C0AF841BD6D4370009ECBE /* Source */ = {
-			isa = PBXGroup;
-			children = (
-				1443C8E11BD7A30200AE5BD4 /* Networking.swift */,
-			);
-			path = Source;
 			sourceTree = "<group>";
 		};
 		14C136501AB7849300B7B07A /* Metadata */ = {
@@ -240,7 +229,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				14A139B41AEFC72B00AD732F /* Tests.swift in Sources */,
-				1443C8E21BD7A30200AE5BD4 /* Networking.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

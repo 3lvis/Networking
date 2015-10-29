@@ -16,9 +16,9 @@ public class Networking {
     private var session = NSURLSession.sharedSession()
 
     /**
-    Base initializer, it creates an instance of `Networking`.
-    - parameter baseURL: The base URL for HTTP requests under `Networking`.
-    */
+     Base initializer, it creates an instance of `Networking`.
+     - parameter baseURL: The base URL for HTTP requests under `Networking`.
+     */
     public init(baseURL: String) {
         self.baseURL = baseURL
         self.stubs = [RequestType : [String : AnyObject]]()
@@ -65,22 +65,22 @@ public class Networking {
     }
 
     /**
-    Registers a response for a GET request to the specified path. After registering this, every GET request to the path, will return
-    the registered response.
-    - parameter path: The path for the stubbed GET request.
-    - parameter response: An `AnyObject` that will be returned when a GET request is made to the specified path.
-    */
+     Registers a response for a GET request to the specified path. After registering this, every GET request to the path, will return
+     the registered response.
+     - parameter path: The path for the stubbed GET request.
+     - parameter response: An `AnyObject` that will be returned when a GET request is made to the specified path.
+     */
     public func stubGET(path: String, response: AnyObject) {
         self.stub(.GET, path: path, response: response)
     }
 
     /**
-    Registers the contents of a file as the response for a GET request to the specified path. After registering this, every GET request to the path, will return
-    the contents of the registered file.
-    - parameter path: The path for the stubbed GET request.
-    - parameter fileName: The name of the file, whose contents will be registered as a reponse.
-    - parameter bundle: The NSBundle where the file is located.
-    */
+     Registers the contents of a file as the response for a GET request to the specified path. After registering this, every GET request to the path, will return
+     the contents of the registered file.
+     - parameter path: The path for the stubbed GET request.
+     - parameter fileName: The name of the file, whose contents will be registered as a reponse.
+     - parameter bundle: The NSBundle where the file is located.
+     */
     public func stubGET(path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
         self.stub(.GET, path: path, fileName: fileName, bundle: bundle)
     }
@@ -98,22 +98,22 @@ public class Networking {
     }
 
     /**
-    Registers a response for a POST request to the specified path. After registering this, every POST request to the path, will return
-    the registered response.
-    - parameter path: The path for the stubbed POST request.
-    - parameter response: An `AnyObject` that will be returned when a POST request is made to the specified path.
-    */
+     Registers a response for a POST request to the specified path. After registering this, every POST request to the path, will return
+     the registered response.
+     - parameter path: The path for the stubbed POST request.
+     - parameter response: An `AnyObject` that will be returned when a POST request is made to the specified path.
+     */
     public func stubPOST(path: String, response: AnyObject) {
         self.stub(.POST, path: path, response: response)
     }
 
     /**
-    Registers the contents of a file as the response for a POST request to the specified path. After registering this, every POST request to the path, will return
-    the contents of the registered file.
-    - parameter path: The path for the stubbed POST request.
-    - parameter fileName: The name of the file, whose contents will be registered as a reponse.
-    - parameter bundle: The NSBundle where the file is located.
-    */
+     Registers the contents of a file as the response for a POST request to the specified path. After registering this, every POST request to the path, will return
+     the contents of the registered file.
+     - parameter path: The path for the stubbed POST request.
+     - parameter fileName: The name of the file, whose contents will be registered as a reponse.
+     - parameter bundle: The NSBundle where the file is located.
+     */
     public func stubPOST(path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
         self.stub(.POST, path: path, fileName: fileName, bundle: bundle)
     }
@@ -126,57 +126,65 @@ public class Networking {
     - parameter completion: A closure that gets called when the image download request is completed, it contains an `UIImage` object and a `NSError`.
     */
     public func downloadImage(path: String, completion: (image: UIImage?, error: NSError?) -> ()) {
-        let request = NSMutableURLRequest(URL: self.urlForPath(path))
-        request.HTTPMethod = "GET"
-        request.addValue("application/json", forHTTPHeaderField: "Accept")
+        if let getStubs = self.stubs[.GET], image = getStubs[path] as? UIImage {
+            completion(image: image, error: nil)
+        } else {
+            let request = NSMutableURLRequest(URL: self.urlForPath(path))
+            request.HTTPMethod = "GET"
+            request.addValue("application/json", forHTTPHeaderField: "Accept")
 
-        if let token = token {
-            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        }
-
-        let semaphore = dispatch_semaphore_create(0)
-        var returnedData: NSData?
-        var returnedImage: UIImage?
-        var returnedError: NSError?
-        var returnedResponse: NSURLResponse?
-
-        #if os(iOS)
-            if Test.isRunning() == false {
-                dispatch_async(dispatch_get_main_queue(), {
-                    UIApplication.sharedApplication().networkActivityIndicatorVisible = true
-                })
+            if let token = token {
+                request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
             }
-        #endif
 
-        self.session.downloadTaskWithRequest(request, completionHandler: { url, response, error in
-            returnedResponse = response
-            returnedError = error
+            let semaphore = dispatch_semaphore_create(0)
+            var returnedData: NSData?
+            var returnedImage: UIImage?
+            var returnedError: NSError?
+            var returnedResponse: NSURLResponse?
 
-            if let url = url, data = NSData(contentsOfURL: url), image = UIImage(data: data) {
-                returnedData = data
-                returnedImage = image
-            }
+            #if os(iOS)
+                if Test.isRunning() == false {
+                    dispatch_async(dispatch_get_main_queue(), {
+                        UIApplication.sharedApplication().networkActivityIndicatorVisible = true
+                    })
+                }
+            #endif
+
+            self.session.downloadTaskWithRequest(request, completionHandler: { url, response, error in
+                returnedResponse = response
+                returnedError = error
+
+                if let url = url, data = NSData(contentsOfURL: url), image = UIImage(data: data) {
+                    returnedData = data
+                    returnedImage = image
+                }
+
+                if Test.isRunning() {
+                    dispatch_semaphore_signal(semaphore)
+                } else {
+                    dispatch_async(dispatch_get_main_queue(), {
+                        #if os(iOS)
+                            UIApplication.sharedApplication().networkActivityIndicatorVisible = false
+                        #endif
+
+                        self.logError(nil, data: returnedData, request: request, response: response, error: error)
+                        completion(image: returnedImage, error: error)
+                    })
+                }
+            }).resume()
 
             if Test.isRunning() {
-                dispatch_semaphore_signal(semaphore)
-            } else {
-                dispatch_async(dispatch_get_main_queue(), {
-                    #if os(iOS)
-                        UIApplication.sharedApplication().networkActivityIndicatorVisible = false
-                    #endif
+                dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
 
-                    self.logError(nil, data: returnedData, request: request, response: response, error: error)
-                    completion(image: returnedImage, error: error)
-                })
+                self.logError(nil, data: returnedData, request: request, response: returnedResponse, error: returnedError)
+                completion(image: returnedImage, error: returnedError)
             }
-        }).resume()
-
-        if Test.isRunning() {
-            dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
-
-            self.logError(nil, data: returnedData, request: request, response: returnedResponse, error: returnedError)
-            completion(image: returnedImage, error: returnedError)
         }
+    }
+
+    public func stubImageDownload(path: String, image: UIImage) {
+        self.stub(.GET, path: path, response: image)
     }
 
     // MARK: - Utilities
@@ -191,9 +199,9 @@ public class Networking {
     }
 }
 
-extension Networking {
-    // MARK: - Private
+// MARK: - Private
 
+extension Networking {
     private func stub(requestType: RequestType, path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
         do {
             if let result = try JSON.from(fileName, bundle: bundle) {
@@ -213,20 +221,18 @@ extension Networking {
     }
 
     private func request(requestType: RequestType, path: String, params: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
-        let request = NSMutableURLRequest(URL: self.urlForPath(path))
-        request.HTTPMethod = requestType.rawValue
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("application/json", forHTTPHeaderField: "Accept")
-
-        if let token = token {
-            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        }
-
-        let responses = self.stubs[requestType] ?? [String : AnyObject]()
-
-        if let response = responses[path] {
+        if let responses = self.stubs[requestType], response = responses[path] {
             completion(JSON: response, error: nil)
         } else {
+            let request = NSMutableURLRequest(URL: self.urlForPath(path))
+            request.HTTPMethod = requestType.rawValue
+            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.addValue("application/json", forHTTPHeaderField: "Accept")
+
+            if let token = token {
+                request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            }
+
             #if os(iOS)
                 if Test.isRunning() == false {
                     dispatch_async(dispatch_get_main_queue(), {
