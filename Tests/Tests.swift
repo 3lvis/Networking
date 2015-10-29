@@ -128,9 +128,18 @@ extension Tests {
         XCTAssertEqual(url.absoluteString, "http://httpbin.org/hello")
     }
 
-    func testImageDownload() {
+    func testImageDownloadSynchronous() {
         var synchronous = false
 
+        let networking = Networking(baseURL: baseURL)
+        networking.downloadImage("/image/png") { image, error in
+            synchronous = true
+        }
+
+        XCTAssertTrue(synchronous)
+    }
+
+    func testImageDownload() {
         let networking = Networking(baseURL: baseURL)
         networking.downloadImage("/image/png") { image, error in
             XCTAssertNotNil(image)
@@ -138,9 +147,18 @@ extension Tests {
             let pigImageData = UIImagePNGRepresentation(pigImage)
             let imageData = UIImagePNGRepresentation(image!)
             XCTAssertEqual(pigImageData, imageData)
-            synchronous = true
         }
+    }
 
-        XCTAssertTrue(synchronous)
+    func testStubImageDownload() {
+        let networking = Networking(baseURL: baseURL)
+        let pigImage = UIImage(named: "pig.png", inBundle: NSBundle(forClass: Tests.self), compatibleWithTraitCollection: nil)!
+        networking.stubImageDownload("/image/png", image: pigImage)
+        networking.downloadImage("/image/png") { image, error in
+            XCTAssertNotNil(image)
+            let pigImageData = UIImagePNGRepresentation(pigImage)
+            let imageData = UIImagePNGRepresentation(image!)
+            XCTAssertEqual(pigImageData, imageData)
+        }
     }
 }
