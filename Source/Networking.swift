@@ -56,7 +56,7 @@ public class Networking {
     // MARK: GET
 
     /**
-    Makes a GET request to the specified path.
+    GET request to the specified path.
     - parameter path: The path for the GET request.
     - parameter completion: A closure that gets called when the GET request is completed, it contains a `JSON` object and a `NSError`.
     */
@@ -65,7 +65,7 @@ public class Networking {
     }
 
     /**
-     Registers a response for a GET request to the specified path. After registering this, every GET request to the path, will return
+     Stubs GET request for the specified path. After registering this, every GET request to the path, will return
      the registered response.
      - parameter path: The path for the stubbed GET request.
      - parameter response: An `AnyObject` that will be returned when a GET request is made to the specified path.
@@ -75,7 +75,7 @@ public class Networking {
     }
 
     /**
-     Registers the contents of a file as the response for a GET request to the specified path. After registering this, every GET request to the path, will return
+     Stubs GET request for the specified path using the contents of a file. After registering this, every GET request to the path, will return
      the contents of the registered file.
      - parameter path: The path for the stubbed GET request.
      - parameter fileName: The name of the file, whose contents will be registered as a reponse.
@@ -88,7 +88,7 @@ public class Networking {
     // MARK: - POST
 
     /**
-    Makes a POST request to the specified path, using the provided parameters.
+    POST request to the specified path, using the provided parameters.
     - parameter path: The path for the GET request.
     - parameter parameters: The parameters to be used, they will be serialized using NSJSONSerialization.
     - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and a `NSError`.
@@ -98,7 +98,7 @@ public class Networking {
     }
 
     /**
-     Registers a response for a POST request to the specified path. After registering this, every POST request to the path, will return
+    Stubs POST request for the specified path. After registering this, every POST request to the path, will return
      the registered response.
      - parameter path: The path for the stubbed POST request.
      - parameter response: An `AnyObject` that will be returned when a POST request is made to the specified path.
@@ -108,7 +108,7 @@ public class Networking {
     }
 
     /**
-     Registers the contents of a file as the response for a POST request to the specified path. After registering this, every POST request to the path, will return
+    Stubs POST request to the specified path using the contents of a file. After registering this, every POST request to the path, will return
      the contents of the registered file.
      - parameter path: The path for the stubbed POST request.
      - parameter fileName: The name of the file, whose contents will be registered as a reponse.
@@ -121,7 +121,7 @@ public class Networking {
     // MARK: Image
 
     /**
-    Downloads an image using the specified path
+    Downloads an image using the specified path.
     - parameter path: The path where the image is located
     - parameter completion: A closure that gets called when the image download request is completed, it contains an `UIImage` object and a `NSError`.
     */
@@ -184,7 +184,7 @@ public class Networking {
     }
 
     /**
-     Registers an UIImage for a downlaod request to the specified path. After registering this, every download request to the path, will return
+     Stubs a download image request with an UIImage. After registering this, every download request to the path, will return
      the registered UIImage.
      - parameter path: The path for the stubbed image download.
      - parameter image: A UIImage that will be returned when there's a request to the registered path
@@ -196,7 +196,7 @@ public class Networking {
     // MARK: - Utilities
 
     /**
-    Convenience method to generated a NSURL by appending the provided path to the Networking's base URL.
+    Generates a NSURL by appending the provided path to the Networking's base URL.
     - parameter path: The path to be appended to the base URL.
     - returns: A NSURL generated after appending the path to the base URL.
     */
