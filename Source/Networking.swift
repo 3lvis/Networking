@@ -118,6 +118,7 @@ public class Networking {
         self.stub(.POST, path: path, fileName: fileName, bundle: bundle)
     }
 
+#if os(iOS) || os(tvOS) || os(watchOS)
     // MARK: Image
 
     /**
@@ -192,6 +193,7 @@ public class Networking {
     public func stubImageDownload(path: String, image: UIImage) {
         self.stub(.GET, path: path, response: image)
     }
+#endif
 
     // MARK: - Utilities
 
