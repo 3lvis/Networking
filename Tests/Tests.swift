@@ -139,6 +139,7 @@ extension Tests {
         XCTAssertTrue(synchronous)
     }
 
+#if os(iOS) || os(tvOS) || os(watchOS)
     func testImageDownload() {
         let networking = Networking(baseURL: baseURL)
         networking.downloadImage("/image/png") { image, error in
@@ -161,4 +162,5 @@ extension Tests {
             XCTAssertEqual(pigImageData, imageData)
         }
     }
+#endif
 }
