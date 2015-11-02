@@ -2,7 +2,7 @@ import Foundation
 import TestCheck
 import JSON
 
-#if os(iOS)
+#if os(iOS) || os(tvOS) || os(watchOS)
     import UIKit
 #endif
 
