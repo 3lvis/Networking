@@ -83,11 +83,11 @@ networking.POST("/post", params: ["username":"jameson", "password":"password"]) 
             "username" : "jameson",
             "password" : "password"
         },
-        "url" : "http:\/\/httpbin.org\/post",
-        "data" : "{\"password\":\"password\",\"username\":\"jameson\"}",
+        "url" : "http://httpbin.org/post",
+        "data" : "{"password":"password","username":"jameson"}",
         "headers" : {
-            "Accept" : "application\/json",
-            "Content-Type" : "application\/json",
+            "Accept" : "application/json",
+            "Content-Type" : "application/json",
             "Host" : "httpbin.org",
             "Content-Length" : "44",
             "Accept-Language" : "en-us"
