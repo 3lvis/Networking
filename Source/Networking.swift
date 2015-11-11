@@ -348,28 +348,23 @@ extension Networking {
         let fullPath = self.urlForPath(path)
 
         self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
+            var sessionTasks = [NSURLSessionTask]()
             switch sessionTaskType {
             case .Data:
-                for dataTask in dataTasks {
-                    if dataTask.originalRequest?.HTTPMethod == requestType.rawValue && dataTask.originalRequest?.URL?.absoluteString == fullPath.absoluteString {
-                        dataTask.cancel()
-                    }
-                }
+                sessionTasks = dataTasks
                 break
             case .Download:
-                for downloadTask in downloadTasks {
-                    if downloadTask.originalRequest?.HTTPMethod == requestType.rawValue && downloadTask.originalRequest?.URL?.absoluteString == fullPath.absoluteString {
-                        downloadTask.cancel()
-                    }
-                }
+                sessionTasks = downloadTasks
                 break
             case .Upload:
-                for uploadTask in uploadTasks {
-                    if uploadTask.originalRequest?.HTTPMethod == requestType.rawValue && uploadTask.originalRequest?.URL?.absoluteString == fullPath.absoluteString {
-                        uploadTask.cancel()
-                    }
-                }
+                sessionTasks = uploadTasks
                 break
+            }
+
+            for sessionTask in sessionTasks {
+                if sessionTask.originalRequest?.HTTPMethod == requestType.rawValue && sessionTask.originalRequest?.URL?.absoluteString == fullPath.absoluteString {
+                    sessionTask.cancel()
+                }
             }
         }
     }
