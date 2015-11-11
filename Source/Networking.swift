@@ -58,6 +58,17 @@ public class Networking {
         self.token = token
     }
 
+    /**
+    Generates a NSURL by appending the provided path to the Networking's base URL.
+    - parameter path: The path to be appended to the base URL.
+    - returns: A NSURL generated after appending the path to the base URL.
+    */
+    public func urlForPath(path: String) -> NSURL {
+        return NSURL(string: self.baseURL + path)!
+    }
+}
+
+extension Networking {
     // MARK: GET
 
     /**
@@ -135,7 +146,7 @@ public class Networking {
     }
 
     /**
-    Stubs POST request for the specified path. After registering this, every POST request to the path, will return
+     Stubs POST request for the specified path. After registering this, every POST request to the path, will return
      the registered response.
      - parameter path: The path for the stubbed POST request.
      - parameter response: An `AnyObject` that will be returned when a POST request is made to the specified path.
@@ -145,7 +156,7 @@ public class Networking {
     }
 
     /**
-    Stubs POST request to the specified path using the contents of a file. After registering this, every POST request to the path, will return
+     Stubs POST request to the specified path using the contents of a file. After registering this, every POST request to the path, will return
      the contents of the registered file.
      - parameter path: The path for the stubbed POST request.
      - parameter fileName: The name of the file, whose contents will be registered as a reponse.
@@ -154,8 +165,10 @@ public class Networking {
     public func stubPOST(path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
         self.stub(.POST, path: path, fileName: fileName, bundle: bundle)
     }
+}
 
-#if os(iOS) || os(tvOS) || os(watchOS)
+extension Networking {
+    #if os(iOS) || os(tvOS) || os(watchOS)
     // MARK: Image
 
     /**
@@ -246,18 +259,7 @@ public class Networking {
     public func stubImageDownload(path: String, image: UIImage) {
         self.stub(.GET, path: path, response: image)
     }
-#endif
-
-    // MARK: - Utilities
-
-    /**
-    Generates a NSURL by appending the provided path to the Networking's base URL.
-    - parameter path: The path to be appended to the base URL.
-    - returns: A NSURL generated after appending the path to the base URL.
-    */
-    public func urlForPath(path: String) -> NSURL {
-        return NSURL(string: self.baseURL + path)!
-    }
+    #endif
 }
 
 // MARK: - Private

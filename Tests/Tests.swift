@@ -143,7 +143,7 @@ extension Tests {
 // MARK: Image
 
 extension Tests {
-#if os(iOS) || os(tvOS) || os(watchOS)
+    #if os(iOS) || os(tvOS) || os(watchOS)
     func testImageDownloadSynchronous() {
         var synchronous = false
 
@@ -196,7 +196,7 @@ extension Tests {
             XCTAssertEqual(pigImageData, imageData)
         }
     }
-#endif
+    #endif
 }
 
 // MARK: Other
@@ -212,14 +212,13 @@ extension Tests {
             XCTAssertEqual(user, "user")
             XCTAssertEqual(authenticated, true)
         })
-   }
+    }
 
     func testURLForPath() {
         let networking = Networking(baseURL: baseURL)
         let url = networking.urlForPath("/hello")
         XCTAssertEqual(url.absoluteString, "http://httpbin.org/hello")
     }
-
 
     func testSkipTestMode() {
         let expectation = expectationWithDescription("testSkipTestMode")
