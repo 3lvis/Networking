@@ -13,7 +13,12 @@ public class Networking {
 
     private let baseURL: String
     private var stubs: [RequestType : [String : AnyObject]]
-    private var session = NSURLSession.sharedSession()
+
+    private lazy var session: NSURLSession = {
+        let config = NSURLSessionConfiguration.defaultSessionConfiguration()
+
+        return NSURLSession(configuration: config)
+    }()
 
     /**
      Base initializer, it creates an instance of `Networking`.
