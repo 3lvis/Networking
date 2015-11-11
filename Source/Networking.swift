@@ -13,6 +13,7 @@ public class Networking {
 
     private let baseURL: String
     private var stubs: [RequestType : [String : AnyObject]]
+    private var token: String?
     internal var disableTestingMode = false
 
     private lazy var session: NSURLSession = {
@@ -49,8 +50,6 @@ public class Networking {
         }
     }
 
-    private var token: String?
-
     /**
      Authenticates using a token, sets the Authorization header to "Bearer \(token)"
      - parameter token: The token to be used
@@ -70,6 +69,10 @@ public class Networking {
         self.request(.GET, path: path, parameters: nil, completion: completion)
     }
 
+    /**
+     Cancels the GET request for the specified path. This causes the request to complete with error code -999
+     - parameter path: The path for the cancelled GET request
+     */
     public func cancelGET(path: String) {
         let fullPath = self.urlForPath(path)
 
@@ -115,6 +118,10 @@ public class Networking {
         self.request(.POST, path: path, parameters: parameters, completion: completion)
     }
 
+    /**
+     Cancels the POST request for the specified path. This causes the request to complete with error code -999
+     - parameter path: The path for the cancelled POST request
+     */
     public func cancelPOST(path: String) {
         let fullPath = self.urlForPath(path)
 
