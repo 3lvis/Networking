@@ -13,7 +13,7 @@
 
 `Networking` supports [HTTP basic autentication](http://www.w3.org/Protocols/HTTP/1.0/spec.html#BasicAA):
 
-To authenticate using basic authentication with a username "Aladdin" and password "open sesame", you would need to set the following header field: 
+To authenticate using basic authentication with a username **"Aladdin"** and password **"open sesame"**, you would need to set the following header field: 
 
 `Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==`, which contains the string `Aladin:open sesame` in Base64 format. Luckily `Networking` provides a simpler way to do this.
 
@@ -31,7 +31,7 @@ networking.GET("/basic-auth/user/pswd", completion: { JSON, error in
 
 `Networking` supports [Bearer Token Usage](https://tools.ietf.org/html/rfc6750):
 
-To authenticate using a bearer token "AAAFFAAAA3DAAAAAA", you would need to set the following header field: 
+To authenticate using a bearer token **"AAAFFAAAA3DAAAAAA"**, you would need to set the following header field: 
 
 `Authorization: Bearer AAAFFAAAA3DAAAAAA`. Luckily `Networking` provides a simpler way to do this.
 
