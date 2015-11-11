@@ -68,6 +68,8 @@ public class Networking {
     }
 }
 
+// MARK: HTTP requests
+
 extension Networking {
     // MARK: GET
 
@@ -167,10 +169,10 @@ extension Networking {
     }
 }
 
+// MARK: Image
+
 extension Networking {
     #if os(iOS) || os(tvOS) || os(watchOS)
-    // MARK: Image
-
     /**
     Downloads an image using the specified path.
     - parameter path: The path where the image is located
