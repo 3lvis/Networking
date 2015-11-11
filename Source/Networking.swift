@@ -228,7 +228,7 @@ extension Networking {
      Cancels the image download request for the specified path. This causes the request to complete with error code -999
      - parameter path: The path for the cancelled image download request
      */
-    func cancelImageDownload(path: String) {
+    public func cancelImageDownload(path: String) {
         self.cancelRequest(.Download, requestType: .GET, path: path)
     }
 
