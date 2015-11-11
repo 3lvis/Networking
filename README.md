@@ -7,6 +7,23 @@
 - Runs synchronously in automatic testing enviroments
 - Free
 
+## Authentication
+
+`Networking` supports [HTTP basic autentication](http://www.w3.org/Protocols/HTTP/1.0/spec.html#BasicAA):
+
+If the user agent wishes to send the user-ID "Aladdin" and password "open sesame", it would use the following header field: 
+
+`Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==`, which contains the string `Aladin:open sesame` in Base64 format.
+
+This is how you use basic authentication on Networking, the following example features a username: `user` and a password: `pswd`.
+
+```swift
+let networking = Networking(baseURL: "http://httpbin.org")
+networking.autenticate("user", password: "pswd")
+networking.GET("/basic-auth/user/pswd", completion: { JSON, error in
+    // Do something...
+})
+```
 
 ## GET
 
