@@ -70,6 +70,18 @@ public class Networking {
         self.request(.GET, path: path, parameters: nil, completion: completion)
     }
 
+    public func cancelGET(path: String) {
+        let fullPath = self.urlForPath(path)
+
+        self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
+            for dataTask in dataTasks {
+                if dataTask.originalRequest?.URL?.absoluteString == fullPath.absoluteString {
+                    dataTask.cancel()
+                }
+            }
+        }
+    }
+
     /**
      Stubs GET request for the specified path. After registering this, every GET request to the path, will return
      the registered response.

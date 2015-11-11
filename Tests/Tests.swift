@@ -27,6 +27,23 @@ extension Tests {
         })
     }
 
+    func testCancelGET() {
+        let expectation = expectationWithDescription("testCancelGET")
+
+        let networking = Networking(baseURL: baseURL)
+        networking.disableTestingMode = true
+        networking.GET("/get", completion: { JSON, error in
+            let canceledCode = error?.code == -999
+            XCTAssertTrue(canceledCode)
+
+            expectation.fulfill()
+        })
+
+        networking.cancelGET("/get")
+
+        waitForExpectationsWithTimeout(3.0, handler: nil)
+    }
+
     func testGETWithInvalidPath() {
         let networking = Networking(baseURL: baseURL)
         networking.GET("/invalidpath", completion: { JSON, error in
