@@ -166,6 +166,25 @@ extension Tests {
         }
     }
 
+    func testCancelImageDownload() {
+        let expectation = expectationWithDescription("testCancelImageDownload")
+
+        let networking = Networking(baseURL: baseURL)
+        networking.disableTestingMode = true
+        networking.downloadImage("/image/png") { image, error in
+            print("image: \(image)")
+            print("error: \(error)")
+            let canceledCode = error?.code == -999
+            XCTAssertTrue(canceledCode)
+
+            expectation.fulfill()
+        }
+
+        networking.cancelImageDownload("/image/png")
+
+        waitForExpectationsWithTimeout(3.0, handler: nil)
+    }
+
     func testStubImageDownload() {
         let networking = Networking(baseURL: baseURL)
         let pigImage = UIImage(named: "pig.png", inBundle: NSBundle(forClass: Tests.self), compatibleWithTraitCollection: nil)!

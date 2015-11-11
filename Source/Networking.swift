@@ -168,7 +168,7 @@ public class Networking {
             completion(image: image, error: nil)
         } else {
             let request = NSMutableURLRequest(URL: self.urlForPath(path))
-            request.HTTPMethod = "GET"
+            request.HTTPMethod = RequestType.GET.rawValue
             request.addValue("application/json", forHTTPHeaderField: "Accept")
 
             if let token = token {
@@ -198,7 +198,7 @@ public class Networking {
                     returnedImage = image
                 }
 
-                if TestCheck.isTesting {
+                if TestCheck.isTesting && self.disableTestingMode == false {
                     dispatch_semaphore_signal(semaphore)
                 } else {
                     dispatch_async(dispatch_get_main_queue(), {
@@ -212,11 +212,27 @@ public class Networking {
                 }
             }).resume()
 
-            if TestCheck.isTesting {
+            if TestCheck.isTesting && self.disableTestingMode == false {
                 dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
 
                 self.logError(nil, data: returnedData, request: request, response: returnedResponse, error: returnedError)
                 completion(image: returnedImage, error: returnedError)
+            }
+        }
+    }
+
+    /**
+     Cancels the image download request for the specified path. This causes the request to complete with error code -999
+     - parameter path: The path for the cancelled image download request
+     */
+    func cancelImageDownload(path: String) {
+        let fullPath = self.urlForPath(path)
+
+        self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
+            for downloadTask in downloadTasks {
+                if downloadTask.originalRequest?.HTTPMethod == RequestType.GET.rawValue && downloadTask.originalRequest?.URL?.absoluteString == fullPath.absoluteString {
+                    downloadTask.cancel()
+                }
             }
         }
     }
