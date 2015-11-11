@@ -1,6 +1,7 @@
 import Foundation
 import XCTest
-import Networking
+
+@testable import Networking
 
 class Tests: XCTestCase {
     let baseURL = "http://httpbin.org"
@@ -137,6 +138,26 @@ extension Tests {
         }
 
         XCTAssertTrue(synchronous)
+    }
+
+    func testSkipTestMode() {
+        let expectation = expectationWithDescription("testSkipTestMode")
+
+        let networking = Networking(baseURL: baseURL)
+        networking.disableTestingMode = true
+
+        var synchronous = false
+        networking.GET("/get", completion: { JSON, error in
+            synchronous = true
+
+            XCTAssertTrue(synchronous)
+
+            expectation.fulfill()
+        })
+
+        XCTAssertFalse(synchronous)
+
+        waitForExpectationsWithTimeout(3.0, handler: nil)
     }
 
 #if os(iOS) || os(tvOS) || os(watchOS)

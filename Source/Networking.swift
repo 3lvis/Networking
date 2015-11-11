@@ -13,6 +13,7 @@ public class Networking {
 
     private let baseURL: String
     private var stubs: [RequestType : [String : AnyObject]]
+    internal var disableTestingMode = false
 
     private lazy var session: NSURLSession = {
         let config = NSURLSessionConfiguration.defaultSessionConfiguration()
@@ -289,7 +290,7 @@ extension Networking {
                         }
                     }
 
-                    if TestCheck.isTesting {
+                    if TestCheck.isTesting && self.disableTestingMode == false {
                         dispatch_semaphore_signal(semaphore)
                     } else {
                         dispatch_async(dispatch_get_main_queue(), {
@@ -303,7 +304,7 @@ extension Networking {
                     }
                 }).resume()
 
-                if TestCheck.isTesting {
+                if TestCheck.isTesting && self.disableTestingMode == false {
                     dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
                     self.logError(parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError)
                     completion(JSON: result, error: connectionError)
