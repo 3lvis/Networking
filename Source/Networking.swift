@@ -11,6 +11,10 @@ public class Networking {
         case GET, POST
     }
 
+    private enum SessionTaskType: String {
+        case Data, Upload, Download
+    }
+
     private let baseURL: String
     private var stubs: [RequestType : [String : AnyObject]]
     private var token: String?
@@ -68,6 +72,8 @@ public class Networking {
     }
 }
 
+// MARK: HTTP requests
+
 extension Networking {
     // MARK: GET
 
@@ -85,15 +91,7 @@ extension Networking {
      - parameter path: The path for the cancelled GET request
      */
     public func cancelGET(path: String) {
-        let fullPath = self.urlForPath(path)
-
-        self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
-            for dataTask in dataTasks {
-                if dataTask.originalRequest?.HTTPMethod == RequestType.GET.rawValue && dataTask.originalRequest?.URL?.absoluteString == fullPath.absoluteString {
-                    dataTask.cancel()
-                }
-            }
-        }
+        self.cancelRequest(.Data, requestType: .GET, path: path)
     }
 
     /**
@@ -134,15 +132,7 @@ extension Networking {
      - parameter path: The path for the cancelled POST request
      */
     public func cancelPOST(path: String) {
-        let fullPath = self.urlForPath(path)
-
-        self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
-            for dataTask in dataTasks {
-                if dataTask.originalRequest?.HTTPMethod == RequestType.POST.rawValue && dataTask.originalRequest?.URL?.absoluteString == fullPath.absoluteString {
-                    dataTask.cancel()
-                }
-            }
-        }
+        self.cancelRequest(.Data, requestType: .POST, path: path)
     }
 
     /**
@@ -167,10 +157,10 @@ extension Networking {
     }
 }
 
+// MARK: Image
+
 extension Networking {
     #if os(iOS) || os(tvOS) || os(watchOS)
-    // MARK: Image
-
     /**
     Downloads an image using the specified path.
     - parameter path: The path where the image is located
@@ -239,15 +229,7 @@ extension Networking {
      - parameter path: The path for the cancelled image download request
      */
     func cancelImageDownload(path: String) {
-        let fullPath = self.urlForPath(path)
-
-        self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
-            for downloadTask in downloadTasks {
-                if downloadTask.originalRequest?.HTTPMethod == RequestType.GET.rawValue && downloadTask.originalRequest?.URL?.absoluteString == fullPath.absoluteString {
-                    downloadTask.cancel()
-                }
-            }
-        }
+        self.cancelRequest(.Download, requestType: .GET, path: path)
     }
 
     /**
@@ -357,6 +339,31 @@ extension Networking {
                     dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
                     self.logError(parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError)
                     completion(JSON: result, error: connectionError)
+                }
+            }
+        }
+    }
+
+    private func cancelRequest(sessionTaskType: SessionTaskType, requestType: RequestType, path: String) {
+        let fullPath = self.urlForPath(path)
+
+        self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
+            var sessionTasks = [NSURLSessionTask]()
+            switch sessionTaskType {
+            case .Data:
+                sessionTasks = dataTasks
+                break
+            case .Download:
+                sessionTasks = downloadTasks
+                break
+            case .Upload:
+                sessionTasks = uploadTasks
+                break
+            }
+
+            for sessionTask in sessionTasks {
+                if sessionTask.originalRequest?.HTTPMethod == requestType.rawValue && sessionTask.originalRequest?.URL?.absoluteString == fullPath.absoluteString {
+                    sessionTask.cancel()
                 }
             }
         }
