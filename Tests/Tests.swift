@@ -140,27 +140,10 @@ extension Tests {
     }
 }
 
-// MARK: Other
+// MARK: Image
 
 extension Tests {
-    func testBasicAuth() {
-        let networking = Networking(baseURL: baseURL)
-        networking.autenticate("user", password: "passwd")
-        networking.GET("/basic-auth/user/passwd", completion: { JSON, error in
-            let JSON = JSON as! [String : AnyObject]
-            let user = JSON["user"] as! String
-            let authenticated = JSON["authenticated"] as! Bool
-            XCTAssertEqual(user, "user")
-            XCTAssertEqual(authenticated, true)
-        })
-   }
-
-    func testURLForPath() {
-        let networking = Networking(baseURL: baseURL)
-        let url = networking.urlForPath("/hello")
-        XCTAssertEqual(url.absoluteString, "http://httpbin.org/hello")
-    }
-
+#if os(iOS) || os(tvOS) || os(watchOS)
     func testImageDownloadSynchronous() {
         var synchronous = false
 
@@ -172,27 +155,6 @@ extension Tests {
         XCTAssertTrue(synchronous)
     }
 
-    func testSkipTestMode() {
-        let expectation = expectationWithDescription("testSkipTestMode")
-
-        let networking = Networking(baseURL: baseURL)
-        networking.disableTestingMode = true
-
-        var synchronous = false
-        networking.GET("/get", completion: { JSON, error in
-            synchronous = true
-
-            XCTAssertTrue(synchronous)
-
-            expectation.fulfill()
-        })
-
-        XCTAssertFalse(synchronous)
-
-        waitForExpectationsWithTimeout(3.0, handler: nil)
-    }
-
-#if os(iOS) || os(tvOS) || os(watchOS)
     func testImageDownload() {
         let networking = Networking(baseURL: baseURL)
         networking.downloadImage("/image/png") { image, error in
@@ -216,4 +178,47 @@ extension Tests {
         }
     }
 #endif
+}
+
+// MARK: Other
+
+extension Tests {
+    func testBasicAuth() {
+        let networking = Networking(baseURL: baseURL)
+        networking.autenticate("user", password: "passwd")
+        networking.GET("/basic-auth/user/passwd", completion: { JSON, error in
+            let JSON = JSON as! [String : AnyObject]
+            let user = JSON["user"] as! String
+            let authenticated = JSON["authenticated"] as! Bool
+            XCTAssertEqual(user, "user")
+            XCTAssertEqual(authenticated, true)
+        })
+   }
+
+    func testURLForPath() {
+        let networking = Networking(baseURL: baseURL)
+        let url = networking.urlForPath("/hello")
+        XCTAssertEqual(url.absoluteString, "http://httpbin.org/hello")
+    }
+
+
+    func testSkipTestMode() {
+        let expectation = expectationWithDescription("testSkipTestMode")
+
+        let networking = Networking(baseURL: baseURL)
+        networking.disableTestingMode = true
+
+        var synchronous = false
+        networking.GET("/get", completion: { JSON, error in
+            synchronous = true
+
+            XCTAssertTrue(synchronous)
+
+            expectation.fulfill()
+        })
+
+        XCTAssertFalse(synchronous)
+
+        waitForExpectationsWithTimeout(3.0, handler: nil)
+    }
 }
