@@ -15,7 +15,7 @@
 
 To authenticate using basic authentication with a username **"Aladdin"** and password **"open sesame"**, you would need to set the following header field: 
 
-`Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==`, which contains the string `Aladin:open sesame` in Base64 format. Luckily `Networking` provides a simpler way to do this.
+`Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==`, which contains the string `Aladin:open sesame` in Base64 format. Luckily, `Networking` provides a simpler way to do this.
 
 This is how you use basic authentication on Networking, the following example features a username: `user` and a password: `pswd`.
 
@@ -33,7 +33,7 @@ networking.GET("/basic-auth/user/pswd", completion: { JSON, error in
 
 To authenticate using a bearer token **"AAAFFAAAA3DAAAAAA"**, you would need to set the following header field: 
 
-`Authorization: Bearer AAAFFAAAA3DAAAAAA`. Luckily `Networking` provides a simpler way to do this.
+`Authorization: Bearer AAAFFAAAA3DAAAAAA`. Luckily, `Networking` provides a simpler way to do this.
 
 This is how you use bearer token authentication on Networking, the following example features a token: `AAAFFAAAA3DAAAAAA`.
 
