@@ -145,7 +145,7 @@ public class Networking {
             var returnedResponse: NSURLResponse?
 
             #if os(iOS)
-                if Test.isRunning() == false {
+                if TestCheck.isTesting == false {
                     dispatch_async(dispatch_get_main_queue(), {
                         UIApplication.sharedApplication().networkActivityIndicatorVisible = true
                     })
@@ -161,7 +161,7 @@ public class Networking {
                     returnedImage = image
                 }
 
-                if Test.isRunning() {
+                if TestCheck.isTesting {
                     dispatch_semaphore_signal(semaphore)
                 } else {
                     dispatch_async(dispatch_get_main_queue(), {
@@ -175,7 +175,7 @@ public class Networking {
                 }
             }).resume()
 
-            if Test.isRunning() {
+            if TestCheck.isTesting {
                 dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
 
                 self.logError(nil, data: returnedData, request: request, response: returnedResponse, error: returnedError)
@@ -242,7 +242,7 @@ extension Networking {
             }
 
             #if os(iOS)
-                if Test.isRunning() == false {
+                if TestCheck.isTesting == false {
                     dispatch_async(dispatch_get_main_queue(), {
                         UIApplication.sharedApplication().networkActivityIndicatorVisible = true
                     })
@@ -284,7 +284,7 @@ extension Networking {
                         }
                     }
 
-                    if Test.isRunning() {
+                    if TestCheck.isTesting {
                         dispatch_semaphore_signal(semaphore)
                     } else {
                         dispatch_async(dispatch_get_main_queue(), {
@@ -298,7 +298,7 @@ extension Networking {
                     }
                 }).resume()
 
-                if Test.isRunning() {
+                if TestCheck.isTesting {
                     dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
                     self.logError(parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError)
                     completion(JSON: result, error: connectionError)
