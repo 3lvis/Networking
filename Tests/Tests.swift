@@ -102,6 +102,23 @@ extension Tests {
         }
     }
 
+    func testCancelPOST() {
+        let expectation = expectationWithDescription("testCancelPOST")
+
+        let networking = Networking(baseURL: baseURL)
+        networking.disableTestingMode = true
+        networking.POST("/post", parameters: ["username":"jameson", "password":"password"]) { JSON, error in
+            let canceledCode = error?.code == -999
+            XCTAssertTrue(canceledCode)
+
+            expectation.fulfill()
+        }
+
+        networking.cancelPOST("/post")
+
+        waitForExpectationsWithTimeout(3.0, handler: nil)
+    }
+
     func testPOSTWithIvalidPath() {
         let networking = Networking(baseURL: baseURL)
         networking.POST("/posdddddt", parameters: ["username":"jameson", "password":"password"]) { JSON, error in

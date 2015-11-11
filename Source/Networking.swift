@@ -75,7 +75,7 @@ public class Networking {
 
         self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
             for dataTask in dataTasks {
-                if dataTask.originalRequest?.URL?.absoluteString == fullPath.absoluteString {
+                if dataTask.originalRequest?.HTTPMethod == RequestType.GET.rawValue && dataTask.originalRequest?.URL?.absoluteString == fullPath.absoluteString {
                     dataTask.cancel()
                 }
             }
@@ -113,6 +113,18 @@ public class Networking {
     */
     public func POST(path: String, parameters: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
         self.request(.POST, path: path, parameters: parameters, completion: completion)
+    }
+
+    public func cancelPOST(path: String) {
+        let fullPath = self.urlForPath(path)
+
+        self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
+            for dataTask in dataTasks {
+                if dataTask.originalRequest?.HTTPMethod == RequestType.POST.rawValue && dataTask.originalRequest?.URL?.absoluteString == fullPath.absoluteString {
+                    dataTask.cancel()
+                }
+            }
+        }
     }
 
     /**
