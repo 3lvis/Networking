@@ -10,6 +10,7 @@
 		1443C8E41BD7A30A00AE5BD4 /* entries.json in Resources */ = {isa = PBXBuildFile; fileRef = 1443C8E31BD7A30A00AE5BD4 /* entries.json */; };
 		146A0A9C1BE245B600D0CD35 /* pig.png in Resources */ = {isa = PBXBuildFile; fileRef = 146A0A9B1BE245B600D0CD35 /* pig.png */; };
 		14A139B41AEFC72B00AD732F /* Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14A139B31AEFC72B00AD732F /* Tests.swift */; };
+		14BDB1C81BF34E3400C873A4 /* Networking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14BDB1C71BF34E3400C873A4 /* Networking.swift */; };
 		BAF1E3DD92A9CD1E3D38F2E1 /* Pods.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3E46227AAAC2B1D3B0DAF2B0 /* Pods.framework */; };
 /* End PBXBuildFile section */
 
@@ -19,6 +20,7 @@
 		146D72AC1AB782920058798C /* Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		146D72B11AB782920058798C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		14A139B31AEFC72B00AD732F /* Tests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Tests.swift; sourceTree = "<group>"; };
+		14BDB1C71BF34E3400C873A4 /* Networking.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Networking.swift; sourceTree = "<group>"; };
 		14C0AF7F1BD6D4230009ECBE /* .slather.yml */ = {isa = PBXFileReference; lastKnownFileType = text; path = .slather.yml; sourceTree = "<group>"; };
 		14C0AF801BD6D4230009ECBE /* .travis.yml */ = {isa = PBXFileReference; lastKnownFileType = text; path = .travis.yml; sourceTree = "<group>"; };
 		14C0AF811BD6D4230009ECBE /* CHANGELOG.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CHANGELOG.md; sourceTree = "<group>"; };
@@ -45,6 +47,7 @@
 			isa = PBXGroup;
 			children = (
 				14C136501AB7849300B7B07A /* Metadata */,
+				14BDB1C61BF34E3400C873A4 /* Source */,
 				146D72AF1AB782920058798C /* Tests */,
 				146D72941AB782920058798C /* Products */,
 				A6ECFB9372A5F73BAFE9A84B /* Pods */,
@@ -79,6 +82,14 @@
 				146D72B11AB782920058798C /* Info.plist */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		14BDB1C61BF34E3400C873A4 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				14BDB1C71BF34E3400C873A4 /* Networking.swift */,
+			);
+			path = Source;
 			sourceTree = "<group>";
 		};
 		14C136501AB7849300B7B07A /* Metadata */ = {
@@ -233,6 +244,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				14A139B41AEFC72B00AD732F /* Tests.swift in Sources */,
+				14BDB1C81BF34E3400C873A4 /* Networking.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

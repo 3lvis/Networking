@@ -13,6 +13,8 @@ public class Networking {
 
     private let baseURL: String
     private var stubs: [RequestType : [String : AnyObject]]
+    private var token: String?
+    internal var disableTestingMode = false
 
     private lazy var session: NSURLSession = {
         let config = NSURLSessionConfiguration.defaultSessionConfiguration()
@@ -48,8 +50,6 @@ public class Networking {
         }
     }
 
-    private var token: String?
-
     /**
      Authenticates using a token, sets the Authorization header to "Bearer \(token)"
      - parameter token: The token to be used
@@ -58,6 +58,17 @@ public class Networking {
         self.token = token
     }
 
+    /**
+    Generates a NSURL by appending the provided path to the Networking's base URL.
+    - parameter path: The path to be appended to the base URL.
+    - returns: A NSURL generated after appending the path to the base URL.
+    */
+    public func urlForPath(path: String) -> NSURL {
+        return NSURL(string: self.baseURL + path)!
+    }
+}
+
+extension Networking {
     // MARK: GET
 
     /**
@@ -67,6 +78,22 @@ public class Networking {
     */
     public func GET(path: String, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
         self.request(.GET, path: path, parameters: nil, completion: completion)
+    }
+
+    /**
+     Cancels the GET request for the specified path. This causes the request to complete with error code -999
+     - parameter path: The path for the cancelled GET request
+     */
+    public func cancelGET(path: String) {
+        let fullPath = self.urlForPath(path)
+
+        self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
+            for dataTask in dataTasks {
+                if dataTask.originalRequest?.HTTPMethod == RequestType.GET.rawValue && dataTask.originalRequest?.URL?.absoluteString == fullPath.absoluteString {
+                    dataTask.cancel()
+                }
+            }
+        }
     }
 
     /**
@@ -103,7 +130,23 @@ public class Networking {
     }
 
     /**
-    Stubs POST request for the specified path. After registering this, every POST request to the path, will return
+     Cancels the POST request for the specified path. This causes the request to complete with error code -999
+     - parameter path: The path for the cancelled POST request
+     */
+    public func cancelPOST(path: String) {
+        let fullPath = self.urlForPath(path)
+
+        self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
+            for dataTask in dataTasks {
+                if dataTask.originalRequest?.HTTPMethod == RequestType.POST.rawValue && dataTask.originalRequest?.URL?.absoluteString == fullPath.absoluteString {
+                    dataTask.cancel()
+                }
+            }
+        }
+    }
+
+    /**
+     Stubs POST request for the specified path. After registering this, every POST request to the path, will return
      the registered response.
      - parameter path: The path for the stubbed POST request.
      - parameter response: An `AnyObject` that will be returned when a POST request is made to the specified path.
@@ -113,7 +156,7 @@ public class Networking {
     }
 
     /**
-    Stubs POST request to the specified path using the contents of a file. After registering this, every POST request to the path, will return
+     Stubs POST request to the specified path using the contents of a file. After registering this, every POST request to the path, will return
      the contents of the registered file.
      - parameter path: The path for the stubbed POST request.
      - parameter fileName: The name of the file, whose contents will be registered as a reponse.
@@ -122,8 +165,10 @@ public class Networking {
     public func stubPOST(path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
         self.stub(.POST, path: path, fileName: fileName, bundle: bundle)
     }
+}
 
-#if os(iOS) || os(tvOS) || os(watchOS)
+extension Networking {
+    #if os(iOS) || os(tvOS) || os(watchOS)
     // MARK: Image
 
     /**
@@ -136,7 +181,7 @@ public class Networking {
             completion(image: image, error: nil)
         } else {
             let request = NSMutableURLRequest(URL: self.urlForPath(path))
-            request.HTTPMethod = "GET"
+            request.HTTPMethod = RequestType.GET.rawValue
             request.addValue("application/json", forHTTPHeaderField: "Accept")
 
             if let token = token {
@@ -166,7 +211,7 @@ public class Networking {
                     returnedImage = image
                 }
 
-                if TestCheck.isTesting {
+                if TestCheck.isTesting && self.disableTestingMode == false {
                     dispatch_semaphore_signal(semaphore)
                 } else {
                     dispatch_async(dispatch_get_main_queue(), {
@@ -180,11 +225,27 @@ public class Networking {
                 }
             }).resume()
 
-            if TestCheck.isTesting {
+            if TestCheck.isTesting && self.disableTestingMode == false {
                 dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
 
                 self.logError(nil, data: returnedData, request: request, response: returnedResponse, error: returnedError)
                 completion(image: returnedImage, error: returnedError)
+            }
+        }
+    }
+
+    /**
+     Cancels the image download request for the specified path. This causes the request to complete with error code -999
+     - parameter path: The path for the cancelled image download request
+     */
+    func cancelImageDownload(path: String) {
+        let fullPath = self.urlForPath(path)
+
+        self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
+            for downloadTask in downloadTasks {
+                if downloadTask.originalRequest?.HTTPMethod == RequestType.GET.rawValue && downloadTask.originalRequest?.URL?.absoluteString == fullPath.absoluteString {
+                    downloadTask.cancel()
+                }
             }
         }
     }
@@ -198,18 +259,7 @@ public class Networking {
     public func stubImageDownload(path: String, image: UIImage) {
         self.stub(.GET, path: path, response: image)
     }
-#endif
-
-    // MARK: - Utilities
-
-    /**
-    Generates a NSURL by appending the provided path to the Networking's base URL.
-    - parameter path: The path to be appended to the base URL.
-    - returns: A NSURL generated after appending the path to the base URL.
-    */
-    public func urlForPath(path: String) -> NSURL {
-        return NSURL(string: self.baseURL + path)!
-    }
+    #endif
 }
 
 // MARK: - Private
@@ -289,7 +339,7 @@ extension Networking {
                         }
                     }
 
-                    if TestCheck.isTesting {
+                    if TestCheck.isTesting && self.disableTestingMode == false {
                         dispatch_semaphore_signal(semaphore)
                     } else {
                         dispatch_async(dispatch_get_main_queue(), {
@@ -303,7 +353,7 @@ extension Networking {
                     }
                 }).resume()
 
-                if TestCheck.isTesting {
+                if TestCheck.isTesting && self.disableTestingMode == false {
                     dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
                     self.logError(parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError)
                     completion(JSON: result, error: connectionError)

@@ -1,6 +1,5 @@
 import Foundation
 import XCTest
-import Networking
 
 class Tests: XCTestCase {
     let baseURL = "http://httpbin.org"
@@ -26,6 +25,23 @@ extension Tests {
             let url = JSON["url"] as! String
             XCTAssertEqual(url, "http://httpbin.org/get")
         })
+    }
+
+    func testCancelGET() {
+        let expectation = expectationWithDescription("testCancelGET")
+
+        let networking = Networking(baseURL: baseURL)
+        networking.disableTestingMode = true
+        networking.GET("/get", completion: { JSON, error in
+            let canceledCode = error?.code == -999
+            XCTAssertTrue(canceledCode)
+
+            expectation.fulfill()
+        })
+
+        networking.cancelGET("/get")
+
+        waitForExpectationsWithTimeout(3.0, handler: nil)
     }
 
     func testGETWithInvalidPath() {
@@ -86,6 +102,23 @@ extension Tests {
         }
     }
 
+    func testCancelPOST() {
+        let expectation = expectationWithDescription("testCancelPOST")
+
+        let networking = Networking(baseURL: baseURL)
+        networking.disableTestingMode = true
+        networking.POST("/post", parameters: ["username":"jameson", "password":"password"]) { JSON, error in
+            let canceledCode = error?.code == -999
+            XCTAssertTrue(canceledCode)
+
+            expectation.fulfill()
+        }
+
+        networking.cancelPOST("/post")
+
+        waitForExpectationsWithTimeout(3.0, handler: nil)
+    }
+
     func testPOSTWithIvalidPath() {
         let networking = Networking(baseURL: baseURL)
         networking.POST("/posdddddt", parameters: ["username":"jameson", "password":"password"]) { JSON, error in
@@ -107,27 +140,10 @@ extension Tests {
     }
 }
 
-// MARK: Other
+// MARK: Image
 
 extension Tests {
-    func testBasicAuth() {
-        let networking = Networking(baseURL: baseURL)
-        networking.autenticate("user", password: "passwd")
-        networking.GET("/basic-auth/user/passwd", completion: { JSON, error in
-            let JSON = JSON as! [String : AnyObject]
-            let user = JSON["user"] as! String
-            let authenticated = JSON["authenticated"] as! Bool
-            XCTAssertEqual(user, "user")
-            XCTAssertEqual(authenticated, true)
-        })
-   }
-
-    func testURLForPath() {
-        let networking = Networking(baseURL: baseURL)
-        let url = networking.urlForPath("/hello")
-        XCTAssertEqual(url.absoluteString, "http://httpbin.org/hello")
-    }
-
+    #if os(iOS) || os(tvOS) || os(watchOS)
     func testImageDownloadSynchronous() {
         var synchronous = false
 
@@ -139,7 +155,6 @@ extension Tests {
         XCTAssertTrue(synchronous)
     }
 
-#if os(iOS) || os(tvOS) || os(watchOS)
     func testImageDownload() {
         let networking = Networking(baseURL: baseURL)
         networking.downloadImage("/image/png") { image, error in
@@ -149,6 +164,25 @@ extension Tests {
             let imageData = UIImagePNGRepresentation(image!)
             XCTAssertEqual(pigImageData, imageData)
         }
+    }
+
+    func testCancelImageDownload() {
+        let expectation = expectationWithDescription("testCancelImageDownload")
+
+        let networking = Networking(baseURL: baseURL)
+        networking.disableTestingMode = true
+        networking.downloadImage("/image/png") { image, error in
+            print("image: \(image)")
+            print("error: \(error)")
+            let canceledCode = error?.code == -999
+            XCTAssertTrue(canceledCode)
+
+            expectation.fulfill()
+        }
+
+        networking.cancelImageDownload("/image/png")
+
+        waitForExpectationsWithTimeout(3.0, handler: nil)
     }
 
     func testStubImageDownload() {
@@ -162,5 +196,47 @@ extension Tests {
             XCTAssertEqual(pigImageData, imageData)
         }
     }
-#endif
+    #endif
+}
+
+// MARK: Other
+
+extension Tests {
+    func testBasicAuth() {
+        let networking = Networking(baseURL: baseURL)
+        networking.autenticate("user", password: "passwd")
+        networking.GET("/basic-auth/user/passwd", completion: { JSON, error in
+            let JSON = JSON as! [String : AnyObject]
+            let user = JSON["user"] as! String
+            let authenticated = JSON["authenticated"] as! Bool
+            XCTAssertEqual(user, "user")
+            XCTAssertEqual(authenticated, true)
+        })
+    }
+
+    func testURLForPath() {
+        let networking = Networking(baseURL: baseURL)
+        let url = networking.urlForPath("/hello")
+        XCTAssertEqual(url.absoluteString, "http://httpbin.org/hello")
+    }
+
+    func testSkipTestMode() {
+        let expectation = expectationWithDescription("testSkipTestMode")
+
+        let networking = Networking(baseURL: baseURL)
+        networking.disableTestingMode = true
+
+        var synchronous = false
+        networking.GET("/get", completion: { JSON, error in
+            synchronous = true
+
+            XCTAssertTrue(synchronous)
+
+            expectation.fulfill()
+        })
+
+        XCTAssertFalse(synchronous)
+
+        waitForExpectationsWithTimeout(3.0, handler: nil)
+    }
 }
