@@ -166,6 +166,23 @@ extension Tests {
         }
     }
 
+    func testDestinationURL() {
+        let networking = Networking(baseURL: baseURL)
+        let path = "/image/png"
+        let destinationURL = networking.destinationURL(path)
+        XCTAssertEqual(destinationURL.lastPathComponent!, "http:--httpbin.org-image-png")
+    }
+
+    func testImageDownloadCache() {
+        let networking = Networking(baseURL: baseURL)
+        let path = "/image/png"
+        networking.downloadImage(path) { image, error in
+        }
+
+        let destinationURL = networking.destinationURL(path)
+        XCTAssertTrue(NSFileManager().fileExistsAtPath(destinationURL.path!))
+    }
+
     func testCancelImageDownload() {
         let expectation = expectationWithDescription("testCancelImageDownload")
 
