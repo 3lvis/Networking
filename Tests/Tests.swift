@@ -148,7 +148,11 @@ extension Tests {
         var synchronous = false
 
         let networking = Networking(baseURL: baseURL)
-        networking.downloadImage("/image/png") { image, error in
+        let path = "/image/png"
+
+        self.removeFileIfNeeded(networking, path: path)
+
+        networking.downloadImage(path) { image, error in
             synchronous = true
         }
 
@@ -157,7 +161,11 @@ extension Tests {
 
     func testImageDownload() {
         let networking = Networking(baseURL: baseURL)
-        networking.downloadImage("/image/png") { image, error in
+        let path = "/image/png"
+
+        self.removeFileIfNeeded(networking, path: path)
+
+        networking.downloadImage(path) { image, error in
             XCTAssertNotNil(image)
             let pigImage = UIImage(named: "pig.png", inBundle: NSBundle(forClass: Tests.self), compatibleWithTraitCollection: nil)!
             let pigImageData = UIImagePNGRepresentation(pigImage)
@@ -176,11 +184,13 @@ extension Tests {
     func testImageDownloadCache() {
         let networking = Networking(baseURL: baseURL)
         let path = "/image/png"
-        networking.downloadImage(path) { image, error in
-        }
 
-        let destinationURL = networking.destinationURL(path)
-        XCTAssertTrue(NSFileManager().fileExistsAtPath(destinationURL.path!))
+        self.removeFileIfNeeded(networking, path: path)
+
+        networking.downloadImage(path) { image, error in
+            let destinationURL = networking.destinationURL(path)
+            XCTAssertTrue(NSFileManager().fileExistsAtPath(destinationURL.path!))
+        }
     }
 
     func testCancelImageDownload() {
@@ -188,7 +198,11 @@ extension Tests {
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
-        networking.downloadImage("/image/png") { image, error in
+        let path = "/image/png"
+
+        self.removeFileIfNeeded(networking, path: path)
+
+        networking.downloadImage(path) { image, error in
             print("image: \(image)")
             print("error: \(error)")
             let canceledCode = error?.code == -999
@@ -211,6 +225,13 @@ extension Tests {
             let pigImageData = UIImagePNGRepresentation(pigImage)
             let imageData = UIImagePNGRepresentation(image!)
             XCTAssertEqual(pigImageData, imageData)
+        }
+    }
+
+    func removeFileIfNeeded(networking: Networking, path: String) {
+        let destinationURL = networking.destinationURL(path)
+        if NSFileManager().fileExistsAtPath(destinationURL.path!) {
+            try! NSFileManager().removeItemAtPath(destinationURL.path!)
         }
     }
     #endif
