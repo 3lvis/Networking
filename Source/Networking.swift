@@ -2,10 +2,6 @@ import Foundation
 import TestCheck
 import JSON
 
-#if os(iOS) || os(tvOS) || os(watchOS)
-    import UIKit
-#endif
-
 public class Networking {
     internal enum RequestType: String {
         case GET, POST

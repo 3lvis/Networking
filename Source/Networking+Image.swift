@@ -1,9 +1,10 @@
+#if os(iOS) || os(tvOS) || os(watchOS)
+
 import Foundation
-import UIKit
 import TestCheck
+import UIKit
 
 public extension Networking {
-    #if os(iOS) || os(tvOS) || os(watchOS)
     /**
      Downloads an image using the specified path.
      - parameter path: The path where the image is located
@@ -101,5 +102,6 @@ public extension Networking {
     public func stubImageDownload(path: String, image: UIImage) {
         self.stub(.GET, path: path, response: image)
     }
-    #endif
 }
+
+#endif
