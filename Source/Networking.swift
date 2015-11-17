@@ -19,6 +19,10 @@ public class Networking {
     private var stubs: [RequestType : [String : AnyObject]]
     private var token: String?
     private var imageCache = NSCache()
+
+    /**
+     Internal flag used to disable synchronous request when running automatic tests
+     */
     internal var disableTestingMode = false
 
     private lazy var session: NSURLSession = {
@@ -64,12 +68,25 @@ public class Networking {
     }
 
     /**
-    Generates a NSURL by appending the provided path to the Networking's base URL.
+    Returns a NSURL by appending the provided path to the Networking's base URL.
     - parameter path: The path to be appended to the base URL.
     - returns: A NSURL generated after appending the path to the base URL.
     */
     public func urlForPath(path: String) -> NSURL {
         return NSURL(string: self.baseURL + path)!
+    }
+
+    /**
+     Returns the NSURL used to store a resource for a certain path. Useful to find where a download image is located.
+     - parameter path: The path used to download the resource.
+     - returns: A NSURL where a resource has been stored.
+     */
+    public func destinationURL(path: String) -> NSURL {
+        guard let url = NSURL(string: (self.urlForPath(path).absoluteString as NSString).stringByReplacingOccurrencesOfString("/", withString: "-")),
+            cachesURL = NSFileManager.defaultManager().URLsForDirectory(.CachesDirectory, inDomains: .UserDomainMask).first else { fatalError("Couldn't normalize url") }
+        let destinationURL = cachesURL.URLByAppendingPathComponent(url.absoluteString)
+
+        return destinationURL
     }
 }
 
@@ -258,14 +275,6 @@ extension Networking {
      */
     public func stubImageDownload(path: String, image: UIImage) {
         self.stub(.GET, path: path, response: image)
-    }
-
-    public func destinationURL(path: String) -> NSURL {
-        guard let url = NSURL(string: (self.urlForPath(path).absoluteString as NSString).stringByReplacingOccurrencesOfString("/", withString: "-")),
-        cachesURL = NSFileManager.defaultManager().URLsForDirectory(.CachesDirectory, inDomains: .UserDomainMask).first else { fatalError("Couldn't normalize url") }
-        let destinationURL = cachesURL.URLByAppendingPathComponent(url.absoluteString)
-
-        return destinationURL
     }
     #endif
 }
