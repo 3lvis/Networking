@@ -42,7 +42,7 @@ public class Networking {
      - parameter username: The username to be used
      - parameter password: The password to be used
      */
-    public func autenticate(username: String, password: String) {
+    public func authenticate(username: String, password: String) {
         let credentialsString = "\(username):\(password)"
         if let credentialsData = credentialsString.dataUsingEncoding(NSUTF8StringEncoding) {
             let base64Credentials = credentialsData.base64EncodedStringWithOptions([])
@@ -59,7 +59,7 @@ public class Networking {
      Authenticates using a token, sets the Authorization header to "Bearer \(token)"
      - parameter token: The token to be used
      */
-    public func autenticate(token: String) {
+    public func authenticate(token: String) {
         self.token = token
     }
 

@@ -46,7 +46,7 @@ This is how you use basic authentication on Networking, the following example fe
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-networking.autenticate("user", password: "pswd")
+networking.authenticate("user", password: "pswd")
 networking.GET("/basic-auth/user/pswd", completion: { JSON, error in
     // Do something...
 })
@@ -64,7 +64,7 @@ This is how you use bearer token authentication on Networking, the following exa
 
 ```swift
 let networking = Networking(baseURL: "http://sample.org")
-networking.autenticate("AAAFFAAAA3DAAAAAA")
+networking.authenticate("AAAFFAAAA3DAAAAAA")
 networking.GET("/users", completion: { JSON, error in
     // Do something...
 })
