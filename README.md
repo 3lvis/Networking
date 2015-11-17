@@ -1,5 +1,9 @@
 ![Networking](https://raw.githubusercontent.com/3lvis/Networking/master/Images/cover-v3.png)
 
+[![Version](https://img.shields.io/cocoapods/v/Networking.svg?style=flat)](http://cocoadocs.org/docsets/Networking)
+[![License](https://img.shields.io/cocoapods/l/Networking.svg?style=flat)](http://cocoadocs.org/docsets/Networking)
+[![Platform](https://img.shields.io/cocoapods/p/Networking.svg?style=flat)](http://cocoadocs.org/docsets/Networking)
+
 - Super friendly API
 - Optimized for unit testing
 - Minimal implementation
