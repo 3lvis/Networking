@@ -103,10 +103,10 @@ public extension Networking {
     }
 
     /**
-     Stubs PUT request for the specified path. After registering this, every POST request to the path, will return
+     Stubs PUT request for the specified path. After registering this, every PUT request to the path, will return
      the registered response.
      - parameter path: The path for the stubbed PUT request.
-     - parameter response: An `AnyObject` that will be returned when a POST request is made to the specified path.
+     - parameter response: An `AnyObject` that will be returned when a PUT request is made to the specified path.
      */
     public func stubPUT(path: String, response: AnyObject) {
         self.stub(.PUT, path: path, response: response)
@@ -128,34 +128,34 @@ public extension Networking {
     /**
     DELETE request to the specified path, using the provided parameters.
     - parameter path: The path for the DELETE request.
-    - parameter completion: A closure that gets called when the PUT request is completed, it contains a `JSON` object and a `NSError`.
+    - parameter completion: A closure that gets called when the DELETE request is completed, it contains a `JSON` object and a `NSError`.
     */
     public func DELETE(path: String, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
         self.request(.DELETE, path: path, parameters: nil, completion: completion)
     }
 
     /**
-     Cancels the PUT request for the specified path. This causes the request to complete with error code -999
-     - parameter path: The path for the cancelled PUT request
+     Cancels the DELETE request for the specified path. This causes the request to complete with error code -999
+     - parameter path: The path for the cancelled DELETE request
      */
     public func cancelDELETE(path: String) {
         self.cancelRequest(.Data, requestType: .DELETE, path: path)
     }
 
     /**
-     Stubs PUT request for the specified path. After registering this, every POST request to the path, will return
+     Stubs DELETE request for the specified path. After registering this, every DELETE request to the path, will return
      the registered response.
-     - parameter path: The path for the stubbed PUT request.
-     - parameter response: An `AnyObject` that will be returned when a POST request is made to the specified path.
+     - parameter path: The path for the stubbed DELETE request.
+     - parameter response: An `AnyObject` that will be returned when a DELETE request is made to the specified path.
      */
     public func stubDELETE(path: String, response: AnyObject) {
         self.stub(.DELETE, path: path, response: response)
     }
 
     /**
-     Stubs PUT request to the specified path using the contents of a file. After registering this, every PUT request to the path, will return
+     Stubs PUT request to the specified path using the contents of a file. After registering this, every DELETE request to the path, will return
      the contents of the registered file.
-     - parameter path: The path for the stubbed PUT request.
+     - parameter path: The path for the stubbed DELETE request.
      - parameter fileName: The name of the file, whose contents will be registered as a reponse.
      - parameter bundle: The NSBundle where the file is located.
      */
