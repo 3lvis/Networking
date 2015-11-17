@@ -14,8 +14,15 @@
     * [Bearer token authentication](#bearer-token-authentication)
 * [GET](#get)
     * [Stubbing GET](#stubbing-get)
+    * [Cancelling GET](#cancelling-get)
 * [POST](#post)
     * [Stubbing POST](#stubbing-post)
+    * [Cancelling POST](#cancelling-post)
+* [Image download](#image-download)
+    * [Stubbing image download](#stubbing-image-download)
+    * [Cancelling image download](#cancelling-image-download)
+    * [Image download caching](#image-download-caching)
+* [Error logging](#error-logging)
 * [Installation](#installation)
 * [Author](#author)
 * [License](#license)
@@ -85,6 +92,17 @@ networking.GET("/stories", completion: { JSON, error in
 })
 ```
 
+### Cancelling GET
+
+```swift
+let networking = Networking(baseURL: "http://httpbin.org")
+networking.GET("/get", completion: { JSON, error in
+    // Cancelling a GET request returns an error with code -999 which means cancelled request
+})
+
+networking.cancelGET("/get")
+```
+
 ## POST
 
 ```swift
@@ -123,6 +141,110 @@ networking.POST("/story", params: ["username":"jameson", "password":"password"])
       // Story with id: 47333
     }
 }
+```
+
+### Cancelling POST
+
+```swift
+let networking = Networking(baseURL: "http://httpbin.org")
+networking.POST("/post", parameters: ["username":"jameson", "password":"password"]) { JSON, error in
+    // Cancelling a POST request returns an error with code -999 which means cancelled request
+})
+
+networking.cancelPOST("/post")
+```
+
+## Image download
+
+```swift
+let networking = Networking(baseURL: "http://httpbin.org")
+networking.downloadImage("/image/png") { image, error in
+   // Do something with the downloaded image
+}
+```
+
+### Stubbing image download
+
+```swift
+let networking = Networking(baseURL: baseURL)
+let pigImage = UIImage(named: "pig.png", inBundle: NSBundle(forClass: Tests.self), compatibleWithTraitCollection: nil)!
+networking.stubImageDownload("/image/png", image: pigImage)
+networking.downloadImage("/image/png") { image, error in
+   // Here you'll get the stubbed pig.png image
+}
+```
+
+### Cancelling image download
+
+```swift
+let networking = Networking(baseURL: baseURL)
+networking.downloadImage("/image/png") { image, error in
+    // Cancelling a image download returns an error with code -999 which means cancelled request
+}
+
+networking.cancelImageDownload("/image/png")
+```
+
+### Image download caching
+
+`Networking` stores the download image in the Caches folder. It also uses NSCache internally so it doesn't have to download the same image again and again.
+
+If you want to remove the downloaded image so it downloads again. You can do it like this:
+
+```swift
+let networking = Networking(baseURL: "http://httpbin.org")
+let destinationURL = networking.destinationURL("/image/png")
+if let path = destinationURL.path where NSFileManager().fileExistsAtPath(path) {
+   try! NSFileManager().removeItemAtPath(path)
+}
+```
+
+## Error logging
+
+Any error catched by `Networking` will be printed in your console. This is really convenient since you want to know why your networking call failed anyway.
+
+For example a cancelled request will print this:
+
+```
+========== Networking Error ==========
+ 
+Error -999: Error Domain=NSURLErrorDomain Code=-999 "cancelled" UserInfo={NSErrorFailingURLKey=http://httpbin.org/image/png, NSLocalizedDescription=cancelled, NSErrorFailingURLStringKey=http://httpbin.org/image/png}
+ 
+Request: <NSMutableURLRequest: 0x7fede8c3daf0> { URL: http://httpbin.org/image/png }
+ 
+================= ~ ==================
+```
+
+A 404 request will print something like this:
+
+```
+========== Networking Error ==========
+ 
+Error 3840: Error Domain=NSCocoaErrorDomain Code=3840 "JSON text did not start with array or object and option to allow fragments not set." UserInfo={NSDebugDescription=JSON text did not start with array or object and option to allow fragments not set.}
+ 
+Request: <NSMutableURLRequest: 0x7fede8d17220> { URL: http://httpbin.org/invalidpath }
+ 
+Data: <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<title>404 Not Found</title>
+<h1>Not Found</h1>
+<p>The requested URL was not found on the server.  If you entered the URL manually please check your spelling and try again.</p>
+
+ 
+Response status code: 404
+ 
+Path: http://httpbin.org/invalidpath
+ 
+Response: <NSHTTPURLResponse: 0x7fede8d0c4e0> { URL: http://httpbin.org/invalidpath } { status code: 404, headers {
+    "Access-Control-Allow-Credentials" = true;
+    "Access-Control-Allow-Origin" = "*";
+    Connection = "keep-alive";
+    "Content-Length" = 233;
+    "Content-Type" = "text/html";
+    Date = "Tue, 17 Nov 2015 09:59:42 GMT";
+    Server = nginx;
+} }
+ 
+================= ~ ==================
 ```
 
 ## Installation
