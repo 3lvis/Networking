@@ -139,3 +139,62 @@ extension HTTPRequestTests {
         }
     }
 }
+
+// MARK: PUT
+
+extension HTTPRequestTests {
+    func testSynchronousPUT() {
+        var synchronous = false
+        let networking = Networking(baseURL: baseURL)
+        networking.PUT("/put", parameters: nil) { JSON, error in
+            synchronous = true
+        }
+
+        XCTAssertTrue(synchronous)
+    }
+
+    func testPUT() {
+        let networking = Networking(baseURL: baseURL)
+        networking.PUT("/put", parameters: ["username":"jameson", "password":"password"]) { JSON, error in
+            XCTAssertNotNil(JSON!, "JSON not nil")
+            XCTAssertNil(error, "Error")
+        }
+    }
+
+    func testCancelPUT() {
+        let expectation = expectationWithDescription("testCancelPUT")
+
+        let networking = Networking(baseURL: baseURL)
+        networking.disableTestingMode = true
+        networking.PUT("/put", parameters: ["username":"jameson", "password":"password"]) { JSON, error in
+            let canceledCode = error?.code == -999
+            XCTAssertTrue(canceledCode)
+
+            expectation.fulfill()
+        }
+
+        networking.cancelPUT("/put")
+
+        waitForExpectationsWithTimeout(3.0, handler: nil)
+    }
+
+    func testPUTWithIvalidPath() {
+        let networking = Networking(baseURL: baseURL)
+        networking.PUT("/posdddddt", parameters: ["username":"jameson", "password":"password"]) { JSON, error in
+            XCTAssertNotNil(error)
+            XCTAssertNil(JSON)
+        }
+    }
+
+    func testPUTStubs() {
+        let networking = Networking(baseURL: baseURL)
+
+        networking.stubPUT("/story", response: [["name" : "Elvis"]])
+
+        networking.PUT("/story", parameters: ["username":"jameson", "password":"password"]) { JSON, error in
+            let JSON = JSON as! [[String : String]]
+            let value = JSON[0]["name"]
+            XCTAssertEqual(value!, "Elvis")
+        }
+    }
+}
