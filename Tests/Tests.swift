@@ -6,7 +6,7 @@ class Tests: XCTestCase {
 
     func testBasicAuth() {
         let networking = Networking(baseURL: baseURL)
-        networking.autenticate("user", password: "passwd")
+        networking.authenticate("user", password: "passwd")
         networking.GET("/basic-auth/user/passwd", completion: { JSON, error in
             let JSON = JSON as! [String : AnyObject]
             let user = JSON["user"] as! String
