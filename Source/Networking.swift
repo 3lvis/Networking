@@ -4,7 +4,7 @@ import JSON
 
 public class Networking {
     internal enum RequestType: String {
-        case GET, POST
+        case GET, POST, PUT, DELETE
     }
 
     internal enum SessionTaskType: String {
