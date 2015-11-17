@@ -18,6 +18,7 @@ public class Networking {
     private let baseURL: String
     private var stubs: [RequestType : [String : AnyObject]]
     private var token: String?
+    private var imageCache = NSCache()
     internal var disableTestingMode = false
 
     private lazy var session: NSURLSession = {
@@ -167,8 +168,22 @@ extension Networking {
     - parameter completion: A closure that gets called when the image download request is completed, it contains an `UIImage` object and a `NSError`.
     */
     public func downloadImage(path: String, completion: (image: UIImage?, error: NSError?) -> ()) {
+        let destinationURL = self.destinationURL(path)
+        guard let filePath = self.destinationURL(path).path else { fatalError("File path not valid") }
+
         if let getStubs = self.stubs[.GET], image = getStubs[path] as? UIImage {
             completion(image: image, error: nil)
+        } else if let image = self.imageCache.objectForKey(destinationURL.absoluteString) as? UIImage {
+            completion(image: image, error: nil)
+        } else if NSFileManager().fileExistsAtPath(filePath) {
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), {
+                if let data = NSData(contentsOfURL: destinationURL), image = UIImage(data: data) {
+                    dispatch_async(dispatch_get_main_queue(), {
+                        completion(image: image, error: nil)
+                    })
+                    self.imageCache.setObject(image, forKey: filePath)
+                }
+            })
         } else {
             let request = NSMutableURLRequest(URL: self.urlForPath(path))
             request.HTTPMethod = RequestType.GET.rawValue
@@ -199,6 +214,9 @@ extension Networking {
                 if let url = url, data = NSData(contentsOfURL: url), image = UIImage(data: data) {
                     returnedData = data
                     returnedImage = image
+
+                    data.writeToURL(destinationURL, atomically: true)
+                    self.imageCache.setObject(image, forKey: filePath)
                 }
 
                 if TestCheck.isTesting && self.disableTestingMode == false {
@@ -240,6 +258,14 @@ extension Networking {
      */
     public func stubImageDownload(path: String, image: UIImage) {
         self.stub(.GET, path: path, response: image)
+    }
+
+    func destinationURL(path: String) -> NSURL {
+        guard let url = NSURL(string: (self.urlForPath(path).absoluteString as NSString).stringByReplacingOccurrencesOfString("/", withString: "-")),
+        cachesURL = NSFileManager.defaultManager().URLsForDirectory(.CachesDirectory, inDomains: .UserDomainMask).first else { fatalError("Couldn't normalize url") }
+        let destinationURL = cachesURL.URLByAppendingPathComponent(url.absoluteString)
+
+        return destinationURL
     }
     #endif
 }
