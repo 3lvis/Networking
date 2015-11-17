@@ -260,7 +260,7 @@ extension Networking {
         self.stub(.GET, path: path, response: image)
     }
 
-    func destinationURL(path: String) -> NSURL {
+    public func destinationURL(path: String) -> NSURL {
         guard let url = NSURL(string: (self.urlForPath(path).absoluteString as NSString).stringByReplacingOccurrencesOfString("/", withString: "-")),
         cachesURL = NSFileManager.defaultManager().URLsForDirectory(.CachesDirectory, inDomains: .UserDomainMask).first else { fatalError("Couldn't normalize url") }
         let destinationURL = cachesURL.URLByAppendingPathComponent(url.absoluteString)
