@@ -5,6 +5,7 @@
 [![Platform](https://img.shields.io/cocoapods/p/Networking.svg?style=flat)](https://cocoapods.org/pods/Networking)
 
 - Super friendly API
+- Singleton free
 - Optimized for unit testing
 - Minimal implementation
 - Easy stubbing
