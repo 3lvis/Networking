@@ -86,10 +86,8 @@ networking.GET("/stories", completion: { JSON, error in
 ### Stubbing GET
 
 ```swift
-let stories = [["id" : 47333, "title" : "Site Design: Aquest"]]
-Networking.stubGET("/stories", response: ["stories" : stories])
-
 let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
+networking.stubGET("/stories", response: [["id" : 47333, "title" : "Site Design: Aquest"]])
 networking.GET("/stories", completion: { JSON, error in
   if let JSON = JSON {
     // Stories with id: 47333
@@ -137,10 +135,8 @@ networking.POST("/post", params: ["username":"jameson", "password":"password"]) 
 ### Stubbing POST
 
 ```swift
-let story = ["id" : 47333, "title" : "Site Design: Aquest"]
-Networking.stubPOST("/story", response: story)
-
 let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
+networking.stubPOST("/story", response: ["id" : 47333, "title" : "Site Design: Aquest"])
 networking.POST("/story", params: ["username":"jameson", "password":"password"]) { JSON, error in
     if let JSON = JSON {
       // Story with id: 47333
