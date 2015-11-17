@@ -23,6 +23,12 @@
 * [POST](#post)
     * [Stubbing POST](#stubbing-post)
     * [Cancelling POST](#cancelling-post)
+* [PUT](#put)
+    * [Stubbing PUT](#stubbing-put)
+    * [Cancelling PUT](#cancelling-put)
+* [DELETE](#delete)
+    * [Stubbing DELETE](#stubbing-delete)
+    * [Cancelling DELETE](#cancelling-delete)
 * [Image download](#image-download)
     * [Stubbing image download](#stubbing-image-download)
     * [Cancelling image download](#cancelling-image-download)
@@ -153,6 +159,90 @@ networking.POST("/post", parameters: ["username":"jameson", "password":"password
 })
 
 networking.cancelPOST("/post")
+```
+
+## PUT
+
+```swift
+let networking = Networking(baseURL: "http://httpbin.org")
+networking.PUT("/put", params: ["username":"jameson", "password":"password"]) { JSON, error in
+    /*
+    JSON Pretty Print:
+    {
+        "json" : {
+            "username" : "jameson",
+            "password" : "password"
+        },
+        "url" : "http://httpbin.org/put",
+        "data" : "{"password":"password","username":"jameson"}",
+        "headers" : {
+            "Accept" : "application/json",
+            "Content-Type" : "application/json",
+            "Host" : "httpbin.org",
+            "Content-Length" : "44",
+            "Accept-Language" : "en-us"
+        }
+    }
+    */
+}
+```
+
+### Stubbing PUT
+
+```swift
+let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
+networking.stubPUT("/story", response: ["id" : 47333, "title" : "Site Design: Aquest"])
+networking.PUT("/story", params: ["username":"jameson", "password":"password"]) { JSON, error in
+    if let JSON = JSON {
+      // Story with id: 47333
+    }
+}
+```
+
+### Cancelling PUT
+
+```swift
+let networking = Networking(baseURL: "http://httpbin.org")
+networking.PUT("/put", parameters: ["username":"jameson", "password":"password"]) { JSON, error in
+    // Cancelling a PUT request returns an error with code -999 which means cancelled request
+})
+
+networking.cancelPUT("/put")
+```
+
+## DELETE
+
+```swift
+let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
+networking.DELETE("/stories/2342", completion: { JSON, error in
+  if let JSON = JSON {
+    // { "success": true }
+  }
+})
+```
+
+
+### Stubbing DELETE
+
+```swift
+let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
+networking.stubDELETE("/stories/2342", response: ["success" : true])
+networking.DELETE("/stories/2342", completion: { JSON, error in
+  if let JSON = JSON {
+    // { "success": true }
+  }
+})
+```
+
+### Cancelling GET
+
+```swift
+let networking = Networking(baseURL: "http://httpbin.org")
+networking.DELETE("/delete", completion: { JSON, error in
+    // Cancelling a DELETE request returns an error with code -999 which means cancelled request
+})
+
+networking.cancelDELETE("/delete")
 ```
 
 ## Image download
