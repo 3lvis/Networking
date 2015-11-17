@@ -7,6 +7,20 @@
 - Runs synchronously in automatic testing enviroments
 - Free
 
+## Table of Contents
+
+* [Authentication](#authentication)
+    * [HTTP basic authentication](#http-basic-authentication)
+    * [Bearer token authentication](#bearer-token-authentication)
+* [GET](#get)
+    * [Stubbing GET](#stubbing-get)
+* [POST](#post)
+    * [Stubbing POST](#stubbing-post)
+* [Installation](#installation)
+* [Author](#author)
+* [License](#license)
+* [Attribution](#attribution)
+
 ## Authentication
 
 ### HTTP basic authentication
