@@ -7,25 +7,25 @@ import JSON
 #endif
 
 public class Networking {
-    private enum RequestType: String {
+    internal enum RequestType: String {
         case GET, POST
     }
 
-    private enum SessionTaskType: String {
+    internal enum SessionTaskType: String {
         case Data, Upload, Download
     }
 
     private let baseURL: String
-    private var stubs: [RequestType : [String : AnyObject]]
-    private var token: String?
-    private var imageCache = NSCache()
+    internal var stubs: [RequestType : [String : AnyObject]]
+    internal var token: String?
+    internal var imageCache = NSCache()
 
     /**
      Internal flag used to disable synchronous request when running automatic tests
      */
     internal var disableTestingMode = false
 
-    private lazy var session: NSURLSession = {
+    internal lazy var session: NSURLSession = {
         let config = NSURLSessionConfiguration.defaultSessionConfiguration()
 
         return NSURLSession(configuration: config)
@@ -90,199 +90,10 @@ public class Networking {
     }
 }
 
-// MARK: HTTP requests
-
-extension Networking {
-    // MARK: GET
-
-    /**
-    GET request to the specified path.
-    - parameter path: The path for the GET request.
-    - parameter completion: A closure that gets called when the GET request is completed, it contains a `JSON` object and a `NSError`.
-    */
-    public func GET(path: String, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
-        self.request(.GET, path: path, parameters: nil, completion: completion)
-    }
-
-    /**
-     Cancels the GET request for the specified path. This causes the request to complete with error code -999
-     - parameter path: The path for the cancelled GET request
-     */
-    public func cancelGET(path: String) {
-        self.cancelRequest(.Data, requestType: .GET, path: path)
-    }
-
-    /**
-     Stubs GET request for the specified path. After registering this, every GET request to the path, will return
-     the registered response.
-     - parameter path: The path for the stubbed GET request.
-     - parameter response: An `AnyObject` that will be returned when a GET request is made to the specified path.
-     */
-    public func stubGET(path: String, response: AnyObject) {
-        self.stub(.GET, path: path, response: response)
-    }
-
-    /**
-     Stubs GET request for the specified path using the contents of a file. After registering this, every GET request to the path, will return
-     the contents of the registered file.
-     - parameter path: The path for the stubbed GET request.
-     - parameter fileName: The name of the file, whose contents will be registered as a reponse.
-     - parameter bundle: The NSBundle where the file is located.
-     */
-    public func stubGET(path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
-        self.stub(.GET, path: path, fileName: fileName, bundle: bundle)
-    }
-
-    // MARK: - POST
-
-    /**
-    POST request to the specified path, using the provided parameters.
-    - parameter path: The path for the GET request.
-    - parameter parameters: The parameters to be used, they will be serialized using NSJSONSerialization.
-    - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and a `NSError`.
-    */
-    public func POST(path: String, parameters: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
-        self.request(.POST, path: path, parameters: parameters, completion: completion)
-    }
-
-    /**
-     Cancels the POST request for the specified path. This causes the request to complete with error code -999
-     - parameter path: The path for the cancelled POST request
-     */
-    public func cancelPOST(path: String) {
-        self.cancelRequest(.Data, requestType: .POST, path: path)
-    }
-
-    /**
-     Stubs POST request for the specified path. After registering this, every POST request to the path, will return
-     the registered response.
-     - parameter path: The path for the stubbed POST request.
-     - parameter response: An `AnyObject` that will be returned when a POST request is made to the specified path.
-     */
-    public func stubPOST(path: String, response: AnyObject) {
-        self.stub(.POST, path: path, response: response)
-    }
-
-    /**
-     Stubs POST request to the specified path using the contents of a file. After registering this, every POST request to the path, will return
-     the contents of the registered file.
-     - parameter path: The path for the stubbed POST request.
-     - parameter fileName: The name of the file, whose contents will be registered as a reponse.
-     - parameter bundle: The NSBundle where the file is located.
-     */
-    public func stubPOST(path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
-        self.stub(.POST, path: path, fileName: fileName, bundle: bundle)
-    }
-}
-
-// MARK: Image
-
-extension Networking {
-    #if os(iOS) || os(tvOS) || os(watchOS)
-    /**
-    Downloads an image using the specified path.
-    - parameter path: The path where the image is located
-    - parameter completion: A closure that gets called when the image download request is completed, it contains an `UIImage` object and a `NSError`.
-    */
-    public func downloadImage(path: String, completion: (image: UIImage?, error: NSError?) -> ()) {
-        let destinationURL = self.destinationURL(path)
-        guard let filePath = self.destinationURL(path).path else { fatalError("File path not valid") }
-
-        if let getStubs = self.stubs[.GET], image = getStubs[path] as? UIImage {
-            completion(image: image, error: nil)
-        } else if let image = self.imageCache.objectForKey(destinationURL.absoluteString) as? UIImage {
-            completion(image: image, error: nil)
-        } else if NSFileManager().fileExistsAtPath(filePath) {
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), {
-                if let data = NSData(contentsOfURL: destinationURL), image = UIImage(data: data) {
-                    dispatch_async(dispatch_get_main_queue(), {
-                        completion(image: image, error: nil)
-                    })
-                    self.imageCache.setObject(image, forKey: filePath)
-                }
-            })
-        } else {
-            let request = NSMutableURLRequest(URL: self.urlForPath(path))
-            request.HTTPMethod = RequestType.GET.rawValue
-            request.addValue("application/json", forHTTPHeaderField: "Accept")
-
-            if let token = token {
-                request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-            }
-
-            let semaphore = dispatch_semaphore_create(0)
-            var returnedData: NSData?
-            var returnedImage: UIImage?
-            var returnedError: NSError?
-            var returnedResponse: NSURLResponse?
-
-            #if os(iOS)
-                if TestCheck.isTesting == false {
-                    dispatch_async(dispatch_get_main_queue(), {
-                        UIApplication.sharedApplication().networkActivityIndicatorVisible = true
-                    })
-                }
-            #endif
-
-            self.session.downloadTaskWithRequest(request, completionHandler: { url, response, error in
-                returnedResponse = response
-                returnedError = error
-
-                if let url = url, data = NSData(contentsOfURL: url), image = UIImage(data: data) {
-                    returnedData = data
-                    returnedImage = image
-
-                    data.writeToURL(destinationURL, atomically: true)
-                    self.imageCache.setObject(image, forKey: filePath)
-                }
-
-                if TestCheck.isTesting && self.disableTestingMode == false {
-                    dispatch_semaphore_signal(semaphore)
-                } else {
-                    dispatch_async(dispatch_get_main_queue(), {
-                        #if os(iOS)
-                            UIApplication.sharedApplication().networkActivityIndicatorVisible = false
-                        #endif
-
-                        self.logError(nil, data: returnedData, request: request, response: response, error: error)
-                        completion(image: returnedImage, error: error)
-                    })
-                }
-            }).resume()
-
-            if TestCheck.isTesting && self.disableTestingMode == false {
-                dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
-
-                self.logError(nil, data: returnedData, request: request, response: returnedResponse, error: returnedError)
-                completion(image: returnedImage, error: returnedError)
-            }
-        }
-    }
-
-    /**
-     Cancels the image download request for the specified path. This causes the request to complete with error code -999
-     - parameter path: The path for the cancelled image download request
-     */
-    public func cancelImageDownload(path: String) {
-        self.cancelRequest(.Download, requestType: .GET, path: path)
-    }
-
-    /**
-     Stubs a download image request with an UIImage. After registering this, every download request to the path, will return
-     the registered UIImage.
-     - parameter path: The path for the stubbed image download.
-     - parameter image: A UIImage that will be returned when there's a request to the registered path
-     */
-    public func stubImageDownload(path: String, image: UIImage) {
-        self.stub(.GET, path: path, response: image)
-    }
-    #endif
-}
-
 // MARK: - Private
 
 extension Networking {
-    private func stub(requestType: RequestType, path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
+    internal func stub(requestType: RequestType, path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
         do {
             if let result = try JSON.from(fileName, bundle: bundle) {
                 self.stub(requestType, path: path, response: result)
@@ -294,13 +105,13 @@ extension Networking {
         }
     }
 
-    private func stub(requestType: RequestType, path: String, response: AnyObject) {
+    internal func stub(requestType: RequestType, path: String, response: AnyObject) {
         var getStubs = self.stubs[requestType] ?? [String : AnyObject]()
         getStubs[path] = response
         self.stubs[requestType] = getStubs
     }
 
-    private func request(requestType: RequestType, path: String, parameters: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
+    internal func request(requestType: RequestType, path: String, parameters: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
         if let responses = self.stubs[requestType], response = responses[path] {
             completion(JSON: response, error: nil)
         } else {
@@ -379,7 +190,7 @@ extension Networking {
         }
     }
 
-    private func cancelRequest(sessionTaskType: SessionTaskType, requestType: RequestType, path: String) {
+    internal func cancelRequest(sessionTaskType: SessionTaskType, requestType: RequestType, path: String) {
         let fullPath = self.urlForPath(path)
 
         self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
@@ -404,7 +215,7 @@ extension Networking {
         }
     }
 
-    private func logError(parameters: AnyObject? = nil, data: NSData?, request: NSURLRequest?, response: NSURLResponse?, error: NSError?) {
+    internal func logError(parameters: AnyObject? = nil, data: NSData?, request: NSURLRequest?, response: NSURLResponse?, error: NSError?) {
         guard let error = error else { return }
 
         print(" ")
