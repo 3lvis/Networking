@@ -10,6 +10,7 @@
 - Minimal implementation
 - Easy stubbing
 - Runs synchronously in automatic testing enviroments
+- Image caching
 - Free
 
 ## Table of Contents
