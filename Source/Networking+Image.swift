@@ -43,9 +43,7 @@ public extension Networking {
             var returnedError: NSError?
             var returnedResponse: NSURLResponse?
 
-            if TestCheck.isTesting == false {
-                NetworkActivityIndicator.sharedIndicator.visible = true
-            }
+            NetworkActivityIndicator.sharedIndicator.visible = true
 
             self.session.downloadTaskWithRequest(request, completionHandler: { url, response, error in
                 returnedResponse = response

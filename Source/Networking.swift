@@ -121,9 +121,7 @@ extension Networking {
                 request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
             }
 
-            if TestCheck.isTesting == false {
-                NetworkActivityIndicator.sharedIndicator.visible = true
-            }
+            NetworkActivityIndicator.sharedIndicator.visible = true
 
             var serializingError: NSError?
             if let parameters = parameters {
