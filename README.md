@@ -35,6 +35,7 @@
     * [Cancelling image download](#cancelling-image-download)
     * [Image download caching](#image-download-caching)
 * [Error logging](#error-logging)
+* [Network Activity Indicator](#network-activity-indicator)
 * [Installation](#installation)
 * [Author](#author)
 * [License](#license)
@@ -338,6 +339,16 @@ Response: <NSHTTPURLResponse: 0x7fede8d0c4e0> { URL: http://httpbin.org/invalidp
  
 ================= ~ ==================
 ```
+
+## Network Activity Indicator
+
+`Networking` leverages on [NetworkActivityIndicator](https://github.com/3lvis/NetworkActivityIndicator) to balance how the network activity indicator is displayed.
+
+You can manage the state of this indicator by using:
+
+```swift
+NetworkActivityIndicator.sharedIndicator.visible = true
+``
 
 ## Installation
 
