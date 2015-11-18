@@ -16,4 +16,5 @@ s.source_files     = 'Source/**/*'
 s.frameworks       = 'Foundation'
 s.dependency 'TestCheck', '~> 0.3.0'
 s.dependency 'JSON', '~> 4.0.2'
+s.dependency 'NetworkActivityIndicator', '~> 0.1.0'
 end
