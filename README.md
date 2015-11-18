@@ -44,7 +44,7 @@
 
 ### HTTP basic authentication
 
-`Networking` supports [HTTP basic autentication](http://www.w3.org/Protocols/HTTP/1.0/spec.html#BasicAA):
+`Networking` supports [HTTP basic authentication](http://www.w3.org/Protocols/HTTP/1.0/spec.html#BasicAA):
 
 To authenticate using basic authentication with a username **"Aladdin"** and password **"open sesame"**, you would need to set the following header field: 
 
