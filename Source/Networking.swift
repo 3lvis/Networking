@@ -1,6 +1,7 @@
 import Foundation
 import TestCheck
 import JSON
+import NetworkActivityIndicator
 
 public class Networking {
     internal enum RequestType: String {
@@ -120,13 +121,7 @@ extension Networking {
                 request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
             }
 
-            #if os(iOS)
-                if TestCheck.isTesting == false {
-                    dispatch_async(dispatch_get_main_queue(), {
-                        UIApplication.sharedApplication().networkActivityIndicatorVisible = true
-                    })
-                }
-            #endif
+            NetworkActivityIndicator.sharedIndicator.visible = true
 
             var serializingError: NSError?
             if let parameters = parameters {
@@ -167,9 +162,7 @@ extension Networking {
                         dispatch_semaphore_signal(semaphore)
                     } else {
                         dispatch_async(dispatch_get_main_queue(), {
-                            #if os(iOS)
-                                UIApplication.sharedApplication().networkActivityIndicatorVisible = false
-                            #endif
+                            NetworkActivityIndicator.sharedIndicator.visible = false
 
                             self.logError(parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError)
                             completion(JSON: result, error: connectionError)

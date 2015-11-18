@@ -3,6 +3,7 @@
 import Foundation
 import TestCheck
 import UIKit
+import NetworkActivityIndicator
 
 public extension Networking {
     /**
@@ -42,13 +43,7 @@ public extension Networking {
             var returnedError: NSError?
             var returnedResponse: NSURLResponse?
 
-            #if os(iOS)
-                if TestCheck.isTesting == false {
-                    dispatch_async(dispatch_get_main_queue(), {
-                        UIApplication.sharedApplication().networkActivityIndicatorVisible = true
-                    })
-                }
-            #endif
+            NetworkActivityIndicator.sharedIndicator.visible = true
 
             self.session.downloadTaskWithRequest(request, completionHandler: { url, response, error in
                 returnedResponse = response
@@ -66,9 +61,7 @@ public extension Networking {
                     dispatch_semaphore_signal(semaphore)
                 } else {
                     dispatch_async(dispatch_get_main_queue(), {
-                        #if os(iOS)
-                            UIApplication.sharedApplication().networkActivityIndicatorVisible = false
-                        #endif
+                        NetworkActivityIndicator.sharedIndicator.visible = false
 
                         self.logError(nil, data: returnedData, request: request, response: response, error: error)
                         completion(image: returnedImage, error: error)
