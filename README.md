@@ -348,7 +348,7 @@ You can manage the state of this indicator by using:
 
 ```swift
 NetworkActivityIndicator.sharedIndicator.visible = true
-``
+```
 
 ## Installation
 
