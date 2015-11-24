@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
 s.name             = "Networking"
-s.version          = "0.12.0"
+s.version          = "0.12.1"
 s.summary          = "Dead Simple Networking Library"
 s.homepage         = "https://github.com/3lvis/Networking"
 s.license          = 'MIT'
@@ -16,5 +16,5 @@ s.source_files     = 'Source/**/*'
 s.frameworks       = 'Foundation'
 s.dependency 'TestCheck', '~> 0.3.0'
 s.dependency 'JSON', '~> 4.0.2'
-s.dependency 'NetworkActivityIndicator', '~> 0.1.1'
+s.dependency 'NetworkActivityIndicator', '~> 0.1.2'
 end
