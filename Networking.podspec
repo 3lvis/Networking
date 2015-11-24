@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
 s.name             = "Networking"
-s.version          = "0.12.1"
+s.version          = "0.12.2"
 s.summary          = "Dead Simple Networking Library"
 s.homepage         = "https://github.com/3lvis/Networking"
 s.license          = 'MIT'
