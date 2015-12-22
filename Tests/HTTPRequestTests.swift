@@ -79,6 +79,29 @@ extension HTTPRequestTests {
             XCTAssertEqual(value, "Entry 1")
         })
     }
+
+    func testStatusCodes() {
+        let networking = Networking(baseURL: baseURL)
+
+        networking.GET("/status/200") { JSON, error in
+            XCTAssertNil(JSON)
+            XCTAssertNil(error)
+        }
+
+        var statusCode = 300
+        networking.GET("/status/\(statusCode)") { JSON, error in
+            XCTAssertNil(JSON)
+            let connectionError = NSError(domain: Networking.ErrorDomain, code: statusCode, userInfo: [NSLocalizedDescriptionKey : NSHTTPURLResponse.localizedStringForStatusCode(statusCode)])
+            XCTAssertEqual(error, connectionError)
+        }
+
+        statusCode = 400
+        networking.GET("/status/\(statusCode)") { JSON, error in
+            XCTAssertNil(JSON)
+            let connectionError = NSError(domain: Networking.ErrorDomain, code: statusCode, userInfo: [NSLocalizedDescriptionKey : NSHTTPURLResponse.localizedStringForStatusCode(statusCode)])
+            XCTAssertEqual(error, connectionError)
+        }
+    }
 }
 
 // MARK: POST
