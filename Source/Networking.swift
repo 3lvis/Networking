@@ -4,6 +4,8 @@ import JSON
 import NetworkActivityIndicator
 
 public class Networking {
+    internal static let ErrorDomain = "NetworkingErrorDomain"
+
     internal enum RequestType: String {
         case GET, POST, PUT, DELETE
     }
@@ -65,10 +67,10 @@ public class Networking {
     }
 
     /**
-    Returns a NSURL by appending the provided path to the Networking's base URL.
-    - parameter path: The path to be appended to the base URL.
-    - returns: A NSURL generated after appending the path to the base URL.
-    */
+     Returns a NSURL by appending the provided path to the Networking's base URL.
+     - parameter path: The path to be appended to the base URL.
+     - returns: A NSURL generated after appending the path to the base URL.
+     */
     public func urlForPath(path: String) -> NSURL {
         return NSURL(string: self.baseURL + path)!
     }
@@ -148,13 +150,19 @@ extension Networking {
                     connectionError = error
                     returnedData = data
 
-                    if let data = data {
-                        do {
-                            result = try NSJSONSerialization.JSONObjectWithData(data, options: .MutableLeaves)
-                        } catch let serializingError as NSError {
-                            if error == nil {
-                                connectionError = serializingError
+                    if let httpResponse = response as? NSHTTPURLResponse {
+                        if httpResponse.statusCode >= 200 && httpResponse.statusCode < 300 {
+                            do {
+                                if let data = data where data.length > 0 {
+                                    result = try NSJSONSerialization.JSONObjectWithData(data, options: [])
+                                }
+                            } catch let serializingError as NSError {
+                                if error == nil {
+                                    connectionError = serializingError
+                                }
                             }
+                        } else {
+                               connectionError = NSError(domain: Networking.ErrorDomain, code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey : NSHTTPURLResponse.localizedStringForStatusCode(httpResponse.statusCode)])
                         }
                     }
 
@@ -230,7 +238,8 @@ extension Networking {
         }
 
         if let response = response as? NSHTTPURLResponse {
-            print("Response status code: \(response.statusCode)")
+            print("Response status code: \(response.statusCode) — \(NSHTTPURLResponse.localizedStringForStatusCode(response.statusCode))")
+            print(" ")
             print(" ")
             print("Path: \(response.URL!.absoluteString)")
             print(" ")
