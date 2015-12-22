@@ -152,17 +152,17 @@ extension Networking {
 
                     if let httpResponse = response as? NSHTTPURLResponse {
                         if httpResponse.statusCode >= 200 && httpResponse.statusCode < 300 {
-                            if let data = data where data.length > 0 {
-                                do {
-                                    result = try NSJSONSerialization.JSONObjectWithData(data, options: .MutableLeaves)
-                                } catch let serializingError as NSError {
-                                    if error == nil {
-                                        connectionError = serializingError
-                                    }
+                            do {
+                                if let data = data where data.length > 0 {
+                                    result = try NSJSONSerialization.JSONObjectWithData(data, options: [])
+                                }
+                            } catch let serializingError as NSError {
+                                if error == nil {
+                                    connectionError = serializingError
                                 }
                             }
                         } else {
-                            connectionError = NSError(domain: Networking.ErrorDomain, code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey : NSHTTPURLResponse.localizedStringForStatusCode(httpResponse.statusCode)])
+                               connectionError = NSError(domain: Networking.ErrorDomain, code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey : NSHTTPURLResponse.localizedStringForStatusCode(httpResponse.statusCode)])
                         }
                     }
 
