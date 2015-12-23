@@ -3,9 +3,16 @@ import XCTest
 
 class Dictionary_FormURLEncodedTests: XCTestCase {
     func testFormatting() {
-        let parameters = ["password" : "secret", "username" : "elvis"]
+        let parameters = ["username" : "elvis", "password" : "secret"]
         let formatted = parameters.formURLEncodedFormat()
-        XCTAssertEqual(formatted, "username=elvis&password=secret")
+
+        // Here I'm checking for both because looping dictionaries
+        // can be quite inconsistent.
+        if formatted == "username=elvis&password=secret" {
+            XCTAssertEqual(formatted, "username=elvis&password=secret")
+        } else {
+            XCTAssertEqual(formatted, "password=secret&username=elvis")
+        }
     }
 
     func testFormattingOneParameter() {
