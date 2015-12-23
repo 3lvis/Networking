@@ -47,13 +47,13 @@
 
 ### HTTP basic authentication
 
-`Networking` supports [HTTP basic authentication](http://www.w3.org/Protocols/HTTP/1.0/spec.html#BasicAA):
+**Networking** supports [HTTP basic authentication](http://www.w3.org/Protocols/HTTP/1.0/spec.html#BasicAA):
 
 To authenticate using basic authentication with a username **"Aladdin"** and password **"open sesame"**, you would need to set the following header field: 
 
-`Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==`, which contains the string `Aladin:open sesame` in Base64 format. Luckily, `Networking` provides a simpler way to do this.
+`Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==`, which contains the string `Aladin:open sesame` in Base64 format. Luckily, **Networking** provides a simpler way to do this.
 
-This is how you use basic authentication on Networking, the following example features a username: `user` and a password: `pswd`.
+This is how you use basic authentication on **Networking**, the following example features a username: `user` and a password: `pswd`.
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
@@ -65,13 +65,13 @@ networking.GET("/basic-auth/user/pswd", completion: { JSON, error in
 
 ### Bearer token authentication
 
-`Networking` supports [Bearer Token Usage](https://tools.ietf.org/html/rfc6750):
+**Networking** supports [Bearer Token Usage](https://tools.ietf.org/html/rfc6750):
 
 To authenticate using a bearer token **"AAAFFAAAA3DAAAAAA"**, you would need to set the following header field: 
 
-`Authorization: Bearer AAAFFAAAA3DAAAAAA`. Luckily, `Networking` provides a simpler way to do this.
+`Authorization: Bearer AAAFFAAAA3DAAAAAA`. Luckily, **Networking** provides a simpler way to do this.
 
-This is how you use bearer token authentication on Networking, the following example features a token: `AAAFFAAAA3DAAAAAA`.
+This is how you use bearer token authentication on **Networking**, the following example features a token: `AAAFFAAAA3DAAAAAA`.
 
 ```swift
 let networking = Networking(baseURL: "http://sample.org")
@@ -304,7 +304,7 @@ networking.cancelImageDownload("/image/png")
 
 ### Image download caching
 
-`Networking` stores the download image in the Caches folder. It also uses NSCache internally so it doesn't have to download the same image again and again.
+**Networking** stores the download image in the Caches folder. It also uses NSCache internally so it doesn't have to download the same image again and again.
 
 If you want to remove the downloaded image so it downloads again. You can do it like this:
 
@@ -318,7 +318,7 @@ if let path = destinationURL.path where NSFileManager().fileExistsAtPath(path) {
 
 ## Error logging
 
-Any error catched by `Networking` will be printed in your console. This is really convenient since you want to know why your networking call failed anyway.
+Any error catched by **Networking** will be printed in your console. This is really convenient since you want to know why your networking call failed anyway.
 
 For example a cancelled request will print this:
 
@@ -366,7 +366,7 @@ Response: <NSHTTPURLResponse: 0x7fede8d0c4e0> { URL: http://httpbin.org/invalidp
 
 ## Network Activity Indicator
 
-`Networking` leverages on [NetworkActivityIndicator](https://github.com/3lvis/NetworkActivityIndicator) to balance how the network activity indicator is displayed.
+**Networking** leverages on [NetworkActivityIndicator](https://github.com/3lvis/NetworkActivityIndicator) to balance how the network activity indicator is displayed.
 
 You can manage the state of this indicator by using:
 
