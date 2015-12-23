@@ -140,6 +140,15 @@ networking.POST("/post", params: ["username":"jameson", "password":"password"]) 
 }
 ```
 
+**Networking** by default uses `application/json` as the `Content-Type` and `Accept` headers. You can use other content types by proving the `ContentType` attribute. Internally **Networking** will format your parameters so they use [`Percent-encoding`](https://en.wikipedia.org/wiki/Percent-encoding#The_application.2Fx-www-form-urlencoded_type).
+
+```swift
+let networking = Networking(baseURL: "http://httpbin.org")
+networking.POST("/post", contentType: .FormURLEncoded, parameters: ["custname":"jameson"]) { JSON, error in
+   // Successfull post using `application/x-www-form-urlencoded` as `Content-Type`
+}
+```
+
 ### Stubbing POST
 
 ```swift
