@@ -132,10 +132,17 @@ extension Networking {
 
             var serializingError: NSError?
             if let parameters = parameters {
-                do {
-                    request.HTTPBody = try NSJSONSerialization.dataWithJSONObject(parameters, options: [])
-                } catch let error as NSError {
-                    serializingError = error
+                switch contentType {
+                case .JSON:
+                    do {
+                        request.HTTPBody = try NSJSONSerialization.dataWithJSONObject(parameters, options: [])
+                    } catch let error as NSError {
+                        serializingError = error
+                    }
+                    break
+                case .FormURLEncoded:
+                    
+                    break
                 }
             }
 
