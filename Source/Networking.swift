@@ -141,7 +141,9 @@ extension Networking {
                     }
                     break
                 case .FormURLEncoded:
-                    
+                    let parametersDictionary = parameters as! [String : AnyObject]
+                    let formattedParameters = parametersDictionary.formURLEncodedFormat()
+                    request.HTTPBody = formattedParameters.dataUsingEncoding(NSUTF8StringEncoding)
                     break
                 }
             }
