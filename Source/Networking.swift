@@ -6,6 +6,11 @@ import NetworkActivityIndicator
 public class Networking {
     internal static let ErrorDomain = "NetworkingErrorDomain"
 
+    public enum ContentType: String {
+        case JSON = "application/json"
+        case FormURLEncoded = "application/x-www-form-urlencoded"
+    }
+
     internal enum RequestType: String {
         case GET, POST, PUT, DELETE
     }
@@ -110,13 +115,13 @@ extension Networking {
         self.stubs[requestType] = getStubs
     }
 
-    internal func request(requestType: RequestType, path: String, parameters: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
+    internal func request(requestType: RequestType, path: String, contentType: ContentType, parameters: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
         if let responses = self.stubs[requestType], response = responses[path] {
             completion(JSON: response, error: nil)
         } else {
             let request = NSMutableURLRequest(URL: self.urlForPath(path))
             request.HTTPMethod = requestType.rawValue
-            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.addValue(contentType.rawValue, forHTTPHeaderField: "Content-Type")
             request.addValue("application/json", forHTTPHeaderField: "Accept")
 
             if let token = token {

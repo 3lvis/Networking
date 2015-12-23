@@ -1,15 +1,14 @@
 import Foundation
 
+// MARK: GET
 public extension Networking {
-    // MARK: GET
-
     /**
     GET request to the specified path.
     - parameter path: The path for the GET request.
     - parameter completion: A closure that gets called when the GET request is completed, it contains a `JSON` object and a `NSError`.
     */
-    public func GET(path: String, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
-        self.request(.GET, path: path, parameters: nil, completion: completion)
+    public func GET(path: String, contentType: ContentType = .JSON, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
+        self.request(.GET, path: path, contentType: contentType, parameters: nil, completion: completion)
     }
 
     /**
@@ -40,17 +39,18 @@ public extension Networking {
     public func stubGET(path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
         self.stub(.GET, path: path, fileName: fileName, bundle: bundle)
     }
+}
 
-    // MARK: - POST
-
+// MARK: - POST
+public extension Networking {
     /**
     POST request to the specified path, using the provided parameters.
     - parameter path: The path for the POST request.
     - parameter parameters: The parameters to be used, they will be serialized using NSJSONSerialization.
     - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and a `NSError`.
     */
-    public func POST(path: String, parameters: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
-        self.request(.POST, path: path, parameters: parameters, completion: completion)
+    public func POST(path: String, contentType: ContentType = .JSON, parameters: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
+        self.request(.POST, path: path, contentType: contentType, parameters: parameters, completion: completion)
     }
 
     /**
@@ -81,17 +81,18 @@ public extension Networking {
     public func stubPOST(path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
         self.stub(.POST, path: path, fileName: fileName, bundle: bundle)
     }
+}
 
-    // MARK: - PUT
-
+// MARK: - PUT
+public extension Networking {
     /**
     PUT request to the specified path, using the provided parameters.
     - parameter path: The path for the PUT request.
     - parameter parameters: The parameters to be used, they will be serialized using NSJSONSerialization.
     - parameter completion: A closure that gets called when the PUT request is completed, it contains a `JSON` object and a `NSError`.
     */
-    public func PUT(path: String, parameters: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
-        self.request(.PUT, path: path, parameters: parameters, completion: completion)
+    public func PUT(path: String, contentType: ContentType = .JSON, parameters: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
+        self.request(.PUT, path: path, contentType: contentType, parameters: parameters, completion: completion)
     }
 
     /**
@@ -122,16 +123,17 @@ public extension Networking {
     public func stubPUT(path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
         self.stub(.PUT, path: path, fileName: fileName, bundle: bundle)
     }
+}
 
-    // MARK: - DELETE
-
+// MARK: - DELETE
+public extension Networking {
     /**
     DELETE request to the specified path, using the provided parameters.
     - parameter path: The path for the DELETE request.
     - parameter completion: A closure that gets called when the DELETE request is completed, it contains a `JSON` object and a `NSError`.
     */
     public func DELETE(path: String, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
-        self.request(.DELETE, path: path, parameters: nil, completion: completion)
+        self.request(.DELETE, path: path, contentType: .JSON, parameters: nil, completion: completion)
     }
 
     /**
