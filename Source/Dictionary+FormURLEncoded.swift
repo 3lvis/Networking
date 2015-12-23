@@ -1,3 +1,5 @@
+import Foundation
+
 public extension Dictionary where Key: StringLiteralConvertible {
     func formURLEncodedFormat() -> String {
         var converted = ""
@@ -8,6 +10,6 @@ public extension Dictionary where Key: StringLiteralConvertible {
             converted.appendContentsOf("\(entry.0)=\(entry.1)")
         }
 
-        return converted
+        return converted.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet())!
     }
 }
