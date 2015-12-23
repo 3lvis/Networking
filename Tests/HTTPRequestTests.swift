@@ -119,7 +119,20 @@ extension HTTPRequestTests {
 
     func testPOST() {
         let networking = Networking(baseURL: baseURL)
-        networking.POST("/post", parameters: ["username":"jameson", "password":"password"]) { JSON, error in
+        networking.POST("/post", parameters: ["username":"jameson", "password":"secret"]) { JSON, error in
+            let JSONResponse = (JSON as! [String : AnyObject])["json"] as! [String : String]
+            XCTAssertEqual("jameson", JSONResponse["username"])
+            XCTAssertEqual("secret", JSONResponse["password"])
+            XCTAssertNotNil(JSON!, "JSON not nil")
+            XCTAssertNil(error, "Error")
+        }
+    }
+
+    func testPOSTWithFormURLEncoded() {
+        let networking = Networking(baseURL: baseURL)
+        networking.POST("/post", contentType: .FormURLEncoded, parameters: ["custname":"jameson"]) { JSON, error in
+            let JSONResponse = (JSON as! [String : AnyObject])["form"] as! [String : String]
+            XCTAssertEqual("jameson", JSONResponse["custname"])
             XCTAssertNotNil(JSON!, "JSON not nil")
             XCTAssertNil(error, "Error")
         }
