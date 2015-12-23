@@ -16,9 +16,9 @@ class Dictionary_FormURLEncodedTests: XCTestCase {
     }
 
     func testFormattingOneParameter() {
-        let parameters = ["password" : "secret"]
+        let parameters = ["name" : "Elvis Nuñez"]
         let formatted = parameters.formURLEncodedFormat()
-        XCTAssertEqual(formatted, "password=secret")
+        XCTAssertEqual(formatted, "name=Elvis%20Nu%C3%B1ez")
     }
 
     func testFormattingWithEmpty() {
