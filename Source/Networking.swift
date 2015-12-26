@@ -176,7 +176,7 @@ extension Networking {
                                 }
                             }
                         } else {
-                               connectionError = NSError(domain: Networking.ErrorDomain, code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey : NSHTTPURLResponse.localizedStringForStatusCode(httpResponse.statusCode)])
+                            connectionError = NSError(domain: Networking.ErrorDomain, code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey : NSHTTPURLResponse.localizedStringForStatusCode(httpResponse.statusCode)])
                         }
                     }
 
@@ -186,7 +186,7 @@ extension Networking {
                         dispatch_async(dispatch_get_main_queue(), {
                             NetworkActivityIndicator.sharedIndicator.visible = false
 
-                            self.logError(parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError)
+                            self.logError(contentType, parameters: parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError)
                             completion(JSON: result, error: connectionError)
                         })
                     }
@@ -194,7 +194,7 @@ extension Networking {
 
                 if TestCheck.isTesting && self.disableTestingMode == false {
                     dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
-                    self.logError(parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError)
+                    self.logError(contentType, parameters: parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError)
                     completion(JSON: result, error: connectionError)
                 }
             }
@@ -226,7 +226,7 @@ extension Networking {
         }
     }
 
-    internal func logError(parameters: AnyObject? = nil, data: NSData?, request: NSURLRequest?, response: NSURLResponse?, error: NSError?) {
+    internal func logError(contentType: ContentType, parameters: AnyObject? = nil, data: NSData?, request: NSURLRequest?, response: NSURLResponse?, error: NSError?) {
         guard let error = error else { return }
 
         print(" ")
@@ -242,7 +242,23 @@ extension Networking {
         }
 
         if let parameters = parameters {
-            print("parameters: \(parameters)")
+            switch contentType {
+            case .JSON:
+                do {
+                    let data = try NSJSONSerialization.dataWithJSONObject(parameters, options: .PrettyPrinted)
+                    let string = String(data: data, encoding: NSUTF8StringEncoding)
+                    print("Parameters: \(string)")
+                } catch let error as NSError {
+                    print("Failed pretty printing parameters: \(parameters), error: \(error)")
+                }
+                break
+            case .FormURLEncoded:
+                let parametersDictionary = parameters as! [String : AnyObject]
+                let formattedParameters = parametersDictionary.formURLEncodedFormat()
+                print("Parameters: \(formattedParameters)")
+                break
+            }
+
             print(" ")
         }
 
