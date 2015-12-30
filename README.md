@@ -380,6 +380,8 @@ NetworkActivityIndicator.sharedIndicator.visible = true
 it, simply add the following line to your Podfile:
 
 ```ruby
+use_frameworks!
+
 pod 'Networking'
 ```
 
