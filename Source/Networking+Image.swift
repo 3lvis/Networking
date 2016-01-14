@@ -25,7 +25,7 @@ public extension Networking {
                     dispatch_async(dispatch_get_main_queue(), {
                         completion(image: image, error: nil)
                     })
-                    self.imageCache.setObject(image, forKey: filePath)
+                    self.imageCache.setObject(image, forKey: destinationURL.absoluteString)
                 }
             })
         } else {
@@ -54,7 +54,7 @@ public extension Networking {
                     returnedImage = image
 
                     data.writeToURL(destinationURL, atomically: true)
-                    self.imageCache.setObject(image, forKey: filePath)
+                    self.imageCache.setObject(image, forKey: destinationURL.absoluteString)
                 }
 
                 if TestCheck.isTesting && self.disableTestingMode == false {
