@@ -43,9 +43,7 @@ public class Networking {
     var disableTestingMode = false
 
     lazy var session: NSURLSession = {
-        let config = NSURLSessionConfiguration.defaultSessionConfiguration()
-
-        return NSURLSession(configuration: config)
+        return NSURLSession(configuration: self.sessionConfiguration())
     }()
 
     /**
@@ -69,7 +67,7 @@ public class Networking {
             let base64Credentials = credentialsData.base64EncodedStringWithOptions([])
             let authString = "Basic \(base64Credentials)"
 
-            let config  = NSURLSessionConfiguration.defaultSessionConfiguration()
+            let config  = self.sessionConfiguration()
             config.HTTPAdditionalHeaders = ["Authorization" : authString]
 
             self.session = NSURLSession(configuration: config)
@@ -110,6 +108,17 @@ public class Networking {
 // MARK: - Private
 
 extension Networking {
+    private func sessionConfiguration() -> NSURLSessionConfiguration {
+        switch self.configurationType {
+        case .Default:
+            return NSURLSessionConfiguration.defaultSessionConfiguration()
+        case .Ephemeral:
+            return NSURLSessionConfiguration.ephemeralSessionConfiguration()
+        case .Background:
+            return NSURLSessionConfiguration.backgroundSessionConfigurationWithIdentifier("NetworkingBackgroundConfiguration")
+        }
+    }
+
     func stub(requestType: RequestType, path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
         do {
             if let result = try JSON.from(fileName, bundle: bundle) {
