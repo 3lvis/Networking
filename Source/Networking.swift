@@ -3,33 +3,38 @@ import TestCheck
 import JSON
 import NetworkActivityIndicator
 
+public enum NetworkingConfigurationType {
+    case Default, Ephemeral, Background
+}
+
 public class Networking {
-    internal static let ErrorDomain = "NetworkingErrorDomain"
+    static let ErrorDomain = "NetworkingErrorDomain"
 
     public enum ContentType: String {
         case JSON = "application/json"
         case FormURLEncoded = "application/x-www-form-urlencoded"
     }
 
-    internal enum RequestType: String {
+    enum RequestType: String {
         case GET, POST, PUT, DELETE
     }
 
-    internal enum SessionTaskType: String {
+    enum SessionTaskType: String {
         case Data, Upload, Download
     }
 
     private let baseURL: String
-    internal var stubs: [RequestType : [String : AnyObject]]
-    internal var token: String?
-    internal var imageCache = NSCache()
+    var stubs = [RequestType : [String : AnyObject]]()
+    var token: String?
+    var imageCache = NSCache()
+    var configurationType: NetworkingConfigurationType
 
     /**
-     Internal flag used to disable synchronous request when running automatic tests
+     flag used to disable synchronous request when running automatic tests
      */
-    internal var disableTestingMode = false
+    var disableTestingMode = false
 
-    internal lazy var session: NSURLSession = {
+    lazy var session: NSURLSession = {
         let config = NSURLSessionConfiguration.defaultSessionConfiguration()
 
         return NSURLSession(configuration: config)
@@ -39,9 +44,9 @@ public class Networking {
      Base initializer, it creates an instance of `Networking`.
      - parameter baseURL: The base URL for HTTP requests under `Networking`.
      */
-    public init(baseURL: String) {
+    public init(baseURL: String, configurationType: NetworkingConfigurationType = .Default) {
         self.baseURL = baseURL
-        self.stubs = [RequestType : [String : AnyObject]]()
+        self.configurationType = configurationType
     }
 
     /**
@@ -97,7 +102,7 @@ public class Networking {
 // MARK: - Private
 
 extension Networking {
-    internal func stub(requestType: RequestType, path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
+    func stub(requestType: RequestType, path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
         do {
             if let result = try JSON.from(fileName, bundle: bundle) {
                 self.stub(requestType, path: path, response: result)
@@ -109,13 +114,13 @@ extension Networking {
         }
     }
 
-    internal func stub(requestType: RequestType, path: String, response: AnyObject) {
+    func stub(requestType: RequestType, path: String, response: AnyObject) {
         var getStubs = self.stubs[requestType] ?? [String : AnyObject]()
         getStubs[path] = response
         self.stubs[requestType] = getStubs
     }
 
-    internal func request(requestType: RequestType, path: String, contentType: ContentType, parameters: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
+    func request(requestType: RequestType, path: String, contentType: ContentType, parameters: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
         if let responses = self.stubs[requestType], response = responses[path] {
             completion(JSON: response, error: nil)
         } else {
@@ -201,7 +206,7 @@ extension Networking {
         }
     }
 
-    internal func cancelRequest(sessionTaskType: SessionTaskType, requestType: RequestType, path: String) {
+    func cancelRequest(sessionTaskType: SessionTaskType, requestType: RequestType, path: String) {
         let fullPath = self.urlForPath(path)
 
         self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
@@ -226,7 +231,7 @@ extension Networking {
         }
     }
 
-    internal func logError(contentType: ContentType, parameters: AnyObject? = nil, data: NSData?, request: NSURLRequest?, response: NSURLResponse?, error: NSError?) {
+    func logError(contentType: ContentType, parameters: AnyObject? = nil, data: NSData?, request: NSURLRequest?, response: NSURLResponse?, error: NSError?) {
         guard let error = error else { return }
 
         print(" ")
