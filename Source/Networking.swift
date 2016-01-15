@@ -3,6 +3,14 @@ import TestCheck
 import JSON
 import NetworkActivityIndicator
 
+/**
+ Provides the a bridge for configuring your Networking object with NSURLSessionConfiguration.
+ - `Default:` This configuration type manages upload and download tasks using the default options.
+ - `Ephemeral:` A configuration type that uses no persistent storage for caches, cookies, or credentials.
+ It's optimized for transferring data to and from your app’s memory.
+ - `Background:` A configuration type that allows HTTP and HTTPS uploads or downloads to be performed in the background.
+ It causes upload and download tasks to be performed by the system in a separate process.
+ */
 public enum NetworkingConfigurationType {
     case Default, Ephemeral, Background
 }
@@ -30,7 +38,7 @@ public class Networking {
     var configurationType: NetworkingConfigurationType
 
     /**
-     flag used to disable synchronous request when running automatic tests
+     Flag used to disable synchronous request when running automatic tests
      */
     var disableTestingMode = false
 
