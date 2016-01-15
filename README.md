@@ -15,6 +15,7 @@
 
 ## Table of Contents
 
+* [Configuration types](#configuration-types)
 * [Authentication](#authentication)
     * [HTTP basic authentication](#http-basic-authentication)
     * [Bearer token authentication](#bearer-token-authentication)
@@ -42,6 +43,18 @@
 * [Author](#author)
 * [License](#license)
 * [Attribution](#attribution)
+
+## Configuration types
+
+**Networking** is basically a wrapper of NSURLSession, the great thing about this is that we can leverage to the great configuration types supported by NSURLSession, such as the default one, ephemeral and background.
+
+When initializing your instance of **Networking** you can provide a `NetworkingConfigurationType`.
+
+ - `Default`: If you don't provide any option this one is used. This configuration type manages upload and download tasks using the default options.
+ - `Ephemeral`: A configuration type that uses no persistent storage for caches, cookies, or credentials.
+ It's optimized for transferring data to and from your app’s memory.
+ - `Background`: A configuration type that allows HTTP and HTTPS uploads or downloads to be performed in the background.
+ It causes upload and download tasks to be performed by the system in a separate process.
 
 ## Authentication
 
