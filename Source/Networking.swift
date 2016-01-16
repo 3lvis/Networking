@@ -255,48 +255,56 @@ extension Networking {
         print("========== Networking Error ==========")
         print(" ")
 
-        print("Error \(error.code): \(error.description)")
-        print(" ")
-
-        if let request = request {
-            print("Request: \(request)")
+        let isCancelled = error.code == -999
+        if isCancelled {
+            if let request = request {
+                print("Cancelled request: \(request)")
+                print(" ")
+            }
+        } else {
+            print("Error \(error.code): \(error.description)")
             print(" ")
-        }
 
-        if let parameters = parameters {
-            switch contentType {
-            case .JSON:
-                do {
-                    let data = try NSJSONSerialization.dataWithJSONObject(parameters, options: .PrettyPrinted)
-                    let string = String(data: data, encoding: NSUTF8StringEncoding)
-                    print("Parameters: \(string)")
-                } catch let error as NSError {
-                    print("Failed pretty printing parameters: \(parameters), error: \(error)")
-                }
-                break
-            case .FormURLEncoded:
-                let parametersDictionary = parameters as! [String : AnyObject]
-                let formattedParameters = parametersDictionary.formURLEncodedFormat()
-                print("Parameters: \(formattedParameters)")
-                break
+            if let request = request {
+                print("Request: \(request)")
+                print(" ")
             }
 
-            print(" ")
-        }
+            if let parameters = parameters {
+                switch contentType {
+                case .JSON:
+                    do {
+                        let data = try NSJSONSerialization.dataWithJSONObject(parameters, options: .PrettyPrinted)
+                        let string = String(data: data, encoding: NSUTF8StringEncoding)
+                        print("Parameters: \(string)")
+                    } catch let error as NSError {
+                        print("Failed pretty printing parameters: \(parameters), error: \(error)")
+                    }
+                    break
+                case .FormURLEncoded:
+                    let parametersDictionary = parameters as! [String : AnyObject]
+                    let formattedParameters = parametersDictionary.formURLEncodedFormat()
+                    print("Parameters: \(formattedParameters)")
+                    break
+                }
 
-        if let data = data, stringData = NSString(data: data, encoding: NSUTF8StringEncoding) {
-            print("Data: \(stringData)")
-            print(" ")
-        }
+                print(" ")
+            }
 
-        if let response = response as? NSHTTPURLResponse {
-            print("Response status code: \(response.statusCode) — \(NSHTTPURLResponse.localizedStringForStatusCode(response.statusCode))")
-            print(" ")
-            print(" ")
-            print("Path: \(response.URL!.absoluteString)")
-            print(" ")
-            print("Response: \(response)")
-            print(" ")
+            if let data = data, stringData = NSString(data: data, encoding: NSUTF8StringEncoding) {
+                print("Data: \(stringData)")
+                print(" ")
+            }
+
+            if let response = response as? NSHTTPURLResponse {
+                print("Response status code: \(response.statusCode) — \(NSHTTPURLResponse.localizedStringForStatusCode(response.statusCode))")
+                print(" ")
+                print(" ")
+                print("Path: \(response.URL!.absoluteString)")
+                print(" ")
+                print("Response: \(response)")
+                print(" ")
+            }
         }
 
         print("================= ~ ==================")
