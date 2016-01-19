@@ -9,7 +9,7 @@ import NetworkActivityIndicator
  - `Server:` Response status codes beginning with the digit "5" indicate cases in which the server is aware that it has erred or is incapable of performing the request.
  */
 public enum NetworkingErrorType {
-    case Client(Int), Server(Int)
+    case Client, Server
 }
 
 /**
@@ -120,9 +120,9 @@ public class Networking {
      */
     public class func errorTypeForError(error: NSError) -> NetworkingErrorType {
         if error.code >= 400 && error.code < 500 {
-            return .Client(error.code)
+            return .Client
         } else {
-            return .Server(error.code)
+            return .Server
         }
     }
 }
