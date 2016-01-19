@@ -1,7 +1,7 @@
 import Foundation
 
 public extension Dictionary where Key: StringLiteralConvertible {
-    func formURLEncodedFormat() -> String {
+    public func formURLEncodedFormat() -> String {
         var converted = ""
         for (index, entry) in self.enumerate() {
             if index > 0 {
