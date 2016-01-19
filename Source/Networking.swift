@@ -113,7 +113,12 @@ public class Networking {
         return destinationURL
     }
 
-    public class func networkingErrorType(error: NSError) -> NetworkingErrorType {
+    /**
+     Returns the NetworkingErrorType for an NSError
+     - parameter error: The error to be evaluated
+     - returns: A NetworkingErrorType, it can be .Client or .Server
+     */
+    public class func errorTypeForError(error: NSError) -> NetworkingErrorType {
         if error.code >= 400 && error.code < 500 {
             return .Client(error.code)
         } else {
