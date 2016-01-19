@@ -25,8 +25,8 @@ public extension Networking {
      - parameter path: The path for the stubbed GET request.
      - parameter response: An `AnyObject` that will be returned when a GET request is made to the specified path.
      */
-    public func stubGET(path: String, response: AnyObject) {
-        self.stub(.GET, path: path, response: response)
+    public func stubGET(path: String, response: AnyObject?, failed: Bool = false) {
+        self.stub(.GET, path: path, response: response, failed: failed)
     }
 
     /**
@@ -67,8 +67,8 @@ public extension Networking {
      - parameter path: The path for the stubbed POST request.
      - parameter response: An `AnyObject` that will be returned when a POST request is made to the specified path.
      */
-    public func stubPOST(path: String, response: AnyObject) {
-        self.stub(.POST, path: path, response: response)
+    public func stubPOST(path: String, response: AnyObject?, failed: Bool = false) {
+        self.stub(.POST, path: path, response: response, failed: failed)
     }
 
     /**
@@ -109,8 +109,8 @@ public extension Networking {
      - parameter path: The path for the stubbed PUT request.
      - parameter response: An `AnyObject` that will be returned when a PUT request is made to the specified path.
      */
-    public func stubPUT(path: String, response: AnyObject) {
-        self.stub(.PUT, path: path, response: response)
+    public func stubPUT(path: String, response: AnyObject?, failed: Bool = false) {
+        self.stub(.PUT, path: path, response: response, failed: failed)
     }
 
     /**
@@ -150,8 +150,8 @@ public extension Networking {
      - parameter path: The path for the stubbed DELETE request.
      - parameter response: An `AnyObject` that will be returned when a DELETE request is made to the specified path.
      */
-    public func stubDELETE(path: String, response: AnyObject) {
-        self.stub(.DELETE, path: path, response: response)
+    public func stubDELETE(path: String, response: AnyObject?, failed: Bool = false) {
+        self.stub(.DELETE, path: path, response: response, failed: failed)
     }
 
     /**

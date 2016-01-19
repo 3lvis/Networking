@@ -92,8 +92,8 @@ public extension Networking {
      - parameter path: The path for the stubbed image download.
      - parameter image: A UIImage that will be returned when there's a request to the registered path
      */
-    public func stubImageDownload(path: String, image: UIImage) {
-        self.stub(.GET, path: path, response: image)
+    public func stubImageDownload(path: String, image: UIImage, failed: Bool = false) {
+        self.stub(.GET, path: path, response: image, failed: failed)
     }
 }
 
