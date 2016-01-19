@@ -144,7 +144,7 @@ extension Networking {
     func stub(requestType: RequestType, path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
         do {
             if let result = try JSON.from(fileName, bundle: bundle) {
-                self.stub(requestType, path: path, response: result, failed: false)
+                self.stub(requestType, path: path, response: result, statusCode: 200)
             }
         } catch ParsingError.NotFound {
             fatalError("We couldn't find \(fileName), are you sure is there?")
@@ -153,7 +153,7 @@ extension Networking {
         }
     }
 
-    func stub(requestType: RequestType, path: String, response: AnyObject?, failed: Bool) {
+    func stub(requestType: RequestType, path: String, response: AnyObject?, statusCode: Int) {
         var getStubs = self.stubs[requestType] ?? [String : AnyObject]()
         getStubs[path] = response
         self.stubs[requestType] = getStubs
