@@ -67,6 +67,16 @@ extension HTTPRequestTests {
         })
     }
 
+    func testGETStubsWithInvalidStatusCode() {
+        let networking = Networking(baseURL: baseURL)
+
+        networking.stubGET("/stories", response: nil, statusCode: 401)
+
+        networking.GET("/stories", completion: { JSON, error in
+            XCTAssertEqual(401, error!.code)
+        })
+    }
+
     func testGETStubsUsingFile() {
         let networking = Networking(baseURL: baseURL)
 
