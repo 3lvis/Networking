@@ -232,9 +232,9 @@ For example a cancelled request will print this:
 
 ```
 ========== Networking Error ==========
-
-Cancelled request: GET https://ddxxx.com/38bea9c8b75bfed1326f90c48675fce87dd04ae6/thumb/small
-
+ 
+Cancelled request: <NSMutableURLRequest: 0x7fdc80eb0e30> { URL: https://api.mmm.com/38bea9c8b75bfed1326f90c48675fce87dd04ae6/thumb/small }
+ 
 ================= ~ ==================
 ```
 
