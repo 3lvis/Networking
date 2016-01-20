@@ -301,7 +301,7 @@ pod 'Networking'
 
 ## Author
 
-Elvis Nuñez, [@3lvis](https://twitter.com/3lvis)
+This library was made with love by [@3lvis](https://twitter.com/3lvis).
 
 
 ## License
