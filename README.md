@@ -47,27 +47,26 @@ When initializing your instance of **Networking** you can provide a `NetworkingC
 
 ### HTTP basic
 
-To authenticate using [basic authentication](http://www.w3.org/Protocols/HTTP/1.0/spec.html#BasicAA) with a username **"Aladdin"** and password **"open sesame"**, you would need to set the following header field: 
+To authenticate using [basic authentication](http://www.w3.org/Protocols/HTTP/1.0/spec.html#BasicAA) with a username **"aladdin"** and password **"opensesame"**, you would need to set the following header field: 
 
-`Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==`, which contains the string `Aladin:open sesame` in Base64 format. Luckily, **Networking** provides a simpler way to do this.
+`Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==`, which contains the string `aladin:opensesame` in Base64 format. 
 
-This is how you use basic authentication on **Networking**, the following example features a username: `user` and a password: `pswd`.
+Luckily, **Networking** provides a simpler way to do this:
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-networking.authenticate("user", password: "pswd")
-networking.GET("/basic-auth/user/pswd", completion: { JSON, error in
-    // Do something...
+networking.authenticate("aladdin", password: "opensesame")
+networking.GET("/basic-auth/aladdin/opensesame", completion: { JSON, error in
+    // Successfully logged in! Now do something with the JSON
 })
 ```
 
 ### Bearer token
 
-To authenticate using a [bearer token](https://tools.ietf.org/html/rfc6750) **"AAAFFAAAA3DAAAAAA"**, you would need to set the following header field: 
+To authenticate using a [bearer token](https://tools.ietf.org/html/rfc6750) **"AAAFFAAAA3DAAAAAA"**, you would need to set the following header field:  `Authorization: Bearer AAAFFAAAA3DAAAAAA`. 
 
-`Authorization: Bearer AAAFFAAAA3DAAAAAA`. Luckily, **Networking** provides a simpler way to do this.
+Luckily, **Networking** provides a simpler way to do this:
 
-This is how you use bearer token authentication on **Networking**, the following example features a token: `AAAFFAAAA3DAAAAAA`.
 
 ```swift
 let networking = Networking(baseURL: "http://sample.org")
