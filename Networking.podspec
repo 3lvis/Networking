@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 s.name             = "Networking"
 s.version          = "0.15.0"
-s.summary          = "Dead Simple Networking Library"
+s.summary          = "Simplified NSURLSession with support for image caching and faking network requests"
 s.homepage         = "https://github.com/3lvis/Networking"
 s.license          = 'MIT'
 s.author           = { "Elvis Nuñez" => "elvisnunez@me.com" }
