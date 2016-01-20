@@ -24,6 +24,24 @@ public enum NetworkingConfigurationType {
     case Default, Ephemeral, Background
 }
 
+/**
+ Categorizes a status code.
+ - `Informational`: This class of status code indicates a provisional response, consisting only of the Status-Line and optional headers, and is terminated by an empty line.
+ - `Successful`: This class of status code indicates that the client's request was successfully received, understood, and accepted.
+ - `Redirection`: This class of status code indicates that further action needs to be taken by the user agent in order to fulfill the request.
+ - `ClientError:` The 4xx class of status code is intended for cases in which the client seems to have erred.
+ - `ServerError:` Response status codes beginning with the digit "5" indicate cases in which the server is aware that it has erred or is incapable of performing the request.
+ - `Unknown:` This response status code could be used by Foundation for other types of states, for example when a request gets cancelled you will receive status code -999
+ */
+public enum NetworkingStatusCodeType {
+    case Informational, Successful, Redirection, ClientError, ServerError, Unknown
+}
+
+struct Stub {
+    let response: AnyObject?
+    let statusCode: Int
+}
+
 public class Networking {
     static let ErrorDomain = "NetworkingErrorDomain"
 
@@ -41,7 +59,7 @@ public class Networking {
     }
 
     private let baseURL: String
-    var stubs = [RequestType : [String : AnyObject]]()
+    var stubs = [RequestType : [String : Stub]]()
     var token: String?
     var imageCache = NSCache()
     var configurationType: NetworkingConfigurationType
@@ -154,14 +172,19 @@ extension Networking {
     }
 
     func stub(requestType: RequestType, path: String, response: AnyObject?, statusCode: Int) {
-        var getStubs = self.stubs[requestType] ?? [String : AnyObject]()
-        getStubs[path] = response
+        var getStubs = self.stubs[requestType] ?? [String : Stub]()
+        getStubs[path] = Stub(response: response, statusCode: statusCode)
         self.stubs[requestType] = getStubs
     }
 
     func request(requestType: RequestType, path: String, contentType: ContentType, parameters: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
-        if let responses = self.stubs[requestType], response = responses[path] {
-            completion(JSON: response, error: nil)
+        if let responses = self.stubs[requestType], stub = responses[path] {
+            if stub.statusCode.statusCodeType() == .Successful {
+                completion(JSON: stub.response, error: nil)
+            } else {
+                let error = NSError(domain: Networking.ErrorDomain, code: stub.statusCode, userInfo: [NSLocalizedDescriptionKey : NSHTTPURLResponse.localizedStringForStatusCode(stub.statusCode)])
+                completion(JSON: nil, error: error)
+            }
         } else {
             let request = NSMutableURLRequest(URL: self.urlForPath(path))
             request.HTTPMethod = requestType.rawValue
@@ -331,5 +354,23 @@ extension Networking {
 
         print("================= ~ ==================")
         print(" ")
+    }
+}
+
+public extension Int {
+    public func statusCodeType() -> NetworkingStatusCodeType {
+        if self >= 100 && self < 200 {
+            return .Informational
+        } else if self >= 200 && self < 300 {
+            return .Successful
+        } else if self >= 300 && self < 400 {
+            return .Redirection
+        } else if self >= 400 && self < 500 {
+            return .ClientError
+        } else if self >= 500 && self < 600 {
+            return .ServerError
+        } else {
+            return .Unknown
+        }
     }
 }

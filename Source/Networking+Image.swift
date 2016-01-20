@@ -15,8 +15,13 @@ public extension Networking {
         let destinationURL = self.destinationURL(path)
         guard let filePath = self.destinationURL(path).path else { fatalError("File path not valid") }
 
-        if let getStubs = self.stubs[.GET], image = getStubs[path] as? UIImage {
-            completion(image: image, error: nil)
+        if let getStubs = self.stubs[.GET], stub = getStubs[path] {
+            if stub.statusCode.statusCodeType() == .Successful, let image = stub.response as? UIImage {
+                completion(image: image, error: nil)
+            } else {
+                let error = NSError(domain: Networking.ErrorDomain, code: stub.statusCode, userInfo: [NSLocalizedDescriptionKey : NSHTTPURLResponse.localizedStringForStatusCode(stub.statusCode)])
+                completion(image: nil, error: error)
+            }
         } else if let image = self.imageCache.objectForKey(destinationURL.absoluteString) as? UIImage {
             completion(image: image, error: nil)
         } else if NSFileManager().fileExistsAtPath(filePath) {
@@ -92,7 +97,7 @@ public extension Networking {
      - parameter path: The path for the stubbed image download.
      - parameter image: A UIImage that will be returned when there's a request to the registered path
      */
-    public func stubImageDownload(path: String, image: UIImage, statusCode: Int = 200) {
+    public func stubImageDownload(path: String, image: UIImage?, statusCode: Int = 200) {
         self.stub(.GET, path: path, response: image, statusCode: statusCode)
     }
 }
