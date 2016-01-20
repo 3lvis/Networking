@@ -306,7 +306,7 @@ Elvis Nuñez, [@3lvis](https://twitter.com/3lvis)
 
 ## License
 
-**Networking** is available under the MIT license. See the LICENSE file for more info.
+**Networking** is available under the MIT license. See the [LICENSE file](https://github.com/3lvis/Networking/blob/master/LICENSE.md) for more info.
 
 
 ## Attribution
