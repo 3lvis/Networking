@@ -12,18 +12,12 @@ public extension Networking {
     }
 
     /**
-     Cancels the GET request for the specified path. This causes the request to complete with error code -999
-     - parameter path: The path for the cancelled GET request
-     */
-    public func cancelGET(path: String) {
-        self.cancelRequest(.Data, requestType: .GET, path: path)
-    }
-
-    /**
      Stubs GET request for the specified path. After registering this, every GET request to the path, will return
      the registered response.
      - parameter path: The path for the stubbed GET request.
      - parameter response: An `AnyObject` that will be returned when a GET request is made to the specified path.
+     - parameter statusCode: By default it's 200, if you provide any status code that is between 200 and 299 the
+     response object will be returned, otherwise we will return an error containig the provided status code.
      */
     public func stubGET(path: String, response: AnyObject?, statusCode: Int = 200) {
         self.stub(.GET, path: path, response: response, statusCode: statusCode)
@@ -38,6 +32,14 @@ public extension Networking {
      */
     public func stubGET(path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
         self.stub(.GET, path: path, fileName: fileName, bundle: bundle)
+    }
+
+    /**
+     Cancels the GET request for the specified path. This causes the request to complete with error code -999
+     - parameter path: The path for the cancelled GET request
+     */
+    public func cancelGET(path: String) {
+        self.cancelRequest(.Data, requestType: .GET, path: path)
     }
 }
 
@@ -54,18 +56,12 @@ public extension Networking {
     }
 
     /**
-     Cancels the POST request for the specified path. This causes the request to complete with error code -999
-     - parameter path: The path for the cancelled POST request
-     */
-    public func cancelPOST(path: String) {
-        self.cancelRequest(.Data, requestType: .POST, path: path)
-    }
-
-    /**
      Stubs POST request for the specified path. After registering this, every POST request to the path, will return
      the registered response.
      - parameter path: The path for the stubbed POST request.
      - parameter response: An `AnyObject` that will be returned when a POST request is made to the specified path.
+     - parameter statusCode: By default it's 200, if you provide any status code that is between 200 and 299 the
+     response object will be returned, otherwise we will return an error containig the provided status code.
      */
     public func stubPOST(path: String, response: AnyObject?, statusCode: Int = 200) {
         self.stub(.POST, path: path, response: response, statusCode: statusCode)
@@ -80,6 +76,14 @@ public extension Networking {
      */
     public func stubPOST(path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
         self.stub(.POST, path: path, fileName: fileName, bundle: bundle)
+    }
+
+    /**
+     Cancels the POST request for the specified path. This causes the request to complete with error code -999
+     - parameter path: The path for the cancelled POST request
+     */
+    public func cancelPOST(path: String) {
+        self.cancelRequest(.Data, requestType: .POST, path: path)
     }
 }
 
@@ -96,18 +100,12 @@ public extension Networking {
     }
 
     /**
-     Cancels the PUT request for the specified path. This causes the request to complete with error code -999
-     - parameter path: The path for the cancelled PUT request
-     */
-    public func cancelPUT(path: String) {
-        self.cancelRequest(.Data, requestType: .PUT, path: path)
-    }
-
-    /**
      Stubs PUT request for the specified path. After registering this, every PUT request to the path, will return
      the registered response.
      - parameter path: The path for the stubbed PUT request.
      - parameter response: An `AnyObject` that will be returned when a PUT request is made to the specified path.
+     - parameter statusCode: By default it's 200, if you provide any status code that is between 200 and 299 the
+     response object will be returned, otherwise we will return an error containig the provided status code.
      */
     public func stubPUT(path: String, response: AnyObject?, statusCode: Int = 200) {
         self.stub(.PUT, path: path, response: response, statusCode: statusCode)
@@ -123,6 +121,14 @@ public extension Networking {
     public func stubPUT(path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
         self.stub(.PUT, path: path, fileName: fileName, bundle: bundle)
     }
+
+    /**
+     Cancels the PUT request for the specified path. This causes the request to complete with error code -999
+     - parameter path: The path for the cancelled PUT request
+     */
+    public func cancelPUT(path: String) {
+        self.cancelRequest(.Data, requestType: .PUT, path: path)
+    }
 }
 
 // MARK: - DELETE
@@ -137,18 +143,12 @@ public extension Networking {
     }
 
     /**
-     Cancels the DELETE request for the specified path. This causes the request to complete with error code -999
-     - parameter path: The path for the cancelled DELETE request
-     */
-    public func cancelDELETE(path: String) {
-        self.cancelRequest(.Data, requestType: .DELETE, path: path)
-    }
-
-    /**
      Stubs DELETE request for the specified path. After registering this, every DELETE request to the path, will return
      the registered response.
      - parameter path: The path for the stubbed DELETE request.
      - parameter response: An `AnyObject` that will be returned when a DELETE request is made to the specified path.
+     - parameter statusCode: By default it's 200, if you provide any status code that is between 200 and 299 the
+     response object will be returned, otherwise we will return an error containig the provided status code.
      */
     public func stubDELETE(path: String, response: AnyObject?, statusCode: Int = 200) {
         self.stub(.DELETE, path: path, response: response, statusCode: statusCode)
@@ -163,5 +163,13 @@ public extension Networking {
      */
     public func stubDELETE(path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
         self.stub(.DELETE, path: path, fileName: fileName, bundle: bundle)
+    }
+
+    /**
+     Cancels the DELETE request for the specified path. This causes the request to complete with error code -999
+     - parameter path: The path for the cancelled DELETE request
+     */
+    public func cancelDELETE(path: String) {
+        self.cancelRequest(.Data, requestType: .DELETE, path: path)
     }
 }

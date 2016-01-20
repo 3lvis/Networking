@@ -27,23 +27,6 @@ extension HTTPRequestTests {
         })
     }
 
-    func testCancelGET() {
-        let expectation = expectationWithDescription("testCancelGET")
-
-        let networking = Networking(baseURL: baseURL)
-        networking.disableTestingMode = true
-        networking.GET("/get", completion: { JSON, error in
-            let canceledCode = error?.code == -999
-            XCTAssertTrue(canceledCode)
-
-            expectation.fulfill()
-        })
-
-        networking.cancelGET("/get")
-
-        waitForExpectationsWithTimeout(3.0, handler: nil)
-    }
-
     func testGETWithInvalidPath() {
         let networking = Networking(baseURL: baseURL)
         networking.GET("/invalidpath", completion: { JSON, error in
@@ -88,6 +71,23 @@ extension HTTPRequestTests {
             let value = entry["title"] as! String
             XCTAssertEqual(value, "Entry 1")
         })
+    }
+
+    func testCancelGET() {
+        let expectation = expectationWithDescription("testCancelGET")
+
+        let networking = Networking(baseURL: baseURL)
+        networking.disableTestingMode = true
+        networking.GET("/get", completion: { JSON, error in
+            let canceledCode = error?.code == -999
+            XCTAssertTrue(canceledCode)
+
+            expectation.fulfill()
+        })
+
+        networking.cancelGET("/get")
+
+        waitForExpectationsWithTimeout(3.0, handler: nil)
     }
 
     func testStatusCodes() {
@@ -148,23 +148,6 @@ extension HTTPRequestTests {
         }
     }
 
-    func testCancelPOST() {
-        let expectation = expectationWithDescription("testCancelPOST")
-
-        let networking = Networking(baseURL: baseURL)
-        networking.disableTestingMode = true
-        networking.POST("/post", parameters: ["username":"jameson", "password":"password"]) { JSON, error in
-            let canceledCode = error?.code == -999
-            XCTAssertTrue(canceledCode)
-
-            expectation.fulfill()
-        }
-
-        networking.cancelPOST("/post")
-
-        waitForExpectationsWithTimeout(3.0, handler: nil)
-    }
-
     func testPOSTWithIvalidPath() {
         let networking = Networking(baseURL: baseURL)
         networking.POST("/posdddddt", parameters: ["username":"jameson", "password":"password"]) { JSON, error in
@@ -194,6 +177,23 @@ extension HTTPRequestTests {
             XCTAssertEqual(401, error!.code)
         })
     }
+
+    func testCancelPOST() {
+        let expectation = expectationWithDescription("testCancelPOST")
+
+        let networking = Networking(baseURL: baseURL)
+        networking.disableTestingMode = true
+        networking.POST("/post", parameters: ["username":"jameson", "password":"password"]) { JSON, error in
+            let canceledCode = error?.code == -999
+            XCTAssertTrue(canceledCode)
+
+            expectation.fulfill()
+        }
+
+        networking.cancelPOST("/post")
+
+        waitForExpectationsWithTimeout(3.0, handler: nil)
+    }
 }
 
 // MARK: PUT
@@ -215,23 +215,6 @@ extension HTTPRequestTests {
             XCTAssertNotNil(JSON!, "JSON not nil")
             XCTAssertNil(error, "Error")
         }
-    }
-
-    func testCancelPUT() {
-        let expectation = expectationWithDescription("testCancelPUT")
-
-        let networking = Networking(baseURL: baseURL)
-        networking.disableTestingMode = true
-        networking.PUT("/put", parameters: ["username":"jameson", "password":"password"]) { JSON, error in
-            let canceledCode = error?.code == -999
-            XCTAssertTrue(canceledCode)
-
-            expectation.fulfill()
-        }
-
-        networking.cancelPUT("/put")
-
-        waitForExpectationsWithTimeout(3.0, handler: nil)
     }
 
     func testPUTWithIvalidPath() {
@@ -263,6 +246,23 @@ extension HTTPRequestTests {
             XCTAssertEqual(401, error!.code)
         })
     }
+
+    func testCancelPUT() {
+        let expectation = expectationWithDescription("testCancelPUT")
+
+        let networking = Networking(baseURL: baseURL)
+        networking.disableTestingMode = true
+        networking.PUT("/put", parameters: ["username":"jameson", "password":"password"]) { JSON, error in
+            let canceledCode = error?.code == -999
+            XCTAssertTrue(canceledCode)
+
+            expectation.fulfill()
+        }
+
+        networking.cancelPUT("/put")
+
+        waitForExpectationsWithTimeout(3.0, handler: nil)
+    }
 }
 
 // MARK: DELETE
@@ -285,23 +285,6 @@ extension HTTPRequestTests {
             let url = JSON["url"] as! String
             XCTAssertEqual(url, "http://httpbin.org/delete")
         })
-    }
-
-    func testCancelDELETE() {
-        let expectation = expectationWithDescription("testCancelDELETE")
-
-        let networking = Networking(baseURL: baseURL)
-        networking.disableTestingMode = true
-        networking.DELETE("/delete", completion: { JSON, error in
-            let canceledCode = error?.code == -999
-            XCTAssertTrue(canceledCode)
-
-            expectation.fulfill()
-        })
-
-        networking.cancelDELETE("/delete")
-
-        waitForExpectationsWithTimeout(3.0, handler: nil)
     }
 
     func testDELETEWithInvalidPath() {
@@ -348,5 +331,22 @@ extension HTTPRequestTests {
             let value = entry["title"] as! String
             XCTAssertEqual(value, "Entry 1")
         })
+    }
+
+    func testCancelDELETE() {
+        let expectation = expectationWithDescription("testCancelDELETE")
+
+        let networking = Networking(baseURL: baseURL)
+        networking.disableTestingMode = true
+        networking.DELETE("/delete", completion: { JSON, error in
+            let canceledCode = error?.code == -999
+            XCTAssertTrue(canceledCode)
+
+            expectation.fulfill()
+        })
+
+        networking.cancelDELETE("/delete")
+
+        waitForExpectationsWithTimeout(3.0, handler: nil)
     }
 }
