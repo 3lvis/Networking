@@ -47,9 +47,7 @@ When initializing your instance of **Networking** you can provide a `NetworkingC
 
 ### HTTP basic
 
-**Networking** supports [HTTP basic authentication](http://www.w3.org/Protocols/HTTP/1.0/spec.html#BasicAA):
-
-To authenticate using basic authentication with a username **"Aladdin"** and password **"open sesame"**, you would need to set the following header field: 
+To authenticate using [basic authentication]((http://www.w3.org/Protocols/HTTP/1.0/spec.html#BasicAA)) with a username **"Aladdin"** and password **"open sesame"**, you would need to set the following header field: 
 
 `Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==`, which contains the string `Aladin:open sesame` in Base64 format. Luckily, **Networking** provides a simpler way to do this.
 
@@ -65,9 +63,7 @@ networking.GET("/basic-auth/user/pswd", completion: { JSON, error in
 
 ### Bearer token
 
-**Networking** supports [Bearer Token Usage](https://tools.ietf.org/html/rfc6750):
-
-To authenticate using a bearer token **"AAAFFAAAA3DAAAAAA"**, you would need to set the following header field: 
+To authenticate using a [bearer token]((https://tools.ietf.org/html/rfc6750)) **"AAAFFAAAA3DAAAAAA"**, you would need to set the following header field: 
 
 `Authorization: Bearer AAAFFAAAA3DAAAAAA`. Luckily, **Networking** provides a simpler way to do this.
 
