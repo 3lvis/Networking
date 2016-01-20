@@ -88,5 +88,13 @@ class ImageTests: XCTestCase {
             XCTAssertEqual(pigImageData, imageData)
         }
     }
+
+    func testStubImageDownloadWithInvalidStatusCode() {
+        let networking = Networking(baseURL: baseURL)
+        networking.stubImageDownload("/image/png", image: nil, statusCode: 401)
+        networking.downloadImage("/image/png") { image, error in
+            XCTAssertEqual(401, error!.code)
+        }
+    }
     #endif
 }
