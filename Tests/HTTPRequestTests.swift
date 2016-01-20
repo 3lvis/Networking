@@ -184,6 +184,16 @@ extension HTTPRequestTests {
             XCTAssertEqual(value!, "Elvis")
         }
     }
+
+    func testPOSTStubsWithInvalidStatusCode() {
+        let networking = Networking(baseURL: baseURL)
+
+        networking.stubPOST("/story", response: nil, statusCode: 401)
+
+        networking.POST("/story", parameters: nil, completion: { JSON, error in
+            XCTAssertEqual(401, error!.code)
+        })
+    }
 }
 
 // MARK: PUT
@@ -242,6 +252,16 @@ extension HTTPRequestTests {
             let value = JSON[0]["name"]
             XCTAssertEqual(value!, "Elvis")
         }
+    }
+
+    func testPUTStubsWithInvalidStatusCode() {
+        let networking = Networking(baseURL: baseURL)
+
+        networking.stubPUT("/story", response: nil, statusCode: 401)
+
+        networking.PUT("/story", parameters: nil, completion: { JSON, error in
+            XCTAssertEqual(401, error!.code)
+        })
     }
 }
 
@@ -304,6 +324,16 @@ extension HTTPRequestTests {
             let JSON = JSON as! [String : String]
             let value = JSON["name"]
             XCTAssertEqual(value!, "Elvis")
+        })
+    }
+
+    func testDELETEStubsWithInvalidStatusCode() {
+        let networking = Networking(baseURL: baseURL)
+
+        networking.stubDELETE("/story", response: nil, statusCode: 401)
+
+        networking.DELETE("/story", completion: { JSON, error in
+            XCTAssertEqual(401, error!.code)
         })
     }
 
