@@ -1,5 +1,6 @@
 import Foundation
 import XCTest
+import Networking
 
 class Tests: XCTestCase {
     let baseURL = "http://httpbin.org"
@@ -47,5 +48,15 @@ class Tests: XCTestCase {
         let path = "/image/png"
         let destinationURL = networking.destinationURL(path)
         XCTAssertEqual(destinationURL.lastPathComponent!, "http:--httpbin.org-image-png")
+    }
+
+    func testStatusCodeType() {
+        XCTAssertEqual((-999).statusCodeType(), NetworkingStatusCodeType.Unknown)
+        XCTAssertEqual(99.statusCodeType(), NetworkingStatusCodeType.Unknown)
+        XCTAssertEqual(101.statusCodeType(), NetworkingStatusCodeType.Informational)
+        XCTAssertEqual(203.statusCodeType(), NetworkingStatusCodeType.Successful)
+        XCTAssertEqual(303.statusCodeType(), NetworkingStatusCodeType.Redirection)
+        XCTAssertEqual(403.statusCodeType(), NetworkingStatusCodeType.ClientError)
+        XCTAssertEqual(550.statusCodeType(), NetworkingStatusCodeType.ServerError)
     }
 }
