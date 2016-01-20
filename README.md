@@ -17,26 +17,13 @@
 
 * [Configuration types](#configuration-types)
 * [Authentication](#authentication)
-    * [HTTP basic authentication](#http-basic-authentication)
-    * [Bearer token authentication](#bearer-token-authentication)
-* [GET](#get)
-    * [Stubbing GET](#stubbing-get)
-    * [Cancelling GET](#cancelling-get)
-* [POST](#post)
-    * [Custom Content-Type](#custom-content-type)
-    * [Stubbing POST](#stubbing-post)
-    * [Cancelling POST](#cancelling-post)
-* [PUT](#put)
-    * [Custom Content-Type](#custom-content-type-1)
-    * [Stubbing PUT](#stubbing-put)
-    * [Cancelling PUT](#cancelling-put)
-* [DELETE](#delete)
-    * [Stubbing DELETE](#stubbing-delete)
-    * [Cancelling DELETE](#cancelling-delete)
+    * [HTTP basic](#http-basic)
+    * [Bearer token](#bearer-token)
+* [Making a request](#making-a-request)
+* [Content Types](#content-types)
+* [Stubbing](#stubbing)
+* [Cancelling](#cancelling)
 * [Image download](#image-download)
-    * [Stubbing image download](#stubbing-image-download)
-    * [Cancelling image download](#cancelling-image-download)
-    * [Image download caching](#image-download-caching)
 * [Error logging](#error-logging)
 * [Network Activity Indicator](#network-activity-indicator)
 * [Installation](#installation)
@@ -58,7 +45,7 @@ When initializing your instance of **Networking** you can provide a `NetworkingC
 
 ## Authentication
 
-### HTTP basic authentication
+### HTTP basic
 
 **Networking** supports [HTTP basic authentication](http://www.w3.org/Protocols/HTTP/1.0/spec.html#BasicAA):
 
@@ -76,7 +63,7 @@ networking.GET("/basic-auth/user/pswd", completion: { JSON, error in
 })
 ```
 
-### Bearer token authentication
+### Bearer token
 
 **Networking** supports [Bearer Token Usage](https://tools.ietf.org/html/rfc6750):
 
@@ -94,7 +81,11 @@ networking.GET("/users", completion: { JSON, error in
 })
 ```
 
-## GET
+## Making a request
+  
+Making a request is as simple as just calling `GET`, `POST`, `PUT`, or `DELETE`. The only difference between this calls is that `GET` and `DELETE` don't require parameters while the other ones do.  
+
+**GET example**:
 
 ```swift
 let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
@@ -105,31 +96,7 @@ networking.GET("/stories", completion: { JSON, error in
 })
 ```
 
-
-### Stubbing GET
-
-```swift
-let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
-networking.stubGET("/stories", response: [["id" : 47333, "title" : "Site Design: Aquest"]])
-networking.GET("/stories", completion: { JSON, error in
-  if let JSON = JSON {
-    // Stories with id: 47333
-  }
-})
-```
-
-### Cancelling GET
-
-```swift
-let networking = Networking(baseURL: "http://httpbin.org")
-networking.GET("/get", completion: { JSON, error in
-    // Cancelling a GET request returns an error with code -999 which means cancelled request
-})
-
-networking.cancelGET("/get")
-```
-
-## POST
+**POST example**:
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
@@ -155,7 +122,7 @@ networking.POST("/post", params: ["username":"jameson", "password":"password"]) 
 }
 ```
 
-### Custom Content-Type
+## Content Types
 
 **Networking** by default uses `application/json` as the `Content-Type` and `Accept` headers. You can use other content types by proving the `ContentType` attribute. Internally **Networking** will format your parameters so they use [`Percent-encoding`](https://en.wikipedia.org/wiki/Percent-encoding#The_application.2Fx-www-form-urlencoded_type).
 
@@ -166,122 +133,55 @@ networking.POST("/post", contentType: .FormURLEncoded, parameters: ["custname":"
 }
 ```
 
-### Stubbing POST
+## Stubbing
+
+Stubbing a request means that after calling this method on a specific path, any call to this resource, will return what you registered as a response. 
+
+**Stubbing with successfull response**:
 
 ```swift
 let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
-networking.stubPOST("/story", response: ["id" : 47333, "title" : "Site Design: Aquest"])
-networking.POST("/story", params: ["username":"jameson", "password":"password"]) { JSON, error in
-    if let JSON = JSON {
-      // Story with id: 47333
-    }
-}
-```
-
-### Cancelling POST
-
-```swift
-let networking = Networking(baseURL: "http://httpbin.org")
-networking.POST("/post", parameters: ["username":"jameson", "password":"password"]) { JSON, error in
-    // Cancelling a POST request returns an error with code -999 which means cancelled request
+networking.stubGET("/stories", response: [["id" : 47333, "title" : "Site Design: Aquest"]])
+networking.GET("/stories", completion: { JSON, error in
+    // JSON containing stories
 })
-
-networking.cancelPOST("/post")
 ```
 
-## PUT
+**Stubbing with contents of a file**:
+
+If your file is not located in the main bundle you have to specify using the bundle parameters, otherwise `NSBundle.mainBundle()` will be used.
 
 ```swift
-let networking = Networking(baseURL: "http://httpbin.org")
-networking.PUT("/put", params: ["username":"jameson", "password":"password"]) { JSON, error in
-    /*
-    JSON Pretty Print:
-    {
-        "json" : {
-            "username" : "jameson",
-            "password" : "password"
-        },
-        "url" : "http://httpbin.org/put",
-        "data" : "{"password":"password","username":"jameson"}",
-        "headers" : {
-            "Accept" : "application/json",
-            "Content-Type" : "application/json",
-            "Host" : "httpbin.org",
-            "Content-Length" : "44",
-            "Accept-Language" : "en-us"
-        }
-    }
-    */
-}
+let networking = Networking(baseURL: baseURL)
+networking.stubGET("/entries", fileName: "entries.json")
+networking.GET("/entries", completion: { JSON, error in
+    // JSON with the contents of entries.json
+})
 ```
 
-### Custom Content-Type
+**Stubbing with status code**:
 
-**Networking** by default uses `application/json` as the `Content-Type` and `Accept` headers. You can use other content types by proving the `ContentType` attribute. Internally **Networking** will format your parameters so they use [`Percent-encoding`](https://en.wikipedia.org/wiki/Percent-encoding#The_application.2Fx-www-form-urlencoded_type).
-
-```swift
-let networking = Networking(baseURL: "http://httpbin.org")
-networking.PUT("/put", contentType: .FormURLEncoded, parameters: ["custname":"jameson"]) { JSON, error in
-   // Successfull put using `application/x-www-form-urlencoded` as `Content-Type`
-}
-```
-
-### Stubbing PUT
+If you do not provide a status code for this stub, the default returned one will be 200 (SUCCESS), but if you do provide a status code that is not 2XX, then **Networking** will return an NSError containing the status code and a proper error description.
 
 ```swift
 let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
-networking.stubPUT("/story", response: ["id" : 47333, "title" : "Site Design: Aquest"])
-networking.PUT("/story", params: ["username":"jameson", "password":"password"]) { JSON, error in
-    if let JSON = JSON {
-      // Story with id: 47333
-    }
-}
+networking.stubGET("/stories", response: nil, statusCode: 500)
+networking.GET("/stories", completion: { JSON, error in
+    // error with status code 500
+})
 ```
 
-### Cancelling PUT
+## Cancelling
+
+Cancelling any request for a specific path is really simple. Beware that cancelling a request will cause the request to return with an error with status code -999.
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-networking.PUT("/put", parameters: ["username":"jameson", "password":"password"]) { JSON, error in
-    // Cancelling a PUT request returns an error with code -999 which means cancelled request
+networking.GET("/get", completion: { JSON, error in
+    // Cancelling a GET request returns an error with code -999 which means cancelled request
 })
 
-networking.cancelPUT("/put")
-```
-
-## DELETE
-
-```swift
-let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
-networking.DELETE("/stories/2342", completion: { JSON, error in
-  if let JSON = JSON {
-    // { "success": true }
-  }
-})
-```
-
-
-### Stubbing DELETE
-
-```swift
-let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
-networking.stubDELETE("/stories/2342", response: ["success" : true])
-networking.DELETE("/stories/2342", completion: { JSON, error in
-  if let JSON = JSON {
-    // { "success": true }
-  }
-})
-```
-
-### Cancelling GET
-
-```swift
-let networking = Networking(baseURL: "http://httpbin.org")
-networking.DELETE("/delete", completion: { JSON, error in
-    // Cancelling a DELETE request returns an error with code -999 which means cancelled request
-})
-
-networking.cancelDELETE("/delete")
+networking.cancelGET("/get")
 ```
 
 ## Image download
@@ -293,18 +193,18 @@ networking.downloadImage("/image/png") { image, error in
 }
 ```
 
-### Stubbing image download
+**Stubbing**:
 
 ```swift
 let networking = Networking(baseURL: baseURL)
-let pigImage = UIImage(named: "pig.png", inBundle: NSBundle(forClass: Tests.self), compatibleWithTraitCollection: nil)!
+let pigImage = UIImage(named: "pig.png")!
 networking.stubImageDownload("/image/png", image: pigImage)
 networking.downloadImage("/image/png") { image, error in
    // Here you'll get the stubbed pig.png image
 }
 ```
 
-### Cancelling image download
+**Cancelling**:
 
 ```swift
 let networking = Networking(baseURL: baseURL)
@@ -315,7 +215,7 @@ networking.downloadImage("/image/png") { image, error in
 networking.cancelImageDownload("/image/png")
 ```
 
-### Image download caching
+**Caching**:
 
 **Networking** stores the download image in the Caches folder. It also uses NSCache internally so it doesn't have to download the same image again and again.
 
@@ -337,11 +237,9 @@ For example a cancelled request will print this:
 
 ```
 ========== Networking Error ==========
- 
-Error -999: Error Domain=NSURLErrorDomain Code=-999 "cancelled" UserInfo={NSErrorFailingURLKey=http://httpbin.org/image/png, NSLocalizedDescription=cancelled, NSErrorFailingURLStringKey=http://httpbin.org/image/png}
- 
-Request: <NSMutableURLRequest: 0x7fede8c3daf0> { URL: http://httpbin.org/image/png }
- 
+
+Cancelled request: GET https://ddxxx.com/38bea9c8b75bfed1326f90c48675fce87dd04ae6/thumb/small
+
 ================= ~ ==================
 ```
 
