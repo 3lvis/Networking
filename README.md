@@ -43,6 +43,10 @@ When initializing your instance of **Networking** you can provide a `NetworkingC
  - `Background`: A configuration type that allows HTTP and HTTPS uploads or downloads to be performed in the background.
  It causes upload and download tasks to be performed by the system in a separate process.
 
+```swift
+let networking = Networking(baseURL: "http://httpbin.org")
+```
+
 ## Authentication
 
 ### HTTP basic
