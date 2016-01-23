@@ -71,7 +71,6 @@ To authenticate using a [bearer token](https://tools.ietf.org/html/rfc6750) **"A
 
 Luckily, **Networking** provides a simpler way to do this:
 
-
 ```swift
 let networking = Networking(baseURL: "http://sample.org")
 networking.authenticate("AAAFFAAAA3DAAAAAA")
@@ -123,7 +122,9 @@ networking.POST("/post", params: ["username":"jameson", "password":"password"]) 
 
 ## Content Types
 
-**Networking** by default uses `application/json` as the `Content-Type` and `Accept` headers. You can use other content types by proving the `ContentType` attribute. Internally **Networking** will format your parameters so they use [`Percent-encoding`](https://en.wikipedia.org/wiki/Percent-encoding#The_application.2Fx-www-form-urlencoded_type).
+**Networking** by default uses `application/json` as the `Content-Type` and `Accept` headers. If you want to use this content type you don't have to do anything.
+
+You can use other content types by proving the `ContentType` attribute. For example, if you want to use `.FormURLEncoded` internally **Networking** will format your parameters so they use [`Percent-encoding`](https://en.wikipedia.org/wiki/Percent-encoding#The_application.2Fx-www-form-urlencoded_type). No more changes needed.
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
