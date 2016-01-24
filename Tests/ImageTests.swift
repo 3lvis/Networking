@@ -77,10 +77,10 @@ class ImageTests: XCTestCase {
         waitForExpectationsWithTimeout(3.0, handler: nil)
     }
 
-    func testStubImageDownload() {
+    func testFakeImageDownload() {
         let networking = Networking(baseURL: baseURL)
         let pigImage = UIImage(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self), compatibleWithTraitCollection: nil)!
-        networking.stubImageDownload("/image/png", image: pigImage)
+        networking.fakeImageDownload("/image/png", image: pigImage)
         networking.downloadImage("/image/png") { image, error in
             XCTAssertNotNil(image)
             let pigImageData = UIImagePNGRepresentation(pigImage)
@@ -89,9 +89,9 @@ class ImageTests: XCTestCase {
         }
     }
 
-    func testStubImageDownloadWithInvalidStatusCode() {
+    func testFakeImageDownloadWithInvalidStatusCode() {
         let networking = Networking(baseURL: baseURL)
-        networking.stubImageDownload("/image/png", image: nil, statusCode: 401)
+        networking.fakeImageDownload("/image/png", image: nil, statusCode: 401)
         networking.downloadImage("/image/png") { image, error in
             XCTAssertEqual(401, error!.code)
         }

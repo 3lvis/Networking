@@ -8,7 +8,7 @@
 - Singleton free
 - Optimized for unit testing
 - Minimal implementation
-- Easy stubbing
+- Easy fake requests (mocking/stubbing)
 - Runs synchronously in automatic testing enviroments
 - Image download and caching
 - Free
@@ -21,7 +21,7 @@
     * [Bearer token](#bearer-token)
 * [Making a request](#making-a-request)
 * [Content Types](#content-types)
-* [Stubbing](#stubbing)
+* [Faking a request](#faking-a-request)
 * [Cancelling](#cancelling)
 * [Image download](#image-download)
 * [Error logging](#error-logging)
@@ -133,39 +133,39 @@ networking.POST("/post", contentType: .FormURLEncoded, parameters: ["custname":"
 }
 ```
 
-## Stubbing
+## Faking a request
 
-Stubbing a request means that after calling this method on a specific path, any call to this resource, will return what you registered as a response. 
+Faking a request means that after calling this method on a specific path, any call to this resource, will return what you registered as a response. This technique is also known as mocking or stubbing.
 
-**Stubbing with successfull response**:
+**Faking with successfull response**:
 
 ```swift
 let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
-networking.stubGET("/stories", response: [["id" : 47333, "title" : "Site Design: Aquest"]])
+networking.fakeGET("/stories", response: [["id" : 47333, "title" : "Site Design: Aquest"]])
 networking.GET("/stories", completion: { JSON, error in
     // JSON containing stories
 })
 ```
 
-**Stubbing with contents of a file**:
+**Faking with contents of a file**:
 
 If your file is not located in the main bundle you have to specify using the bundle parameters, otherwise `NSBundle.mainBundle()` will be used.
 
 ```swift
 let networking = Networking(baseURL: baseURL)
-networking.stubGET("/entries", fileName: "entries.json")
+networking.fakeGET("/entries", fileName: "entries.json")
 networking.GET("/entries", completion: { JSON, error in
     // JSON with the contents of entries.json
 })
 ```
 
-**Stubbing with status code**:
+**Faking with status code**:
 
-If you do not provide a status code for this stub, the default returned one will be 200 (SUCCESS), but if you do provide a status code that is not 2XX, then **Networking** will return an NSError containing the status code and a proper error description.
+If you do not provide a status code for this fake request, the default returned one will be 200 (SUCCESS), but if you do provide a status code that is not 2XX, then **Networking** will return an NSError containing the status code and a proper error description.
 
 ```swift
 let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
-networking.stubGET("/stories", response: nil, statusCode: 500)
+networking.fakeGET("/stories", response: nil, statusCode: 500)
 networking.GET("/stories", completion: { JSON, error in
     // error with status code 500
 })
@@ -193,14 +193,14 @@ networking.downloadImage("/image/png") { image, error in
 }
 ```
 
-**Stubbing**:
+**Faking**:
 
 ```swift
 let networking = Networking(baseURL: baseURL)
 let pigImage = UIImage(named: "pig.png")!
-networking.stubImageDownload("/image/png", image: pigImage)
+networking.fakeImageDownload("/image/png", image: pigImage)
 networking.downloadImage("/image/png") { image, error in
-   // Here you'll get the stubbed pig.png image
+   // Here you'll get the provided pig.png image
 }
 ```
 

@@ -38,10 +38,10 @@ extension HTTPRequestTests {
         })
     }
 
-    func testGETStubs() {
+    func testFakeGET() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.stubGET("/stories", response: ["name" : "Elvis"])
+        networking.fakeGET("/stories", response: ["name" : "Elvis"])
 
         networking.GET("/stories", completion: { JSON, error in
             let JSON = JSON as! [String : String]
@@ -50,20 +50,20 @@ extension HTTPRequestTests {
         })
     }
 
-    func testGETStubsWithInvalidStatusCode() {
+    func testFakeGETWithInvalidStatusCode() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.stubGET("/stories", response: nil, statusCode: 401)
+        networking.fakeGET("/stories", response: nil, statusCode: 401)
 
         networking.GET("/stories", completion: { JSON, error in
             XCTAssertEqual(401, error!.code)
         })
     }
 
-    func testGETStubsUsingFile() {
+    func testFakeGETUsingFile() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.stubGET("/entries", fileName: "entries.json", bundle: NSBundle(forClass: self.classForKeyedArchiver!))
+        networking.fakeGET("/entries", fileName: "entries.json", bundle: NSBundle(forClass: self.classForKeyedArchiver!))
 
         networking.GET("/entries", completion: { JSON, error in
             let JSON = JSON as! [[String : AnyObject]]
@@ -156,10 +156,10 @@ extension HTTPRequestTests {
         }
     }
 
-    func testPOSTStubs() {
+    func testFakePOST() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.stubPOST("/story", response: [["name" : "Elvis"]])
+        networking.fakePOST("/story", response: [["name" : "Elvis"]])
 
         networking.POST("/story", parameters: ["username":"jameson", "password":"password"]) { JSON, error in
             let JSON = JSON as! [[String : String]]
@@ -168,10 +168,10 @@ extension HTTPRequestTests {
         }
     }
 
-    func testPOSTStubsWithInvalidStatusCode() {
+    func testFakePOSTWithInvalidStatusCode() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.stubPOST("/story", response: nil, statusCode: 401)
+        networking.fakePOST("/story", response: nil, statusCode: 401)
 
         networking.POST("/story", parameters: nil, completion: { JSON, error in
             XCTAssertEqual(401, error!.code)
@@ -225,10 +225,10 @@ extension HTTPRequestTests {
         }
     }
 
-    func testPUTStubs() {
+    func testFakePUT() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.stubPUT("/story", response: [["name" : "Elvis"]])
+        networking.fakePUT("/story", response: [["name" : "Elvis"]])
 
         networking.PUT("/story", parameters: ["username":"jameson", "password":"password"]) { JSON, error in
             let JSON = JSON as! [[String : String]]
@@ -237,10 +237,10 @@ extension HTTPRequestTests {
         }
     }
 
-    func testPUTStubsWithInvalidStatusCode() {
+    func testFakePUTWithInvalidStatusCode() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.stubPUT("/story", response: nil, statusCode: 401)
+        networking.fakePUT("/story", response: nil, statusCode: 401)
 
         networking.PUT("/story", parameters: nil, completion: { JSON, error in
             XCTAssertEqual(401, error!.code)
@@ -298,10 +298,10 @@ extension HTTPRequestTests {
         })
     }
 
-    func testDELETEStubs() {
+    func testFakeDELETE() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.stubDELETE("/stories", response: ["name" : "Elvis"])
+        networking.fakeDELETE("/stories", response: ["name" : "Elvis"])
 
         networking.DELETE("/stories", completion: { JSON, error in
             let JSON = JSON as! [String : String]
@@ -310,20 +310,20 @@ extension HTTPRequestTests {
         })
     }
 
-    func testDELETEStubsWithInvalidStatusCode() {
+    func testFakeDELETEWithInvalidStatusCode() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.stubDELETE("/story", response: nil, statusCode: 401)
+        networking.fakeDELETE("/story", response: nil, statusCode: 401)
 
         networking.DELETE("/story", completion: { JSON, error in
             XCTAssertEqual(401, error!.code)
         })
     }
 
-    func testDELETEStubsUsingFile() {
+    func testFakeDELETEUsingFile() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.stubDELETE("/entries", fileName: "entries.json", bundle: NSBundle(forClass: self.classForKeyedArchiver!))
+        networking.fakeDELETE("/entries", fileName: "entries.json", bundle: NSBundle(forClass: self.classForKeyedArchiver!))
 
         networking.DELETE("/entries", completion: { JSON, error in
             let JSON = JSON as! [[String : AnyObject]]

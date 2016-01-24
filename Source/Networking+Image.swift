@@ -15,11 +15,11 @@ public extension Networking {
         let destinationURL = self.destinationURL(path)
         guard let filePath = self.destinationURL(path).path else { fatalError("File path not valid") }
 
-        if let getStubs = self.stubs[.GET], stub = getStubs[path] {
-            if stub.statusCode.statusCodeType() == .Successful, let image = stub.response as? UIImage {
+        if let getFakeRequests = self.fakeRequests[.GET], fakeRequest = getFakeRequests[path] {
+            if fakeRequest.statusCode.statusCodeType() == .Successful, let image = fakeRequest.response as? UIImage {
                 completion(image: image, error: nil)
             } else {
-                let error = NSError(domain: Networking.ErrorDomain, code: stub.statusCode, userInfo: [NSLocalizedDescriptionKey : NSHTTPURLResponse.localizedStringForStatusCode(stub.statusCode)])
+                let error = NSError(domain: Networking.ErrorDomain, code: fakeRequest.statusCode, userInfo: [NSLocalizedDescriptionKey : NSHTTPURLResponse.localizedStringForStatusCode(fakeRequest.statusCode)])
                 completion(image: nil, error: error)
             }
         } else if let image = self.imageCache.objectForKey(destinationURL.absoluteString) as? UIImage {
@@ -92,13 +92,13 @@ public extension Networking {
     }
 
     /**
-     Stubs a download image request with an UIImage. After registering this, every download request to the path, will return
+     Registers a fake download image request with an UIImage. After registering this, every download request to the path, will return
      the registered UIImage.
-     - parameter path: The path for the stubbed image download.
+     - parameter path: The path for the faked image download request.
      - parameter image: A UIImage that will be returned when there's a request to the registered path
      */
-    public func stubImageDownload(path: String, image: UIImage?, statusCode: Int = 200) {
-        self.stub(.GET, path: path, response: image, statusCode: statusCode)
+    public func fakeImageDownload(path: String, image: UIImage?, statusCode: Int = 200) {
+        self.fake(.GET, path: path, response: image, statusCode: statusCode)
     }
 }
 
