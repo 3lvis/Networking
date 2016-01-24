@@ -8,7 +8,7 @@
 - Singleton free
 - Optimized for unit testing
 - Minimal implementation
-- Easy fake requests (mocking/stubbing)
+- Fake requests easily (mocking/stubbing)
 - Runs synchronously in automatic testing enviroments
 - Image download and caching
 - Free
