@@ -186,6 +186,10 @@ networking.cancelGET("/get")
 
 ## Image download
 
+To download an image using NSURLSession you have to download data and convert that data to an UIImage, without taking in account that you have to remember to do this in a background thread to not block your UI.
+
+Luckily **Networking** provides you a simpler method to do all this:
+
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.downloadImage("/image/png") { image, error in
