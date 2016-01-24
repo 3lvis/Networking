@@ -50,7 +50,7 @@ public enum NetworkingConfigurationType {
     case Default, Ephemeral, Background
 }
 
-struct Stub {
+struct FakeRequest {
     let response: AnyObject?
     let statusCode: Int
 }
@@ -72,7 +72,7 @@ public class Networking {
     }
 
     private let baseURL: String
-    var stubs = [RequestType : [String : Stub]]()
+    var fakeRequests = [RequestType : [String : FakeRequest]]()
     var token: String?
     var imageCache = NSCache()
     var configurationType: NetworkingConfigurationType
@@ -157,10 +157,10 @@ extension Networking {
         }
     }
 
-    func stub(requestType: RequestType, path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
+    func fake(requestType: RequestType, path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
         do {
             if let result = try JSON.from(fileName, bundle: bundle) {
-                self.stub(requestType, path: path, response: result, statusCode: 200)
+                self.fake(requestType, path: path, response: result, statusCode: 200)
             }
         } catch ParsingError.NotFound {
             fatalError("We couldn't find \(fileName), are you sure is there?")
@@ -169,18 +169,18 @@ extension Networking {
         }
     }
 
-    func stub(requestType: RequestType, path: String, response: AnyObject?, statusCode: Int) {
-        var getStubs = self.stubs[requestType] ?? [String : Stub]()
-        getStubs[path] = Stub(response: response, statusCode: statusCode)
-        self.stubs[requestType] = getStubs
+    func fake(requestType: RequestType, path: String, response: AnyObject?, statusCode: Int) {
+        var fakeRequests = self.fakeRequests[requestType] ?? [String : FakeRequest]()
+        fakeRequests[path] = FakeRequest(response: response, statusCode: statusCode)
+        self.fakeRequests[requestType] = fakeRequests
     }
 
     func request(requestType: RequestType, path: String, contentType: ContentType, parameters: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
-        if let responses = self.stubs[requestType], stub = responses[path] {
-            if stub.statusCode.statusCodeType() == .Successful {
-                completion(JSON: stub.response, error: nil)
+        if let responses = self.fakeRequests[requestType], fakeRequest = responses[path] {
+            if fakeRequest.statusCode.statusCodeType() == .Successful {
+                completion(JSON: fakeRequest.response, error: nil)
             } else {
-                let error = NSError(domain: Networking.ErrorDomain, code: stub.statusCode, userInfo: [NSLocalizedDescriptionKey : NSHTTPURLResponse.localizedStringForStatusCode(stub.statusCode)])
+                let error = NSError(domain: Networking.ErrorDomain, code: fakeRequest.statusCode, userInfo: [NSLocalizedDescriptionKey : NSHTTPURLResponse.localizedStringForStatusCode(fakeRequest.statusCode)])
                 completion(JSON: nil, error: error)
             }
         } else {
