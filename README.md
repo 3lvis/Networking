@@ -19,6 +19,7 @@
 * [Authentication](#authentication)
     * [HTTP basic](#http-basic)
     * [Bearer token](#bearer-token)
+    * [HTTP token](#http-token)
 * [Making a request](#making-a-request)
 * [Content Types](#content-types)
 * [Faking a request](#faking-a-request)
@@ -51,15 +52,15 @@ let networking = Networking(baseURL: "http://httpbin.org")
 
 ### HTTP basic
 
-To authenticate using [basic authentication](http://www.w3.org/Protocols/HTTP/1.0/spec.html#BasicAA) with a username **"aladdin"** and password **"opensesame"**, you would need to set the following header field: 
+To authenticate using [basic authentication](http://www.w3.org/Protocols/HTTP/1.0/spec.html#BasicAA) with a username **"aladdin"** and password **"opensesame"**, you would need to set the following header field:
 
-`Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==`, which contains the string `aladin:opensesame` in Base64 format. 
+`Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==`, which contains the string `aladin:opensesame` in Base64 format.
 
 Luckily, **Networking** provides a simpler way to do this:
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-networking.authenticate("aladdin", password: "opensesame")
+networking.authenticate(username: "aladdin", password: "opensesame")
 networking.GET("/basic-auth/aladdin/opensesame", completion: { JSON, error in
     // Successfully logged in! Now do something with the JSON
 })
@@ -67,20 +68,34 @@ networking.GET("/basic-auth/aladdin/opensesame", completion: { JSON, error in
 
 ### Bearer token
 
-To authenticate using a [bearer token](https://tools.ietf.org/html/rfc6750) **"AAAFFAAAA3DAAAAAA"**, you would need to set the following header field:  `Authorization: Bearer AAAFFAAAA3DAAAAAA`. 
+To authenticate using a [bearer token](https://tools.ietf.org/html/rfc6750) **"AAAFFAAAA3DAAAAAA"**, you would need to set the following header field:  `Authorization: Bearer AAAFFAAAA3DAAAAAA`.
 
 Luckily, **Networking** provides a simpler way to do this:
 
 ```swift
 let networking = Networking(baseURL: "http://sample.org")
-networking.authenticate("AAAFFAAAA3DAAAAAA")
+networking.authenticate(bearerToken: "AAAFFAAAA3DAAAAAA")
+networking.GET("/users", completion: { JSON, error in
+    // Do something...
+})
+```
+
+### HTTP token
+
+To authenticate using a [HTTP token](http://tools.ietf.org/html/rfc1945) **"AAAFFAAAA3DAAAAAA"**, you would need to set the following header field:  `Authorization: Token token=AAAFFAAAA3DAAAAAA`.
+
+Luckily, **Networking** also provides a simpler way to do this:
+
+```swift
+let networking = Networking(baseURL: "http://sample.org")
+networking.authenticate(HTTPToken: "AAAFFAAAA3DAAAAAA")
 networking.GET("/users", completion: { JSON, error in
     // Do something...
 })
 ```
 
 ## Making a request
-  
+
 Making a request is as simple as just calling `GET`, `POST`, `PUT`, or `DELETE`. The only difference between this calls is that `GET` and `DELETE` don't require parameters while the other ones do.  
 
 **GET example**:
@@ -241,9 +256,9 @@ For example a cancelled request will print this:
 
 ```
 ========== Networking Error ==========
- 
+
 Cancelled request: <NSMutableURLRequest: 0x7fdc80eb0e30> { URL: https://api.mmm.com/38bea9c8b75bfed1326f90c48675fce87dd04ae6/thumb/small }
- 
+
 ================= ~ ==================
 ```
 
@@ -251,21 +266,21 @@ A 404 request will print something like this:
 
 ```
 ========== Networking Error ==========
- 
+
 Error 3840: Error Domain=NSCocoaErrorDomain Code=3840 "JSON text did not start with array or object and option to allow fragments not set." UserInfo={NSDebugDescription=JSON text did not start with array or object and option to allow fragments not set.}
- 
+
 Request: <NSMutableURLRequest: 0x7fede8d17220> { URL: http://httpbin.org/invalidpath }
- 
+
 Data: <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
 <title>404 Not Found</title>
 <h1>Not Found</h1>
 <p>The requested URL was not found on the server.  If you entered the URL manually please check your spelling and try again.</p>
 
- 
+
 Response status code: 404
- 
+
 Path: http://httpbin.org/invalidpath
- 
+
 Response: <NSHTTPURLResponse: 0x7fede8d0c4e0> { URL: http://httpbin.org/invalidpath } { status code: 404, headers {
     "Access-Control-Allow-Credentials" = true;
     "Access-Control-Allow-Origin" = "*";
@@ -275,7 +290,7 @@ Response: <NSHTTPURLResponse: 0x7fede8d0c4e0> { URL: http://httpbin.org/invalidp
     Date = "Tue, 17 Nov 2015 09:59:42 GMT";
     Server = nginx;
 } }
- 
+
 ================= ~ ==================
 ```
 
