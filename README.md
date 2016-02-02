@@ -60,7 +60,7 @@ Luckily, **Networking** provides a simpler way to do this:
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-networking.authenticate("aladdin", password: "opensesame")
+networking.authenticate(username: "aladdin", password: "opensesame")
 networking.GET("/basic-auth/aladdin/opensesame", completion: { JSON, error in
     // Successfully logged in! Now do something with the JSON
 })
@@ -74,7 +74,7 @@ Luckily, **Networking** provides a simpler way to do this:
 
 ```swift
 let networking = Networking(baseURL: "http://sample.org")
-networking.authenticate("AAAFFAAAA3DAAAAAA")
+networking.authenticate(bearerToken: "AAAFFAAAA3DAAAAAA")
 networking.GET("/users", completion: { JSON, error in
     // Do something...
 })
@@ -88,7 +88,7 @@ Luckily, **Networking** also provides a simpler way to do this:
 
 ```swift
 let networking = Networking(baseURL: "http://sample.org")
-networking.authenticate("token=AAAFFAAAA3DAAAAAA")
+networking.authenticate(HTTPToken: "AAAFFAAAA3DAAAAAA")
 networking.GET("/users", completion: { JSON, error in
     // Do something...
 })

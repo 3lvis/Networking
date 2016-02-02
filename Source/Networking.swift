@@ -50,6 +50,11 @@ public enum NetworkingConfigurationType {
     case Default, Ephemeral, Background
 }
 
+
+public enum NetworkingTokenType {
+    case HTTP, Bearer, None
+}
+
 struct FakeRequest {
     let response: AnyObject?
     let statusCode: Int
@@ -74,6 +79,7 @@ public class Networking {
     private let baseURL: String
     var fakeRequests = [RequestType : [String : FakeRequest]]()
     var token: String?
+    var tokenType: NetworkingTokenType = .None
     var imageCache = NSCache()
     var configurationType: NetworkingConfigurationType
 
@@ -101,7 +107,7 @@ public class Networking {
      - parameter username: The username to be used
      - parameter password: The password to be used
      */
-    public func authenticate(username: String, password: String) {
+    public func authenticate(username username: String, password: String) {
         let credentialsString = "\(username):\(password)"
         if let credentialsData = credentialsString.dataUsingEncoding(NSUTF8StringEncoding) {
             let base64Credentials = credentialsData.base64EncodedStringWithOptions([])
@@ -115,12 +121,21 @@ public class Networking {
     }
 
     /**
-     Authenticates using a token, sets the Authorization header to "Bearer \(token)" or
-     to "Token token=\(token)" if the string includes "token="
+     Authenticates using a Bearer token, sets the Authorization header to "Bearer \(token)"
      - parameter token: The token to be used
      */
-    public func authenticate(token: String) {
-        self.token = (token.rangeOfString("token=") != nil) ? "Token \(token)" : "Bearer \(token)"
+    public func authenticate(bearerToken bearerToken: String) {
+        self.tokenType = .Bearer
+        self.token = bearerToken
+    }
+
+    /**
+     Authenticates using a HTTP token, sets the Authorization header to "Token token=\(token)"
+     - parameter token: The token to be used
+     */
+    public func authenticate(HTTPToken httpToken: String) {
+      self.tokenType = .HTTP
+      self.token = httpToken
     }
 
     /**
@@ -191,7 +206,16 @@ extension Networking {
             request.addValue("application/json", forHTTPHeaderField: "Accept")
 
             if let token = token {
-                request.setValue(token, forHTTPHeaderField: "Authorization")
+                switch self.tokenType {
+                case .HTTP:
+                  request.setValue("Token token=\(token)", forHTTPHeaderField: "Authorization")
+                  break
+                case .Bearer:
+                  request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+                  break
+                case .None:
+                  break
+              }
             }
 
             NetworkActivityIndicator.sharedIndicator.visible = true
