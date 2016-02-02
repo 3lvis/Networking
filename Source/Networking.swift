@@ -51,8 +51,13 @@ public enum NetworkingConfigurationType {
 }
 
 
-public enum NetworkingTokenType {
-    case HTTP, Bearer, None
+/**
+ Represents the token type to be used.
+ - `HTTP:` ?
+ - `Bearer:` https://tools.ietf.org/html/rfc6750
+ */
+enum NetworkingTokenType {
+    case HTTP, Bearer
 }
 
 struct FakeRequest {
@@ -79,7 +84,7 @@ public class Networking {
     private let baseURL: String
     var fakeRequests = [RequestType : [String : FakeRequest]]()
     var token: String?
-    var tokenType: NetworkingTokenType = .None
+    var tokenType: NetworkingTokenType?
     var imageCache = NSCache()
     var configurationType: NetworkingConfigurationType
 
@@ -122,7 +127,7 @@ public class Networking {
 
     /**
      Authenticates using a Bearer token, sets the Authorization header to "Bearer \(token)"
-     - parameter token: The token to be used
+     - parameter bearerToken: The token to be used
      */
     public func authenticate(bearerToken bearerToken: String) {
         self.tokenType = .Bearer
@@ -131,11 +136,11 @@ public class Networking {
 
     /**
      Authenticates using a HTTP token, sets the Authorization header to "Token token=\(token)"
-     - parameter token: The token to be used
+     - parameter HTTPToken: The token to be used
      */
-    public func authenticate(HTTPToken httpToken: String) {
+    public func authenticate(HTTPToken HTTPToken: String) {
       self.tokenType = .HTTP
-      self.token = httpToken
+      self.token = HTTPToken
     }
 
     /**
@@ -205,15 +210,13 @@ extension Networking {
             request.addValue(contentType.rawValue, forHTTPHeaderField: "Content-Type")
             request.addValue("application/json", forHTTPHeaderField: "Accept")
 
-            if let token = token {
-                switch self.tokenType {
+            if let token = self.token, type = self.tokenType {
+                switch type {
                 case .HTTP:
                   request.setValue("Token token=\(token)", forHTTPHeaderField: "Authorization")
                   break
                 case .Bearer:
                   request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-                  break
-                case .None:
                   break
               }
             }
