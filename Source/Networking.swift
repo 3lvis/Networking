@@ -115,11 +115,12 @@ public class Networking {
     }
 
     /**
-     Authenticates using a token, sets the Authorization header to "Bearer \(token)"
+     Authenticates using a token, sets the Authorization header to "Bearer \(token)" or
+     to "Token token=\(token)" if the string includes "token="
      - parameter token: The token to be used
      */
     public func authenticate(token: String) {
-        self.token = token
+        self.token = (token.rangeOfString("token=") != nil) ? "Token \(token)" : "Bearer \(token)"
     }
 
     /**
@@ -190,7 +191,7 @@ extension Networking {
             request.addValue("application/json", forHTTPHeaderField: "Accept")
 
             if let token = token {
-                request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+                request.setValue(token, forHTTPHeaderField: "Authorization")
             }
 
             NetworkActivityIndicator.sharedIndicator.visible = true
