@@ -33,9 +33,10 @@ struct FakeRequest {
 public class Networking {
     static let ErrorDomain = "NetworkingErrorDomain"
 
-    public enum ContentType: String {
-        case JSON = "application/json"
-        case FormURLEncoded = "application/x-www-form-urlencoded"
+    public enum ContentType {
+        case JSON
+        case FormURLEncoded
+        case Custom(String)
     }
 
     /**
@@ -195,7 +196,7 @@ extension Networking {
         } else {
             let request = NSMutableURLRequest(URL: self.urlForPath(path))
             request.HTTPMethod = requestType.rawValue
-            request.addValue(contentType.rawValue, forHTTPHeaderField: "Content-Type")
+            request.addValue(Networking.valueForContentType(contentType), forHTTPHeaderField: "Content-Type")
             request.addValue("application/json", forHTTPHeaderField: "Accept")
 
             if let authorizationHeader = self.customAuthorizationHeader {
@@ -220,6 +221,9 @@ extension Networking {
                     let parametersDictionary = parameters as! [String : AnyObject]
                     let formattedParameters = parametersDictionary.formURLEncodedFormat()
                     request.HTTPBody = formattedParameters.dataUsingEncoding(NSUTF8StringEncoding)
+                    break
+                case .Custom(_):
+                    request.HTTPBody = parameters as? NSData
                     break
                 }
             }
@@ -274,6 +278,17 @@ extension Networking {
                     completion(JSON: result, error: connectionError)
                 }
             }
+        }
+    }
+
+    class func valueForContentType(contentType: ContentType) -> String {
+        switch contentType {
+        case .JSON:
+            return "application/json"
+        case .FormURLEncoded:
+            return "application/x-www-form-urlencoded"
+        case .Custom(let value):
+            return value
         }
     }
 
@@ -340,6 +355,7 @@ extension Networking {
                     let formattedParameters = parametersDictionary.formURLEncodedFormat()
                     print("Parameters: \(formattedParameters)")
                     break
+                default: break
                 }
 
                 print(" ")
