@@ -50,16 +50,6 @@ public enum NetworkingConfigurationType {
     case Default, Ephemeral, Background
 }
 
-
-/**
- Represents the token type to be used.
- - `HTTP:` ?
- - `Bearer:` https://tools.ietf.org/html/rfc6750
- */
-enum NetworkingTokenType {
-    case HTTP, Bearer
-}
-
 struct FakeRequest {
     let response: AnyObject?
     let statusCode: Int
@@ -84,7 +74,7 @@ public class Networking {
     private let baseURL: String
     var fakeRequests = [RequestType : [String : FakeRequest]]()
     var token: String?
-    var tokenType: NetworkingTokenType?
+    var customAuthorizationHeader: String?
     var imageCache = NSCache()
     var configurationType: NetworkingConfigurationType
 
@@ -127,20 +117,18 @@ public class Networking {
 
     /**
      Authenticates using a Bearer token, sets the Authorization header to "Bearer \(token)"
-     - parameter bearerToken: The token to be used
+     - parameter token: The token to be used
      */
-    public func authenticate(bearerToken bearerToken: String) {
-        self.tokenType = .Bearer
-        self.token = bearerToken
+    public func authenticate(token token: String) {
+        self.token = token
     }
 
     /**
-     Authenticates using a HTTP token, sets the Authorization header to "Token token=\(token)"
-     - parameter HTTPToken: The token to be used
+     Authenticates using a custom HTTP Authorization header
+     - parameter authorizationHeader: The authorization header to be used
      */
-    public func authenticate(HTTPToken HTTPToken: String) {
-      self.tokenType = .HTTP
-      self.token = HTTPToken
+    public func authenticate(authorizationHeader authorizationHeader: String) {
+        self.customAuthorizationHeader = authorizationHeader
     }
 
     /**
@@ -210,15 +198,10 @@ extension Networking {
             request.addValue(contentType.rawValue, forHTTPHeaderField: "Content-Type")
             request.addValue("application/json", forHTTPHeaderField: "Accept")
 
-            if let token = self.token, type = self.tokenType {
-                switch type {
-                case .HTTP:
-                  request.setValue("Token token=\(token)", forHTTPHeaderField: "Authorization")
-                  break
-                case .Bearer:
-                  request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-                  break
-              }
+            if let authorizationHeader = self.customAuthorizationHeader {
+                request.setValue(authorizationHeader, forHTTPHeaderField: "Authorization")
+            } else if let token = self.token {
+                request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
             }
 
             NetworkActivityIndicator.sharedIndicator.visible = true
