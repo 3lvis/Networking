@@ -9,7 +9,7 @@
 - Optimized for unit testing
 - Minimal implementation
 - Fake requests easily (mocking/stubbing)
-- Runs synchronously in automatic testing enviroments
+- Runs synchronously in automatic testing environments
 - Image download and caching
 - Free
 
