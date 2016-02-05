@@ -9,7 +9,7 @@
 - Optimized for unit testing
 - Minimal implementation
 - Fake requests easily (mocking/stubbing)
-- Runs synchronously in automatic testing enviroments
+- Runs synchronously in automatic testing environments
 - Image download and caching
 - Free
 
@@ -19,7 +19,7 @@
 * [Authentication](#authentication)
     * [HTTP basic](#http-basic)
     * [Bearer token](#bearer-token)
-    * [HTTP token](#http-token)
+    * [Custom authentication header](#custom-authentication-header)
 * [Making a request](#making-a-request)
 * [Content Types](#content-types)
 * [Faking a request](#faking-a-request)
@@ -74,21 +74,21 @@ Luckily, **Networking** provides a simpler way to do this:
 
 ```swift
 let networking = Networking(baseURL: "http://sample.org")
-networking.authenticate(bearerToken: "AAAFFAAAA3DAAAAAA")
+networking.authenticate(token: "AAAFFAAAA3DAAAAAA")
 networking.GET("/users", completion: { JSON, error in
     // Do something...
 })
 ```
 
-### HTTP token
+### Custom authentication header
 
-To authenticate using a [HTTP token](http://tools.ietf.org/html/rfc1945) **"AAAFFAAAA3DAAAAAA"**, you would need to set the following header field:  `Authorization: Token token=AAAFFAAAA3DAAAAAA`.
+To authenticate using a custom authentication header, for example **"Token token=AAAFFAAAA3DAAAAAA"** you would need to set the following header field: `Authorization: Token token=AAAFFAAAA3DAAAAAA`.
 
 Luckily, **Networking** also provides a simpler way to do this:
 
 ```swift
 let networking = Networking(baseURL: "http://sample.org")
-networking.authenticate(HTTPToken: "AAAFFAAAA3DAAAAAA")
+networking.authenticate(authorizationHeader: "Token token=AAAFFAAAA3DAAAAAA")
 networking.GET("/users", completion: { JSON, error in
     // Do something...
 })
