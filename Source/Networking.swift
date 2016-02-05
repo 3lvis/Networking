@@ -3,25 +3,12 @@ import TestCheck
 import JSON
 import NetworkActivityIndicator
 
-/**
- Categorizes a status code.
- - `Informational`: This class of status code indicates a provisional response, consisting only of the Status-Line and optional headers, and is terminated by an empty line.
- - `Successful`: This class of status code indicates that the client's request was successfully received, understood, and accepted.
- - `Redirection`: This class of status code indicates that further action needs to be taken by the user agent in order to fulfill the request.
- - `ClientError:` The 4xx class of status code is intended for cases in which the client seems to have erred.
- - `ServerError:` Response status codes beginning with the digit "5" indicate cases in which the server is aware that it has erred or is incapable of performing the request.
- - `Unknown:` This response status code could be used by Foundation for other types of states, for example when a request gets cancelled you will receive status code -999
- */
-public enum NetworkingStatusCodeType {
-    case Informational, Successful, Redirection, ClientError, ServerError, Unknown
-}
-
 public extension Int {
     /**
      Categorizes a status code.
      - returns: The NetworkingStatusCodeType of the status code.
      */
-    public func statusCodeType() -> NetworkingStatusCodeType {
+    public func statusCodeType() -> Networking.StatusCodeType {
         if self >= 100 && self < 200 {
             return .Informational
         } else if self >= 200 && self < 300 {
@@ -38,18 +25,6 @@ public extension Int {
     }
 }
 
-/**
- Provides the a bridge for configuring your Networking object with NSURLSessionConfiguration.
- - `Default:` This configuration type manages upload and download tasks using the default options.
- - `Ephemeral:` A configuration type that uses no persistent storage for caches, cookies, or credentials.
- It's optimized for transferring data to and from your app’s memory.
- - `Background:` A configuration type that allows HTTP and HTTPS uploads or downloads to be performed in the background.
- It causes upload and download tasks to be performed by the system in a separate process.
- */
-public enum NetworkingConfigurationType {
-    case Default, Ephemeral, Background
-}
-
 struct FakeRequest {
     let response: AnyObject?
     let statusCode: Int
@@ -63,6 +38,19 @@ public class Networking {
         case FormURLEncoded = "application/x-www-form-urlencoded"
     }
 
+    /**
+     Categorizes a status code.
+     - `Informational`: This class of status code indicates a provisional response, consisting only of the Status-Line and optional headers, and is terminated by an empty line.
+     - `Successful`: This class of status code indicates that the client's request was successfully received, understood, and accepted.
+     - `Redirection`: This class of status code indicates that further action needs to be taken by the user agent in order to fulfill the request.
+     - `ClientError:` The 4xx class of status code is intended for cases in which the client seems to have erred.
+     - `ServerError:` Response status codes beginning with the digit "5" indicate cases in which the server is aware that it has erred or is incapable of performing the request.
+     - `Unknown:` This response status code could be used by Foundation for other types of states, for example when a request gets cancelled you will receive status code -999
+     */
+    public enum StatusCodeType {
+        case Informational, Successful, Redirection, ClientError, ServerError, Unknown
+    }
+
     enum RequestType: String {
         case GET, POST, PUT, DELETE
     }
@@ -71,12 +59,24 @@ public class Networking {
         case Data, Upload, Download
     }
 
+    /**
+     Provides the a bridge for configuring your Networking object with NSURLSessionConfiguration.
+     - `Default:` This configuration type manages upload and download tasks using the default options.
+     - `Ephemeral:` A configuration type that uses no persistent storage for caches, cookies, or credentials.
+     It's optimized for transferring data to and from your app’s memory.
+     - `Background:` A configuration type that allows HTTP and HTTPS uploads or downloads to be performed in the background.
+     It causes upload and download tasks to be performed by the system in a separate process.
+     */
+    public enum ConfigurationType {
+        case Default, Ephemeral, Background
+    }
+
     private let baseURL: String
     var fakeRequests = [RequestType : [String : FakeRequest]]()
     var token: String?
     var customAuthorizationHeader: String?
     var imageCache = NSCache()
-    var configurationType: NetworkingConfigurationType
+    var configurationType: ConfigurationType
 
     /**
      Flag used to disable synchronous request when running automatic tests
@@ -91,7 +91,7 @@ public class Networking {
      Base initializer, it creates an instance of `Networking`.
      - parameter baseURL: The base URL for HTTP requests under `Networking`.
      */
-    public init(baseURL: String, configurationType: NetworkingConfigurationType = .Default) {
+    public init(baseURL: String, configurationType: ConfigurationType = .Default) {
         self.baseURL = baseURL
         self.configurationType = configurationType
     }

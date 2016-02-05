@@ -50,12 +50,12 @@ class Tests: XCTestCase {
     }
 
     func testStatusCodeType() {
-        XCTAssertEqual((-999).statusCodeType(), NetworkingStatusCodeType.Unknown)
-        XCTAssertEqual(99.statusCodeType(), NetworkingStatusCodeType.Unknown)
-        XCTAssertEqual(101.statusCodeType(), NetworkingStatusCodeType.Informational)
-        XCTAssertEqual(203.statusCodeType(), NetworkingStatusCodeType.Successful)
-        XCTAssertEqual(303.statusCodeType(), NetworkingStatusCodeType.Redirection)
-        XCTAssertEqual(403.statusCodeType(), NetworkingStatusCodeType.ClientError)
-        XCTAssertEqual(550.statusCodeType(), NetworkingStatusCodeType.ServerError)
+        XCTAssertEqual((-999).statusCodeType(), Networking.StatusCodeType.Unknown)
+        XCTAssertEqual(99.statusCodeType(), Networking.StatusCodeType.Unknown)
+        XCTAssertEqual(101.statusCodeType(), Networking.StatusCodeType.Informational)
+        XCTAssertEqual(203.statusCodeType(), Networking.StatusCodeType.Successful)
+        XCTAssertEqual(303.statusCodeType(), Networking.StatusCodeType.Redirection)
+        XCTAssertEqual(403.statusCodeType(), Networking.StatusCodeType.ClientError)
+        XCTAssertEqual(550.statusCodeType(), Networking.StatusCodeType.ServerError)
     }
 }
