@@ -368,7 +368,7 @@ extension Networking {
 
             if let response = response as? NSHTTPURLResponse {
                 if let headers = request?.allHTTPHeaderFields {
-                    print("Headers: \(request?.allHTTPHeaderFields)")
+                    print("Headers: \(headers)")
                     print(" ")
                     print(" ")
                 }
