@@ -367,6 +367,11 @@ extension Networking {
             }
 
             if let response = response as? NSHTTPURLResponse {
+                if let headers = request?.allHTTPHeaderFields {
+                    print("Headers: \(headers)")
+                    print(" ")
+                    print(" ")
+                }
                 print("Response status code: \(response.statusCode) — \(NSHTTPURLResponse.localizedStringForStatusCode(response.statusCode))")
                 print(" ")
                 print(" ")
