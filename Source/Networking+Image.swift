@@ -37,13 +37,9 @@ public extension Networking {
                 }
             })
         } else {
-            let request = NSMutableURLRequest(URL: self.urlForPath(fullPath))
+            let request = NSMutableURLRequest(URL: NSURL(string: fullPath)!)
             request.HTTPMethod = RequestType.GET.rawValue
             request.addValue("application/json", forHTTPHeaderField: "Accept")
-
-            if let token = token {
-                request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-            }
 
             let semaphore = dispatch_semaphore_create(0)
             var returnedData: NSData?
