@@ -53,12 +53,14 @@ public extension Networking {
                 returnedResponse = response
                 returnedError = error
 
-                if let url = url, data = NSData(contentsOfURL: url), image = UIImage(data: data) {
+                if returnedError == nil, let url = url, data = NSData(contentsOfURL: url), image = UIImage(data: data) {
                     returnedData = data
                     returnedImage = image
 
                     data.writeToURL(destinationURL, atomically: true)
                     self.imageCache.setObject(image, forKey: destinationURL.absoluteString)
+                } else if let url = url {
+                    returnedError = NSError(domain: Networking.ErrorDomain, code: 500, userInfo: [NSLocalizedDescriptionKey : "Failed to load url: \(url.absoluteString)"])
                 }
 
                 if TestCheck.isTesting && self.disableTestingMode == false {
@@ -67,7 +69,7 @@ public extension Networking {
                     dispatch_async(dispatch_get_main_queue(), {
                         NetworkActivityIndicator.sharedIndicator.visible = false
 
-                        self.logError(.JSON, parameters: nil, data: returnedData, request: request, response: response, error: error)
+                        self.logError(.JSON, parameters: nil, data: returnedData, request: request, response: response, error: returnedError)
                         completion(image: returnedImage, error: error)
                     })
                 }
@@ -144,7 +146,7 @@ public extension Networking {
                     dispatch_async(dispatch_get_main_queue(), {
                         NetworkActivityIndicator.sharedIndicator.visible = false
 
-                        self.logError(.JSON, parameters: nil, data: returnedData, request: request, response: response, error: error)
+                        self.logError(.JSON, parameters: nil, data: returnedData, request: request, response: response, error: returnedError)
                         completion(image: returnedImage, error: error)
                     })
                 }
