@@ -18,7 +18,7 @@ public extension Networking {
         let destinationURL = cachesURL.URLByAppendingPathComponent(url.absoluteString)
         guard let filePath = destinationURL.path else { fatalError("File path not valid") }
 
-        self.downloadImage(destinationURL: destinationURL, path: path, filePath: filePath, completion: completion)
+        self.downloadImage(requestURL: NSURL(string: path)!, destinationURL: destinationURL, path: path, filePath: filePath, completion: completion)
     }
 
     /**
@@ -30,10 +30,10 @@ public extension Networking {
         let destinationURL = self.destinationURL(path)
         guard let filePath = self.destinationURL(path).path else { fatalError("File path not valid") }
 
-        self.downloadImage(destinationURL: destinationURL, path: path, filePath: filePath, completion: completion)
+        self.downloadImage(requestURL: self.urlForPath(path), destinationURL: destinationURL, path: path, filePath: filePath, completion: completion)
     }
 
-    func downloadImage(destinationURL destinationURL: NSURL, path: String, filePath: String, completion: (image: UIImage?, error: NSError?) -> ()) {
+    func downloadImage(requestURL requestURL: NSURL, destinationURL: NSURL, path: String, filePath: String, completion: (image: UIImage?, error: NSError?) -> ()) {
         if let getFakeRequests = self.fakeRequests[.GET], fakeRequest = getFakeRequests[path] {
             if fakeRequest.statusCode.statusCodeType() == .Successful, let image = fakeRequest.response as? UIImage {
                 completion(image: image, error: nil)
@@ -53,7 +53,7 @@ public extension Networking {
                 }
             })
         } else {
-            let request = NSMutableURLRequest(URL: self.urlForPath(path))
+            let request = NSMutableURLRequest(URL: requestURL)
             request.HTTPMethod = RequestType.GET.rawValue
             request.addValue("application/json", forHTTPHeaderField: "Accept")
 
