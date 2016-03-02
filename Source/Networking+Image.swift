@@ -8,6 +8,21 @@ import NetworkActivityIndicator
 public extension Networking {
     /**
      Downloads an image using the specified path.
+     - parameter path: The full path where the image is located
+     - parameter completion: A closure that gets called when the image download request is completed, it contains an `UIImage` object and a `NSError`.
+     */
+    public func downloadImage(fullPath path: String, completion: (image: UIImage?, error: NSError?) -> ()) {
+        let fullURL = NSURL(string: path)!
+        guard let url = NSURL(string: (fullURL.absoluteString as NSString).stringByReplacingOccurrencesOfString("/", withString: "-")),
+            cachesURL = NSFileManager.defaultManager().URLsForDirectory(.CachesDirectory, inDomains: .UserDomainMask).first else { fatalError("Couldn't normalize url") }
+        let destinationURL = cachesURL.URLByAppendingPathComponent(url.absoluteString)
+        guard let filePath = destinationURL.path else { fatalError("File path not valid") }
+
+        self.downloadImage(destinationURL: destinationURL, path: path, filePath: filePath, completion: completion)
+    }
+
+    /**
+     Downloads an image using the specified path.
      - parameter path: The path where the image is located
      - parameter completion: A closure that gets called when the image download request is completed, it contains an `UIImage` object and a `NSError`.
      */
@@ -15,6 +30,10 @@ public extension Networking {
         let destinationURL = self.destinationURL(path)
         guard let filePath = self.destinationURL(path).path else { fatalError("File path not valid") }
 
+        self.downloadImage(destinationURL: destinationURL, path: path, filePath: filePath, completion: completion)
+    }
+
+    func downloadImage(destinationURL destinationURL: NSURL, path: String, filePath: String, completion: (image: UIImage?, error: NSError?) -> ()) {
         if let getFakeRequests = self.fakeRequests[.GET], fakeRequest = getFakeRequests[path] {
             if fakeRequest.statusCode.statusCodeType() == .Successful, let image = fakeRequest.response as? UIImage {
                 completion(image: image, error: nil)
@@ -54,12 +73,14 @@ public extension Networking {
                 returnedResponse = response
                 returnedError = error
 
-                if let url = url, data = NSData(contentsOfURL: url), image = UIImage(data: data) {
+                if returnedError == nil, let url = url, data = NSData(contentsOfURL: url), image = UIImage(data: data) {
                     returnedData = data
                     returnedImage = image
 
                     data.writeToURL(destinationURL, atomically: true)
                     self.imageCache.setObject(image, forKey: destinationURL.absoluteString)
+                } else if let url = url {
+                    returnedError = NSError(domain: Networking.ErrorDomain, code: 500, userInfo: [NSLocalizedDescriptionKey : "Failed to load url: \(url.absoluteString)"])
                 }
 
                 if TestCheck.isTesting && self.disableTestingMode == false {
@@ -68,7 +89,7 @@ public extension Networking {
                     dispatch_async(dispatch_get_main_queue(), {
                         NetworkActivityIndicator.sharedIndicator.visible = false
 
-                        self.logError(.JSON, parameters: nil, data: returnedData, request: request, response: response, error: error)
+                        self.logError(.JSON, parameters: nil, data: returnedData, request: request, response: response, error: returnedError)
                         completion(image: returnedImage, error: error)
                     })
                 }

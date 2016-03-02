@@ -42,6 +42,21 @@ class ImageTests: XCTestCase {
         }
     }
 
+    func testImageDownloadFullPath() {
+        let networking = Networking(baseURL: baseURL)
+        let path = "http://httpbin.org/image/png"
+
+        self.removeFileIfNeeded(networking, path: path)
+
+        networking.downloadImage(fullPath: path) { image, error in
+            XCTAssertNotNil(image)
+            let pigImage = UIImage(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self), compatibleWithTraitCollection: nil)!
+            let pigImageData = UIImagePNGRepresentation(pigImage)
+            let imageData = UIImagePNGRepresentation(image!)
+            XCTAssertEqual(pigImageData, imageData)
+        }
+    }
+
     func testImageDownloadCache() {
         let networking = Networking(baseURL: baseURL)
         let path = "/image/png"
@@ -64,8 +79,6 @@ class ImageTests: XCTestCase {
         self.removeFileIfNeeded(networking, path: path)
 
         networking.downloadImage(path) { image, error in
-            print("image: \(image)")
-            print("error: \(error)")
             let canceledCode = error?.code == -999
             XCTAssertTrue(canceledCode)
 
