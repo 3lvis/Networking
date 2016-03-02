@@ -11,14 +11,14 @@ public extension Networking {
      - parameter path: The full path where the image is located
      - parameter completion: A closure that gets called when the image download request is completed, it contains an `UIImage` object and a `NSError`.
      */
-    public func downloadImage(fullPath fullPath: String, completion: (image: UIImage?, error: NSError?) -> ()) {
-        let fullURL = NSURL(string: fullPath)!
+    public func downloadImage(fullPath path: String, completion: (image: UIImage?, error: NSError?) -> ()) {
+        let fullURL = NSURL(string: path)!
         guard let url = NSURL(string: (fullURL.absoluteString as NSString).stringByReplacingOccurrencesOfString("/", withString: "-")),
             cachesURL = NSFileManager.defaultManager().URLsForDirectory(.CachesDirectory, inDomains: .UserDomainMask).first else { fatalError("Couldn't normalize url") }
         let destinationURL = cachesURL.URLByAppendingPathComponent(url.absoluteString)
         guard let filePath = destinationURL.path else { fatalError("File path not valid") }
 
-        if let getFakeRequests = self.fakeRequests[.GET], fakeRequest = getFakeRequests[fullPath] {
+        if let getFakeRequests = self.fakeRequests[.GET], fakeRequest = getFakeRequests[path] {
             if fakeRequest.statusCode.statusCodeType() == .Successful, let image = fakeRequest.response as? UIImage {
                 completion(image: image, error: nil)
             } else {
@@ -37,7 +37,7 @@ public extension Networking {
                 }
             })
         } else {
-            let request = NSMutableURLRequest(URL: NSURL(string: fullPath)!)
+            let request = NSMutableURLRequest(URL: NSURL(string: path)!)
             request.HTTPMethod = RequestType.GET.rawValue
             request.addValue("application/json", forHTTPHeaderField: "Accept")
 
