@@ -41,6 +41,10 @@ public extension Networking {
             request.HTTPMethod = RequestType.GET.rawValue
             request.addValue("application/json", forHTTPHeaderField: "Accept")
 
+            if let token = token {
+                request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            }
+
             let semaphore = dispatch_semaphore_create(0)
             var returnedData: NSData?
             var returnedImage: UIImage?
@@ -132,12 +136,14 @@ public extension Networking {
                 returnedResponse = response
                 returnedError = error
 
-                if let url = url, data = NSData(contentsOfURL: url), image = UIImage(data: data) {
+                if returnedError == nil, let url = url, data = NSData(contentsOfURL: url), image = UIImage(data: data) {
                     returnedData = data
                     returnedImage = image
 
                     data.writeToURL(destinationURL, atomically: true)
                     self.imageCache.setObject(image, forKey: destinationURL.absoluteString)
+                } else if let url = url {
+                    returnedError = NSError(domain: Networking.ErrorDomain, code: 500, userInfo: [NSLocalizedDescriptionKey : "Failed to load url: \(url.absoluteString)"])
                 }
 
                 if TestCheck.isTesting && self.disableTestingMode == false {
