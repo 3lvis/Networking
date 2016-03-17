@@ -148,6 +148,18 @@ networking.POST("/post", contentType: .FormURLEncoded, parameters: ["custname":"
 }
 ```
 
+So far **Networking** only supports three types of `Content-Type` out of the box: `JSON`, `FormURLEncoded` and `Custom`. Meanwhile `JSON` and `FormURLEncoded` serialize your parameters in some way, `Custom` only sends your parameters as `NSData` so make sure that if you're using `Custom` then send something in data format as your parameters.
+
+
+For example:
+```swift
+let networking = Networking(baseURL: "http://httpbin.org")
+networking.POST("/upload", contentType: .Custom("application/octet-stream"), parameters: imageData) { JSON, error in
+   // Successfull upload using `application/octet-stream` as `Content-Type`
+}
+```
+
+
 ## Faking a request
 
 Faking a request means that after calling this method on a specific path, any call to this resource, will return what you registered as a response. This technique is also known as mocking or stubbing.
