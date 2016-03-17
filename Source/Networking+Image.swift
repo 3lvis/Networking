@@ -80,7 +80,11 @@ public extension Networking {
                     data.writeToURL(destinationURL, atomically: true)
                     self.imageCache.setObject(image, forKey: destinationURL.absoluteString)
                 } else if let url = url {
-                    returnedError = NSError(domain: Networking.ErrorDomain, code: 500, userInfo: [NSLocalizedDescriptionKey : "Failed to load url: \(url.absoluteString)"])
+                    if let response = response as? NSHTTPURLResponse {
+                        returnedError = NSError(domain: Networking.ErrorDomain, code: response.statusCode, userInfo: [NSLocalizedDescriptionKey : NSHTTPURLResponse.localizedStringForStatusCode(response.statusCode)])
+                    } else {
+                        returnedError = NSError(domain: Networking.ErrorDomain, code: 500, userInfo: [NSLocalizedDescriptionKey : "Failed to load url: \(url.absoluteString)"])
+                    }
                 }
 
                 if TestCheck.isTesting && self.disableTestingMode == false {
@@ -90,7 +94,7 @@ public extension Networking {
                         NetworkActivityIndicator.sharedIndicator.visible = false
 
                         self.logError(.JSON, parameters: nil, data: returnedData, request: request, response: response, error: returnedError)
-                        completion(image: returnedImage, error: error)
+                        completion(image: returnedImage, error: returnedError)
                     })
                 }
             }).resume()
