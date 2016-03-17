@@ -205,9 +205,20 @@ To download an image using NSURLSession you have to download data and convert th
 
 Luckily **Networking** provides you a simpler method to do all this:
 
+**Same base url**:
+
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.downloadImage("/image/png") { image, error in
+   // Do something with the downloaded image
+}
+```
+
+**Full path url**:
+
+```swift
+let networking = Networking(baseURL: "http://httpbin.org")
+networking.downloadImage(fullPath: "https://www.gstatic.com/webp/gallery3/1.png") { image, error in
    // Do something with the downloaded image
 }
 ```
