@@ -1,9 +1,7 @@
 #if os(iOS) || os(tvOS) || os(watchOS)
 
 import Foundation
-import TestCheck
 import UIKit
-import NetworkActivityIndicator
 
 public extension Networking {
     /**

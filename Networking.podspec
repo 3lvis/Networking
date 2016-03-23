@@ -26,7 +26,4 @@ s.tvos.deployment_target = '9.0'
 s.requires_arc     = true
 s.source_files     = 'Source/**/*'
 s.frameworks       = 'Foundation'
-s.dependency 'TestCheck', '~> 0.3.0'
-s.dependency 'JSON', '~> 4.0.2'
-s.dependency 'NetworkActivityIndicator', '~> 0.1.5'
 end
