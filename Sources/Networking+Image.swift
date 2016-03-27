@@ -10,13 +10,14 @@ public extension Networking {
      - parameter completion: A closure that gets called when the image download request is completed, it contains an `UIImage` object and a `NSError`.
      */
     public func downloadImage(fullPath path: String, completion: (image: UIImage?, error: NSError?) -> ()) {
-        let fullURL = NSURL(string: path)!
+        let encodedPath = path.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
+        let fullURL = NSURL(string: encodedPath)!
         guard let url = NSURL(string: (fullURL.absoluteString as NSString).stringByReplacingOccurrencesOfString("/", withString: "-")),
             cachesURL = NSFileManager.defaultManager().URLsForDirectory(.CachesDirectory, inDomains: .UserDomainMask).first else { fatalError("Couldn't normalize url") }
         let destinationURL = cachesURL.URLByAppendingPathComponent(url.absoluteString)
         guard let filePath = destinationURL.path else { fatalError("File path not valid") }
 
-        self.downloadImage(requestURL: NSURL(string: path)!, destinationURL: destinationURL, path: path, filePath: filePath, completion: completion)
+        self.downloadImage(requestURL: NSURL(string: encodedPath)!, destinationURL: destinationURL, path: encodedPath, filePath: filePath, completion: completion)
     }
 
     /**
