@@ -5,7 +5,8 @@ class ImageTests: XCTestCase {
     let baseURL = "http://httpbin.org"
 
     func removeFileIfNeeded(networking: Networking, path: String) {
-        let destinationURL = networking.destinationURL(path)
+        let encodedPath = path.encodeUTF8()!
+        let destinationURL = networking.destinationURL(encodedPath)
         if NSFileManager().fileExistsAtPath(destinationURL.path!) {
             try! NSFileManager().removeItemAtPath(destinationURL.path!)
         }
@@ -42,6 +43,21 @@ class ImageTests: XCTestCase {
         }
     }
 
+    func testImageDownloadWithWeirdCharacters() {
+        let networking = Networking(baseURL: "https://rescuejuice.com")
+        let path = "/wp-content/uploads/2015/11/døgnvillburgere.jpg"
+
+        self.removeFileIfNeeded(networking, path: path)
+
+        networking.downloadImage(path) { image, error in
+            XCTAssertNotNil(image)
+            let pigImage = UIImage(named: "døgnvillburgere.jpg", inBundle: NSBundle(forClass: ImageTests.self), compatibleWithTraitCollection: nil)!
+            let pigImageData = UIImagePNGRepresentation(pigImage)
+            let imageData = UIImagePNGRepresentation(image!)
+            XCTAssertEqual(pigImageData, imageData)
+        }
+    }
+
     func testImageDownloadFullPath() {
         let networking = Networking(baseURL: baseURL)
         let path = "http://httpbin.org/image/png"
@@ -51,6 +67,21 @@ class ImageTests: XCTestCase {
         networking.downloadImage(fullPath: path) { image, error in
             XCTAssertNotNil(image)
             let pigImage = UIImage(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self), compatibleWithTraitCollection: nil)!
+            let pigImageData = UIImagePNGRepresentation(pigImage)
+            let imageData = UIImagePNGRepresentation(image!)
+            XCTAssertEqual(pigImageData, imageData)
+        }
+    }
+
+    func testImageDownloadFullPathWithWeirdCharacters() {
+        let networking = Networking(baseURL: baseURL)
+        let path = "https://rescuejuice.com/wp-content/uploads/2015/11/døgnvillburgere.jpg"
+
+        self.removeFileIfNeeded(networking, path: path)
+
+        networking.downloadImage(fullPath: path) { image, error in
+            XCTAssertNotNil(image)
+            let pigImage = UIImage(named: "døgnvillburgere.jpg", inBundle: NSBundle(forClass: ImageTests.self), compatibleWithTraitCollection: nil)!
             let pigImageData = UIImagePNGRepresentation(pigImage)
             let imageData = UIImagePNGRepresentation(image!)
             XCTAssertEqual(pigImageData, imageData)
