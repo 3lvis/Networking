@@ -51,7 +51,7 @@ public extension Networking {
     - parameter parameters: The parameters to be used, they will be serialized using NSJSONSerialization.
     - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and a `NSError`.
     */
-    public func POST(path: String, contentType: ContentType = .JSON, parameters: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
+    public func POST(path: String, contentType: ContentType = .JSON, parameters: AnyObject? = nil, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
         self.request(.POST, path: path, contentType: contentType, parameters: parameters, completion: completion)
     }
 

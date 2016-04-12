@@ -138,6 +138,16 @@ extension HTTPRequestTests {
         }
     }
 
+    func testPOSTWithNoParameters() {
+        let networking = Networking(baseURL: baseURL)
+        networking.POST("/post") { JSON, error in
+            let JSONResponse = JSON as! [String : AnyObject]
+            XCTAssertEqual("http://httpbin.org/post", JSONResponse["url"] as? String)
+            XCTAssertNotNil(JSON!, "JSON not nil")
+            XCTAssertNil(error, "Error")
+        }
+    }
+
     func testPOSTWithFormURLEncoded() {
         let networking = Networking(baseURL: baseURL)
         networking.POST("/post", contentType: .FormURLEncoded, parameters: ["custname":"jameson"]) { JSON, error in
