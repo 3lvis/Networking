@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1413C1D41CBD15F6000AF90F /* døgnvillburgere.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 1413C1D31CBD15F6000AF90F /* døgnvillburgere.jpg */; };
+		1413C1D61CBD1784000AF90F /* String+UTF8.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1413C1D51CBD1784000AF90F /* String+UTF8.swift */; };
 		1474C1C31CA2988900E15D84 /* Dictionary+FormURLEncoded.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1474C1BC1CA2988900E15D84 /* Dictionary+FormURLEncoded.swift */; };
 		1474C1C41CA2988900E15D84 /* JSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1474C1BD1CA2988900E15D84 /* JSON.swift */; };
 		1474C1C51CA2988900E15D84 /* NetworkActivityIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1474C1BE1CA2988900E15D84 /* NetworkActivityIndicator.swift */; };
@@ -23,6 +25,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1413C1D31CBD15F6000AF90F /* døgnvillburgere.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "døgnvillburgere.jpg"; sourceTree = "<group>"; };
+		1413C1D51CBD1784000AF90F /* String+UTF8.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+UTF8.swift"; sourceTree = "<group>"; };
 		146D72AC1AB782920058798C /* Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		146D72B11AB782920058798C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1474C1BC1CA2988900E15D84 /* Dictionary+FormURLEncoded.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Dictionary+FormURLEncoded.swift"; sourceTree = "<group>"; };
@@ -87,6 +91,7 @@
 				14DE34771CA298ED009B2E35 /* ImageTests.swift */,
 				14DE34781CA298ED009B2E35 /* Info.plist */,
 				14DE34791CA298ED009B2E35 /* pig.png */,
+				1413C1D31CBD15F6000AF90F /* døgnvillburgere.jpg */,
 				14A139B31AEFC72B00AD732F /* Tests.swift */,
 				146D72B01AB782920058798C /* Supporting Files */,
 			);
@@ -111,6 +116,7 @@
 				1474C1C01CA2988900E15D84 /* Networking+Image.swift */,
 				1474C1C11CA2988900E15D84 /* Networking.swift */,
 				1474C1C21CA2988900E15D84 /* TestCheck.swift */,
+				1413C1D51CBD1784000AF90F /* String+UTF8.swift */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -193,6 +199,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1413C1D41CBD15F6000AF90F /* døgnvillburgere.jpg in Resources */,
 				14DE347F1CA298ED009B2E35 /* pig.png in Resources */,
 				14DE347B1CA298ED009B2E35 /* entries.json in Resources */,
 			);
@@ -210,6 +217,7 @@
 				14DE347A1CA298ED009B2E35 /* Dictionary+FormURLEncodedTests.swift in Sources */,
 				1474C1C41CA2988900E15D84 /* JSON.swift in Sources */,
 				1474C1C71CA2988900E15D84 /* Networking+Image.swift in Sources */,
+				1413C1D61CBD1784000AF90F /* String+UTF8.swift in Sources */,
 				1474C1C51CA2988900E15D84 /* NetworkActivityIndicator.swift in Sources */,
 				1474C1C31CA2988900E15D84 /* Dictionary+FormURLEncoded.swift in Sources */,
 				14DE347D1CA298ED009B2E35 /* ImageTests.swift in Sources */,

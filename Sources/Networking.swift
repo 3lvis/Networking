@@ -135,7 +135,8 @@ public class Networking {
      - returns: A NSURL generated after appending the path to the base URL.
      */
     public func urlForPath(path: String) -> NSURL {
-        return NSURL(string: self.baseURL + path)!
+        let encodedPath = path.encodeUTF8()!
+        return NSURL(string: self.baseURL + encodedPath)!
     }
 
     /**
