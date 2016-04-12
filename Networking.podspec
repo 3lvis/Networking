@@ -7,6 +7,7 @@ Simple NSURLSession wrapper with support for image caching and faking network re
 
 - Super friendly API
 - Singleton free
+- No external dependencies
 - Optimized for unit testing
 - Minimal implementation
 - Fake requests easily (mocking/stubbing)
