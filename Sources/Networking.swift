@@ -345,14 +345,17 @@ extension Networking {
                         let data = try NSJSONSerialization.dataWithJSONObject(parameters, options: .PrettyPrinted)
                         let string = String(data: data, encoding: NSUTF8StringEncoding)
                         print("Parameters: \(string)")
+                        print(" ")
                     } catch let error as NSError {
                         print("Failed pretty printing parameters: \(parameters), error: \(error)")
+                        print(" ")
                     }
                     break
                 case .FormURLEncoded:
                     guard let parametersDictionary = parameters as? [String : AnyObject] else { fatalError("Couldn't cast parameters as dictionary: \(parameters)") }
                     let formattedParameters = parametersDictionary.formURLEncodedFormat()
                     print("Parameters: \(formattedParameters)")
+                    print(" ")
                     break
                 default: break
                 }
@@ -369,10 +372,8 @@ extension Networking {
                 if let headers = request?.allHTTPHeaderFields {
                     print("Headers: \(headers)")
                     print(" ")
-                    print(" ")
                 }
                 print("Response status code: \(response.statusCode) — \(NSHTTPURLResponse.localizedStringForStatusCode(response.statusCode))")
-                print(" ")
                 print(" ")
                 print("Path: \(response.URL!.absoluteString)")
                 print(" ")
