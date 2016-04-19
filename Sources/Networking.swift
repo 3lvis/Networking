@@ -135,8 +135,9 @@ public class Networking {
      - returns: A NSURL generated after appending the path to the base URL.
      */
     public func urlForPath(path: String) -> NSURL {
-        let encodedPath = path.encodeUTF8()!
-        return NSURL(string: self.baseURL + encodedPath)!
+        guard let encodedPath = path.encodeUTF8() else { fatalError("Couldn't encode path to UTF8: \(path)") }
+        guard let url = NSURL(string: self.baseURL + encodedPath) else { fatalError("Couldn't create a url using baseURL: \(self.baseURL) and encodedPath: \(encodedPath)") }
+        return url
     }
 
     /**
@@ -216,7 +217,7 @@ extension Networking {
                     }
                     break
                 case .FormURLEncoded:
-                    let parametersDictionary = parameters as! [String : AnyObject]
+                    guard let parametersDictionary = parameters as? [String : AnyObject] else { fatalError("Couldn't cast parameters as dictionary: \(parameters)") }
                     let formattedParameters = parametersDictionary.formURLEncodedFormat()
                     request.HTTPBody = formattedParameters.dataUsingEncoding(NSUTF8StringEncoding)
                     break
@@ -349,7 +350,7 @@ extension Networking {
                     }
                     break
                 case .FormURLEncoded:
-                    let parametersDictionary = parameters as! [String : AnyObject]
+                    guard let parametersDictionary = parameters as? [String : AnyObject] else { fatalError("Couldn't cast parameters as dictionary: \(parameters)") }
                     let formattedParameters = parametersDictionary.formURLEncodedFormat()
                     print("Parameters: \(formattedParameters)")
                     break

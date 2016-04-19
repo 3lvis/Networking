@@ -10,6 +10,7 @@ extension Dictionary where Key: StringLiteralConvertible {
             converted.appendContentsOf("\(entry.0)=\(entry.1)")
         }
 
-        return converted.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet())!
+        guard let encodedParameters = converted.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet()) else { fatalError("Couldn't convert parameters to form url: \(converted)") }
+        return encodedParameters
     }
 }
