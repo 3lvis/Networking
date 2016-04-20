@@ -58,36 +58,6 @@ class ImageTests: XCTestCase {
         }
     }
 
-    func testImageDownloadFullPath() {
-        let networking = Networking(baseURL: baseURL)
-        let path = "http://httpbin.org/image/png"
-
-        self.removeFileIfNeeded(networking, path: path)
-
-        networking.downloadImage(fullPath: path) { image, error in
-            XCTAssertNotNil(image)
-            let pigImage = UIImage(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self), compatibleWithTraitCollection: nil)!
-            let pigImageData = UIImagePNGRepresentation(pigImage)
-            let imageData = UIImagePNGRepresentation(image!)
-            XCTAssertEqual(pigImageData, imageData)
-        }
-    }
-
-    func testImageDownloadFullPathWithWeirdCharacters() {
-        let networking = Networking(baseURL: baseURL)
-        let path = "https://rescuejuice.com/wp-content/uploads/2015/11/døgnvillburgere.jpg"
-
-        self.removeFileIfNeeded(networking, path: path)
-
-        networking.downloadImage(fullPath: path) { image, error in
-            XCTAssertNotNil(image)
-            let pigImage = UIImage(named: "døgnvillburgere.jpg", inBundle: NSBundle(forClass: ImageTests.self), compatibleWithTraitCollection: nil)!
-            let pigImageData = UIImagePNGRepresentation(pigImage)
-            let imageData = UIImagePNGRepresentation(image!)
-            XCTAssertEqual(pigImageData, imageData)
-        }
-    }
-
     func testImageDownloadCache() {
         let networking = Networking(baseURL: baseURL)
         let path = "/image/png"
@@ -117,27 +87,6 @@ class ImageTests: XCTestCase {
         }
 
         networking.cancelImageDownload("/image/png")
-
-        waitForExpectationsWithTimeout(3.0, handler: nil)
-    }
-
-    func testCancelImageDownloadFullPath() {
-        let expectation = expectationWithDescription("testCancelImageDownloadFullPath")
-
-        let networking = Networking(baseURL: baseURL)
-        networking.disableTestingMode = true
-        let path = "http://httpbin.org/image/pneeeg"
-
-        self.removeFileIfNeeded(networking, path: path)
-
-        networking.downloadImage(fullPath: path) { image, error in
-            let canceledCode = error?.code == -999
-            XCTAssertTrue(canceledCode)
-
-            expectation.fulfill()
-        }
-
-        networking.cancelImageDownload(fullPath: path)
 
         waitForExpectationsWithTimeout(3.0, handler: nil)
     }
