@@ -152,6 +152,17 @@ public class Networking {
 
         return destinationURL
     }
+
+    public static func splitBaseURLAndRelativePath(path: String) -> (baseURL: String, relativePath: String) {
+        guard let encodedPath = path.encodeUTF8() else { fatalError("Couldn't encode path to UTF8: \(path)") }
+        guard let url = NSURL(string: encodedPath) else { fatalError("Path \(encodedPath) can't be converted to url") }
+        guard let baseURLWithDash = NSURL(string: "/", relativeToURL: url)?.absoluteURL.absoluteString else { fatalError("Can't find absolute url of url: \(url)") }
+        let index = baseURLWithDash.endIndex.advancedBy(-1)
+        let baseURL = baseURLWithDash.substringToIndex(index)
+        let relativePath = path.stringByReplacingOccurrencesOfString(baseURL, withString: "")
+
+        return (baseURL, relativePath)
+    }
 }
 
 extension Networking {
