@@ -52,7 +52,7 @@
 		1474C1C71CA2988900E15D84 /* Networking+Image.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1474C1C01CA2988900E15D84 /* Networking+Image.swift */; };
 		1474C1C81CA2988900E15D84 /* Networking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1474C1C11CA2988900E15D84 /* Networking.swift */; };
 		1474C1C91CA2988900E15D84 /* TestCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1474C1C21CA2988900E15D84 /* TestCheck.swift */; };
-		14A139B41AEFC72B00AD732F /* Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14A139B31AEFC72B00AD732F /* Tests.swift */; };
+		14A139B41AEFC72B00AD732F /* NetworkingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14A139B31AEFC72B00AD732F /* NetworkingTests.swift */; };
 		14DE347A1CA298ED009B2E35 /* Dictionary+FormURLEncodedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14DE34741CA298ED009B2E35 /* Dictionary+FormURLEncodedTests.swift */; };
 		14DE347B1CA298ED009B2E35 /* entries.json in Resources */ = {isa = PBXBuildFile; fileRef = 14DE34751CA298ED009B2E35 /* entries.json */; };
 		14DE347C1CA298ED009B2E35 /* HTTPRequestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14DE34761CA298ED009B2E35 /* HTTPRequestTests.swift */; };
@@ -78,7 +78,7 @@
 		1474C1C01CA2988900E15D84 /* Networking+Image.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Networking+Image.swift"; sourceTree = "<group>"; };
 		1474C1C11CA2988900E15D84 /* Networking.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Networking.swift; sourceTree = "<group>"; };
 		1474C1C21CA2988900E15D84 /* TestCheck.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestCheck.swift; sourceTree = "<group>"; };
-		14A139B31AEFC72B00AD732F /* Tests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Tests.swift; sourceTree = "<group>"; };
+		14A139B31AEFC72B00AD732F /* NetworkingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkingTests.swift; sourceTree = "<group>"; };
 		14C0AF7F1BD6D4230009ECBE /* .slather.yml */ = {isa = PBXFileReference; lastKnownFileType = text; path = .slather.yml; sourceTree = "<group>"; };
 		14C0AF801BD6D4230009ECBE /* .travis.yml */ = {isa = PBXFileReference; lastKnownFileType = text; path = .travis.yml; sourceTree = "<group>"; };
 		14C0AF811BD6D4230009ECBE /* CHANGELOG.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CHANGELOG.md; sourceTree = "<group>"; };
@@ -159,14 +159,14 @@
 		146D72AF1AB782920058798C /* Tests */ = {
 			isa = PBXGroup;
 			children = (
-				14DE34741CA298ED009B2E35 /* Dictionary+FormURLEncodedTests.swift */,
+				1413C1D31CBD15F6000AF90F /* døgnvillburgere.jpg */,
 				14DE34751CA298ED009B2E35 /* entries.json */,
-				14DE34761CA298ED009B2E35 /* HTTPRequestTests.swift */,
-				14DE34771CA298ED009B2E35 /* ImageTests.swift */,
 				14DE34781CA298ED009B2E35 /* Info.plist */,
 				14DE34791CA298ED009B2E35 /* pig.png */,
-				1413C1D31CBD15F6000AF90F /* døgnvillburgere.jpg */,
-				14A139B31AEFC72B00AD732F /* Tests.swift */,
+				14DE34741CA298ED009B2E35 /* Dictionary+FormURLEncodedTests.swift */,
+				14DE34761CA298ED009B2E35 /* HTTPRequestTests.swift */,
+				14DE34771CA298ED009B2E35 /* ImageTests.swift */,
+				14A139B31AEFC72B00AD732F /* NetworkingTests.swift */,
 				146D72B01AB782920058798C /* Supporting Files */,
 			);
 			path = Tests;
@@ -509,7 +509,7 @@
 				1474C1C31CA2988900E15D84 /* Dictionary+FormURLEncoded.swift in Sources */,
 				14DE347D1CA298ED009B2E35 /* ImageTests.swift in Sources */,
 				1474C1C61CA2988900E15D84 /* Networking+HTTPRequest.swift in Sources */,
-				14A139B41AEFC72B00AD732F /* Tests.swift in Sources */,
+				14A139B41AEFC72B00AD732F /* NetworkingTests.swift in Sources */,
 				1474C1C81CA2988900E15D84 /* Networking.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -841,6 +841,7 @@
 				14638D001CC6459A002B9433 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		14638D171CC646F9002B9433 /* Build configuration list for PBXNativeTarget "Networking-watchOS" */ = {
 			isa = XCConfigurationList;
@@ -849,6 +850,7 @@
 				14638D191CC646F9002B9433 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		14638D2D1CC64747002B9433 /* Build configuration list for PBXNativeTarget "Networking-tvOS" */ = {
 			isa = XCConfigurationList;
@@ -857,6 +859,7 @@
 				14638D2F1CC64747002B9433 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		14638D431CC647E4002B9433 /* Build configuration list for PBXNativeTarget "Networking-OSX" */ = {
 			isa = XCConfigurationList;
@@ -865,6 +868,7 @@
 				14638D451CC647E4002B9433 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		146D728E1AB782920058798C /* Build configuration list for PBXProject "Demo" */ = {
 			isa = XCConfigurationList;

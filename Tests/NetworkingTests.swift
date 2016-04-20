@@ -1,7 +1,7 @@
 import Foundation
 import XCTest
 
-class Tests: XCTestCase {
+class NetworkingTests: XCTestCase {
     let baseURL = "http://httpbin.org"
 
     func testBasicAuth() {
@@ -57,5 +57,15 @@ class Tests: XCTestCase {
         XCTAssertEqual(303.statusCodeType(), Networking.StatusCodeType.Redirection)
         XCTAssertEqual(403.statusCodeType(), Networking.StatusCodeType.ClientError)
         XCTAssertEqual(550.statusCodeType(), Networking.StatusCodeType.ServerError)
+    }
+
+    func testSplitBaseURLAndRelativePath() {
+        let (baseURL1, relativePath1) = Networking.splitBaseURLAndRelativePath("https://rescuejuice.com/wp-content/uploads/2015/11/døgnvillburgere.jpg")
+        XCTAssertEqual(baseURL1, "https://rescuejuice.com")
+        XCTAssertEqual(relativePath1, "/wp-content/uploads/2015/11/døgnvillburgere.jpg")
+
+        let (baseURL2, relativePath2) = Networking.splitBaseURLAndRelativePath("http://httpbin.org/basic-auth/user/passwd")
+        XCTAssertEqual(baseURL2, "http://httpbin.org")
+        XCTAssertEqual(relativePath2, "/basic-auth/user/passwd")
     }
 }
