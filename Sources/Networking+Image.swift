@@ -6,22 +6,6 @@ import UIKit
 public extension Networking {
     /**
      Downloads an image using the specified path.
-     - parameter path: The full path where the image is located
-     - parameter completion: A closure that gets called when the image download request is completed, it contains an `UIImage` object and a `NSError`.
-     */
-    public func downloadImage(fullPath path: String, completion: (image: UIImage?, error: NSError?) -> ()) {
-        guard let encodedPath = path.encodeUTF8() else { fatalError("Couldn't encode path to UTF8: \(path)") }
-        guard let fullURL = NSURL(string: encodedPath) else { fatalError("Couldn't create a NSURL from encoded path: \(encodedPath)") }
-        guard let url = NSURL(string: (fullURL.absoluteString as NSString).stringByReplacingOccurrencesOfString("/", withString: "-")),
-            cachesURL = NSFileManager.defaultManager().URLsForDirectory(.CachesDirectory, inDomains: .UserDomainMask).first else { fatalError("Couldn't normalize url") }
-        let destinationURL = cachesURL.URLByAppendingPathComponent(url.absoluteString)
-        guard let filePath = destinationURL.path else { fatalError("File path not valid") }
-
-        self.downloadImage(requestURL: fullURL, destinationURL: destinationURL, path: encodedPath, filePath: filePath, completion: completion)
-    }
-
-    /**
-     Downloads an image using the specified path.
      - parameter path: The path where the image is located
      - parameter completion: A closure that gets called when the image download request is completed, it contains an `UIImage` object and a `NSError`.
      */
@@ -113,16 +97,6 @@ public extension Networking {
      */
     public func cancelImageDownload(path: String) {
         let url = self.urlForPath(path)
-        self.cancelRequest(.Download, requestType: .GET, url: url)
-    }
-
-    /**
-     Cancels the image download request for the specified full path. This causes the request to complete with error code -999
-     - parameter fullPath: The fullPath for the cancelled image download request
-     */
-    public func cancelImageDownload(fullPath path: String) {
-        guard let encodedPath = path.encodeUTF8() else { fatalError("Couldn't encode path to UTF8: \(path)") }
-        guard let url = NSURL(string: encodedPath) else { fatalError("Couldn't create a NSURL from encoded path: \(encodedPath)") }
         self.cancelRequest(.Download, requestType: .GET, url: url)
     }
 
