@@ -291,9 +291,7 @@ extension Networking {
         }
     }
 
-    func cancelRequest(sessionTaskType: SessionTaskType, requestType: RequestType, path: String) {
-        let fullPath = self.urlForPath(path)
-
+    func cancelRequest(sessionTaskType: SessionTaskType, requestType: RequestType, url: NSURL) {
         self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
             var sessionTasks = [NSURLSessionTask]()
             switch sessionTaskType {
@@ -309,7 +307,7 @@ extension Networking {
             }
 
             for sessionTask in sessionTasks {
-                if sessionTask.originalRequest?.HTTPMethod == requestType.rawValue && sessionTask.originalRequest?.URL?.absoluteString == fullPath.absoluteString {
+                if sessionTask.originalRequest?.HTTPMethod == requestType.rawValue && sessionTask.originalRequest?.URL?.absoluteString == url.absoluteString {
                     sessionTask.cancel()
                 }
             }

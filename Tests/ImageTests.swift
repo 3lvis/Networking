@@ -121,6 +121,27 @@ class ImageTests: XCTestCase {
         waitForExpectationsWithTimeout(3.0, handler: nil)
     }
 
+    func testCancelImageDownloadFullPath() {
+        let expectation = expectationWithDescription("testCancelImageDownloadFullPath")
+
+        let networking = Networking(baseURL: baseURL)
+        networking.disableTestingMode = true
+        let path = "http://httpbin.org/image/pneeeg"
+
+        self.removeFileIfNeeded(networking, path: path)
+
+        networking.downloadImage(fullPath: path) { image, error in
+            let canceledCode = error?.code == -999
+            XCTAssertTrue(canceledCode)
+
+            expectation.fulfill()
+        }
+
+        networking.cancelImageDownload(fullPath: path)
+
+        waitForExpectationsWithTimeout(3.0, handler: nil)
+    }
+
     func testFakeImageDownload() {
         let networking = Networking(baseURL: baseURL)
         let pigImage = UIImage(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self), compatibleWithTraitCollection: nil)!

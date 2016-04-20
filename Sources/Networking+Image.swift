@@ -112,7 +112,18 @@ public extension Networking {
      - parameter path: The path for the cancelled image download request
      */
     public func cancelImageDownload(path: String) {
-        self.cancelRequest(.Download, requestType: .GET, path: path)
+        let url = self.urlForPath(path)
+        self.cancelRequest(.Download, requestType: .GET, url: url)
+    }
+
+    /**
+     Cancels the image download request for the specified full path. This causes the request to complete with error code -999
+     - parameter fullPath: The fullPath for the cancelled image download request
+     */
+    public func cancelImageDownload(fullPath path: String) {
+        guard let encodedPath = path.encodeUTF8() else { fatalError("Couldn't encode path to UTF8: \(path)") }
+        guard let url = NSURL(string: encodedPath) else { fatalError("Couldn't create a NSURL from encoded path: \(encodedPath)") }
+        self.cancelRequest(.Download, requestType: .GET, url: url)
     }
 
     /**

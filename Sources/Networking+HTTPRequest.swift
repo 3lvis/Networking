@@ -39,7 +39,8 @@ public extension Networking {
      - parameter path: The path for the cancelled GET request
      */
     public func cancelGET(path: String) {
-        self.cancelRequest(.Data, requestType: .GET, path: path)
+        let url = self.urlForPath(path)
+        self.cancelRequest(.Data, requestType: .GET, url: url)
     }
 }
 
@@ -83,7 +84,8 @@ public extension Networking {
      - parameter path: The path for the cancelled POST request
      */
     public func cancelPOST(path: String) {
-        self.cancelRequest(.Data, requestType: .POST, path: path)
+        let url = self.urlForPath(path)
+        self.cancelRequest(.Data, requestType: .POST, url: url)
     }
 }
 
@@ -127,7 +129,8 @@ public extension Networking {
      - parameter path: The path for the cancelled PUT request
      */
     public func cancelPUT(path: String) {
-        self.cancelRequest(.Data, requestType: .PUT, path: path)
+        let url = self.urlForPath(path)
+        self.cancelRequest(.Data, requestType: .PUT, url: url)
     }
 }
 
@@ -170,6 +173,7 @@ public extension Networking {
      - parameter path: The path for the cancelled DELETE request
      */
     public func cancelDELETE(path: String) {
-        self.cancelRequest(.Data, requestType: .DELETE, path: path)
+        let url = self.urlForPath(path)
+        self.cancelRequest(.Data, requestType: .DELETE, url: url)
     }
 }
