@@ -7,16 +7,21 @@ public extension Networking {
     /**
      Downloads an image using the specified path.
      - parameter path: The path where the image is located
+     - parameter cacheName: The cache name used to identify the downloaded image, by default the path is used. 
      - parameter completion: A closure that gets called when the image download request is completed, it contains an `UIImage` object and a `NSError`.
      */
-    public func downloadImage(path: String, completion: (image: UIImage?, error: NSError?) -> ()) {
-        let destinationURL = self.destinationURL(path)
-        guard let filePath = self.destinationURL(path).path else { fatalError("File path not valid") }
-
-        self.downloadImage(requestURL: self.urlForPath(path), destinationURL: destinationURL, path: path, filePath: filePath, completion: completion)
+    public func downloadImage(path: String, cacheName: String? = nil, completion: (image: UIImage?, error: NSError?) -> ()) {
+        let destinationURL: NSURL
+        if let cacheName = cacheName {
+            destinationURL = self.destinationURL(cacheName)
+        } else {
+            destinationURL = self.destinationURL(path)
+        }
+        self.downloadImage(requestURL: self.urlForPath(path), destinationURL: destinationURL, path: path, completion: completion)
     }
 
-    func downloadImage(requestURL requestURL: NSURL, destinationURL: NSURL, path: String, filePath: String, completion: (image: UIImage?, error: NSError?) -> ()) {
+    func downloadImage(requestURL requestURL: NSURL, destinationURL: NSURL, path: String, completion: (image: UIImage?, error: NSError?) -> ()) {
+        guard let destinationURLPath = destinationURL.path else { fatalError("File path not valid") }
         if let getFakeRequests = self.fakeRequests[.GET], fakeRequest = getFakeRequests[path] {
             if fakeRequest.statusCode.statusCodeType() == .Successful, let image = fakeRequest.response as? UIImage {
                 completion(image: image, error: nil)
@@ -26,7 +31,7 @@ public extension Networking {
             }
         } else if let image = self.imageCache.objectForKey(destinationURL.absoluteString) as? UIImage {
             completion(image: image, error: nil)
-        } else if NSFileManager().fileExistsAtPath(filePath) {
+        } else if NSFileManager().fileExistsAtPath(destinationURLPath) {
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), {
                 if let data = NSData(contentsOfURL: destinationURL), image = UIImage(data: data) {
                     dispatch_async(dispatch_get_main_queue(), {
@@ -61,7 +66,7 @@ public extension Networking {
                     returnedImage = image
 
                     data.writeToURL(destinationURL, atomically: true)
-                    self.imageCache.setObject(image, forKey: destinationURL.absoluteString)
+                    self.imageCache.setObject(image, forKey: destinationURLPath)
                 } else if let url = url {
                     if let response = response as? NSHTTPURLResponse {
                         returnedError = NSError(domain: Networking.ErrorDomain, code: response.statusCode, userInfo: [NSLocalizedDescriptionKey : NSHTTPURLResponse.localizedStringForStatusCode(response.statusCode)])
