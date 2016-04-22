@@ -13,7 +13,12 @@ public extension Networking {
     public func downloadImage(path: String, cacheName: String? = nil, completion: (image: UIImage?, error: NSError?) -> ()) {
         let destinationURL: NSURL
         if let cacheName = cacheName {
-            destinationURL = self.destinationURL(cacheName)
+            guard let encodedPath = path.encodeUTF8() else { fatalError("Couldn't encode path to UTF8: \(path)") }
+            guard let encodedUrl = NSURL(string: encodedPath) else { fatalError("Couldn't create a url using encodedPath: \(encodedPath)") }
+            let encodedString = encodedUrl.absoluteString.stringByReplacingOccurrencesOfString("/", withString: "-")
+            guard let url = NSURL(string: encodedString) else { fatalError("Couldn't normalize url") }
+            guard let cachesURL = NSFileManager.defaultManager().URLsForDirectory(.CachesDirectory, inDomains: .UserDomainMask).first else { fatalError("Couldn't normalize url") }
+            destinationURL = cachesURL.URLByAppendingPathComponent(url.absoluteString)
         } else {
             destinationURL = self.destinationURL(path)
         }
@@ -22,6 +27,7 @@ public extension Networking {
 
     func downloadImage(requestURL requestURL: NSURL, destinationURL: NSURL, path: String, completion: (image: UIImage?, error: NSError?) -> ()) {
         guard let destinationURLPath = destinationURL.path else { fatalError("File path not valid") }
+        print("Looking for \(destinationURLPath)")
         if let getFakeRequests = self.fakeRequests[.GET], fakeRequest = getFakeRequests[path] {
             if fakeRequest.statusCode.statusCodeType() == .Successful, let image = fakeRequest.response as? UIImage {
                 completion(image: image, error: nil)
@@ -29,18 +35,26 @@ public extension Networking {
                 let error = NSError(domain: Networking.ErrorDomain, code: fakeRequest.statusCode, userInfo: [NSLocalizedDescriptionKey : NSHTTPURLResponse.localizedStringForStatusCode(fakeRequest.statusCode)])
                 completion(image: nil, error: error)
             }
-        } else if let image = self.imageCache.objectForKey(destinationURL.absoluteString) as? UIImage {
+        } else if let image = self.imageCache.objectForKey(destinationURLPath) as? UIImage {
+            print("Found in cache \(destinationURLPath)")
             completion(image: image, error: nil)
         } else if NSFileManager().fileExistsAtPath(destinationURLPath) {
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), {
+            print("Looking in file \(destinationURLPath)")
+
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), {
                 if let data = NSData(contentsOfURL: destinationURL), image = UIImage(data: data) {
                     dispatch_async(dispatch_get_main_queue(), {
+                        print("Found in file \(destinationURLPath)")
+                        self.imageCache.setObject(image, forKey: destinationURLPath)
                         completion(image: image, error: nil)
                     })
-                    self.imageCache.setObject(image, forKey: destinationURL.absoluteString)
+                } else {
+                    print("WTF")
                 }
             })
         } else {
+            print("Downloading \(destinationURLPath)")
+
             let request = NSMutableURLRequest(URL: requestURL)
             request.HTTPMethod = RequestType.GET.rawValue
             request.addValue("application/json", forHTTPHeaderField: "Accept")
@@ -65,6 +79,7 @@ public extension Networking {
                     returnedData = data
                     returnedImage = image
 
+                    print("Downloaded \(destinationURLPath)")
                     data.writeToURL(destinationURL, atomically: true)
                     self.imageCache.setObject(image, forKey: destinationURLPath)
                 } else if let url = url {
