@@ -4,11 +4,10 @@ import XCTest
 class ImageTests: XCTestCase {
     let baseURL = "http://httpbin.org"
 
-    func removeFileIfNeeded(networking: Networking, path: String) {
-        let encodedPath = path.encodeUTF8()!
-        let destinationURL = networking.destinationURL(encodedPath)
-        if NSFileManager().fileExistsAtPath(destinationURL.path!) {
-            try! NSFileManager().removeItemAtPath(destinationURL.path!)
+    func removeFileIfNeeded(networking: Networking, path: String, cacheName: String? = nil) {
+        let destinationURL = networking.destinationURL(path, cacheName: cacheName)
+        if NSFileManager().fileExistsAtURL(destinationURL) {
+            NSFileManager().removeFileAtURL(destinationURL)
         }
     }
 
@@ -58,7 +57,7 @@ class ImageTests: XCTestCase {
         }
     }
 
-    func testImageDownloadCache() {
+    func testDownloadedImageInFile() {
         let networking = Networking(baseURL: baseURL)
         let path = "/image/png"
 
@@ -66,7 +65,20 @@ class ImageTests: XCTestCase {
 
         networking.downloadImage(path) { image, error in
             let destinationURL = networking.destinationURL(path)
-            XCTAssertTrue(NSFileManager().fileExistsAtPath(destinationURL.path!))
+            XCTAssertTrue(NSFileManager().fileExistsAtURL(destinationURL))
+        }
+    }
+
+    func testDownloadedImageInFileUsingCustomName() {
+        let networking = Networking(baseURL: baseURL)
+        let path = "/image/png"
+        let cacheName = "png"
+
+        self.removeFileIfNeeded(networking, path: path, cacheName: cacheName)
+
+        networking.downloadImage(path, cacheName: cacheName) { image, error in
+            let destinationURL = networking.destinationURL(path, cacheName: cacheName)
+            XCTAssertTrue(NSFileManager().fileExistsAtURL(destinationURL))
         }
     }
 
