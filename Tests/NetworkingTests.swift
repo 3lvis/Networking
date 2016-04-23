@@ -49,6 +49,14 @@ class NetworkingTests: XCTestCase {
         XCTAssertEqual(destinationURL.lastPathComponent!, "http:--httpbin.org-image-png")
     }
 
+    func testDestinationURLCache() {
+        let networking = Networking(baseURL: baseURL)
+        let path = "/image/png"
+        let cacheName = "png/png"
+        let destinationURL = networking.destinationURL(path, cacheName: cacheName)
+        XCTAssertEqual(destinationURL.lastPathComponent!, "png-png")
+    }
+
     func testStatusCodeType() {
         XCTAssertEqual((-999).statusCodeType(), Networking.StatusCodeType.Unknown)
         XCTAssertEqual(99.statusCodeType(), Networking.StatusCodeType.Unknown)

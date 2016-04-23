@@ -73,7 +73,7 @@ class ImageTests: XCTestCase {
     func testDownloadedImageInFileUsingCustomName() {
         let networking = Networking(baseURL: baseURL)
         let path = "/image/png"
-        let cacheName = "png"
+        let cacheName = "png/png"
 
         self.removeFileIfNeeded(networking, path: path, cacheName: cacheName)
 
@@ -98,7 +98,7 @@ class ImageTests: XCTestCase {
     func testDownloadedImageInCacheUsingCustomName() {
         let networking = Networking(baseURL: baseURL)
         let path = "/image/png"
-        let cacheName = "png"
+        let cacheName = "png/png"
 
         self.removeFileIfNeeded(networking, path: path, cacheName: cacheName)
 
