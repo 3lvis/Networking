@@ -84,7 +84,6 @@ public extension Networking {
                     returnedData = data
                     returnedImage = image
 
-                    try! NSFileManager.defaultManager().createDirectoryAtURL(destinationURL, withIntermediateDirectories: true, attributes: nil)
                     data.writeToURL(destinationURL, atomically: true)
                     print("saving file: \(destinationURL)")
                     self.imageCache.setObject(image, forKey: destinationURL.absoluteString)
