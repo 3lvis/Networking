@@ -12,7 +12,8 @@ public extension Networking {
     public func downloadImage(path: String, cacheName: String? = nil, completion: (image: UIImage?, error: NSError?) -> ()) {
         let destinationURL: NSURL
         if let cacheName = cacheName {
-            guard let url = NSURL(string: cacheName) else { fatalError("Couldn't create a destination url using cacheName: \(cacheName)") }
+            let replacedPath = cacheName.stringByReplacingOccurrencesOfString("/", withString: "-")
+            guard let url = NSURL(string: replacedPath) else { fatalError("Couldn't create a destination url using cacheName: \(replacedPath)") }
             guard let cachesURL = NSFileManager.defaultManager().URLsForDirectory(.CachesDirectory, inDomains: .UserDomainMask).first else { fatalError("Couldn't normalize url") }
             destinationURL = cachesURL.URLByAppendingPathComponent(url.absoluteString)
         } else {

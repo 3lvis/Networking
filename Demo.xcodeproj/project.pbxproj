@@ -189,16 +189,16 @@
 		1474C1BB1CA2988900E15D84 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				14638D031CC645D2002B9433 /* Networking.h */,
 				1474C1BC1CA2988900E15D84 /* Dictionary+FormURLEncoded.swift */,
 				1474C1BD1CA2988900E15D84 /* JSON.swift */,
 				1474C1BE1CA2988900E15D84 /* NetworkActivityIndicator.swift */,
+				14638D031CC645D2002B9433 /* Networking.h */,
+				1474C1C11CA2988900E15D84 /* Networking.swift */,
 				1474C1BF1CA2988900E15D84 /* Networking+HTTPRequest.swift */,
 				1474C1C01CA2988900E15D84 /* Networking+Image.swift */,
-				1474C1C11CA2988900E15D84 /* Networking.swift */,
-				1474C1C21CA2988900E15D84 /* TestCheck.swift */,
-				1413C1D51CBD1784000AF90F /* String+UTF8.swift */,
 				14676B951CCB490C00FFDC92 /* NSFileManager+Helpers.swift */,
+				1413C1D51CBD1784000AF90F /* String+UTF8.swift */,
+				1474C1C21CA2988900E15D84 /* TestCheck.swift */,
 			);
 			path = Sources;
 			sourceTree = "<group>";

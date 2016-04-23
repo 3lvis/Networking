@@ -39,7 +39,7 @@ class NetworkingTests: XCTestCase {
 
         XCTAssertFalse(synchronous)
 
-        waitForExpectationsWithTimeout(3.0, handler: nil)
+        waitForExpectationsWithTimeout(5.0, handler: nil)
     }
 
     func testDestinationURL() {
