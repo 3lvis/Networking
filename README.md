@@ -259,8 +259,8 @@ If you want to remove the downloaded image so it downloads again. You can do it 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
 let destinationURL = networking.destinationURL("/image/png")
-if let path = destinationURL.path where NSFileManager().fileExistsAtPath(path) {
-   try! NSFileManager().removeItemAtPath(path)
+if let path = destinationURL.path where NSFileManager.defaultManager().fileExistsAtPath(path) {
+   try! NSFileManager.defaultManager().removeItemAtPath(path)
 }
 ```
 
