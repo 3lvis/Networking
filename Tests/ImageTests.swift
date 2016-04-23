@@ -81,6 +81,26 @@ class ImageTests: XCTestCase {
             XCTAssertTrue(NSFileManager().fileExistsAtURL(destinationURL))
         }
     }
+    func testDownloadedImageInCache() {
+        let networking = Networking(baseURL: baseURL)
+        let path = "/image/png"
+
+        networking.downloadImage(path) { image, error in
+            let destinationURL = networking.destinationURL(path)
+            XCTAssertNotNil(networking.imageCache.objectForKey(destinationURL.absoluteString))
+        }
+    }
+
+    func testDownloadedImageInCacheUsingCustomName() {
+        let networking = Networking(baseURL: baseURL)
+        let path = "/image/png"
+        let cacheName = "png"
+
+        networking.downloadImage(path, cacheName: cacheName) { image, error in
+            let destinationURL = networking.destinationURL(path, cacheName: cacheName)
+            XCTAssertNotNil(networking.imageCache.objectForKey(destinationURL.absoluteString))
+        }
+    }
 
     func testCancelImageDownload() {
         let expectation = expectationWithDescription("testCancelImageDownload")
