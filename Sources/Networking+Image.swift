@@ -23,12 +23,6 @@ public extension Networking {
     }
 
     func downloadImage(requestURL requestURL: NSURL, destinationURL: NSURL, path: String, completion: (image: UIImage?, error: NSError?) -> ()) {
-        print("request url: \(requestURL)")
-        print("—")
-        print("destination url: \(destinationURL)")
-        print("—")
-        print("path: \(path)")
-        print("—")
         if let getFakeRequests = self.fakeRequests[.GET], fakeRequest = getFakeRequests[path] {
             if fakeRequest.statusCode.statusCodeType() == .Successful, let image = fakeRequest.response as? UIImage {
                 completion(image: image, error: nil)
@@ -37,12 +31,8 @@ public extension Networking {
                 completion(image: nil, error: error)
             }
         } else if let image = self.imageCache.objectForKey(destinationURL.absoluteString) as? UIImage {
-            print("image cache: \(destinationURL)")
-            print("—")
             completion(image: image, error: nil)
         } else if NSFileManager.defaultManager().fileExistsAtURL(destinationURL) {
-            print("file found: \(destinationURL)")
-            print("—")
             if TestCheck.isTesting {
                 guard let data = NSFileManager.defaultManager().contentsAtPath(destinationURL.path!) else { fatalError("Couldn't get image in destination url: \(destinationURL)") }
                 guard let image = UIImage(data: data) else { fatalError("Couldn't get convert image using data: \(data)") }
@@ -59,8 +49,6 @@ public extension Networking {
                 })
             }
         } else {
-            print("downloading url: \(requestURL)")
-            print("—")
             let request = NSMutableURLRequest(URL: requestURL)
             request.HTTPMethod = RequestType.GET.rawValue
             request.addValue("application/json", forHTTPHeaderField: "Accept")
@@ -86,7 +74,6 @@ public extension Networking {
                     returnedImage = image
 
                     data.writeToURL(destinationURL, atomically: true)
-                    print("saving file: \(destinationURL)")
                     self.imageCache.setObject(image, forKey: destinationURL.absoluteString)
                 } else if let url = url {
                     if let response = response as? NSHTTPURLResponse {
