@@ -145,12 +145,22 @@ public class Networking {
      - parameter path: The path used to download the resource.
      - returns: A NSURL where a resource has been stored.
      */
-    public func destinationURL(path: String) -> NSURL {
-        guard let url = NSURL(string: (self.urlForPath(path).absoluteString as NSString).stringByReplacingOccurrencesOfString("/", withString: "-")),
-            cachesURL = NSFileManager.defaultManager().URLsForDirectory(.CachesDirectory, inDomains: .UserDomainMask).first else { fatalError("Couldn't normalize url") }
-        let destinationURL = cachesURL.URLByAppendingPathComponent(url.absoluteString)
+    public func destinationURL(path: String, cacheName: String? = nil) -> NSURL {
+        if let cacheName = cacheName {
+            guard let url = NSURL(string: cacheName) else { fatalError("Couldn't create a destination url using cacheName: \(cacheName)") }
+            guard let cachesURL = NSFileManager.defaultManager().URLsForDirectory(.CachesDirectory, inDomains: .UserDomainMask).first else { fatalError("Couldn't normalize url") }
+            let destinationURL = cachesURL.URLByAppendingPathComponent(url.absoluteString)
 
-        return destinationURL
+            return destinationURL
+        } else {
+            let finalPath = self.urlForPath(path).absoluteString
+            let replacedPath = finalPath.stringByReplacingOccurrencesOfString("/", withString: "-")
+            guard let url = NSURL(string: replacedPath) else { fatalError("Couldn't create a url using replacedPath: \(replacedPath)") }
+            guard let cachesURL = NSFileManager.defaultManager().URLsForDirectory(.CachesDirectory, inDomains: .UserDomainMask).first else { fatalError("Couldn't normalize url") }
+            let destinationURL = cachesURL.URLByAppendingPathComponent(url.absoluteString)
+
+            return destinationURL
+        }
     }
 
     public static func splitBaseURLAndRelativePath(path: String) -> (baseURL: String, relativePath: String) {

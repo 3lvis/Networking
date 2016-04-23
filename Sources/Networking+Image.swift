@@ -1,19 +1,20 @@
-#if os(iOS) || os(tvOS) || os(watchOS)
-
 import Foundation
 import UIKit
 
 public extension Networking {
+    #if os(iOS) || os(tvOS) || os(watchOS)
     /**
      Downloads an image using the specified path.
      - parameter path: The path where the image is located
-     - parameter cacheName: The cache name used to identify the downloaded image, by default the path is used. 
+     - parameter cacheName: The cache name used to identify the downloaded image, by default the path is used.
      - parameter completion: A closure that gets called when the image download request is completed, it contains an `UIImage` object and a `NSError`.
      */
     public func downloadImage(path: String, cacheName: String? = nil, completion: (image: UIImage?, error: NSError?) -> ()) {
         let destinationURL: NSURL
         if let cacheName = cacheName {
-            destinationURL = self.destinationURL(cacheName)
+            guard let url = NSURL(string: cacheName) else { fatalError("Couldn't create a destination url using cacheName: \(cacheName)") }
+            guard let cachesURL = NSFileManager.defaultManager().URLsForDirectory(.CachesDirectory, inDomains: .UserDomainMask).first else { fatalError("Couldn't normalize url") }
+            destinationURL = cachesURL.URLByAppendingPathComponent(url.absoluteString)
         } else {
             destinationURL = self.destinationURL(path)
         }
@@ -21,7 +22,6 @@ public extension Networking {
     }
 
     func downloadImage(requestURL requestURL: NSURL, destinationURL: NSURL, path: String, completion: (image: UIImage?, error: NSError?) -> ()) {
-        guard let destinationURLPath = destinationURL.path else { fatalError("File path not valid") }
         if let getFakeRequests = self.fakeRequests[.GET], fakeRequest = getFakeRequests[path] {
             if fakeRequest.statusCode.statusCodeType() == .Successful, let image = fakeRequest.response as? UIImage {
                 completion(image: image, error: nil)
@@ -31,14 +31,13 @@ public extension Networking {
             }
         } else if let image = self.imageCache.objectForKey(destinationURL.absoluteString) as? UIImage {
             completion(image: image, error: nil)
-        } else if NSFileManager().fileExistsAtPath(destinationURLPath) {
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), {
-                if let data = NSData(contentsOfURL: destinationURL), image = UIImage(data: data) {
-                    dispatch_async(dispatch_get_main_queue(), {
-                        completion(image: image, error: nil)
-                    })
+        } else if NSFileManager().fileExistsAtURL(destinationURL) {
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), {
+                guard let data = NSData(contentsOfURL: destinationURL), image = UIImage(data: data) else { fatalError("Couldn't get image in destination url: \(destinationURL)") }
+                dispatch_async(dispatch_get_main_queue(), {
                     self.imageCache.setObject(image, forKey: destinationURL.absoluteString)
-                }
+                    completion(image: image, error: nil)
+                })
             })
         } else {
             let request = NSMutableURLRequest(URL: requestURL)
@@ -66,7 +65,7 @@ public extension Networking {
                     returnedImage = image
 
                     data.writeToURL(destinationURL, atomically: true)
-                    self.imageCache.setObject(image, forKey: destinationURLPath)
+                    self.imageCache.setObject(image, forKey: destinationURL.absoluteString)
                 } else if let url = url {
                     if let response = response as? NSHTTPURLResponse {
                         returnedError = NSError(domain: Networking.ErrorDomain, code: response.statusCode, userInfo: [NSLocalizedDescriptionKey : NSHTTPURLResponse.localizedStringForStatusCode(response.statusCode)])
@@ -114,6 +113,5 @@ public extension Networking {
     public func fakeImageDownload(path: String, image: UIImage?, statusCode: Int = 200) {
         self.fake(.GET, path: path, response: image, statusCode: statusCode)
     }
+    #endif
 }
-
-#endif
