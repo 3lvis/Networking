@@ -12,7 +12,8 @@ public extension Networking {
     public func downloadImage(path: String, cacheName: String? = nil, completion: (image: UIImage?, error: NSError?) -> ()) {
         let destinationURL: NSURL
         if let cacheName = cacheName {
-            guard let url = NSURL(string: cacheName) else { fatalError("Couldn't create a destination url using cacheName: \(cacheName)") }
+            let replacedPath = cacheName.stringByReplacingOccurrencesOfString("/", withString: "-")
+            guard let url = NSURL(string: replacedPath) else { fatalError("Couldn't create a destination url using cacheName: \(replacedPath)") }
             guard let cachesURL = NSFileManager.defaultManager().URLsForDirectory(.CachesDirectory, inDomains: .UserDomainMask).first else { fatalError("Couldn't normalize url") }
             destinationURL = cachesURL.URLByAppendingPathComponent(url.absoluteString)
         } else {
@@ -22,6 +23,12 @@ public extension Networking {
     }
 
     func downloadImage(requestURL requestURL: NSURL, destinationURL: NSURL, path: String, completion: (image: UIImage?, error: NSError?) -> ()) {
+        print("request url: \(requestURL)")
+        print("—")
+        print("destination url: \(destinationURL)")
+        print("—")
+        print("path: \(path)")
+        print("—")
         if let getFakeRequests = self.fakeRequests[.GET], fakeRequest = getFakeRequests[path] {
             if fakeRequest.statusCode.statusCodeType() == .Successful, let image = fakeRequest.response as? UIImage {
                 completion(image: image, error: nil)
@@ -30,16 +37,30 @@ public extension Networking {
                 completion(image: nil, error: error)
             }
         } else if let image = self.imageCache.objectForKey(destinationURL.absoluteString) as? UIImage {
+            print("image cache: \(destinationURL)")
+            print("—")
             completion(image: image, error: nil)
-        } else if NSFileManager().fileExistsAtURL(destinationURL) {
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), {
-                guard let data = NSData(contentsOfURL: destinationURL), image = UIImage(data: data) else { fatalError("Couldn't get image in destination url: \(destinationURL)") }
-                dispatch_async(dispatch_get_main_queue(), {
-                    self.imageCache.setObject(image, forKey: destinationURL.absoluteString)
-                    completion(image: image, error: nil)
+        } else if NSFileManager.defaultManager().fileExistsAtURL(destinationURL) {
+            print("file found: \(destinationURL)")
+            print("—")
+            if TestCheck.isTesting {
+                guard let data = NSFileManager.defaultManager().contentsAtPath(destinationURL.path!) else { fatalError("Couldn't get image in destination url: \(destinationURL)") }
+                guard let image = UIImage(data: data) else { fatalError("Couldn't get convert image using data: \(data)") }
+                self.imageCache.setObject(image, forKey: destinationURL.absoluteString)
+                completion(image: image, error: nil)
+            } else {
+                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), {
+                    guard let data = NSData(contentsOfURL: destinationURL) else { fatalError("Couldn't get image in destination url: \(destinationURL)") }
+                    guard let image = UIImage(data: data) else { fatalError("Couldn't get convert image using data: \(data)") }
+                    dispatch_async(dispatch_get_main_queue(), {
+                        self.imageCache.setObject(image, forKey: destinationURL.absoluteString)
+                        completion(image: image, error: nil)
+                    })
                 })
-            })
+            }
         } else {
+            print("downloading url: \(requestURL)")
+            print("—")
             let request = NSMutableURLRequest(URL: requestURL)
             request.HTTPMethod = RequestType.GET.rawValue
             request.addValue("application/json", forHTTPHeaderField: "Accept")
@@ -65,6 +86,7 @@ public extension Networking {
                     returnedImage = image
 
                     data.writeToURL(destinationURL, atomically: true)
+                    print("saving file: \(destinationURL)")
                     self.imageCache.setObject(image, forKey: destinationURL.absoluteString)
                 } else if let url = url {
                     if let response = response as? NSHTTPURLResponse {

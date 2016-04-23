@@ -147,7 +147,8 @@ public class Networking {
      */
     public func destinationURL(path: String, cacheName: String? = nil) -> NSURL {
         if let cacheName = cacheName {
-            guard let url = NSURL(string: cacheName) else { fatalError("Couldn't create a destination url using cacheName: \(cacheName)") }
+            let replacedPath = cacheName.stringByReplacingOccurrencesOfString("/", withString: "-")
+            guard let url = NSURL(string: replacedPath) else { fatalError("Couldn't create a destination url using cacheName: \(replacedPath)") }
             guard let cachesURL = NSFileManager.defaultManager().URLsForDirectory(.CachesDirectory, inDomains: .UserDomainMask).first else { fatalError("Couldn't normalize url") }
             let destinationURL = cachesURL.URLByAppendingPathComponent(url.absoluteString)
 

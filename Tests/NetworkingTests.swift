@@ -39,7 +39,7 @@ class NetworkingTests: XCTestCase {
 
         XCTAssertFalse(synchronous)
 
-        waitForExpectationsWithTimeout(3.0, handler: nil)
+        waitForExpectationsWithTimeout(5.0, handler: nil)
     }
 
     func testDestinationURL() {
@@ -47,6 +47,14 @@ class NetworkingTests: XCTestCase {
         let path = "/image/png"
         let destinationURL = networking.destinationURL(path)
         XCTAssertEqual(destinationURL.lastPathComponent!, "http:--httpbin.org-image-png")
+    }
+
+    func testDestinationURLCache() {
+        let networking = Networking(baseURL: baseURL)
+        let path = "/image/png"
+        let cacheName = "png/png"
+        let destinationURL = networking.destinationURL(path, cacheName: cacheName)
+        XCTAssertEqual(destinationURL.lastPathComponent!, "png-png")
     }
 
     func testStatusCodeType() {

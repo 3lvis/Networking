@@ -6,8 +6,8 @@ class ImageTests: XCTestCase {
 
     func removeFileIfNeeded(networking: Networking, path: String, cacheName: String? = nil) {
         let destinationURL = networking.destinationURL(path, cacheName: cacheName)
-        if NSFileManager().fileExistsAtURL(destinationURL) {
-            NSFileManager().removeFileAtURL(destinationURL)
+        if NSFileManager.defaultManager().fileExistsAtURL(destinationURL) {
+            NSFileManager.defaultManager().removeFileAtURL(destinationURL)
         }
     }
 
@@ -65,25 +65,29 @@ class ImageTests: XCTestCase {
 
         networking.downloadImage(path) { image, error in
             let destinationURL = networking.destinationURL(path)
-            XCTAssertTrue(NSFileManager().fileExistsAtURL(destinationURL))
+            XCTAssertTrue(NSFileManager.defaultManager().fileExistsAtURL(destinationURL))
+            XCTAssertNotNil(NSFileManager.defaultManager().contentsAtPath(destinationURL.path!))
         }
     }
 
     func testDownloadedImageInFileUsingCustomName() {
         let networking = Networking(baseURL: baseURL)
         let path = "/image/png"
-        let cacheName = "png"
+        let cacheName = "png/png"
 
         self.removeFileIfNeeded(networking, path: path, cacheName: cacheName)
 
         networking.downloadImage(path, cacheName: cacheName) { image, error in
             let destinationURL = networking.destinationURL(path, cacheName: cacheName)
-            XCTAssertTrue(NSFileManager().fileExistsAtURL(destinationURL))
+            XCTAssertTrue(NSFileManager.defaultManager().fileExistsAtURL(destinationURL))
+            XCTAssertNotNil(NSFileManager.defaultManager().contentsAtPath(destinationURL.path!))
         }
     }
     func testDownloadedImageInCache() {
         let networking = Networking(baseURL: baseURL)
         let path = "/image/png"
+
+        self.removeFileIfNeeded(networking, path: path)
 
         networking.downloadImage(path) { image, error in
             let destinationURL = networking.destinationURL(path)
@@ -94,7 +98,9 @@ class ImageTests: XCTestCase {
     func testDownloadedImageInCacheUsingCustomName() {
         let networking = Networking(baseURL: baseURL)
         let path = "/image/png"
-        let cacheName = "png"
+        let cacheName = "png/png"
+
+        self.removeFileIfNeeded(networking, path: path, cacheName: cacheName)
 
         networking.downloadImage(path, cacheName: cacheName) { image, error in
             let destinationURL = networking.destinationURL(path, cacheName: cacheName)
