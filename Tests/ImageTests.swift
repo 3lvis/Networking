@@ -91,7 +91,7 @@ class ImageTests: XCTestCase {
 
         networking.downloadImage(path) { image, error in
             let destinationURL = networking.destinationURL(path)
-            XCTAssertNotNil(networking.imageCache.objectForKey(destinationURL.absoluteString))
+            XCTAssertNotNil(networking.cache.objectForKey(destinationURL.absoluteString))
         }
     }
 
@@ -104,7 +104,7 @@ class ImageTests: XCTestCase {
 
         networking.downloadImage(path, cacheName: cacheName) { image, error in
             let destinationURL = networking.destinationURL(path, cacheName: cacheName)
-            XCTAssertNotNil(networking.imageCache.objectForKey(destinationURL.absoluteString))
+            XCTAssertNotNil(networking.cache.objectForKey(destinationURL.absoluteString))
         }
     }
 

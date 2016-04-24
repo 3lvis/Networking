@@ -73,7 +73,7 @@ public class Networking {
     var fakeRequests = [RequestType : [String : FakeRequest]]()
     var token: String?
     var customAuthorizationHeader: String?
-    var imageCache: NSCache
+    var cache: NSCache
     var configurationType: ConfigurationType
 
     /**
@@ -92,7 +92,7 @@ public class Networking {
     public init(baseURL: String, configurationType: ConfigurationType = .Default, cache: NSCache? = nil) {
         self.baseURL = baseURL
         self.configurationType = configurationType
-        self.imageCache = cache ?? NSCache()
+        self.cache = cache ?? NSCache()
     }
 
     /**
