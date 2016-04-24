@@ -165,6 +165,11 @@ public class Networking {
         }
     }
 
+    /**
+     Splits a url in base url and relative path
+     - parameter path: The full url to be splitted
+     - returns: A base url and a relative path
+     */
     public static func splitBaseURLAndRelativePath(path: String) -> (baseURL: String, relativePath: String) {
         guard let encodedPath = path.encodeUTF8() else { fatalError("Couldn't encode path to UTF8: \(path)") }
         guard let url = NSURL(string: encodedPath) else { fatalError("Path \(encodedPath) can't be converted to url") }
@@ -174,6 +179,23 @@ public class Networking {
         let relativePath = path.stringByReplacingOccurrencesOfString(baseURL, withString: "")
 
         return (baseURL, relativePath)
+    }
+
+    /**
+     Cancels all the current requests.
+     */
+    public func cancellAllRequests() {
+        self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
+            for sessionTask in dataTasks {
+                sessionTask.cancel()
+            }
+            for sessionTask in downloadTasks {
+                sessionTask.cancel()
+            }
+            for sessionTask in uploadTasks {
+                sessionTask.cancel()
+            }
+        }
     }
 }
 

@@ -76,4 +76,26 @@ class NetworkingTests: XCTestCase {
         XCTAssertEqual(baseURL2, "http://httpbin.org")
         XCTAssertEqual(relativePath2, "/basic-auth/user/passwd")
     }
+
+    func testCancelRequests() {
+        let expectation = expectationWithDescription("testCancelRequests")
+        let networking = Networking(baseURL: baseURL)
+        networking.disableTestingMode = true
+
+        networking.GET("/get", completion: { JSON, error in
+            let canceledCode = error?.code == -999
+            XCTAssertTrue(canceledCode)
+            expectation.fulfill()
+        })
+
+        networking.POST("/post") { JSON, error in
+            let canceledCode = error?.code == -999
+            XCTAssertTrue(canceledCode)
+            expectation.fulfill()
+        }
+
+        networking.cancellAllRequests()
+
+        waitForExpectationsWithTimeout(3.0, handler: nil)
+    }
 }
