@@ -73,7 +73,7 @@ public class Networking {
     var fakeRequests = [RequestType : [String : FakeRequest]]()
     var token: String?
     var customAuthorizationHeader: String?
-    var imageCache = NSCache()
+    var imageCache: NSCache
     var configurationType: ConfigurationType
 
     /**
@@ -89,9 +89,10 @@ public class Networking {
      Base initializer, it creates an instance of `Networking`.
      - parameter baseURL: The base URL for HTTP requests under `Networking`.
      */
-    public init(baseURL: String, configurationType: ConfigurationType = .Default) {
+    public init(baseURL: String, configurationType: ConfigurationType = .Default, cache: NSCache? = nil) {
         self.baseURL = baseURL
         self.configurationType = configurationType
+        self.imageCache = cache ?? NSCache()
     }
 
     /**
