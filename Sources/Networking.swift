@@ -183,8 +183,9 @@ public class Networking {
 
     /**
      Cancels all the current requests.
+     - parameter completion: The completion block to be called when all the requests are cancelled
      */
-    public func cancellAllRequests() {
+    public func cancellAllRequests(completion: (Void -> Void)?) {
         self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
             for sessionTask in dataTasks {
                 sessionTask.cancel()
@@ -195,6 +196,8 @@ public class Networking {
             for sessionTask in uploadTasks {
                 sessionTask.cancel()
             }
+
+            completion?()
         }
     }
 }

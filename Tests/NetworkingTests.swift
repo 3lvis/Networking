@@ -94,7 +94,7 @@ class NetworkingTests: XCTestCase {
             expectation.fulfill()
         }
 
-        networking.cancellAllRequests()
+        networking.cancellAllRequests(nil)
 
         waitForExpectationsWithTimeout(3.0, handler: nil)
     }
