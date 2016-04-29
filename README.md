@@ -67,11 +67,7 @@ let networking = Networking(baseURL: "http://httpbin.org", configurationType: .E
 
 ### HTTP basic
 
-To authenticate using [basic authentication](http://www.w3.org/Protocols/HTTP/1.0/spec.html#BasicAA) with a username **"aladdin"** and password **"opensesame"**, you would need to set the following header field:
-
-`Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==`, which contains the string `aladin:opensesame` in Base64 format.
-
-Luckily, **Networking** provides a simpler way to do this:
+To authenticate using [basic authentication](http://www.w3.org/Protocols/HTTP/1.0/spec.html#BasicAA) with a username **"aladdin"** and password **"opensesame"** you only need to do this:
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
@@ -83,9 +79,7 @@ networking.GET("/basic-auth/aladdin/opensesame", completion: { JSON, error in
 
 ### Bearer token
 
-To authenticate using a [bearer token](https://tools.ietf.org/html/rfc6750) **"AAAFFAAAA3DAAAAAA"**, you would need to set the following header field:  `Authorization: Bearer AAAFFAAAA3DAAAAAA`.
-
-Luckily, **Networking** provides a simpler way to do this:
+To authenticate using a [bearer token](https://tools.ietf.org/html/rfc6750) **"AAAFFAAAA3DAAAAAA"** you only need to do this:
 
 ```swift
 let networking = Networking(baseURL: "http://sample.org")
@@ -97,9 +91,7 @@ networking.GET("/users", completion: { JSON, error in
 
 ### Custom authentication header
 
-To authenticate using a custom authentication header, for example **"Token token=AAAFFAAAA3DAAAAAA"** you would need to set the following header field: `Authorization: Token token=AAAFFAAAA3DAAAAAA`.
-
-Luckily, **Networking** also provides a simpler way to do this:
+To authenticate using a custom authentication header, for example **"Token token=AAAFFAAAA3DAAAAAA"** you would need to set the following header field: `Authorization: Token token=AAAFFAAAA3DAAAAAA`. Luckily, **Networking** provides a simple way to do this:
 
 ```swift
 let networking = Networking(baseURL: "http://sample.org")
@@ -111,7 +103,7 @@ networking.GET("/users", completion: { JSON, error in
 
 ## Making a request
 
-Making a request is as simple as just calling `GET`, `POST`, `PUT`, or `DELETE`. The only difference between this calls is that `GET` and `DELETE` don't require parameters while the other ones do.  
+Making a request is as simple as just calling `GET`, `POST`, `PUT`, or `DELETE`.
 
 **GET example**:
 
@@ -163,8 +155,7 @@ networking.POST("/post", contentType: .FormURLEncoded, parameters: ["custname":"
 }
 ```
 
-So far **Networking** only supports three types of `Content-Type` out of the box: `JSON`, `FormURLEncoded` and `Custom`. Meanwhile `JSON` and `FormURLEncoded` serialize your parameters in some way, `Custom` only sends your parameters as `NSData` so make sure that if you're using `Custom` then send something in data format as your parameters.
-
+At the moment **Networking** supports three types of `Content-Type` out of the box: `JSON`, `FormURLEncoded` and `Custom`. Meanwhile `JSON` and `FormURLEncoded` serialize your parameters in some way, `Custom` only sends your parameters as `NSData` so make sure that if you're using `Custom` then send something in data format as your parameters.
 
 For example:
 ```swift
@@ -173,7 +164,6 @@ networking.POST("/upload", contentType: .Custom("application/octet-stream"), par
    // Successfull upload using `application/octet-stream` as `Content-Type`
 }
 ```
-
 
 ## Faking a request
 
@@ -228,9 +218,7 @@ networking.cancelGET("/get")
 
 ## Downloading and caching an image
 
-To download an image using NSURLSession you have to download data and convert that data to an UIImage, without taking in account that you have to remember to do this in a background thread to not block your UI.
-
-Luckily **Networking** provides you a simpler method to do all this:
+**Downloading**:
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
@@ -265,7 +253,7 @@ networking.cancelImageDownload("/image/png")
 
 **Networking** stores the download image in the Caches folder. It also uses NSCache internally so it doesn't have to download the same image again and again.
 
-If you want to remove the downloaded image so it downloads again. You can do it like this:
+If you want to remove the downloaded image you can do it like this:
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
@@ -323,7 +311,7 @@ Response: <NSHTTPURLResponse: 0x7fede8d0c4e0> { URL: http://httpbin.org/invalidp
 
 ## Updating the Network Activity Indicator
 
-**Networking** leverages on [NetworkActivityIndicator](https://github.com/3lvis/NetworkActivityIndicator) to balance how the network activity indicator is displayed.
+**Networking** balances how the network activity indicator is displayed.
 
 > A network activity indicator appears in the status bar and shows that network activity is occurring.
 >The network activity indicator:
