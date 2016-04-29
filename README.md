@@ -339,6 +339,13 @@ use_frameworks!
 pod 'Networking'
 ```
 
+**Networking** is also available through [Carthage](https://github.com/Carthage/Carthage). To install
+it, simply add the following line to your Cartfile:
+
+```ruby
+github "3lvis/Networking"
+```
+
 ## Author
 
 This library was made with love by [@3lvis](https://twitter.com/3lvis).
