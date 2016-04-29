@@ -15,7 +15,7 @@
 - Minimal implementation
 - Fake requests easily (mocking/stubbing)
 - Runs synchronously in automatic testing environments
-- Image download and caching
+- Image downloading and caching
 - Free
 
 ## Table of Contents
@@ -39,18 +39,28 @@
 
 ## Choosing a configuration type
 
-**Networking** is basically a wrapper of NSURLSession, the great thing about this is that we can leverage to the great configuration types supported by NSURLSession, such as the default one, ephemeral and background.
+Since **Networking** is basically a wrapper of `NSURLSession` we can take leverage of the great configuration types that it supports, such as the default one, ephemeral and background, if you don't provide any or don't have special needs the `Default` one will be used.
 
-When initializing your instance of **Networking** you can provide a `NetworkingConfigurationType`.
+ - `Default`: The default session configuration uses a persistent disk-based cache (except when the result is downloaded to a file) and stores credentials in the user’s keychain. It also stores cookies (by default) in the same shared cookie store as the NSURLConnection and NSURLDownload classes.
+ 
+- `Ephemeral`: An ephemeral session configuration object is similar to a default session configuration object except that the corresponding session object does not store caches, credential stores, or any session-related data to disk. Instead, session-related data is stored in RAM. The only time an ephemeral session writes data to disk is when you tell it to write the contents of a URL to a file.
 
- - `Default`: If you don't provide any option this one is used. This configuration type manages upload and download tasks using the default options.
- - `Ephemeral`: A configuration type that uses no persistent storage for caches, cookies, or credentials.
- It's optimized for transferring data to and from your app’s memory.
- - `Background`: A configuration type that allows HTTP and HTTPS uploads or downloads to be performed in the background.
- It causes upload and download tasks to be performed by the system in a separate process.
+The main advantage to using ephemeral sessions is privacy. By not writing potentially sensitive data to disk, you make it less likely that the data will be intercepted and used later. For this reason, ephemeral sessions are ideal for private browsing modes in web browsers and other similar situations.
+
+Because an ephemeral session does not write cached data to disk, the size of the cache is limited by available RAM. This limitation means that previously fetched resources are less likely to be in the cache (and are guaranteed to not be there if the user quits and relaunches your app). This behavior may reduce perceived performance, depending on your app.
+
+When your app invalidates the session, all ephemeral session data is purged automatically. Additionally, in iOS, the in-memory cache is not purged automatically when your app is suspended but may be purged when your app is terminated or when the system experiences memory pressure.
+
+ - `Background`: This configuration type is suitable for transferring data files while the app runs in the background. A session configured with this object hands control of the transfers over to the system, which handles the transfers in a separate process. In iOS, this configuration makes it possible for transfers to continue even when the app itself is suspended or terminated.
+
+If an iOS app is terminated by the system and relaunched, it retrieves the status of transfers that were in progress at the time of termination. This behavior applies only for normal termination of the app by the system. If the user terminates the app from the multitasking screen, the system cancels all of the session’s background transfers. In addition, the system does not automatically relaunch apps that were force quit by the user. The user must explicitly relaunch the app before transfers can begin again.
 
 ```swift
+// Default
 let networking = Networking(baseURL: "http://httpbin.org")
+
+// Ephemeral
+let networking = Networking(baseURL: "http://httpbin.org", configurationType: .Ephemeral)
 ```
 
 ## Authenticating
