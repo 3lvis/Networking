@@ -19,24 +19,24 @@
 
 ## Table of Contents
 
-* [Configuration types](#configuration-types)
-* [Authentication](#authentication)
+* [Choosing a configuration type](#configuration-types)
+* [Authenticating](#authenticating)
     * [HTTP basic](#http-basic)
     * [Bearer token](#bearer-token)
     * [Custom authentication header](#custom-authentication-header)
 * [Making a request](#making-a-request)
-* [Content Types](#content-types)
+* [Choosing a content type](#content-types)
 * [Faking a request](#faking-a-request)
-* [Cancelling](#cancelling)
-* [Image download](#image-download)
-* [Error logging](#error-logging)
-* [Network Activity Indicator](#network-activity-indicator)
-* [Installation](#installation)
+* [Cancelling a request](#cancelling)
+* [Downloading and caching an image](#image-download)
+* [Logging errors](#error-logging)
+* [Updating the Network Activity Indicator](#network-activity-indicator)
+* [Installing](#installing)
 * [Author](#author)
 * [License](#license)
 * [Attribution](#attribution)
 
-## Configuration types
+## Choosing a configuration type
 
 **Networking** is basically a wrapper of NSURLSession, the great thing about this is that we can leverage to the great configuration types supported by NSURLSession, such as the default one, ephemeral and background.
 
@@ -52,7 +52,7 @@ When initializing your instance of **Networking** you can provide a `NetworkingC
 let networking = Networking(baseURL: "http://httpbin.org")
 ```
 
-## Authentication
+## Authenticating
 
 ### HTTP basic
 
@@ -139,7 +139,7 @@ networking.POST("/post", params: ["username":"jameson", "password":"password"]) 
 }
 ```
 
-## Content Types
+## Choosing a Content Type
 
 **Networking** by default uses `application/json` as the `Content-Type` and `Accept` headers. If you want to use this content type you don't have to do anything.
 
@@ -202,7 +202,7 @@ networking.GET("/stories", completion: { JSON, error in
 })
 ```
 
-## Cancelling
+## Cancelling a request
 
 Cancelling any request for a specific path is really simple. Beware that cancelling a request will cause the request to return with an error with status code -999.
 
@@ -215,7 +215,7 @@ networking.GET("/get", completion: { JSON, error in
 networking.cancelGET("/get")
 ```
 
-## Image download
+## Downloading and caching an image
 
 To download an image using NSURLSession you have to download data and convert that data to an UIImage, without taking in account that you have to remember to do this in a background thread to not block your UI.
 
@@ -264,7 +264,7 @@ if let path = destinationURL.path where NSFileManager.defaultManager().fileExist
 }
 ```
 
-## Error logging
+## Logging errors
 
 Any error catched by **Networking** will be printed in your console. This is really convenient since you want to know why your networking call failed anyway.
 
@@ -310,7 +310,7 @@ Response: <NSHTTPURLResponse: 0x7fede8d0c4e0> { URL: http://httpbin.org/invalidp
 ================= ~ ==================
 ```
 
-## Network Activity Indicator
+## Updating the Network Activity Indicator
 
 **Networking** leverages on [NetworkActivityIndicator](https://github.com/3lvis/NetworkActivityIndicator) to balance how the network activity indicator is displayed.
 
@@ -328,7 +328,7 @@ Response: <NSHTTPURLResponse: 0x7fede8d0c4e0> { URL: http://httpbin.org/invalidp
   <img src="https://raw.githubusercontent.com/3lvis/NetworkActivityIndicator/master/GIF/sample.gif"/>
 </p>
 
-## Installation
+## Installing
 
 **Networking** is available through [CocoaPods](http://cocoapods.org). To install
 it, simply add the following line to your Podfile:
