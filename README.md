@@ -39,7 +39,7 @@
 
 ## Choosing a configuration type
 
-Since **Networking** is basically a wrapper of `NSURLSession` we can take leverage of the great configuration types that it supports, such as the default one, ephemeral and background, if you don't provide any or don't have special needs the `Default` one will be used.
+Since **Networking** is basically a wrapper of `NSURLSession` we can take leverage of the great configuration types that it supports, such as `Default`, `Ephemeral` and `Background`, if you don't provide any or don't have special needs then `Default` will be used.
 
  - `Default`: The default session configuration uses a persistent disk-based cache (except when the result is downloaded to a file) and stores credentials in the user’s keychain. It also stores cookies (by default) in the same shared cookie store as the NSURLConnection and NSURLDownload classes.
  
