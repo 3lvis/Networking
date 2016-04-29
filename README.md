@@ -6,6 +6,7 @@
 ![platforms](https://img.shields.io/badge/platforms-iOS%20%7C%20OS%20X%20%7C%20watchOS%20%7C%20tvOS%20-lightgrey.svg)
 [![License](https://img.shields.io/cocoapods/l/Networking.svg?style=flat)](https://cocoapods.org/pods/Networking)
 
+**Networking** was born out of the necesity of having a simple networking library that didn't had crazy programming abstractions or used the latest reactive programming techniques, just a plain, simple and convenient wrapper around `NSURLSession` that supported common needs such as faking requests and caching images out of the box. A library that was small enough to read in one go but useful enough to include in any project. That's how **Networking** was born, a fully tested library that even your grandma would love.
 
 - Super friendly API
 - Singleton free
