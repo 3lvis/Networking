@@ -6,6 +6,64 @@ import Foundation
 
 public extension Networking {
     #if os(iOS) || os(tvOS) || os(watchOS)
+    public func insertInCache(path: String, cacheName: String? = nil, image: UIImage) {
+        let destinationURL: NSURL
+        if let cacheName = cacheName {
+            let replacedPath = cacheName.stringByReplacingOccurrencesOfString("/", withString: "-")
+            guard let url = NSURL(string: replacedPath) else { fatalError("Couldn't create a destination url using cacheName: \(replacedPath)") }
+            guard let cachesURL = NSFileManager.defaultManager().URLsForDirectory(.CachesDirectory, inDomains: .UserDomainMask).first else { fatalError("Couldn't normalize url") }
+            destinationURL = cachesURL.URLByAppendingPathComponent(url.absoluteString)
+        } else {
+            destinationURL = self.destinationURL(path)
+        }
+
+        self.cache.setObject(image, forKey: destinationURL.absoluteString)
+    }
+
+    public func imageFromCache(path: String, cacheName: String? = nil, completion: (image: UIImage?, error: NSError?) -> Void) {
+        let destinationURL: NSURL
+        if let cacheName = cacheName {
+            let replacedPath = cacheName.stringByReplacingOccurrencesOfString("/", withString: "-")
+            guard let url = NSURL(string: replacedPath) else { fatalError("Couldn't create a destination url using cacheName: \(replacedPath)") }
+            guard let cachesURL = NSFileManager.defaultManager().URLsForDirectory(.CachesDirectory, inDomains: .UserDomainMask).first else { fatalError("Couldn't normalize url") }
+            destinationURL = cachesURL.URLByAppendingPathComponent(url.absoluteString)
+        } else {
+            destinationURL = self.destinationURL(path)
+        }
+
+        if TestCheck.isTesting {
+            if let image = self.cache.objectForKey(destinationURL.absoluteString) as? UIImage {
+                completion(image: image, error: nil)
+            } else if NSFileManager.defaultManager().fileExistsAtURL(destinationURL) {
+                guard let data = NSFileManager.defaultManager().contentsAtPath(destinationURL.path!) else { fatalError("Couldn't get image in destination url: \(destinationURL)") }
+                guard let image = UIImage(data: data) else { fatalError("Couldn't get convert image using data: \(data)") }
+                self.cache.setObject(image, forKey: destinationURL.absoluteString)
+                completion(image: image, error: nil)
+            } else {
+                completion(image: nil, error: nil)
+            }
+        } else {
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0)) {
+                if let image = self.cache.objectForKey(destinationURL.absoluteString) as? UIImage {
+                    dispatch_async(dispatch_get_main_queue()) {
+                        completion(image: image, error: nil)
+                    }
+                } else if NSFileManager.defaultManager().fileExistsAtURL(destinationURL) {
+                    guard let data = NSData(contentsOfURL: destinationURL) else { fatalError("Couldn't get image in destination url: \(destinationURL)") }
+                    guard let image = UIImage(data: data) else { fatalError("Couldn't get convert image using data: \(data)") }
+                    self.cache.setObject(image, forKey: destinationURL.absoluteString)
+                    dispatch_async(dispatch_get_main_queue()) {
+                        completion(image: image, error: nil)
+                    }
+                } else {
+                    dispatch_async(dispatch_get_main_queue()) {
+                        completion(image: nil, error: nil)
+                    }
+                }
+            }
+        }
+    }
+
     /**
      Downloads an image using the specified path.
      - parameter path: The path where the image is located
