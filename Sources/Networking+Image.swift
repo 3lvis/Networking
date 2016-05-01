@@ -31,12 +31,14 @@ public extension Networking {
         } else {
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0)) {
                 if let image = self.cache.objectForKey(destinationURL.absoluteString) as? UIImage {
-                    completion(image: image, error: nil)
+                    dispatch_async(dispatch_get_main_queue()) {
+                        completion(image: image, error: nil)
+                    }
                 } else if NSFileManager.defaultManager().fileExistsAtURL(destinationURL) {
                     guard let data = NSData(contentsOfURL: destinationURL) else { fatalError("Couldn't get image in destination url: \(destinationURL)") }
                     guard let image = UIImage(data: data) else { fatalError("Couldn't get convert image using data: \(data)") }
+                    self.cache.setObject(image, forKey: destinationURL.absoluteString)
                     dispatch_async(dispatch_get_main_queue()) {
-                        self.cache.setObject(image, forKey: destinationURL.absoluteString)
                         completion(image: image, error: nil)
                     }
                 } else {
