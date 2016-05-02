@@ -6,6 +6,14 @@ import Foundation
 
 public extension Networking {
     #if os(iOS) || os(tvOS) || os(watchOS)
+
+    /**
+     Retrieves an image from the cache or from the filesystem
+     - parameter path: The path where the image is located
+     - parameter cacheName: The cache name used to identify the downloaded image, by default the path is used.
+     - parameter completion: A closure that returns the image from the cache, if no image is found it will 
+     return nil, it contains an `UIImage` object and a `NSError`.
+     */
     public func imageFromCache(path: String, cacheName: String? = nil, completion: (image: UIImage?, error: NSError?) -> Void) {
         let destinationURL = self.destinationURL(path, cacheName: cacheName)
 
