@@ -13,13 +13,13 @@ public extension Networking {
      - parameter completion: A closure that returns the image from the cache, if no image is found it will 
      return nil, it contains an `UIImage` object and a `NSError`.
      */
-    public func imageFromCache(path: String, cacheName: String? = nil, completion: (image: UIImage?, error: NSError?) -> Void) {
+    public func imageFromCache(path: String, cacheName: String? = nil, completion: (image: UIImage?) -> Void) {
         let destinationURL = self.destinationURL(path, cacheName: cacheName)
         let semaphore = dispatch_semaphore_create(0)
         var returnedImage: UIImage?
 
         if let image = self.cache.objectForKey(destinationURL.absoluteString) as? UIImage {
-            completion(image: image, error: nil)
+            completion(image: image)
         } else if NSFileManager.defaultManager().fileExistsAtURL(destinationURL) {
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0)) {
                 let image = self.imageForDestinationURL(destinationURL)
@@ -29,17 +29,17 @@ public extension Networking {
                     dispatch_semaphore_signal(semaphore)
                 } else {
                     dispatch_async(dispatch_get_main_queue()) {
-                        completion(image: image, error: nil)
+                        completion(image: image)
                     }
                 }
             }
 
             if TestCheck.isTesting && self.disableTestingMode == false {
                 dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
-                completion(image: returnedImage, error: nil)
+                completion(image: returnedImage)
             }
         } else {
-            completion(image: nil, error: nil)
+            completion(image: nil)
         }
     }
 
@@ -58,8 +58,10 @@ public extension Networking {
                 completion(image: nil, error: error)
             }
         } else {
-            self.imageFromCache(path, cacheName: cacheName) { image, error in                
-                if image == nil && error == nil {
+            self.imageFromCache(path, cacheName: cacheName) { image in
+                if let image = image {
+                    completion(image: image, error: nil)
+                } else {
                     let destinationURL = self.destinationURL(path, cacheName: cacheName)
                     let requestURL = self.urlForPath(path)
                     let request = NSMutableURLRequest(URL: requestURL)
@@ -107,14 +109,12 @@ public extension Networking {
                             }
                         }
                         }.resume()
-                    
+
                     if TestCheck.isTesting && self.disableTestingMode == false {
                         dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
                         self.logError(.JSON, parameters: nil, data: returnedData, request: request, response: returnedResponse, error: returnedError)
                         completion(image: returnedImage, error: returnedError)
                     }
-                } else {
-                    completion(image: image, error: error)
                 }
             }
         }
