@@ -39,7 +39,7 @@ class NetworkingTests: XCTestCase {
 
         XCTAssertFalse(synchronous)
 
-        waitForExpectationsWithTimeout(5.0, handler: nil)
+        waitForExpectationsWithTimeout(15.0, handler: nil)
     }
 
     func testDestinationURL() {
@@ -81,21 +81,29 @@ class NetworkingTests: XCTestCase {
         let expectation = expectationWithDescription("testCancelRequests")
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
+        var cancelledGET = false
+        var cancelledPOST = false
 
         networking.GET("/get", completion: { JSON, error in
-            let canceledCode = error?.code == -999
-            XCTAssertTrue(canceledCode)
-            expectation.fulfill()
+            cancelledGET = error?.code == -999
+            XCTAssertTrue(cancelledGET)
+
+            if cancelledGET && cancelledPOST {
+                expectation.fulfill()
+            }
         })
 
         networking.POST("/post") { JSON, error in
-            let canceledCode = error?.code == -999
-            XCTAssertTrue(canceledCode)
-            expectation.fulfill()
+            cancelledPOST = error?.code == -999
+            XCTAssertTrue(cancelledPOST)
+
+            if cancelledGET && cancelledPOST {
+                expectation.fulfill()
+            }
         }
 
         networking.cancelAllRequests(nil)
 
-        waitForExpectationsWithTimeout(3.0, handler: nil)
+        waitForExpectationsWithTimeout(15.0, handler: nil)
     }
 }

@@ -126,7 +126,7 @@ class ImageTests: XCTestCase {
 
         networking.cancelImageDownload("/image/png")
 
-        waitForExpectationsWithTimeout(3.0, handler: nil)
+        waitForExpectationsWithTimeout(15.0, handler: nil)
     }
 
     func testFakeImageDownload() {

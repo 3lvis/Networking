@@ -87,7 +87,7 @@ extension HTTPRequestTests {
 
         networking.cancelGET("/get")
 
-        waitForExpectationsWithTimeout(3.0, handler: nil)
+        waitForExpectationsWithTimeout(15.0, handler: nil)
     }
 
     func testStatusCodes() {
@@ -202,7 +202,7 @@ extension HTTPRequestTests {
 
         networking.cancelPOST("/post")
 
-        waitForExpectationsWithTimeout(3.0, handler: nil)
+        waitForExpectationsWithTimeout(15.0, handler: nil)
     }
 }
 
@@ -271,7 +271,7 @@ extension HTTPRequestTests {
 
         networking.cancelPUT("/put")
 
-        waitForExpectationsWithTimeout(3.0, handler: nil)
+        waitForExpectationsWithTimeout(15.0, handler: nil)
     }
 }
 
@@ -357,6 +357,6 @@ extension HTTPRequestTests {
 
         networking.cancelDELETE("/delete")
 
-        waitForExpectationsWithTimeout(3.0, handler: nil)
+        waitForExpectationsWithTimeout(15.0, handler: nil)
     }
 }
