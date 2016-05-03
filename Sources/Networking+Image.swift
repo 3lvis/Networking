@@ -6,30 +6,16 @@ import Foundation
 
 public extension Networking {
     #if os(iOS) || os(tvOS) || os(watchOS)
-    public func insertInCache(path: String, cacheName: String? = nil, image: UIImage) {
-        let destinationURL: NSURL
-        if let cacheName = cacheName {
-            let replacedPath = cacheName.stringByReplacingOccurrencesOfString("/", withString: "-")
-            guard let url = NSURL(string: replacedPath) else { fatalError("Couldn't create a destination url using cacheName: \(replacedPath)") }
-            guard let cachesURL = NSFileManager.defaultManager().URLsForDirectory(.CachesDirectory, inDomains: .UserDomainMask).first else { fatalError("Couldn't normalize url") }
-            destinationURL = cachesURL.URLByAppendingPathComponent(url.absoluteString)
-        } else {
-            destinationURL = self.destinationURL(path)
-        }
 
-        self.cache.setObject(image, forKey: destinationURL.absoluteString)
-    }
-
+    /**
+     Retrieves an image from the cache or from the filesystem
+     - parameter path: The path where the image is located
+     - parameter cacheName: The cache name used to identify the downloaded image, by default the path is used.
+     - parameter completion: A closure that returns the image from the cache, if no image is found it will 
+     return nil, it contains an `UIImage` object and a `NSError`.
+     */
     public func imageFromCache(path: String, cacheName: String? = nil, completion: (image: UIImage?, error: NSError?) -> Void) {
-        let destinationURL: NSURL
-        if let cacheName = cacheName {
-            let replacedPath = cacheName.stringByReplacingOccurrencesOfString("/", withString: "-")
-            guard let url = NSURL(string: replacedPath) else { fatalError("Couldn't create a destination url using cacheName: \(replacedPath)") }
-            guard let cachesURL = NSFileManager.defaultManager().URLsForDirectory(.CachesDirectory, inDomains: .UserDomainMask).first else { fatalError("Couldn't normalize url") }
-            destinationURL = cachesURL.URLByAppendingPathComponent(url.absoluteString)
-        } else {
-            destinationURL = self.destinationURL(path)
-        }
+        let destinationURL = self.destinationURL(path, cacheName: cacheName)
 
         if TestCheck.isTesting {
             if let image = self.cache.objectForKey(destinationURL.absoluteString) as? UIImage {
@@ -71,15 +57,7 @@ public extension Networking {
      - parameter completion: A closure that gets called when the image download request is completed, it contains an `UIImage` object and a `NSError`.
      */
     public func downloadImage(path: String, cacheName: String? = nil, completion: (image: UIImage?, error: NSError?) -> Void) {
-        let destinationURL: NSURL
-        if let cacheName = cacheName {
-            let replacedPath = cacheName.stringByReplacingOccurrencesOfString("/", withString: "-")
-            guard let url = NSURL(string: replacedPath) else { fatalError("Couldn't create a destination url using cacheName: \(replacedPath)") }
-            guard let cachesURL = NSFileManager.defaultManager().URLsForDirectory(.CachesDirectory, inDomains: .UserDomainMask).first else { fatalError("Couldn't normalize url") }
-            destinationURL = cachesURL.URLByAppendingPathComponent(url.absoluteString)
-        } else {
-            destinationURL = self.destinationURL(path)
-        }
+        let destinationURL = self.destinationURL(path, cacheName: cacheName)
         self.download(requestURL: self.urlForPath(path), destinationURL: destinationURL, path: path, completion: completion)
     }
 
