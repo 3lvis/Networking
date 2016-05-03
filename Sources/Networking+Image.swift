@@ -6,7 +6,6 @@ import Foundation
 
 public extension Networking {
     #if os(iOS) || os(tvOS) || os(watchOS)
-
     /**
      Retrieves an image from the cache or from the filesystem
      - parameter path: The path where the image is located
@@ -16,37 +15,44 @@ public extension Networking {
      */
     public func imageFromCache(path: String, cacheName: String? = nil, completion: (image: UIImage?, error: NSError?) -> Void) {
         let destinationURL = self.destinationURL(path, cacheName: cacheName)
+        let semaphore = dispatch_semaphore_create(0)
+        var returnedImage: UIImage?
 
-        if TestCheck.isTesting {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0)) {
             if let image = self.cache.objectForKey(destinationURL.absoluteString) as? UIImage {
-                completion(image: image, error: nil)
+                returnedImage = image
+                if TestCheck.isTesting && self.disableTestingMode == false {
+                    dispatch_semaphore_signal(semaphore)
+                } else {
+                    dispatch_async(dispatch_get_main_queue()) {
+                        completion(image: image, error: nil)
+                    }
+                }
             } else if NSFileManager.defaultManager().fileExistsAtURL(destinationURL) {
-                guard let data = NSFileManager.defaultManager().contentsAtPath(destinationURL.path!) else { fatalError("Couldn't get image in destination url: \(destinationURL)") }
-                guard let image = UIImage(data: data) else { fatalError("Couldn't get convert image using data: \(data)") }
+                let image = self.imageForDestinationURL(destinationURL)
+                returnedImage = image
                 self.cache.setObject(image, forKey: destinationURL.absoluteString)
-                completion(image: image, error: nil)
+                if TestCheck.isTesting && self.disableTestingMode == false {
+                    dispatch_semaphore_signal(semaphore)
+                } else {
+                    dispatch_async(dispatch_get_main_queue()) {
+                        completion(image: image, error: nil)
+                    }
+                }
             } else {
-                completion(image: nil, error: nil)
-            }
-        } else {
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0)) {
-                if let image = self.cache.objectForKey(destinationURL.absoluteString) as? UIImage {
-                    dispatch_async(dispatch_get_main_queue()) {
-                        completion(image: image, error: nil)
-                    }
-                } else if NSFileManager.defaultManager().fileExistsAtURL(destinationURL) {
-                    guard let data = NSData(contentsOfURL: destinationURL) else { fatalError("Couldn't get image in destination url: \(destinationURL)") }
-                    guard let image = UIImage(data: data) else { fatalError("Couldn't get convert image using data: \(data)") }
-                    self.cache.setObject(image, forKey: destinationURL.absoluteString)
-                    dispatch_async(dispatch_get_main_queue()) {
-                        completion(image: image, error: nil)
-                    }
+                if TestCheck.isTesting && self.disableTestingMode == false {
+                    dispatch_semaphore_signal(semaphore)
                 } else {
                     dispatch_async(dispatch_get_main_queue()) {
                         completion(image: nil, error: nil)
                     }
                 }
             }
+        }
+
+        if TestCheck.isTesting && self.disableTestingMode == false {
+            dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
+            completion(image: returnedImage, error: nil)
         }
     }
 
@@ -72,20 +78,24 @@ public extension Networking {
         } else if let image = self.cache.objectForKey(destinationURL.absoluteString) as? UIImage {
             completion(image: image, error: nil)
         } else if NSFileManager.defaultManager().fileExistsAtURL(destinationURL) {
-            if TestCheck.isTesting {
-                guard let data = NSFileManager.defaultManager().contentsAtPath(destinationURL.path!) else { fatalError("Couldn't get image in destination url: \(destinationURL)") }
-                guard let image = UIImage(data: data) else { fatalError("Couldn't get convert image using data: \(data)") }
+            let semaphore = dispatch_semaphore_create(0)
+            var returnedImage: UIImage?
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0)) {
+                let image = self.imageForDestinationURL(destinationURL)
+                returnedImage = image
                 self.cache.setObject(image, forKey: destinationURL.absoluteString)
-                completion(image: image, error: nil)
-            } else {
-                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), {
-                    guard let data = NSData(contentsOfURL: destinationURL) else { fatalError("Couldn't get image in destination url: \(destinationURL)") }
-                    guard let image = UIImage(data: data) else { fatalError("Couldn't get convert image using data: \(data)") }
-                    dispatch_async(dispatch_get_main_queue(), {
-                        self.cache.setObject(image, forKey: destinationURL.absoluteString)
+                if TestCheck.isTesting && self.disableTestingMode == false {
+                    dispatch_semaphore_signal(semaphore)
+                } else {
+                    dispatch_async(dispatch_get_main_queue()) {
                         completion(image: image, error: nil)
-                    })
-                })
+                    }
+                }
+            }
+
+            if TestCheck.isTesting && self.disableTestingMode == false {
+                dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
+                completion(image: returnedImage, error: nil)
             }
         } else {
             let request = NSMutableURLRequest(URL: requestURL)
@@ -104,7 +114,7 @@ public extension Networking {
 
             NetworkActivityIndicator.sharedIndicator.visible = true
 
-            self.session.downloadTaskWithRequest(request, completionHandler: { url, response, error in
+            self.session.downloadTaskWithRequest(request) { url, response, error in
                 returnedResponse = response
                 returnedError = error
 
@@ -125,18 +135,17 @@ public extension Networking {
                 if TestCheck.isTesting && self.disableTestingMode == false {
                     dispatch_semaphore_signal(semaphore)
                 } else {
-                    dispatch_async(dispatch_get_main_queue(), {
+                    dispatch_async(dispatch_get_main_queue()) {
                         NetworkActivityIndicator.sharedIndicator.visible = false
 
                         self.logError(.JSON, parameters: nil, data: returnedData, request: request, response: response, error: returnedError)
                         completion(image: returnedImage, error: returnedError)
-                    })
+                    }
                 }
-            }).resume()
+            }.resume()
 
             if TestCheck.isTesting && self.disableTestingMode == false {
                 dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
-
                 self.logError(.JSON, parameters: nil, data: returnedData, request: request, response: returnedResponse, error: returnedError)
                 completion(image: returnedImage, error: returnedError)
             }
@@ -160,6 +169,17 @@ public extension Networking {
      */
     public func fakeImageDownload(path: String, image: UIImage?, statusCode: Int = 200) {
         self.fake(.GET, path: path, response: image, statusCode: statusCode)
+    }
+    #endif
+}
+
+extension Networking {
+    #if os(iOS) || os(tvOS) || os(watchOS)
+    func imageForDestinationURL(url: NSURL) -> UIImage {
+        guard let data = NSFileManager.defaultManager().contentsAtPath(url.path!) else { fatalError("Couldn't get image in destination url: \(url)") }
+        guard let image = UIImage(data: data) else { fatalError("Couldn't get convert image using data: \(data)") }
+        
+        return image
     }
     #endif
 }

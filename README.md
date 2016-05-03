@@ -72,9 +72,9 @@ To authenticate using [basic authentication](http://www.w3.org/Protocols/HTTP/1.
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.authenticate(username: "aladdin", password: "opensesame")
-networking.GET("/basic-auth/aladdin/opensesame", completion: { JSON, error in
+networking.GET("/basic-auth/aladdin/opensesame") { JSON, error in
     // Successfully logged in! Now do something with the JSON
-})
+}
 ```
 
 ### Bearer token
@@ -84,9 +84,9 @@ To authenticate using a [bearer token](https://tools.ietf.org/html/rfc6750) **"A
 ```swift
 let networking = Networking(baseURL: "http://sample.org")
 networking.authenticate(token: "AAAFFAAAA3DAAAAAA")
-networking.GET("/users", completion: { JSON, error in
+networking.GET("/users") { JSON, error in
     // Do something...
-})
+}
 ```
 
 ### Custom authentication header
@@ -96,9 +96,9 @@ To authenticate using a custom authentication header, for example **"Token token
 ```swift
 let networking = Networking(baseURL: "http://sample.org")
 networking.authenticate(authorizationHeader: "Token token=AAAFFAAAA3DAAAAAA")
-networking.GET("/users", completion: { JSON, error in
+networking.GET("/users") { JSON, error in
     // Do something...
-})
+}
 ```
 
 ## Making a request
@@ -109,11 +109,11 @@ Making a request is as simple as just calling `GET`, `POST`, `PUT`, or `DELETE`.
 
 ```swift
 let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
-networking.GET("/stories", completion: { JSON, error in
+networking.GET("/stories") { JSON, error in
   if let JSON = JSON {
     // Stories JSON: https://api-news.layervault.com/api/v2/stories
   }
-})
+}
 ```
 
 **POST example**:
@@ -174,9 +174,9 @@ Faking a request means that after calling this method on a specific path, any ca
 ```swift
 let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
 networking.fakeGET("/stories", response: [["id" : 47333, "title" : "Site Design: Aquest"]])
-networking.GET("/stories", completion: { JSON, error in
+networking.GET("/stories") { JSON, error in
     // JSON containing stories
-})
+}
 ```
 
 **Faking with contents of a file**:
@@ -186,9 +186,9 @@ If your file is not located in the main bundle you have to specify using the bun
 ```swift
 let networking = Networking(baseURL: baseURL)
 networking.fakeGET("/entries", fileName: "entries.json")
-networking.GET("/entries", completion: { JSON, error in
+networking.GET("/entries") { JSON, error in
     // JSON with the contents of entries.json
-})
+}
 ```
 
 **Faking with status code**:
@@ -198,9 +198,9 @@ If you do not provide a status code for this fake request, the default returned 
 ```swift
 let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
 networking.fakeGET("/stories", response: nil, statusCode: 500)
-networking.GET("/stories", completion: { JSON, error in
+networking.GET("/stories") { JSON, error in
     // error with status code 500
-})
+}
 ```
 
 ## Cancelling a request
@@ -209,9 +209,9 @@ Cancelling any request for a specific path is really simple. Beware that cancell
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-networking.GET("/get", completion: { JSON, error in
+networking.GET("/get") { JSON, error in
     // Cancelling a GET request returns an error with code -999 which means cancelled request
-})
+}
 
 networking.cancelGET("/get")
 ```

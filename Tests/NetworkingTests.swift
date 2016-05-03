@@ -7,13 +7,13 @@ class NetworkingTests: XCTestCase {
     func testBasicAuth() {
         let networking = Networking(baseURL: baseURL)
         networking.authenticate(username: "user", password: "passwd")
-        networking.GET("/basic-auth/user/passwd", completion: { JSON, error in
+        networking.GET("/basic-auth/user/passwd") { JSON, error in
             let JSON = JSON as! [String : AnyObject]
             let user = JSON["user"] as! String
             let authenticated = JSON["authenticated"] as! Bool
             XCTAssertEqual(user, "user")
             XCTAssertEqual(authenticated, true)
-        })
+        }
     }
 
     func testURLForPath() {
@@ -29,13 +29,13 @@ class NetworkingTests: XCTestCase {
         networking.disableTestingMode = true
 
         var synchronous = false
-        networking.GET("/get", completion: { JSON, error in
+        networking.GET("/get") { JSON, error in
             synchronous = true
 
             XCTAssertTrue(synchronous)
 
             expectation.fulfill()
-        })
+        }
 
         XCTAssertFalse(synchronous)
 
@@ -84,14 +84,14 @@ class NetworkingTests: XCTestCase {
         var cancelledGET = false
         var cancelledPOST = false
 
-        networking.GET("/get", completion: { JSON, error in
+        networking.GET("/get") { JSON, error in
             cancelledGET = error?.code == -999
             XCTAssertTrue(cancelledGET)
 
             if cancelledGET && cancelledPOST {
                 expectation.fulfill()
             }
-        })
+        }
 
         networking.POST("/post") { JSON, error in
             cancelledPOST = error?.code == -999

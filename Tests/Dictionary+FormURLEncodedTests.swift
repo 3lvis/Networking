@@ -6,8 +6,7 @@ class Dictionary_FormURLEncodedTests: XCTestCase {
         let parameters = ["username" : "elvis", "password" : "secret"]
         let formatted = parameters.formURLEncodedFormat()
 
-        // Here I'm checking for both because looping dictionaries
-        // can be quite inconsistent.
+        // Here I'm checking for both because looping dictionaries can be quite inconsistent.
         if formatted == "username=elvis&password=secret" {
             XCTAssertEqual(formatted, "username=elvis&password=secret")
         } else {
