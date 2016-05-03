@@ -78,18 +78,24 @@ public extension Networking {
         } else if let image = self.cache.objectForKey(destinationURL.absoluteString) as? UIImage {
             completion(image: image, error: nil)
         } else if NSFileManager.defaultManager().fileExistsAtURL(destinationURL) {
-            if TestCheck.isTesting {
+            let semaphore = dispatch_semaphore_create(0)
+            var returnedImage: UIImage?
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), {
                 let image = self.imageForDestinationURL(destinationURL)
+                returnedImage = image
                 self.cache.setObject(image, forKey: destinationURL.absoluteString)
-                completion(image: image, error: nil)
-            } else {
-                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), {
-                    let image = self.imageForDestinationURL(destinationURL)
-                    self.cache.setObject(image, forKey: destinationURL.absoluteString)
+                if TestCheck.isTesting && self.disableTestingMode == false {
+                    dispatch_semaphore_signal(semaphore)
+                } else {
                     dispatch_async(dispatch_get_main_queue(), {
                         completion(image: image, error: nil)
                     })
-                })
+                }
+            })
+
+            if TestCheck.isTesting && self.disableTestingMode == false {
+                dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
+                completion(image: returnedImage, error: nil)
             }
         } else {
             let request = NSMutableURLRequest(URL: requestURL)
@@ -140,7 +146,6 @@ public extension Networking {
 
             if TestCheck.isTesting && self.disableTestingMode == false {
                 dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
-
                 self.logError(.JSON, parameters: nil, data: returnedData, request: request, response: returnedResponse, error: returnedError)
                 completion(image: returnedImage, error: returnedError)
             }
