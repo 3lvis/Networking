@@ -80,18 +80,18 @@ public extension Networking {
         } else if NSFileManager.defaultManager().fileExistsAtURL(destinationURL) {
             let semaphore = dispatch_semaphore_create(0)
             var returnedImage: UIImage?
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), {
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0)) {
                 let image = self.imageForDestinationURL(destinationURL)
                 returnedImage = image
                 self.cache.setObject(image, forKey: destinationURL.absoluteString)
                 if TestCheck.isTesting && self.disableTestingMode == false {
                     dispatch_semaphore_signal(semaphore)
                 } else {
-                    dispatch_async(dispatch_get_main_queue(), {
+                    dispatch_async(dispatch_get_main_queue()) {
                         completion(image: image, error: nil)
-                    })
+                    }
                 }
-            })
+            }
 
             if TestCheck.isTesting && self.disableTestingMode == false {
                 dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
@@ -114,7 +114,7 @@ public extension Networking {
 
             NetworkActivityIndicator.sharedIndicator.visible = true
 
-            self.session.downloadTaskWithRequest(request, completionHandler: { url, response, error in
+            self.session.downloadTaskWithRequest(request) { url, response, error in
                 returnedResponse = response
                 returnedError = error
 
@@ -135,14 +135,14 @@ public extension Networking {
                 if TestCheck.isTesting && self.disableTestingMode == false {
                     dispatch_semaphore_signal(semaphore)
                 } else {
-                    dispatch_async(dispatch_get_main_queue(), {
+                    dispatch_async(dispatch_get_main_queue()) {
                         NetworkActivityIndicator.sharedIndicator.visible = false
 
                         self.logError(.JSON, parameters: nil, data: returnedData, request: request, response: response, error: returnedError)
                         completion(image: returnedImage, error: returnedError)
-                    })
+                    }
                 }
-            }).resume()
+            }.resume()
 
             if TestCheck.isTesting && self.disableTestingMode == false {
                 dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)

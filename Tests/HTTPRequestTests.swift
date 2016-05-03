@@ -11,28 +11,28 @@ extension HTTPRequestTests {
     func testSynchronousGET() {
         var synchronous = false
         let networking = Networking(baseURL: baseURL)
-        networking.GET("/get", completion: { JSON, error in
+        networking.GET("/get") { JSON, error in
             synchronous = true
-        })
+        }
 
         XCTAssertTrue(synchronous)
     }
 
     func testGET() {
         let networking = Networking(baseURL: baseURL)
-        networking.GET("/get", completion: { JSON, error in
+        networking.GET("/get") { JSON, error in
             let JSON = JSON as! [String : AnyObject]
             let url = JSON["url"] as! String
             XCTAssertEqual(url, "http://httpbin.org/get")
-        })
+        }
     }
 
     func testGETWithInvalidPath() {
         let networking = Networking(baseURL: baseURL)
-        networking.GET("/invalidpath", completion: { JSON, error in
+        networking.GET("/invalidpath") { JSON, error in
             XCTAssertNil(JSON)
             XCTAssertNotNil(error)
-        })
+        }
     }
 
     func testFakeGET() {
@@ -40,11 +40,11 @@ extension HTTPRequestTests {
 
         networking.fakeGET("/stories", response: ["name" : "Elvis"])
 
-        networking.GET("/stories", completion: { JSON, error in
+        networking.GET("/stories") { JSON, error in
             let JSON = JSON as! [String : String]
             let value = JSON["name"]
             XCTAssertEqual(value!, "Elvis")
-        })
+        }
     }
 
     func testFakeGETWithInvalidStatusCode() {
@@ -52,9 +52,9 @@ extension HTTPRequestTests {
 
         networking.fakeGET("/stories", response: nil, statusCode: 401)
 
-        networking.GET("/stories", completion: { JSON, error in
+        networking.GET("/stories") { JSON, error in
             XCTAssertEqual(401, error!.code)
-        })
+        }
     }
 
     func testFakeGETUsingFile() {
@@ -62,12 +62,12 @@ extension HTTPRequestTests {
 
         networking.fakeGET("/entries", fileName: "entries.json", bundle: NSBundle(forClass: self.classForKeyedArchiver!))
 
-        networking.GET("/entries", completion: { JSON, error in
+        networking.GET("/entries") { JSON, error in
             let JSON = JSON as! [[String : AnyObject]]
             let entry = JSON[0]
             let value = entry["title"] as! String
             XCTAssertEqual(value, "Entry 1")
-        })
+        }
     }
 
     func testCancelGET() {
@@ -75,12 +75,12 @@ extension HTTPRequestTests {
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
-        networking.GET("/get", completion: { JSON, error in
+        networking.GET("/get") { JSON, error in
             let canceledCode = error?.code == -999
             XCTAssertTrue(canceledCode)
 
             expectation.fulfill()
-        })
+        }
 
         networking.cancelGET("/get")
 
@@ -180,9 +180,9 @@ extension HTTPRequestTests {
 
         networking.fakePOST("/story", response: nil, statusCode: 401)
 
-        networking.POST("/story", parameters: nil, completion: { JSON, error in
+        networking.POST("/story") { JSON, error in
             XCTAssertEqual(401, error!.code)
-        })
+        }
     }
 
     func testCancelPOST() {
@@ -249,9 +249,9 @@ extension HTTPRequestTests {
 
         networking.fakePUT("/story", response: nil, statusCode: 401)
 
-        networking.PUT("/story", parameters: nil, completion: { JSON, error in
+        networking.PUT("/story") { JSON, error in
             XCTAssertEqual(401, error!.code)
-        })
+        }
     }
 
     func testCancelPUT() {
@@ -278,28 +278,28 @@ extension HTTPRequestTests {
     func testSynchronousDELETE() {
         var synchronous = false
         let networking = Networking(baseURL: baseURL)
-        networking.DELETE("/delete", completion: { JSON, error in
+        networking.DELETE("/delete") { JSON, error in
             synchronous = true
-        })
+        }
 
         XCTAssertTrue(synchronous)
     }
 
     func testDELETE() {
         let networking = Networking(baseURL: baseURL)
-        networking.DELETE("/delete", completion: { JSON, error in
+        networking.DELETE("/delete") { JSON, error in
             let JSON = JSON as! [String : AnyObject]
             let url = JSON["url"] as! String
             XCTAssertEqual(url, "http://httpbin.org/delete")
-        })
+        }
     }
 
     func testDELETEWithInvalidPath() {
         let networking = Networking(baseURL: baseURL)
-        networking.DELETE("/invalidpath", completion: { JSON, error in
+        networking.DELETE("/invalidpath") { JSON, error in
             XCTAssertNil(JSON)
             XCTAssertNotNil(error)
-        })
+        }
     }
 
     func testFakeDELETE() {
@@ -307,11 +307,11 @@ extension HTTPRequestTests {
 
         networking.fakeDELETE("/stories", response: ["name" : "Elvis"])
 
-        networking.DELETE("/stories", completion: { JSON, error in
+        networking.DELETE("/stories") { JSON, error in
             let JSON = JSON as! [String : String]
             let value = JSON["name"]
             XCTAssertEqual(value!, "Elvis")
-        })
+        }
     }
 
     func testFakeDELETEWithInvalidStatusCode() {
@@ -319,9 +319,9 @@ extension HTTPRequestTests {
 
         networking.fakeDELETE("/story", response: nil, statusCode: 401)
 
-        networking.DELETE("/story", completion: { JSON, error in
+        networking.DELETE("/story") { JSON, error in
             XCTAssertEqual(401, error!.code)
-        })
+        }
     }
 
     func testFakeDELETEUsingFile() {
@@ -329,12 +329,12 @@ extension HTTPRequestTests {
 
         networking.fakeDELETE("/entries", fileName: "entries.json", bundle: NSBundle(forClass: self.classForKeyedArchiver!))
 
-        networking.DELETE("/entries", completion: { JSON, error in
+        networking.DELETE("/entries") { JSON, error in
             let JSON = JSON as! [[String : AnyObject]]
             let entry = JSON[0]
             let value = entry["title"] as! String
             XCTAssertEqual(value, "Entry 1")
-        })
+        }
     }
 
     func testCancelDELETE() {
@@ -342,12 +342,12 @@ extension HTTPRequestTests {
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
-        networking.DELETE("/delete", completion: { JSON, error in
+        networking.DELETE("/delete") { JSON, error in
             let canceledCode = error?.code == -999
             XCTAssertTrue(canceledCode)
 
             expectation.fulfill()
-        })
+        }
 
         networking.cancelDELETE("/delete")
 

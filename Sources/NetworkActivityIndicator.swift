@@ -32,9 +32,9 @@ class NetworkActivityIndicator: NSObject {
             }
 
             #if os(iOS)
-                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(0.5 * Double(NSEC_PER_SEC))), dispatch_get_main_queue(), {
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(0.5 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) {
                     UIApplication.sharedApplication().networkActivityIndicatorVisible = (self.activitiesCount > 0)
-                })
+                }
             #endif
         }
     }

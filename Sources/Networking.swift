@@ -197,9 +197,9 @@ public class Networking {
                 sessionTask.cancel()
             }
 
-            dispatch_async(dispatch_get_main_queue(), {
+            dispatch_async(dispatch_get_main_queue()) {
                 completion?()
-            })
+            }
         }
     }
 }
@@ -278,9 +278,9 @@ extension Networking {
             }
 
             if let serializingError = serializingError {
-                dispatch_async(dispatch_get_main_queue(), {
+                dispatch_async(dispatch_get_main_queue()) {
                     completion(JSON: nil, error: serializingError)
-                })
+                }
             } else {
                 var connectionError: NSError?
                 var result: AnyObject?
@@ -288,7 +288,7 @@ extension Networking {
                 var returnedResponse: NSURLResponse?
                 var returnedData: NSData?
 
-                self.session.dataTaskWithRequest(request, completionHandler: { data, response, error in
+                self.session.dataTaskWithRequest(request) { data, response, error in
                     returnedResponse = response
                     connectionError = error
                     returnedData = data
@@ -312,14 +312,14 @@ extension Networking {
                     if TestCheck.isTesting && self.disableTestingMode == false {
                         dispatch_semaphore_signal(semaphore)
                     } else {
-                        dispatch_async(dispatch_get_main_queue(), {
+                        dispatch_async(dispatch_get_main_queue()) {
                             NetworkActivityIndicator.sharedIndicator.visible = false
 
                             self.logError(contentType, parameters: parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError)
                             completion(JSON: result, error: connectionError)
-                        })
+                        }
                     }
-                }).resume()
+                }.resume()
 
                 if TestCheck.isTesting && self.disableTestingMode == false {
                     dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
