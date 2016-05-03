@@ -63,11 +63,6 @@ public extension Networking {
      - parameter completion: A closure that gets called when the image download request is completed, it contains an `UIImage` object and a `NSError`.
      */
     public func downloadImage(path: String, cacheName: String? = nil, completion: (image: UIImage?, error: NSError?) -> Void) {
-        let destinationURL = self.destinationURL(path, cacheName: cacheName)
-        self.download(requestURL: self.urlForPath(path), destinationURL: destinationURL, path: path, completion: completion)
-    }
-
-    func download(requestURL requestURL: NSURL, destinationURL: NSURL, path: String, completion: (image: UIImage?, error: NSError?) -> Void) {
         if let getFakeRequests = self.fakeRequests[.GET], fakeRequest = getFakeRequests[path] {
             if fakeRequest.statusCode.statusCodeType() == .Successful, let image = fakeRequest.response as? UIImage {
                 completion(image: image, error: nil)
@@ -75,79 +70,65 @@ public extension Networking {
                 let error = NSError(domain: Networking.ErrorDomain, code: fakeRequest.statusCode, userInfo: [NSLocalizedDescriptionKey : NSHTTPURLResponse.localizedStringForStatusCode(fakeRequest.statusCode)])
                 completion(image: nil, error: error)
             }
-        } else if let image = self.cache.objectForKey(destinationURL.absoluteString) as? UIImage {
-            completion(image: image, error: nil)
-        } else if NSFileManager.defaultManager().fileExistsAtURL(destinationURL) {
-            let semaphore = dispatch_semaphore_create(0)
-            var returnedImage: UIImage?
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0)) {
-                let image = self.imageForDestinationURL(destinationURL)
-                returnedImage = image
-                self.cache.setObject(image, forKey: destinationURL.absoluteString)
-                if TestCheck.isTesting && self.disableTestingMode == false {
-                    dispatch_semaphore_signal(semaphore)
-                } else {
-                    dispatch_async(dispatch_get_main_queue()) {
-                        completion(image: image, error: nil)
-                    }
-                }
-            }
-
-            if TestCheck.isTesting && self.disableTestingMode == false {
-                dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
-                completion(image: returnedImage, error: nil)
-            }
         } else {
-            let request = NSMutableURLRequest(URL: requestURL)
-            request.HTTPMethod = RequestType.GET.rawValue
-            request.addValue("application/json", forHTTPHeaderField: "Accept")
+            self.imageFromCache(path, cacheName: cacheName) { image, error in                
+                if image == nil && error == nil {
+                    let destinationURL = self.destinationURL(path, cacheName: cacheName)
+                    let requestURL = self.urlForPath(path)
+                    let request = NSMutableURLRequest(URL: requestURL)
+                    request.HTTPMethod = RequestType.GET.rawValue
+                    request.addValue("application/json", forHTTPHeaderField: "Accept")
 
-            if let token = token {
-                request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-            }
-
-            let semaphore = dispatch_semaphore_create(0)
-            var returnedData: NSData?
-            var returnedImage: UIImage?
-            var returnedError: NSError?
-            var returnedResponse: NSURLResponse?
-
-            NetworkActivityIndicator.sharedIndicator.visible = true
-
-            self.session.downloadTaskWithRequest(request) { url, response, error in
-                returnedResponse = response
-                returnedError = error
-
-                if returnedError == nil, let url = url, data = NSData(contentsOfURL: url), image = UIImage(data: data) {
-                    returnedData = data
-                    returnedImage = image
-
-                    data.writeToURL(destinationURL, atomically: true)
-                    self.cache.setObject(image, forKey: destinationURL.absoluteString)
-                } else if let url = url {
-                    if let response = response as? NSHTTPURLResponse {
-                        returnedError = NSError(domain: Networking.ErrorDomain, code: response.statusCode, userInfo: [NSLocalizedDescriptionKey : NSHTTPURLResponse.localizedStringForStatusCode(response.statusCode)])
-                    } else {
-                        returnedError = NSError(domain: Networking.ErrorDomain, code: 500, userInfo: [NSLocalizedDescriptionKey : "Failed to load url: \(url.absoluteString)"])
+                    if let token = self.token {
+                        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
                     }
-                }
 
-                if TestCheck.isTesting && self.disableTestingMode == false {
-                    dispatch_semaphore_signal(semaphore)
-                } else {
-                    dispatch_async(dispatch_get_main_queue()) {
-                        NetworkActivityIndicator.sharedIndicator.visible = false
+                    let semaphore = dispatch_semaphore_create(0)
+                    var returnedData: NSData?
+                    var returnedImage: UIImage?
+                    var returnedError: NSError?
+                    var returnedResponse: NSURLResponse?
 
-                        self.logError(.JSON, parameters: nil, data: returnedData, request: request, response: response, error: returnedError)
+                    NetworkActivityIndicator.sharedIndicator.visible = true
+
+                    self.session.downloadTaskWithRequest(request) { url, response, error in
+                        returnedResponse = response
+                        returnedError = error
+
+                        if returnedError == nil, let url = url, data = NSData(contentsOfURL: url), image = UIImage(data: data) {
+                            returnedData = data
+                            returnedImage = image
+
+                            data.writeToURL(destinationURL, atomically: true)
+                            self.cache.setObject(image, forKey: destinationURL.absoluteString)
+                        } else if let url = url {
+                            if let response = response as? NSHTTPURLResponse {
+                                returnedError = NSError(domain: Networking.ErrorDomain, code: response.statusCode, userInfo: [NSLocalizedDescriptionKey : NSHTTPURLResponse.localizedStringForStatusCode(response.statusCode)])
+                            } else {
+                                returnedError = NSError(domain: Networking.ErrorDomain, code: 500, userInfo: [NSLocalizedDescriptionKey : "Failed to load url: \(url.absoluteString)"])
+                            }
+                        }
+
+                        if TestCheck.isTesting && self.disableTestingMode == false {
+                            dispatch_semaphore_signal(semaphore)
+                        } else {
+                            dispatch_async(dispatch_get_main_queue()) {
+                                NetworkActivityIndicator.sharedIndicator.visible = false
+
+                                self.logError(.JSON, parameters: nil, data: returnedData, request: request, response: response, error: returnedError)
+                                completion(image: returnedImage, error: returnedError)
+                            }
+                        }
+                        }.resume()
+                    
+                    if TestCheck.isTesting && self.disableTestingMode == false {
+                        dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
+                        self.logError(.JSON, parameters: nil, data: returnedData, request: request, response: returnedResponse, error: returnedError)
                         completion(image: returnedImage, error: returnedError)
                     }
+                } else {
+                    completion(image: image, error: error)
                 }
-            }.resume()
-
-            if TestCheck.isTesting && self.disableTestingMode == false {
-                dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
-                self.logError(.JSON, parameters: nil, data: returnedData, request: request, response: returnedResponse, error: returnedError)
-                completion(image: returnedImage, error: returnedError)
             }
         }
     }

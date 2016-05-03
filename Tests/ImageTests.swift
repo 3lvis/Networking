@@ -223,7 +223,9 @@ class ImageTests: XCTestCase {
             expectation.fulfill()
         }
 
-        networking.cancelImageDownload("/image/png")
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(0.5 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) {
+            networking.cancelImageDownload("/image/png")
+        }
 
         waitForExpectationsWithTimeout(15.0, handler: nil)
     }
