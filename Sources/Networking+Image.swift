@@ -6,7 +6,6 @@ import Foundation
 
 public extension Networking {
     #if os(iOS) || os(tvOS) || os(watchOS)
-
     /**
      Retrieves an image from the cache or from the filesystem
      - parameter path: The path where the image is located

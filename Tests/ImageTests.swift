@@ -12,6 +12,41 @@ class ImageTests: XCTestCase {
     }
 
     #if os(iOS) || os(tvOS) || os(watchOS)
+    func testImageFromCacheForPath() {
+        var synchronous = false
+        let networking = Networking(baseURL: baseURL)
+        let path = "/image/png"
+        self.removeFileIfNeeded(networking, path: path)
+        networking.downloadImage(path) { image, error in
+            networking.imageFromCache(path) { image, error in
+                synchronous = true
+                let pigImage = UIImage(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self), compatibleWithTraitCollection: nil)!
+                let pigImageData = UIImagePNGRepresentation(pigImage)
+                let imageData = UIImagePNGRepresentation(image!)
+                XCTAssertEqual(pigImageData, imageData)
+            }
+        }
+        XCTAssertTrue(synchronous)
+    }
+
+    func testImageFromCacheForCustomCacheName() {
+        var synchronous = false
+        let networking = Networking(baseURL: baseURL)
+        let path = "/image/png"
+        let cacheName = "hello"
+        self.removeFileIfNeeded(networking, path: path, cacheName: cacheName)
+        networking.downloadImage(path, cacheName: cacheName) { image, error in
+            networking.imageFromCache(path, cacheName: cacheName) { image, error in
+                synchronous = true
+                let pigImage = UIImage(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self), compatibleWithTraitCollection: nil)!
+                let pigImageData = UIImagePNGRepresentation(pigImage)
+                let imageData = UIImagePNGRepresentation(image!)
+                XCTAssertEqual(pigImageData, imageData)
+            }
+        }
+        XCTAssertTrue(synchronous)
+    }
+
     func testImageDownloadSynchronous() {
         var synchronous = false
 
