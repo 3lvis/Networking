@@ -249,7 +249,7 @@ extension HTTPRequestTests {
 
         networking.fakePUT("/story", response: nil, statusCode: 401)
 
-        networking.PUT("/story") { JSON, error in
+        networking.PUT("/story", parameters: nil) { JSON, error in
             XCTAssertEqual(401, error!.code)
         }
     }
