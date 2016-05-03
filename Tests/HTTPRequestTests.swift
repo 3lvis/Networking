@@ -30,11 +30,8 @@ extension HTTPRequestTests {
     func testGETWithInvalidPath() {
         let networking = Networking(baseURL: baseURL)
         networking.GET("/invalidpath", completion: { JSON, error in
-            if let JSON: AnyObject = JSON {
-                fatalError("JSON not nil: \(JSON)")
-            } else {
-                XCTAssertNotNil(error)
-            }
+            XCTAssertNil(JSON)
+            XCTAssertNotNil(error)
         })
     }
 
@@ -300,11 +297,8 @@ extension HTTPRequestTests {
     func testDELETEWithInvalidPath() {
         let networking = Networking(baseURL: baseURL)
         networking.DELETE("/invalidpath", completion: { JSON, error in
-            if let JSON: AnyObject = JSON {
-                fatalError("JSON not nil: \(JSON)")
-            } else {
-                XCTAssertNotNil(error)
-            }
+            XCTAssertNil(JSON)
+            XCTAssertNotNil(error)
         })
     }
 
