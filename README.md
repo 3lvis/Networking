@@ -263,6 +263,23 @@ if let path = destinationURL.path where NSFileManager.defaultManager().fileExist
 }
 ```
 
+**Retreiving cached image**:
+
+First download an image like you normally do:
+```swift
+let networking = Networking(baseURL: baseURL)
+networking.downloadImage("/image/png") { image, error in
+    // Downloaded image
+}
+```
+
+Then you would be able to retrieve the image from the cache at any time!
+```swift
+networking.imageFromCache("/image/png") { image in
+    // Image from cache, you will get `nil` if no image is found
+}
+```
+
 ## Logging errors
 
 Any error catched by **Networking** will be printed in your console. This is really convenient since you want to know why your networking call failed anyway.
