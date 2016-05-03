@@ -18,17 +18,10 @@ public extension Networking {
         let semaphore = dispatch_semaphore_create(0)
         var returnedImage: UIImage?
 
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0)) {
-            if let image = self.cache.objectForKey(destinationURL.absoluteString) as? UIImage {
-                returnedImage = image
-                if TestCheck.isTesting && self.disableTestingMode == false {
-                    dispatch_semaphore_signal(semaphore)
-                } else {
-                    dispatch_async(dispatch_get_main_queue()) {
-                        completion(image: image, error: nil)
-                    }
-                }
-            } else if NSFileManager.defaultManager().fileExistsAtURL(destinationURL) {
+        if let image = self.cache.objectForKey(destinationURL.absoluteString) as? UIImage {
+            completion(image: image, error: nil)
+        } else if NSFileManager.defaultManager().fileExistsAtURL(destinationURL) {
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0)) {
                 let image = self.imageForDestinationURL(destinationURL)
                 returnedImage = image
                 self.cache.setObject(image, forKey: destinationURL.absoluteString)
@@ -39,20 +32,14 @@ public extension Networking {
                         completion(image: image, error: nil)
                     }
                 }
-            } else {
-                if TestCheck.isTesting && self.disableTestingMode == false {
-                    dispatch_semaphore_signal(semaphore)
-                } else {
-                    dispatch_async(dispatch_get_main_queue()) {
-                        completion(image: nil, error: nil)
-                    }
-                }
             }
-        }
 
-        if TestCheck.isTesting && self.disableTestingMode == false {
-            dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
-            completion(image: returnedImage, error: nil)
+            if TestCheck.isTesting && self.disableTestingMode == false {
+                dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
+                completion(image: returnedImage, error: nil)
+            }
+        } else {
+            completion(image: nil, error: nil)
         }
     }
 
