@@ -185,6 +185,19 @@ extension HTTPRequestTests {
         }
     }
 
+    func testFakePOSTUsingFile() {
+        let networking = Networking(baseURL: baseURL)
+
+        networking.fakePOST("/entries", fileName: "entries.json", bundle: NSBundle(forClass: self.classForKeyedArchiver!))
+
+        networking.POST("/entries") { JSON, error in
+            let JSON = JSON as! [[String : AnyObject]]
+            let entry = JSON[0]
+            let value = entry["title"] as! String
+            XCTAssertEqual(value, "Entry 1")
+        }
+    }
+
     func testCancelPOST() {
         let expectation = expectationWithDescription("testCancelPOST")
 
@@ -251,6 +264,19 @@ extension HTTPRequestTests {
 
         networking.PUT("/story", parameters: nil) { JSON, error in
             XCTAssertEqual(401, error!.code)
+        }
+    }
+
+    func testFakePUTUsingFile() {
+        let networking = Networking(baseURL: baseURL)
+
+        networking.fakePUT("/entries", fileName: "entries.json", bundle: NSBundle(forClass: self.classForKeyedArchiver!))
+
+        networking.PUT("/entries", parameters: nil) { JSON, error in
+            let JSON = JSON as! [[String : AnyObject]]
+            let entry = JSON[0]
+            let value = entry["title"] as! String
+            XCTAssertEqual(value, "Entry 1")
         }
     }
 
