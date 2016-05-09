@@ -30,10 +30,21 @@ struct FakeRequest {
 public class Networking {
     static let ErrorDomain = "NetworkingErrorDomain"
 
-    public enum ContentType {
+    public enum ParameterType {
         case JSON
         case FormURLEncoded
         case Custom(String)
+
+        var contentType: String {
+            switch self {
+            case .JSON:
+                return "application/json"
+            case .FormURLEncoded:
+                return "application/x-www-form-urlencoded"
+            case .Custom(let value):
+                return value
+            }
+        }
     }
 
     /**
@@ -269,7 +280,7 @@ extension Networking {
         self.fakeRequests[requestType] = fakeRequests
     }
 
-    func request(requestType: RequestType, path: String, contentType: ContentType, parameters: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
+    func request(requestType: RequestType, path: String, parameterType: ParameterType, parameters: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
         if let responses = self.fakeRequests[requestType], fakeRequest = responses[path] {
             if fakeRequest.statusCode.statusCodeType() == .Successful {
                 completion(JSON: fakeRequest.response, error: nil)
@@ -280,7 +291,7 @@ extension Networking {
         } else {
             let request = NSMutableURLRequest(URL: self.urlForPath(path))
             request.HTTPMethod = requestType.rawValue
-            request.addValue(Networking.valueForContentType(contentType), forHTTPHeaderField: "Content-Type")
+            request.addValue(parameterType.contentType, forHTTPHeaderField: "Content-Type")
             request.addValue("application/json", forHTTPHeaderField: "Accept")
 
             if let authorizationHeader = self.customAuthorizationHeader {
@@ -293,7 +304,7 @@ extension Networking {
 
             var serializingError: NSError?
             if let parameters = parameters {
-                switch contentType {
+                switch parameterType {
                 case .JSON:
                     do {
                         request.HTTPBody = try NSJSONSerialization.dataWithJSONObject(parameters, options: [])
@@ -350,7 +361,7 @@ extension Networking {
                         dispatch_async(dispatch_get_main_queue()) {
                             NetworkActivityIndicator.sharedIndicator.visible = false
 
-                            self.logError(contentType, parameters: parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError)
+                            self.logError(parameterType, parameters: parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError)
                             completion(JSON: result, error: connectionError)
                         }
                     }
@@ -358,21 +369,10 @@ extension Networking {
 
                 if TestCheck.isTesting && self.disableTestingMode == false {
                     dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
-                    self.logError(contentType, parameters: parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError)
+                    self.logError(parameterType, parameters: parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError)
                     completion(JSON: result, error: connectionError)
                 }
             }
-        }
-    }
-
-    class func valueForContentType(contentType: ContentType) -> String {
-        switch contentType {
-        case .JSON:
-            return "application/json"
-        case .FormURLEncoded:
-            return "application/x-www-form-urlencoded"
-        case .Custom(let value):
-            return value
         }
     }
 
@@ -399,7 +399,7 @@ extension Networking {
         }
     }
 
-    func logError(contentType: ContentType, parameters: AnyObject? = nil, data: NSData?, request: NSURLRequest?, response: NSURLResponse?, error: NSError?) {
+    func logError(parameterType: ParameterType, parameters: AnyObject? = nil, data: NSData?, request: NSURLRequest?, response: NSURLResponse?, error: NSError?) {
         guard let error = error else { return }
 
         print(" ")
@@ -422,7 +422,7 @@ extension Networking {
             }
 
             if let parameters = parameters {
-                switch contentType {
+                switch parameterType {
                 case .JSON:
                     do {
                         let data = try NSJSONSerialization.dataWithJSONObject(parameters, options: .PrettyPrinted)
