@@ -106,4 +106,19 @@ class NetworkingTests: XCTestCase {
 
         waitForExpectationsWithTimeout(15.0, handler: nil)
     }
+    
+    func testDownloadData() {
+        // for now we don't need a baseURL, should probably make this optional or add new initialiser
+        let networking = Networking(baseURL: "")
+        let path = self.baseURL + "/image/png"
+        let URL = NSURL(string: path)!
+        networking.downloadData(URL) { (data, error) in
+            if let data = data {
+                XCTAssertNotNil(data)
+                XCTAssertTrue(data.length == 8090, "Data size mismatch")
+            } else {
+                XCTFail("Data is nil")
+            }
+        }
+    }
 }
