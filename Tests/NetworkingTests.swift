@@ -113,7 +113,12 @@ class NetworkingTests: XCTestCase {
         let path = self.baseURL + "/image/png"
         let URL = NSURL(string: path)!
         networking.downloadData(URL) { (data, error) in
-            XCTAssertNotNil(data)
+            if let data = data {
+                XCTAssertNotNil(data)
+                XCTAssertTrue(data.length == 8090, "Data size mismatch")
+            } else {
+                XCTFail("Data is nil")
+            }
         }
     }
 }

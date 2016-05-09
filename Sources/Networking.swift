@@ -211,7 +211,9 @@ public class Networking {
      - parameter completion: the completion handler.
      */
     public func downloadData(URL: NSURL, completion: (data: NSData?, error: NSError?) -> ()) {
-        if let task = self.cache.objectForKey(String(format: "task: ", URL.absoluteString)) {
+        let semaphore = dispatch_semaphore_create(0)
+
+        if let _ = self.cache.objectForKey(String(format: "task: ", URL.absoluteString)) {
 //            NSLog("Task for this URL already processing")
         } else if let data = self.cache.objectForKey(URL.absoluteString) as? NSData {
 //            NSLog("Cached data")
@@ -224,10 +226,16 @@ public class Networking {
                     self.cache.setObject(data, forKey: URL.absoluteString)
                     self.cache.removeObjectForKey(String(format: "task: ", URL.absoluteString))
                     completion(data: data, error: err)
+                    if TestCheck.isTesting {
+                        dispatch_semaphore_signal(semaphore)
+                    }
                 }
             }
             self.cache.setObject(task, forKey: String(format: "task: ", URL.absoluteString))
             task.resume()
+            if TestCheck.isTesting {
+                dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
+            }
         }
     }
 }
