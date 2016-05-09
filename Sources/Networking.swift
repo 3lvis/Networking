@@ -202,39 +202,38 @@ public class Networking {
             }
         }
     }
-    
-    
+
     /**
      Downloads data from a URL, caching the result.
-     - Careful: Doesn't create a new task if current task with same URL is already running.
-     - parameter URL: the data URL.
-     - parameter completion: the completion handler.
+     - parameter path: The path used to download the resource
+     - parameter completion: A closure that gets called when the download request is completed, it contains a `data` object and a `NSError`.
      */
-    public func downloadData(URL: NSURL, completion: (data: NSData?, error: NSError?) -> ()) {
-        let semaphore = dispatch_semaphore_create(0)
-
-        if let _ = self.cache.objectForKey(String(format: "task: ", URL.absoluteString)) {
-//            NSLog("Task for this URL already processing")
-        } else if let data = self.cache.objectForKey(URL.absoluteString) as? NSData {
-//            NSLog("Cached data")
-            self.cache.removeObjectForKey(String(format: "task: ", URL.absoluteString))
-            completion(data: data, error: nil)
+    public func downloadData(path: String, completion: (data: NSData?, error: NSError?) -> Void) {
+        let url = self.urlForPath(path)
+        if let cachedData = self.cache.objectForKey(url.absoluteString) as? NSData {
+            completion(data: cachedData, error: nil)
         } else {
-//            NSLog("Fetche data")
-            let task = self.session.dataTaskWithURL(URL) { (data, response, err) in
-                if let data = data {
-                    self.cache.setObject(data, forKey: URL.absoluteString)
-                    self.cache.removeObjectForKey(String(format: "task: ", URL.absoluteString))
-                    completion(data: data, error: err)
+            var found = false
+            let semaphore = dispatch_semaphore_create(0)
+            self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
+                for downloadTask in downloadTasks where downloadTask.originalRequest?.URL?.absoluteString == url.absoluteString {
+                    found = true
+                }
+            }
+
+            if !found {
+                self.session.dataTaskWithURL(url) { data, response, error in
+                    if let data = data {
+                        self.cache.setObject(data, forKey: url.absoluteString)
+                    }
+                    completion(data: data, error: error)
                     if TestCheck.isTesting {
                         dispatch_semaphore_signal(semaphore)
                     }
+                    }.resume()
+                if TestCheck.isTesting {
+                    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
                 }
-            }
-            self.cache.setObject(task, forKey: String(format: "task: ", URL.absoluteString))
-            task.resume()
-            if TestCheck.isTesting {
-                dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
             }
         }
     }
