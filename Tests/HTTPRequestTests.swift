@@ -147,7 +147,7 @@ extension HTTPRequestTests {
 
     func testPOSTWithFormURLEncoded() {
         let networking = Networking(baseURL: baseURL)
-        networking.POST("/post", contentType: .FormURLEncoded, parameters: ["custname":"jameson"]) { JSON, error in
+        networking.POST("/post", parameterType: .FormURLEncoded, parameters: ["custname":"jameson"]) { JSON, error in
             let JSONResponse = (JSON as! [String : AnyObject])["form"] as! [String : String]
             XCTAssertEqual("jameson", JSONResponse["custname"])
             XCTAssertNotNil(JSON!, "JSON not nil")

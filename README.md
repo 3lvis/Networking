@@ -150,7 +150,7 @@ You can use other content types by proving the `ContentType` attribute. For exam
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-networking.POST("/post", contentType: .FormURLEncoded, parameters: ["custname":"jameson"]) { JSON, error in
+networking.POST("/post", parameterType: .FormURLEncoded, parameters: ["custname":"jameson"]) { JSON, error in
    // Successfull post using `application/x-www-form-urlencoded` as `Content-Type`
 }
 ```
@@ -160,7 +160,7 @@ At the moment **Networking** supports three types of `Content-Type` out of the b
 For example:
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-networking.POST("/upload", contentType: .Custom("application/octet-stream"), parameters: imageData) { JSON, error in
+networking.POST("/upload", parameterType: .Custom("application/octet-stream"), parameters: imageData) { JSON, error in
    // Successfull upload using `application/octet-stream` as `Content-Type`
 }
 ```
