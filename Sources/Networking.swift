@@ -67,6 +67,20 @@ public class Networking {
         }
     }
 
+    enum ResponseType {
+        case JSON
+        case Data
+
+        var accept: String? {
+            switch self {
+            case .JSON:
+                return "application/json"
+            default:
+                return nil
+            }
+        }
+    }
+
     /**
      Categorizes a status code.
      - `Informational`: This class of status code indicates a provisional response, consisting only of the Status-Line and optional headers, and is terminated by an empty line.
@@ -220,32 +234,8 @@ public class Networking {
      - parameter completion: A closure that gets called when the download request is completed, it contains a `data` object and a `NSError`.
      */
     public func downloadData(path: String, completion: (data: NSData?, error: NSError?) -> Void) {
-        let url = self.urlForPath(path)
-        if let cachedData = self.cache.objectForKey(url.absoluteString) as? NSData {
-            completion(data: cachedData, error: nil)
-        } else {
-            var found = false
-            let semaphore = dispatch_semaphore_create(0)
-            self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
-                for downloadTask in downloadTasks where downloadTask.originalRequest?.URL?.absoluteString == url.absoluteString {
-                    found = true
-                }
-            }
-
-            if !found {
-                self.session.dataTaskWithURL(url) { data, response, error in
-                    if let data = data {
-                        self.cache.setObject(data, forKey: url.absoluteString)
-                    }
-                    completion(data: data, error: error)
-                    if TestCheck.isTesting {
-                        dispatch_semaphore_signal(semaphore)
-                    }
-                    }.resume()
-                if TestCheck.isTesting {
-                    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
-                }
-            }
+        self.request(.GET, path: path, parameterType: .JSON, parameters: nil, responseType: .Data) { response, error in
+            completion(data: response as? NSData, error: error)
         }
     }
 }
@@ -280,19 +270,25 @@ extension Networking {
         self.fakeRequests[requestType] = fakeRequests
     }
 
-    func request(requestType: RequestType, path: String, parameterType: ParameterType, parameters: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
+    func request(requestType: RequestType, path: String, parameterType: ParameterType?, parameters: AnyObject?, responseType: ResponseType, completion: (response: AnyObject?, error: NSError?) -> ()) {
         if let responses = self.fakeRequests[requestType], fakeRequest = responses[path] {
             if fakeRequest.statusCode.statusCodeType() == .Successful {
-                completion(JSON: fakeRequest.response, error: nil)
+                completion(response: fakeRequest.response, error: nil)
             } else {
                 let error = NSError(domain: Networking.ErrorDomain, code: fakeRequest.statusCode, userInfo: [NSLocalizedDescriptionKey : NSHTTPURLResponse.localizedStringForStatusCode(fakeRequest.statusCode)])
-                completion(JSON: nil, error: error)
+                completion(response: nil, error: error)
             }
         } else {
             let request = NSMutableURLRequest(URL: self.urlForPath(path))
             request.HTTPMethod = requestType.rawValue
-            request.addValue(parameterType.contentType, forHTTPHeaderField: "Content-Type")
-            request.addValue("application/json", forHTTPHeaderField: "Accept")
+
+            if let parameterType = parameterType {
+                request.addValue(parameterType.contentType, forHTTPHeaderField: "Content-Type")
+            }
+
+            if let accept = responseType.accept {
+                request.addValue(accept, forHTTPHeaderField: "Accept")
+            }
 
             if let authorizationHeader = self.customAuthorizationHeader {
                 request.setValue(authorizationHeader, forHTTPHeaderField: "Authorization")
@@ -303,7 +299,7 @@ extension Networking {
             NetworkActivityIndicator.sharedIndicator.visible = true
 
             var serializingError: NSError?
-            if let parameters = parameters {
+            if let parameterType = parameterType, parameters = parameters {
                 switch parameterType {
                 case .JSON:
                     do {
@@ -325,7 +321,7 @@ extension Networking {
 
             if let serializingError = serializingError {
                 dispatch_async(dispatch_get_main_queue()) {
-                    completion(JSON: nil, error: serializingError)
+                    completion(response: nil, error: serializingError)
                 }
             } else {
                 var connectionError: NSError?
@@ -343,7 +339,14 @@ extension Networking {
                         if httpResponse.statusCode >= 200 && httpResponse.statusCode < 300 {
                             do {
                                 if let data = data where data.length > 0 {
-                                    result = try NSJSONSerialization.JSONObjectWithData(data, options: [])
+                                    switch responseType {
+                                    case .JSON:
+                                        result = try NSJSONSerialization.JSONObjectWithData(data, options: [])
+                                        break
+                                    case .Data:
+                                        result = data
+                                        break
+                                    }
                                 }
                             } catch let serializingError as NSError {
                                 if error == nil {
@@ -361,16 +364,16 @@ extension Networking {
                         dispatch_async(dispatch_get_main_queue()) {
                             NetworkActivityIndicator.sharedIndicator.visible = false
 
-                            self.logError(parameterType, parameters: parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError)
-                            completion(JSON: result, error: connectionError)
+                            self.logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError)
+                            completion(response: result, error: connectionError)
                         }
                     }
                 }.resume()
 
                 if TestCheck.isTesting && self.disableTestingMode == false {
                     dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
-                    self.logError(parameterType, parameters: parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError)
-                    completion(JSON: result, error: connectionError)
+                    self.logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError)
+                    completion(response: result, error: connectionError)
                 }
             }
         }
@@ -399,7 +402,7 @@ extension Networking {
         }
     }
 
-    func logError(parameterType: ParameterType, parameters: AnyObject? = nil, data: NSData?, request: NSURLRequest?, response: NSURLResponse?, error: NSError?) {
+    func logError(parameterType parameterType: ParameterType?, parameters: AnyObject? = nil, data: NSData?, request: NSURLRequest?, response: NSURLResponse?, error: NSError?) {
         guard let error = error else { return }
 
         print(" ")
@@ -421,7 +424,7 @@ extension Networking {
                 print(" ")
             }
 
-            if let parameters = parameters {
+            if let parameterType = parameterType, parameters = parameters {
                 switch parameterType {
                 case .JSON:
                     do {

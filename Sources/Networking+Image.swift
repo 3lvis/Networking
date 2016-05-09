@@ -104,7 +104,7 @@ public extension Networking {
                             dispatch_async(dispatch_get_main_queue()) {
                                 NetworkActivityIndicator.sharedIndicator.visible = false
 
-                                self.logError(.JSON, parameters: nil, data: returnedData, request: request, response: response, error: returnedError)
+                                self.logError(parameterType: nil, parameters: nil, data: returnedData, request: request, response: response, error: returnedError)
                                 completion(image: returnedImage, error: returnedError)
                             }
                         }
@@ -112,7 +112,7 @@ public extension Networking {
 
                     if TestCheck.isTesting && self.disableTestingMode == false {
                         dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
-                        self.logError(.JSON, parameters: nil, data: returnedData, request: request, response: returnedResponse, error: returnedError)
+                        self.logError(parameterType: nil, parameters: nil, data: returnedData, request: request, response: returnedResponse, error: returnedError)
                         completion(image: returnedImage, error: returnedError)
                     }
                 }
