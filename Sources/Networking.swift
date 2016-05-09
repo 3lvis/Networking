@@ -202,6 +202,34 @@ public class Networking {
             }
         }
     }
+    
+    
+    /**
+     Downloads data from a URL, caching the result.
+     - Careful: Doesn't create a new task if current task with same URL is already running.
+     - parameter URL: the data URL.
+     - parameter completion: the completion handler.
+     */
+    public func downloadData(URL: NSURL, completion: (data: NSData?, error: NSError?) -> ()) {
+        if let task = self.cache.objectForKey(String(format: "task: ", URL.absoluteString)) {
+//            NSLog("Task for this URL already processing")
+        } else if let data = self.cache.objectForKey(URL.absoluteString) as? NSData {
+//            NSLog("Cached data")
+            self.cache.removeObjectForKey(String(format: "task: ", URL.absoluteString))
+            completion(data: data, error: nil)
+        } else {
+//            NSLog("Fetche data")
+            let task = self.session.dataTaskWithURL(URL) { (data, response, err) in
+                if let data = data {
+                    self.cache.setObject(data, forKey: URL.absoluteString)
+                    self.cache.removeObjectForKey(String(format: "task: ", URL.absoluteString))
+                    completion(data: data, error: err)
+                }
+            }
+            self.cache.setObject(task, forKey: String(format: "task: ", URL.absoluteString))
+            task.resume()
+        }
+    }
 }
 
 extension Networking {
