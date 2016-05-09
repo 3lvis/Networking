@@ -30,6 +30,26 @@ struct FakeRequest {
 public class Networking {
     static let ErrorDomain = "NetworkingErrorDomain"
 
+    /**
+     Provides the a bridge for configuring your Networking object with NSURLSessionConfiguration.
+     - `Default:` This configuration type manages upload and download tasks using the default options.
+     - `Ephemeral:` A configuration type that uses no persistent storage for caches, cookies, or credentials.
+     It's optimized for transferring data to and from your app’s memory.
+     - `Background:` A configuration type that allows HTTP and HTTPS uploads or downloads to be performed in the background.
+     It causes upload and download tasks to be performed by the system in a separate process.
+     */
+    public enum ConfigurationType {
+        case Default, Ephemeral, Background
+    }
+
+    enum RequestType: String {
+        case GET, POST, PUT, DELETE
+    }
+
+    enum SessionTaskType: String {
+        case Data, Upload, Download
+    }
+
     public enum ParameterType {
         case JSON
         case FormURLEncoded
@@ -58,26 +78,6 @@ public class Networking {
      */
     public enum StatusCodeType {
         case Informational, Successful, Redirection, ClientError, ServerError, Unknown
-    }
-
-    enum RequestType: String {
-        case GET, POST, PUT, DELETE
-    }
-
-    enum SessionTaskType: String {
-        case Data, Upload, Download
-    }
-
-    /**
-     Provides the a bridge for configuring your Networking object with NSURLSessionConfiguration.
-     - `Default:` This configuration type manages upload and download tasks using the default options.
-     - `Ephemeral:` A configuration type that uses no persistent storage for caches, cookies, or credentials.
-     It's optimized for transferring data to and from your app’s memory.
-     - `Background:` A configuration type that allows HTTP and HTTPS uploads or downloads to be performed in the background.
-     It causes upload and download tasks to be performed by the system in a separate process.
-     */
-    public enum ConfigurationType {
-        case Default, Ephemeral, Background
     }
 
     private let baseURL: String
