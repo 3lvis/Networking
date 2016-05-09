@@ -233,9 +233,46 @@ public class Networking {
      - parameter path: The path used to download the resource
      - parameter completion: A closure that gets called when the download request is completed, it contains a `data` object and a `NSError`.
      */
-    public func downloadData(path: String, completion: (data: NSData?, error: NSError?) -> Void) {
-        self.request(.GET, path: path, parameterType: .JSON, parameters: nil, responseType: .Data) { response, error in
+    public func downloadData(path: String, cacheName: String? = nil, completion: (data: NSData?, error: NSError?) -> Void) {
+        self.request(.GET, path: path, cacheName: cacheName, parameterType: .JSON, parameters: nil, responseType: .Data) { response, error in
             completion(data: response as? NSData, error: error)
+        }
+    }
+
+    /**
+     Retrieves data from the cache or from the filesystem
+     - parameter path: The path where the image is located
+     - parameter cacheName: The cache name used to identify the downloaded image, by default the path is used.
+     - parameter completion: A closure that returns the image from the cache, if no image is found it will
+     return nil, it contains an `UIImage` object and a `NSError`.
+     */
+    public func dataFromCache(path: String, cacheName: String? = nil, completion: (data: NSData?) -> Void) {
+        let destinationURL = self.destinationURL(path, cacheName: cacheName)
+        let semaphore = dispatch_semaphore_create(0)
+        var returnedData: NSData?
+
+        if let data = self.cache.objectForKey(destinationURL.absoluteString) as? NSData {
+            completion(data: data)
+        } else if NSFileManager.defaultManager().fileExistsAtURL(destinationURL) {
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0)) {
+                let data = self.dataForDestinationURL(destinationURL)
+                returnedData = data
+                self.cache.setObject(data, forKey: destinationURL.absoluteString)
+                if TestCheck.isTesting && self.disableTestingMode == false {
+                    dispatch_semaphore_signal(semaphore)
+                } else {
+                    dispatch_async(dispatch_get_main_queue()) {
+                        completion(data: data)
+                    }
+                }
+            }
+
+            if TestCheck.isTesting && self.disableTestingMode == false {
+                dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
+                completion(data: returnedData)
+            }
+        } else {
+            completion(data: nil)
         }
     }
 }
@@ -270,7 +307,7 @@ extension Networking {
         self.fakeRequests[requestType] = fakeRequests
     }
 
-    func request(requestType: RequestType, path: String, parameterType: ParameterType?, parameters: AnyObject?, responseType: ResponseType, completion: (response: AnyObject?, error: NSError?) -> ()) {
+    func request(requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, responseType: ResponseType, completion: (response: AnyObject?, error: NSError?) -> ()) {
         if let responses = self.fakeRequests[requestType], fakeRequest = responses[path] {
             if fakeRequest.statusCode.statusCodeType() == .Successful {
                 completion(response: fakeRequest.response, error: nil)
@@ -279,101 +316,154 @@ extension Networking {
                 completion(response: nil, error: error)
             }
         } else {
-            let request = NSMutableURLRequest(URL: self.urlForPath(path))
-            request.HTTPMethod = requestType.rawValue
+            if responseType == .Data {
+                self.dataFromCache(path, cacheName: cacheName) { data in
+                    if let data = data {
+                        completion(response: data, error: nil)
+                    } else {
+                        let destinationURL = self.destinationURL(path, cacheName: cacheName)
+                        let requestURL = self.urlForPath(path)
+                        let request = NSMutableURLRequest(URL: requestURL)
+                        request.HTTPMethod = RequestType.GET.rawValue
+                        request.addValue("application/json", forHTTPHeaderField: "Accept")
 
-            if let parameterType = parameterType {
-                request.addValue(parameterType.contentType, forHTTPHeaderField: "Content-Type")
-            }
+                        if let token = self.token {
+                            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+                        }
 
-            if let accept = responseType.accept {
-                request.addValue(accept, forHTTPHeaderField: "Accept")
-            }
+                        let semaphore = dispatch_semaphore_create(0)
+                        var returnedData: NSData?
+                        var returnedError: NSError?
+                        var returnedResponse: NSURLResponse?
 
-            if let authorizationHeader = self.customAuthorizationHeader {
-                request.setValue(authorizationHeader, forHTTPHeaderField: "Authorization")
-            } else if let token = self.token {
-                request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-            }
+                        NetworkActivityIndicator.sharedIndicator.visible = true
 
-            NetworkActivityIndicator.sharedIndicator.visible = true
+                        self.session.downloadTaskWithRequest(request) { url, response, error in
+                            returnedResponse = response
+                            returnedError = error
 
-            var serializingError: NSError?
-            if let parameterType = parameterType, parameters = parameters {
-                switch parameterType {
-                case .JSON:
-                    do {
-                        request.HTTPBody = try NSJSONSerialization.dataWithJSONObject(parameters, options: [])
-                    } catch let error as NSError {
-                        serializingError = error
-                    }
-                    break
-                case .FormURLEncoded:
-                    guard let parametersDictionary = parameters as? [String : AnyObject] else { fatalError("Couldn't cast parameters as dictionary: \(parameters)") }
-                    let formattedParameters = parametersDictionary.formURLEncodedFormat()
-                    request.HTTPBody = formattedParameters.dataUsingEncoding(NSUTF8StringEncoding)
-                    break
-                case .Custom(_):
-                    request.HTTPBody = parameters as? NSData
-                    break
-                }
-            }
+                            if returnedError == nil, let url = url, data = NSData(contentsOfURL: url) {
+                                returnedData = data
 
-            if let serializingError = serializingError {
-                dispatch_async(dispatch_get_main_queue()) {
-                    completion(response: nil, error: serializingError)
-                }
-            } else {
-                var connectionError: NSError?
-                var result: AnyObject?
-                let semaphore = dispatch_semaphore_create(0)
-                var returnedResponse: NSURLResponse?
-                var returnedData: NSData?
-
-                self.session.dataTaskWithRequest(request) { data, response, error in
-                    returnedResponse = response
-                    connectionError = error
-                    returnedData = data
-
-                    if let httpResponse = response as? NSHTTPURLResponse {
-                        if httpResponse.statusCode >= 200 && httpResponse.statusCode < 300 {
-                            do {
-                                if let data = data where data.length > 0 {
-                                    switch responseType {
-                                    case .JSON:
-                                        result = try NSJSONSerialization.JSONObjectWithData(data, options: [])
-                                        break
-                                    case .Data:
-                                        result = data
-                                        break
-                                    }
-                                }
-                            } catch let serializingError as NSError {
-                                if error == nil {
-                                    connectionError = serializingError
+                                data.writeToURL(destinationURL, atomically: true)
+                                self.cache.setObject(data, forKey: destinationURL.absoluteString)
+                            } else if let url = url {
+                                if let response = response as? NSHTTPURLResponse {
+                                    returnedError = NSError(domain: Networking.ErrorDomain, code: response.statusCode, userInfo: [NSLocalizedDescriptionKey : NSHTTPURLResponse.localizedStringForStatusCode(response.statusCode)])
+                                } else {
+                                    returnedError = NSError(domain: Networking.ErrorDomain, code: 500, userInfo: [NSLocalizedDescriptionKey : "Failed to load url: \(url.absoluteString)"])
                                 }
                             }
+
+                            if TestCheck.isTesting && self.disableTestingMode == false {
+                                dispatch_semaphore_signal(semaphore)
+                            } else {
+                                dispatch_async(dispatch_get_main_queue()) {
+                                    NetworkActivityIndicator.sharedIndicator.visible = false
+
+                                    self.logError(parameterType: nil, parameters: nil, data: returnedData, request: request, response: response, error: returnedError)
+                                    completion(response: returnedData, error: returnedError)
+                                }
+                            }
+                            }.resume()
+
+                        if TestCheck.isTesting && self.disableTestingMode == false {
+                            dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
+                            self.logError(parameterType: nil, parameters: nil, data: returnedData, request: request, response: returnedResponse, error: returnedError)
+                            completion(response: returnedData, error: returnedError)
+                        }
+                    }
+                }
+            } else {
+                let request = NSMutableURLRequest(URL: self.urlForPath(path))
+                request.HTTPMethod = requestType.rawValue
+
+                if let parameterType = parameterType {
+                    request.addValue(parameterType.contentType, forHTTPHeaderField: "Content-Type")
+                }
+
+                if let accept = responseType.accept {
+                    request.addValue(accept, forHTTPHeaderField: "Accept")
+                }
+
+                if let authorizationHeader = self.customAuthorizationHeader {
+                    request.setValue(authorizationHeader, forHTTPHeaderField: "Authorization")
+                } else if let token = self.token {
+                    request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+                }
+
+                NetworkActivityIndicator.sharedIndicator.visible = true
+
+                var serializingError: NSError?
+                if let parameterType = parameterType, parameters = parameters {
+                    switch parameterType {
+                    case .JSON:
+                        do {
+                            request.HTTPBody = try NSJSONSerialization.dataWithJSONObject(parameters, options: [])
+                        } catch let error as NSError {
+                            serializingError = error
+                        }
+                        break
+                    case .FormURLEncoded:
+                        guard let parametersDictionary = parameters as? [String : AnyObject] else { fatalError("Couldn't cast parameters as dictionary: \(parameters)") }
+                        let formattedParameters = parametersDictionary.formURLEncodedFormat()
+                        request.HTTPBody = formattedParameters.dataUsingEncoding(NSUTF8StringEncoding)
+                        break
+                    case .Custom(_):
+                        request.HTTPBody = parameters as? NSData
+                        break
+                    }
+                }
+
+                if let serializingError = serializingError {
+                    dispatch_async(dispatch_get_main_queue()) {
+                        completion(response: nil, error: serializingError)
+                    }
+                } else {
+                    var connectionError: NSError?
+                    var result: AnyObject?
+                    let semaphore = dispatch_semaphore_create(0)
+                    var returnedResponse: NSURLResponse?
+                    var returnedData: NSData?
+
+                    self.session.dataTaskWithRequest(request) { data, response, error in
+                        returnedResponse = response
+                        connectionError = error
+                        returnedData = data
+
+                        if let httpResponse = response as? NSHTTPURLResponse {
+                            if httpResponse.statusCode >= 200 && httpResponse.statusCode < 300 {
+                                do {
+                                    if let data = data where data.length > 0 && responseType == .JSON {
+                                        result = try NSJSONSerialization.JSONObjectWithData(data, options: [])
+                                    }
+                                } catch let serializingError as NSError {
+                                    if error == nil {
+                                        connectionError = serializingError
+                                    }
+                                }
+                            } else {
+                                connectionError = NSError(domain: Networking.ErrorDomain, code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey : NSHTTPURLResponse.localizedStringForStatusCode(httpResponse.statusCode)])
+                            }
+                        }
+
+                        if TestCheck.isTesting && self.disableTestingMode == false {
+                            dispatch_semaphore_signal(semaphore)
                         } else {
-                            connectionError = NSError(domain: Networking.ErrorDomain, code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey : NSHTTPURLResponse.localizedStringForStatusCode(httpResponse.statusCode)])
-                        }
-                    }
+                            dispatch_async(dispatch_get_main_queue()) {
+                                NetworkActivityIndicator.sharedIndicator.visible = false
 
+                                self.logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError)
+                                completion(response: result, error: connectionError)
+                            }
+                        }
+                        }.resume()
+                    
                     if TestCheck.isTesting && self.disableTestingMode == false {
-                        dispatch_semaphore_signal(semaphore)
-                    } else {
-                        dispatch_async(dispatch_get_main_queue()) {
-                            NetworkActivityIndicator.sharedIndicator.visible = false
-
-                            self.logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError)
-                            completion(response: result, error: connectionError)
-                        }
+                        dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
+                        self.logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError)
+                        completion(response: result, error: connectionError)
                     }
-                }.resume()
-
-                if TestCheck.isTesting && self.disableTestingMode == false {
-                    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
-                    self.logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError)
-                    completion(response: result, error: connectionError)
                 }
             }
         }
