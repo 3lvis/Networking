@@ -8,7 +8,7 @@ public extension Networking {
     - parameter completion: A closure that gets called when the GET request is completed, it contains a `JSON` object and a `NSError`.
     */
     public func GET(path: String, parameterType: ParameterType = .JSON, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
-        self.request(.GET, path: path, parameterType: parameterType, parameters: nil, completion: completion)
+        self.request(.GET, path: path, parameterType: parameterType, parameters: nil, responseType: .JSON, completion: completion)
     }
 
     /**
@@ -53,7 +53,7 @@ public extension Networking {
     - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and a `NSError`.
     */
     public func POST(path: String, parameterType: ParameterType = .JSON, parameters: AnyObject? = nil, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
-        self.request(.POST, path: path, parameterType: parameterType, parameters: parameters, completion: completion)
+        self.request(.POST, path: path, parameterType: parameterType, parameters: parameters, responseType: .JSON, completion: completion)
     }
 
     /**
@@ -98,7 +98,7 @@ public extension Networking {
     - parameter completion: A closure that gets called when the PUT request is completed, it contains a `JSON` object and a `NSError`.
     */
     public func PUT(path: String, parameterType: ParameterType = .JSON, parameters: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
-        self.request(.PUT, path: path, parameterType: parameterType, parameters: parameters, completion: completion)
+        self.request(.PUT, path: path, parameterType: parameterType, parameters: parameters, responseType: .JSON, completion: completion)
     }
 
     /**
@@ -142,7 +142,7 @@ public extension Networking {
     - parameter completion: A closure that gets called when the DELETE request is completed, it contains a `JSON` object and a `NSError`.
     */
     public func DELETE(path: String, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
-        self.request(.DELETE, path: path, parameterType: .JSON, parameters: nil, completion: completion)
+        self.request(.DELETE, path: path, parameterType: .JSON, parameters: nil, responseType: .JSON, completion: completion)
     }
 
     /**
