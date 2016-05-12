@@ -1,5 +1,9 @@
 import Foundation
 
+#if os(iOS) || os(tvOS) || os(watchOS)
+    import UIKit
+#endif
+
 public extension Int {
     /**
      Categorizes a status code.
@@ -70,6 +74,7 @@ public class Networking {
     enum ResponseType {
         case JSON
         case Data
+        case Image
 
         var accept: String? {
             switch self {
@@ -248,33 +253,41 @@ public class Networking {
      return nil.
      */
     public func dataFromCache(path: String, cacheName: String? = nil, completion: (data: NSData?) -> Void) {
+        self.objectFromCache(path, cacheName: cacheName, responseType: .Data) { object in
+            completion(data: object as? NSData)
+        }
+    }
+
+    func objectFromCache(path: String, cacheName: String? = nil, responseType: ResponseType, completion: (object: AnyObject?) -> Void) {
         let destinationURL = self.destinationURL(path, cacheName: cacheName)
 
-        if let data = self.cache.objectForKey(destinationURL.absoluteString) as? NSData {
-            completion(data: data)
+        if let object = self.cache.objectForKey(destinationURL.absoluteString) {
+            completion(object: object)
         } else if NSFileManager.defaultManager().fileExistsAtURL(destinationURL) {
-            let semaphore = dispatch_semaphore_create(0)
-            var returnedData: NSData?
+            let queue = TestCheck.isTesting && self.disableTestingMode == false ? dispatch_get_main_queue() : dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0)
 
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0)) {
-                let data = self.dataForDestinationURL(destinationURL)
-                returnedData = data
-                self.cache.setObject(data, forKey: destinationURL.absoluteString)
-                if TestCheck.isTesting && self.disableTestingMode == false {
-                    dispatch_semaphore_signal(semaphore)
-                } else {
+            dispatch_async(queue) {
+                let object = self.dataForDestinationURL(destinationURL)
+                if responseType == .Image {
+                    if let image = UIImage(data: object) {
+                        self.cache.setObject(image, forKey: destinationURL.absoluteString)
+                        dispatch_async(dispatch_get_main_queue()) {
+                            completion(object: image)
+                        }
+                    } else {
+                        dispatch_async(dispatch_get_main_queue()) {
+                            completion(object: nil)
+                        }
+                    }
+                } else if responseType == .Data {
+                    self.cache.setObject(object, forKey: destinationURL.absoluteString)
                     dispatch_async(dispatch_get_main_queue()) {
-                        completion(data: data)
+                        completion(object: object)
                     }
                 }
             }
-
-            if TestCheck.isTesting && self.disableTestingMode == false {
-                dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
-                completion(data: returnedData)
-            }
         } else {
-            completion(data: nil)
+            completion(object: nil)
         }
     }
 }
@@ -335,7 +348,7 @@ extension Networking {
                     }
                 }
                 break
-            case .Data:
+            case .Data, .Image:
                 self.dataFromCache(path, cacheName: cacheName) { data in
                     if let data = data {
                         completion(response: data, error: nil)
@@ -343,7 +356,7 @@ extension Networking {
                         self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, responseType: responseType) { data, error in
                             if let error = error {
                                 completion(response: nil, error: error)
-                            } else if let data = data where data.length > 0 && responseType == .Data {
+                            } else if let data = data where data.length > 0 {
                                 let destinationURL = self.destinationURL(path, cacheName: cacheName)
                                 data.writeToURL(destinationURL, atomically: true)
                                 self.cache.setObject(data, forKey: destinationURL.absoluteString)
@@ -440,7 +453,6 @@ extension Networking {
             if TestCheck.isTesting && self.disableTestingMode == false {
                 dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
                 self.logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError)
-                print(connectionError)
                 completion(response: returnedData, error: connectionError)
             }
         }

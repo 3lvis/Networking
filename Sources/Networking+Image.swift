@@ -7,12 +7,8 @@ import Foundation
 public extension Networking {
     #if os(iOS) || os(tvOS) || os(watchOS)
     public func imageFromCache(path: String, cacheName: String? = nil, completion: (image: UIImage?) -> Void) {
-        self.dataFromCache(path, cacheName: cacheName) { data in
-            if let data = data {
-                completion(image: UIImage(data: data))
-            } else {
-                completion(image: nil)
-            }
+        self.objectFromCache(path, cacheName: cacheName, responseType: .Image) { object in
+            completion(image: object as? UIImage)
         }
     }
 
