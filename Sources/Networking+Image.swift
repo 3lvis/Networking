@@ -40,7 +40,7 @@ public extension Networking {
      */
     public func cancelImageDownload(path: String) {
         let url = self.urlForPath(path)
-        self.cancelRequest(.Download, requestType: .GET, url: url)
+        self.cancelRequest(.Data, requestType: .GET, url: url)
     }
 
     /**

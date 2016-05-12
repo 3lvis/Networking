@@ -217,8 +217,7 @@ class ImageTests: XCTestCase {
         self.removeFileIfNeeded(networking, path: path)
 
         networking.downloadImage(path) { image, error in
-            let canceledCode = error?.code == -999
-            XCTAssertTrue(canceledCode)
+            XCTAssertEqual(error!.code, -999)
 
             expectation.fulfill()
         }
