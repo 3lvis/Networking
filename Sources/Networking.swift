@@ -243,7 +243,9 @@ public class Networking {
      */
     public func downloadData(path: String, cacheName: String? = nil, completion: (data: NSData?, error: NSError?) -> Void) {
         self.request(.GET, path: path, cacheName: cacheName, parameterType: .JSON, parameters: nil, responseType: .Data) { response, error in
-            completion(data: response as? NSData, error: error)
+            dispatch_async(dispatch_get_main_queue()) {
+                completion(data: response as? NSData, error: error)
+            }
         }
     }
 
@@ -255,7 +257,9 @@ public class Networking {
      */
     public func dataFromCache(path: String, cacheName: String? = nil, completion: (data: NSData?) -> Void) {
         self.objectFromCache(path, cacheName: cacheName, responseType: .Data) { object in
-            completion(data: object as? NSData)
+            dispatch_async(dispatch_get_main_queue()) {
+                completion(data: object as? NSData)
+            }
         }
     }
 }
@@ -286,9 +290,7 @@ extension Networking {
                 if TestCheck.isTesting && self.disableTestingMode == false {
                     dispatch_semaphore_signal(semaphore)
                 } else {
-                    dispatch_async(dispatch_get_main_queue()) {
-                        completion(object: returnedObject)
-                    }
+                    completion(object: returnedObject)
                 }
             }
 

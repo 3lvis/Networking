@@ -218,7 +218,6 @@ class ImageTests: XCTestCase {
 
         networking.downloadImage(path) { image, error in
             XCTAssertEqual(error!.code, -999)
-
             expectation.fulfill()
         }
 
