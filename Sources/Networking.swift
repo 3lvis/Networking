@@ -230,12 +230,8 @@ public class Networking {
                 sessionTask.cancel()
             }
 
-            if TestCheck.isTesting && self.disableTestingMode == false {
+            TestCheck.testBlock(disabled: self.disableTestingMode) {
                 completion?()
-            } else {
-                dispatch_async(dispatch_get_main_queue()) {
-                    completion?()
-                }
             }
         }
     }
@@ -259,12 +255,8 @@ public class Networking {
      */
     public func dataFromCache(path: String, cacheName: String? = nil, completion: (data: NSData?) -> Void) {
         self.objectFromCache(path, cacheName: cacheName, responseType: .Data) { object in
-            if TestCheck.isTesting && self.disableTestingMode == false {
+            TestCheck.testBlock(disabled: self.disableTestingMode) {
                 completion(data: object as? NSData)
-            } else {
-                dispatch_async(dispatch_get_main_queue()) {
-                    completion(data: object as? NSData)
-                }
             }
         }
     }
@@ -366,24 +358,16 @@ extension Networking {
                         }
                     }
 
-                    if TestCheck.isTesting && self.disableTestingMode == false {
+                    TestCheck.testBlock(disabled: self.disableTestingMode) {
                         completion(response: returnedResponse, error: returnedError)
-                    } else {
-                        dispatch_async(dispatch_get_main_queue()) {
-                            completion(response: returnedResponse, error: returnedError)
-                        }
                     }
                 }
                 break
             case .Data, .Image:
                 self.objectFromCache(path, cacheName: cacheName, responseType: responseType) { object in
                     if let object = object {
-                        if TestCheck.isTesting && self.disableTestingMode == false {
+                        TestCheck.testBlock(disabled: self.disableTestingMode) {
                             completion(response: object, error: nil)
-                        } else {
-                            dispatch_async(dispatch_get_main_queue()) {
-                                completion(response: object, error: nil)
-                            }
                         }
                     } else {
                         self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, responseType: responseType) { data, error in
@@ -409,12 +393,8 @@ extension Networking {
                                     break
                                 }
                             }
-                            if TestCheck.isTesting && self.disableTestingMode == false {
+                            TestCheck.testBlock(disabled: self.disableTestingMode) {
                                 completion(response: returnedResponse, error: error)
-                            } else {
-                                dispatch_async(dispatch_get_main_queue()) {
-                                    completion(response: returnedResponse, error: error)
-                                }
                             }
                         }
                     }

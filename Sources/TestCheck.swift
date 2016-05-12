@@ -25,4 +25,14 @@ struct TestCheck {
 
         return isRunning
     }()
+
+    static func testBlock(disabled disabled: Bool, block: Void -> Void) {
+        if TestCheck.isTesting && disabled == false {
+            block()
+        } else {
+            dispatch_async(dispatch_get_main_queue()) {
+                block()
+            }
+        }
+    }
 }
