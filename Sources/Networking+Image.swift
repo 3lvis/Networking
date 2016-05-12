@@ -14,8 +14,12 @@ public extension Networking {
      */
     public func imageFromCache(path: String, cacheName: String? = nil, completion: (image: UIImage?) -> Void) {
         self.objectFromCache(path, cacheName: cacheName, responseType: .Image) { object in
-            dispatch_async(dispatch_get_main_queue()) {
+            if TestCheck.isTesting && self.disableTestingMode == false {
                 completion(image: object as? UIImage)
+            } else {
+                dispatch_async(dispatch_get_main_queue()) {
+                    completion(image: object as? UIImage)
+                }
             }
         }
     }
@@ -28,11 +32,19 @@ public extension Networking {
      */
     public func downloadImage(path: String, cacheName: String? = nil, completion: (image: UIImage?, error: NSError?) -> Void) {
         self.request(.GET, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, responseType: .Image) { response, error in
-            dispatch_async(dispatch_get_main_queue()) {
+            if TestCheck.isTesting && self.disableTestingMode == false {
                 if let image = response as? UIImage {
                     completion(image: image, error: error)
                 } else {
                     completion(image: nil, error: error)
+                }
+            } else {
+                dispatch_async(dispatch_get_main_queue()) {
+                    if let image = response as? UIImage {
+                        completion(image: image, error: error)
+                    } else {
+                        completion(image: nil, error: error)
+                    }
                 }
             }
         }

@@ -217,7 +217,7 @@ class ImageTests: XCTestCase {
         self.removeFileIfNeeded(networking, path: path)
 
         networking.downloadImage(path) { image, error in
-            XCTAssertEqual(error!.code, -999)
+            XCTAssertEqual(error?.code, -999)
             expectation.fulfill()
         }
 

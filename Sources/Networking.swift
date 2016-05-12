@@ -230,8 +230,12 @@ public class Networking {
                 sessionTask.cancel()
             }
 
-            dispatch_async(dispatch_get_main_queue()) {
+            if TestCheck.isTesting && self.disableTestingMode == false {
                 completion?()
+            } else {
+                dispatch_async(dispatch_get_main_queue()) {
+                    completion?()
+                }
             }
         }
     }
@@ -242,10 +246,8 @@ public class Networking {
      - parameter completion: A closure that gets called when the download request is completed, it contains  a `data` object and a `NSError`.
      */
     public func downloadData(path: String, cacheName: String? = nil, completion: (data: NSData?, error: NSError?) -> Void) {
-        self.request(.GET, path: path, cacheName: cacheName, parameterType: .JSON, parameters: nil, responseType: .Data) { response, error in
-            dispatch_async(dispatch_get_main_queue()) {
-                completion(data: response as? NSData, error: error)
-            }
+        self.request(.GET, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, responseType: .Data) { response, error in
+            completion(data: response as? NSData, error: error)
         }
     }
 
@@ -257,8 +259,12 @@ public class Networking {
      */
     public func dataFromCache(path: String, cacheName: String? = nil, completion: (data: NSData?) -> Void) {
         self.objectFromCache(path, cacheName: cacheName, responseType: .Data) { object in
-            dispatch_async(dispatch_get_main_queue()) {
+            if TestCheck.isTesting && self.disableTestingMode == false {
                 completion(data: object as? NSData)
+            } else {
+                dispatch_async(dispatch_get_main_queue()) {
+                    completion(data: object as? NSData)
+                }
             }
         }
     }
@@ -350,43 +356,51 @@ extension Networking {
             switch responseType {
             case .JSON:
                 self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, responseType: responseType) { data, error in
-                    if let error = error {
-                        completion(response: nil, error: error)
-                    } else if let data = data where data.length > 0 && responseType == .JSON {
+                    var returnedError = error
+                    var returnedResponse: AnyObject?
+                    if let data = data where data.length > 0 {
                         do {
-                            let JSON = try NSJSONSerialization.JSONObjectWithData(data, options: [])
-                            completion(response: JSON, error: error)
+                            returnedResponse = try NSJSONSerialization.JSONObjectWithData(data, options: [])
                         } catch let JSONError as NSError {
-                            completion(response: nil, error: JSONError)
+                            returnedError = JSONError
                         }
+                    }
+
+                    if TestCheck.isTesting && self.disableTestingMode == false {
+                        completion(response: returnedResponse, error: returnedError)
                     } else {
-                        completion(response: nil, error: nil)
+                        dispatch_async(dispatch_get_main_queue()) {
+                            completion(response: returnedResponse, error: returnedError)
+                        }
                     }
                 }
                 break
             case .Data, .Image:
-                self.dataFromCache(path, cacheName: cacheName) { data in
-                    if let data = data {
-                        completion(response: data, error: nil)
+                self.objectFromCache(path, cacheName: cacheName, responseType: responseType) { object in
+                    if let object = object {
+                        if TestCheck.isTesting && self.disableTestingMode == false {
+                            completion(response: object, error: nil)
+                        } else {
+                            dispatch_async(dispatch_get_main_queue()) {
+                                completion(response: object, error: nil)
+                            }
+                        }
                     } else {
                         self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, responseType: responseType) { data, error in
-                            if let error = error {
-                                completion(response: nil, error: error)
-                            } else if let data = data where data.length > 0 {
+                            var returnedResponse: AnyObject?
+                            if let data = data where data.length > 0 {
                                 let destinationURL = self.destinationURL(path, cacheName: cacheName)
                                 data.writeToURL(destinationURL, atomically: true)
                                 switch responseType {
                                 case .Data:
                                     self.cache.setObject(data, forKey: destinationURL.absoluteString)
-                                    completion(response: data, error: nil)
+                                    returnedResponse = data
                                     break
                                 case .Image:
                                     #if os(iOS) || os(tvOS) || os(watchOS)
                                         if let image = UIImage(data: data) {
                                             self.cache.setObject(image, forKey: destinationURL.absoluteString)
-                                            completion(response: image, error: nil)
-                                        } else {
-                                            completion(response: nil, error: nil)
+                                            returnedResponse = image
                                         }
                                     #endif
                                     break
@@ -394,8 +408,13 @@ extension Networking {
                                     fatalError("Response Type is different than Data and Image")
                                     break
                                 }
+                            }
+                            if TestCheck.isTesting && self.disableTestingMode == false {
+                                completion(response: returnedResponse, error: error)
                             } else {
-                                completion(response: nil, error: nil)
+                                dispatch_async(dispatch_get_main_queue()) {
+                                    completion(response: returnedResponse, error: error)
+                                }
                             }
                         }
                     }
@@ -476,10 +495,10 @@ extension Networking {
                 } else {
                     dispatch_async(dispatch_get_main_queue()) {
                         NetworkActivityIndicator.sharedIndicator.visible = false
-
-                        self.logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError)
-                        completion(response: returnedData, error: connectionError)
                     }
+
+                    self.logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError)
+                    completion(response: returnedData, error: connectionError)
                 }
                 }.resume()
 
