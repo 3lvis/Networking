@@ -106,7 +106,20 @@ class NetworkingTests: XCTestCase {
 
         waitForExpectationsWithTimeout(15.0, handler: nil)
     }
-    
+
+    func testCancelRequestsReturnInMainThread() {
+        let expectation = expectationWithDescription("testCancelRequestsReturnInMainThread")
+        let networking = Networking(baseURL: baseURL)
+        networking.disableTestingMode = true
+        networking.GET("/get") { JSON, error in
+            XCTAssertTrue(NSThread.isMainThread())
+            XCTAssertEqual(error?.code, -999)
+            expectation.fulfill()
+        }
+        networking.cancelAllRequests(nil)
+        waitForExpectationsWithTimeout(15.0, handler: nil)
+    }
+
     func testDownloadData() {
         var synchronous = false
         let networking = Networking(baseURL: self.baseURL)
@@ -114,6 +127,7 @@ class NetworkingTests: XCTestCase {
         Helper.removeFileIfNeeded(networking, path: path)
         networking.downloadData(path) { data, error in
             synchronous = true
+            XCTAssertTrue(NSThread.isMainThread())
             XCTAssertNotNil(data)
             XCTAssertTrue(data!.length == 8090, "Data size mismatch")
         }

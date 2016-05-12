@@ -18,6 +18,17 @@ extension HTTPRequestTests {
         XCTAssertTrue(synchronous)
     }
 
+    func testRequestReturnBlockInMainThread() {
+        let expectation = expectationWithDescription("testRequestReturnBlockInMainThread")
+        let networking = Networking(baseURL: baseURL)
+        networking.disableTestingMode = true
+        networking.GET("/get") { JSON, error in
+            XCTAssertTrue(NSThread.isMainThread())
+            expectation.fulfill()
+        }
+        waitForExpectationsWithTimeout(15.0, handler: nil)
+    }
+
     func testGET() {
         let networking = Networking(baseURL: baseURL)
         networking.GET("/get") { JSON, error in
