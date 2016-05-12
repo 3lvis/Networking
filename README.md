@@ -144,20 +144,27 @@ networking.POST("/post", params: ["username":"jameson", "password":"password"]) 
 
 ## Choosing a Content Type
 
-**Networking** by default uses `application/json` as the `Content-Type` and `Accept` headers. If you want to use this content type you don't have to do anything.
+The `Content-Type` HTTP specification is so unfriendly, you have to know the specifics of it before understanding that content type is really just the parameter type. Because of this **Networking** uses a `ParameterType` instead of a `ContentType`. Anyway, here's hoping this makes it more human friendly.
 
-The HTTP specification is so unfriendly, you have to know the specifics of it before understanding that content type is really just the parameter type. Anyway, here's hoping this makes it more human friendly.
+**Networking** by default uses `application/json` as the `Content-Type`, if you're sending JSON you don't have to do anything. But if you want to send other types of parameters you can do it by providing the `ParameterType` attribute. For example, if you want to use `application/x-www-form-urlencoded` just use the `.FormURLEncoded` parameter type, internally **Networking** will format your parameters so they use [`Percent-encoding`](https://en.wikipedia.org/wiki/Percent-encoding#The_application.2Fx-www-form-urlencoded_type). No more changes needed.
 
-You can use other content types by proving the `ParameterType` attribute. For example, if you want to use `.FormURLEncoded` internally **Networking** will format your parameters so they use [`Percent-encoding`](https://en.wikipedia.org/wiki/Percent-encoding#The_application.2Fx-www-form-urlencoded_type). No more changes needed.
-
+**JSON parameters**:
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-networking.POST("/post", parameterType: .FormURLEncoded, parameters: ["name":"jameson"]) { JSON, error in
+networking.POST("/post", parameters: ["name" : "jameson"]) { JSON, error in
+   // Successfull post using `application/json` as `Content-Type`
+}
+```
+
+**Percent encoded parameters**:
+```swift
+let networking = Networking(baseURL: "http://httpbin.org")
+networking.POST("/post", parameterType: .FormURLEncoded, parameters: ["name" : "jameson"]) { JSON, error in
    // Successfull post using `application/x-www-form-urlencoded` as `Content-Type`
 }
 ```
 
-At the moment **Networking** supports three types of `Content-Type` out of the box: `JSON`, `FormURLEncoded` and `Custom`. Meanwhile `JSON` and `FormURLEncoded` serialize your parameters in some way, `Custom` only sends your parameters as `NSData` so make sure that if you're using `Custom` then send something in data format as your parameters.
+At the moment **Networking** supports three types of `ParameterType`s out of the box: `JSON`, `FormURLEncoded` and `Custom`. Meanwhile `JSON` and `FormURLEncoded` serialize your parameters in some way, `Custom(String)` sends your parameters as plain `NSData` and sets the value inside `Custom` as the `Content-Type`.
 
 For example:
 ```swift
