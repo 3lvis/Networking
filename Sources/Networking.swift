@@ -299,13 +299,11 @@ extension Networking {
         }
     }
 
-    #if os(iOS) || os(tvOS) || os(watchOS)
     func dataForDestinationURL(url: NSURL) -> NSData {
         guard let data = NSFileManager.defaultManager().contentsAtPath(url.path!) else { fatalError("Couldn't get image in destination url: \(url)") }
 
         return data
     }
-    #endif
 
     func sessionConfiguration() -> NSURLSessionConfiguration {
         switch self.configurationType {
