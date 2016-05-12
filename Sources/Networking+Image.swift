@@ -28,8 +28,6 @@ public extension Networking {
         self.request(.GET, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, responseType: .Image) { response, error in
             if let image = response as? UIImage {
                 completion(image: image, error: error)
-            } else if let data = response as? NSData {
-                completion(image: UIImage(data: data), error: error)
             } else {
                 completion(image: nil, error: error)
             }

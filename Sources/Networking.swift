@@ -273,7 +273,9 @@ extension Networking {
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0)) {
                 let object = self.dataForDestinationURL(destinationURL)
                 if responseType == .Image {
-                    returnedObject = UIImage(data: object)
+                    #if os(iOS) || os(tvOS) || os(watchOS)
+                        returnedObject = UIImage(data: object)
+                    #endif
                 } else {
                     returnedObject = object
                 }
@@ -371,12 +373,25 @@ extension Networking {
                             } else if let data = data where data.length > 0 {
                                 let destinationURL = self.destinationURL(path, cacheName: cacheName)
                                 data.writeToURL(destinationURL, atomically: true)
-                                if let image = UIImage(data: data) {
-                                    self.cache.setObject(image, forKey: destinationURL.absoluteString)
-                                } else {
+                                switch responseType {
+                                case .Data:
                                     self.cache.setObject(data, forKey: destinationURL.absoluteString)
+                                    completion(response: data, error: nil)
+                                    break
+                                case .Image:
+                                    #if os(iOS) || os(tvOS) || os(watchOS)
+                                        if let image = UIImage(data: data) {
+                                            self.cache.setObject(image, forKey: destinationURL.absoluteString)
+                                            completion(response: image, error: nil)
+                                        } else {
+                                            completion(response: nil, error: nil)
+                                        }
+                                    #endif
+                                    break
+                                default:
+                                    fatalError("Response Type is different than Data and Image")
+                                    break
                                 }
-                                completion(response: data, error: nil)
                             } else {
                                 completion(response: nil, error: nil)
                             }
