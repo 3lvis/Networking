@@ -52,6 +52,12 @@ public class Networking {
         case Data, Upload, Download
     }
 
+    /**
+     Provides the rules to serialize your parameters, also sets the `Content-Type` header.
+     - `JSON:` Serializes your parameters using `NSJSONSerialization` and sets your `Content-Type` to `application/json`.
+     - `FormURLEncoded:` Serializes your parameters using `Percent-encoding` and sets your `Content-Type` to `application/x-www-form-urlencoded`.
+     - `Custom(String):` Sends your parameters as plain data, sets your `Content-Type` to the value inside `Custom`.
+     */
     public enum ParameterType {
         case JSON
         case FormURLEncoded
