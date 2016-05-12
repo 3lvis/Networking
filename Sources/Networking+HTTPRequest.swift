@@ -12,20 +12,17 @@ public extension Networking {
     }
 
     /**
-     Registers a fake GET request for the specified path. After registering this, every GET request to the path, will return
-     the registered response.
+     Registers a fake GET request for the specified path. After registering this, every GET request to the path, will return the registered response.
      - parameter path: The path for the faked GET request.
      - parameter response: An `AnyObject` that will be returned when a GET request is made to the specified path.
-     - parameter statusCode: By default it's 200, if you provide any status code that is between 200 and 299 the
-     response object will be returned, otherwise we will return an error containig the provided status code.
+     - parameter statusCode: By default it's 200, if you provide any status code that is between 200 and 299 the response object will be returned, otherwise we will return an error containig the provided status code.
      */
     public func fakeGET(path: String, response: AnyObject?, statusCode: Int = 200) {
         self.fake(.GET, path: path, response: response, statusCode: statusCode)
     }
 
     /**
-     Registers a fake GET request for the specified path using the contents of a file. After registering this, every GET request to the path, will return
-     the contents of the registered file.
+     Registers a fake GET request for the specified path using the contents of a file. After registering this, every GET request to the path, will return the contents of the registered file.
      - parameter path: The path for the faked GET request.
      - parameter fileName: The name of the file, whose contents will be registered as a reponse.
      - parameter bundle: The NSBundle where the file is located.
@@ -35,7 +32,7 @@ public extension Networking {
     }
 
     /**
-     Cancels the GET request for the specified path. This causes the request to complete with error code -999
+     Cancels the GET request for the specified path. This causes the request to complete with error code -999.
      - parameter path: The path for the cancelled GET request
      */
     public func cancelGET(path: String) {
@@ -57,20 +54,17 @@ public extension Networking {
     }
 
     /**
-     Registers a fake POST request for the specified path. After registering this, every POST request to the path, will return
-     the registered response.
+     Registers a fake POST request for the specified path. After registering this, every POST request to the path, will return the registered response.
      - parameter path: The path for the faked POST request.
      - parameter response: An `AnyObject` that will be returned when a POST request is made to the specified path.
-     - parameter statusCode: By default it's 200, if you provide any status code that is between 200 and 299 the
-     response object will be returned, otherwise we will return an error containig the provided status code.
+     - parameter statusCode: By default it's 200, if you provide any status code that is between 200 and 299 the response object will be returned, otherwise we will return an error containig the provided status code.
      */
     public func fakePOST(path: String, response: AnyObject?, statusCode: Int = 200) {
         self.fake(.POST, path: path, response: response, statusCode: statusCode)
     }
 
     /**
-     Registers a fake POST request to the specified path using the contents of a file. After registering this, every POST request to the path, will return
-     the contents of the registered file.
+     Registers a fake POST request to the specified path using the contents of a file. After registering this, every POST request to the path, will return the contents of the registered file.
      - parameter path: The path for the faked POST request.
      - parameter fileName: The name of the file, whose contents will be registered as a reponse.
      - parameter bundle: The NSBundle where the file is located.
@@ -80,8 +74,8 @@ public extension Networking {
     }
 
     /**
-     Cancels the POST request for the specified path. This causes the request to complete with error code -999
-     - parameter path: The path for the cancelled POST request
+     Cancels the POST request for the specified path. This causes the request to complete with error code -999.
+     - parameter path: The path for the cancelled POST request.
      */
     public func cancelPOST(path: String) {
         let url = self.urlForPath(path)
@@ -102,20 +96,17 @@ public extension Networking {
     }
 
     /**
-     Registers a fake PUT request for the specified path. After registering this, every PUT request to the path, will return
-     the registered response.
+     Registers a fake PUT request for the specified path. After registering this, every PUT request to the path, will return the registered response.
      - parameter path: The path for the faked PUT request.
      - parameter response: An `AnyObject` that will be returned when a PUT request is made to the specified path.
-     - parameter statusCode: By default it's 200, if you provide any status code that is between 200 and 299 the
-     response object will be returned, otherwise we will return an error containig the provided status code.
+     - parameter statusCode: By default it's 200, if you provide any status code that is between 200 and 299 the response object will be returned, otherwise we will return an error containig the provided status code.
      */
     public func fakePUT(path: String, response: AnyObject?, statusCode: Int = 200) {
         self.fake(.PUT, path: path, response: response, statusCode: statusCode)
     }
 
     /**
-     Registers a fake PUT request to the specified path using the contents of a file. After registering this, every PUT request to the path, will return
-     the contents of the registered file.
+     Registers a fake PUT request to the specified path using the contents of a file. After registering this, every PUT request to the path, will return the contents of the registered file.
      - parameter path: The path for the faked PUT request.
      - parameter fileName: The name of the file, whose contents will be registered as a reponse.
      - parameter bundle: The NSBundle where the file is located.
@@ -125,8 +116,8 @@ public extension Networking {
     }
 
     /**
-     Cancels the PUT request for the specified path. This causes the request to complete with error code -999
-     - parameter path: The path for the cancelled PUT request
+     Cancels the PUT request for the specified path. This causes the request to complete with error code -999.
+     - parameter path: The path for the cancelled PUT request.
      */
     public func cancelPUT(path: String) {
         let url = self.urlForPath(path)
@@ -146,20 +137,17 @@ public extension Networking {
     }
 
     /**
-     Registers a fake DELETE request for the specified path. After registering this, every DELETE request to the path, will return
-     the registered response.
+     Registers a fake DELETE request for the specified path. After registering this, every DELETE request to the path, will return the registered response.
      - parameter path: The path for the faked DELETE request.
      - parameter response: An `AnyObject` that will be returned when a DELETE request is made to the specified path.
-     - parameter statusCode: By default it's 200, if you provide any status code that is between 200 and 299 the
-     response object will be returned, otherwise we will return an error containig the provided status code.
+     - parameter statusCode: By default it's 200, if you provide any status code that is between 200 and 299 the response object will be returned, otherwise we will return an error containig the provided status code.
      */
     public func fakeDELETE(path: String, response: AnyObject?, statusCode: Int = 200) {
         self.fake(.DELETE, path: path, response: response, statusCode: statusCode)
     }
 
     /**
-     Registers a fake DELETE request to the specified path using the contents of a file. After registering this, every DELETE request to the path, will return
-     the contents of the registered file.
+     Registers a fake DELETE request to the specified path using the contents of a file. After registering this, every DELETE request to the path, will return the contents of the registered file.
      - parameter path: The path for the faked DELETE request.
      - parameter fileName: The name of the file, whose contents will be registered as a reponse.
      - parameter bundle: The NSBundle where the file is located.
@@ -169,8 +157,8 @@ public extension Networking {
     }
 
     /**
-     Cancels the DELETE request for the specified path. This causes the request to complete with error code -999
-     - parameter path: The path for the cancelled DELETE request
+     Cancels the DELETE request for the specified path. This causes the request to complete with error code -999.
+     - parameter path: The path for the cancelled DELETE request.
      */
     public func cancelDELETE(path: String) {
         let url = self.urlForPath(path)

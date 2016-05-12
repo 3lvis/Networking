@@ -26,21 +26,19 @@ public extension Int {
     }
 }
 
-struct FakeRequest {
-    let response: AnyObject?
-    let statusCode: Int
-}
-
 public class Networking {
     static let ErrorDomain = "NetworkingErrorDomain"
+
+    struct FakeRequest {
+        let response: AnyObject?
+        let statusCode: Int
+    }
 
     /**
      Provides the a bridge for configuring your Networking object with NSURLSessionConfiguration.
      - `Default:` This configuration type manages upload and download tasks using the default options.
-     - `Ephemeral:` A configuration type that uses no persistent storage for caches, cookies, or credentials.
-     It's optimized for transferring data to and from your app’s memory.
-     - `Background:` A configuration type that allows HTTP and HTTPS uploads or downloads to be performed in the background.
-     It causes upload and download tasks to be performed by the system in a separate process.
+     - `Ephemeral:` A configuration type that uses no persistent storage for caches, cookies, or credentials. It's optimized for transferring data to and from your app’s memory.
+     - `Background:` A configuration type that allows HTTP and HTTPS uploads or downloads to be performed in the background. It causes upload and download tasks to be performed by the system in a separate process.
      */
     public enum ConfigurationType {
         case Default, Ephemeral, Background
@@ -93,7 +91,7 @@ public class Networking {
      - `Redirection`: This class of status code indicates that further action needs to be taken by the user agent in order to fulfill the request.
      - `ClientError:` The 4xx class of status code is intended for cases in which the client seems to have erred.
      - `ServerError:` Response status codes beginning with the digit "5" indicate cases in which the server is aware that it has erred or is incapable of performing the request.
-     - `Unknown:` This response status code could be used by Foundation for other types of states, for example when a request gets cancelled you will receive status code -999
+     - `Unknown:` This response status code could be used by Foundation for other types of states, for example when a request gets cancelled you will receive status code -999.
      */
     public enum StatusCodeType {
         case Informational, Successful, Redirection, ClientError, ServerError, Unknown
@@ -107,7 +105,7 @@ public class Networking {
     var configurationType: ConfigurationType
 
     /**
-     Flag used to disable synchronous request when running automatic tests
+     Flag used to disable synchronous request when running automatic tests.
      */
     var disableTestingMode = false
 
@@ -126,10 +124,9 @@ public class Networking {
     }
 
     /**
-     Authenticates using Basic Authentication, it converts username:password to Base64 then sets the
-     Authorization header to "Basic \(Base64(username:password))"
-     - parameter username: The username to be used
-     - parameter password: The password to be used
+     Authenticates using Basic Authentication, it converts username:password to Base64 then sets the Authorization header to "Basic \(Base64(username:password))".
+     - parameter username: The username to be used.
+     - parameter password: The password to be used.
      */
     public func authenticate(username username: String, password: String) {
         let credentialsString = "\(username):\(password)"
@@ -145,16 +142,16 @@ public class Networking {
     }
 
     /**
-     Authenticates using a Bearer token, sets the Authorization header to "Bearer \(token)"
-     - parameter token: The token to be used
+     Authenticates using a Bearer token, sets the Authorization header to "Bearer \(token)".
+     - parameter token: The token to be used.
      */
     public func authenticate(token token: String) {
         self.token = token
     }
 
     /**
-     Authenticates using a custom HTTP Authorization header
-     - parameter authorizationHeader: The authorization header to be used
+     Authenticates using a custom HTTP Authorization header.
+     - parameter authorizationHeader: The authorization header to be used.
      */
     public func authenticate(authorizationHeader authorizationHeader: String) {
         self.customAuthorizationHeader = authorizationHeader
@@ -196,9 +193,9 @@ public class Networking {
     }
 
     /**
-     Splits a url in base url and relative path
-     - parameter path: The full url to be splitted
-     - returns: A base url and a relative path
+     Splits a url in base url and relative path.
+     - parameter path: The full url to be splitted.
+     - returns: A base url and a relative path.
      */
     public static func splitBaseURLAndRelativePath(path: String) -> (baseURL: String, relativePath: String) {
         guard let encodedPath = path.encodeUTF8() else { fatalError("Couldn't encode path to UTF8: \(path)") }
@@ -213,7 +210,7 @@ public class Networking {
 
     /**
      Cancels all the current requests.
-     - parameter completion: The completion block to be called when all the requests are cancelled
+     - parameter completion: The completion block to be called when all the requests are cancelled.
      */
     public func cancelAllRequests(completion: (Void -> Void)?) {
         self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
@@ -235,9 +232,8 @@ public class Networking {
 
     /**
      Downloads data from a URL, caching the result.
-     - parameter path: The path used to download the resource
-     - parameter completion: A closure that gets called when the download request is completed, it contains 
-     a `data` object and a `NSError`.
+     - parameter path: The path used to download the resource.
+     - parameter completion: A closure that gets called when the download request is completed, it contains  a `data` object and a `NSError`.
      */
     public func downloadData(path: String, cacheName: String? = nil, completion: (data: NSData?, error: NSError?) -> Void) {
         self.request(.GET, path: path, cacheName: cacheName, parameterType: .JSON, parameters: nil, responseType: .Data) { response, error in
@@ -249,15 +245,16 @@ public class Networking {
      Retrieves data from the cache or from the filesystem.
      - parameter path: The path where the image is located.
      - parameter cacheName: The cache name used to identify the downloaded data, by default the path is used.
-     - parameter completion: A closure that returns the data from the cache, if no data is found it will
-     return nil.
+     - parameter completion: A closure that returns the data from the cache, if no data is found it will return nil.
      */
     public func dataFromCache(path: String, cacheName: String? = nil, completion: (data: NSData?) -> Void) {
         self.objectFromCache(path, cacheName: cacheName, responseType: .Data) { object in
             completion(data: object as? NSData)
         }
     }
+}
 
+extension Networking {
     func objectFromCache(path: String, cacheName: String? = nil, responseType: ResponseType, completion: (object: AnyObject?) -> Void) {
         let destinationURL = self.destinationURL(path, cacheName: cacheName)
 
@@ -295,9 +292,15 @@ public class Networking {
             completion(object: nil)
         }
     }
-}
 
-extension Networking {
+    #if os(iOS) || os(tvOS) || os(watchOS)
+    func dataForDestinationURL(url: NSURL) -> NSData {
+        guard let data = NSFileManager.defaultManager().contentsAtPath(url.path!) else { fatalError("Couldn't get image in destination url: \(url)") }
+
+        return data
+    }
+    #endif
+
     func sessionConfiguration() -> NSURLSessionConfiguration {
         switch self.configurationType {
         case .Default:

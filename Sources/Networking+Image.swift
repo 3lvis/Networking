@@ -20,7 +20,7 @@ public extension Networking {
 
     /**
      Downloads an image using the specified path.
-     - parameter path: The path where the image is located
+     - parameter path: The path where the image is located.
      - parameter cacheName: The cache name used to identify the downloaded image, by default the path is used.
      - parameter completion: A closure that gets called when the image download request is completed, it contains an `UIImage` object and a `NSError`.
      */
@@ -37,8 +37,8 @@ public extension Networking {
     }
 
     /**
-     Cancels the image download request for the specified path. This causes the request to complete with error code -999
-     - parameter path: The path for the cancelled image download request
+     Cancels the image download request for the specified path. This causes the request to complete with error code -999.
+     - parameter path: The path for the cancelled image download request.
      */
     public func cancelImageDownload(path: String) {
         let url = self.urlForPath(path)
@@ -46,23 +46,12 @@ public extension Networking {
     }
 
     /**
-     Registers a fake download image request with an UIImage. After registering this, every download request to the path, will return
-     the registered UIImage.
+     Registers a fake download image request with an UIImage. After registering this, every download request to the path, will return. the registered UIImage.
      - parameter path: The path for the faked image download request.
-     - parameter image: A UIImage that will be returned when there's a request to the registered path
+     - parameter image: A UIImage that will be returned when there's a request to the registered path.
      */
     public func fakeImageDownload(path: String, image: UIImage?, statusCode: Int = 200) {
         self.fake(.GET, path: path, response: image, statusCode: statusCode)
-    }
-    #endif
-}
-
-extension Networking {
-    #if os(iOS) || os(tvOS) || os(watchOS)
-    func dataForDestinationURL(url: NSURL) -> NSData {
-        guard let data = NSFileManager.defaultManager().contentsAtPath(url.path!) else { fatalError("Couldn't get image in destination url: \(url)") }
-
-        return data
     }
     #endif
 }
