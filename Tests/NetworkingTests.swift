@@ -4,13 +4,6 @@ import XCTest
 class NetworkingTests: XCTestCase {
     let baseURL = "http://httpbin.org"
 
-    func removeFileIfNeeded(networking: Networking, path: String, cacheName: String? = nil) {
-        let destinationURL = networking.destinationURL(path, cacheName: cacheName)
-        if NSFileManager.defaultManager().fileExistsAtURL(destinationURL) {
-            NSFileManager.defaultManager().removeFileAtURL(destinationURL)
-        }
-    }
-
     func testBasicAuth() {
         let networking = Networking(baseURL: baseURL)
         networking.authenticate(username: "user", password: "passwd")
@@ -118,7 +111,7 @@ class NetworkingTests: XCTestCase {
         var synchronous = false
         let networking = Networking(baseURL: self.baseURL)
         let path = "/image/png"
-        self.removeFileIfNeeded(networking, path: path)
+        Helper.removeFileIfNeeded(networking, path: path)
         networking.downloadData(path) { data, error in
             synchronous = true
             XCTAssertNotNil(data)
