@@ -264,27 +264,32 @@ public class Networking {
         if let object = self.cache.objectForKey(destinationURL.absoluteString) {
             completion(object: object)
         } else if NSFileManager.defaultManager().fileExistsAtURL(destinationURL) {
-            let queue = TestCheck.isTesting && self.disableTestingMode == false ? dispatch_get_main_queue() : dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0)
+            let semaphore = dispatch_semaphore_create(0)
+            var returnedObject: AnyObject?
 
-            dispatch_async(queue) {
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0)) {
                 let object = self.dataForDestinationURL(destinationURL)
                 if responseType == .Image {
-                    if let image = UIImage(data: object) {
-                        self.cache.setObject(image, forKey: destinationURL.absoluteString)
-                        dispatch_async(dispatch_get_main_queue()) {
-                            completion(object: image)
-                        }
-                    } else {
-                        dispatch_async(dispatch_get_main_queue()) {
-                            completion(object: nil)
-                        }
-                    }
-                } else if responseType == .Data {
-                    self.cache.setObject(object, forKey: destinationURL.absoluteString)
+                    returnedObject = UIImage(data: object)
+                } else {
+                    returnedObject = object
+                }
+                if let returnedObject = returnedObject {
+                    self.cache.setObject(returnedObject, forKey: destinationURL.absoluteString)
+                }
+
+                if TestCheck.isTesting && self.disableTestingMode == false {
+                    dispatch_semaphore_signal(semaphore)
+                } else {
                     dispatch_async(dispatch_get_main_queue()) {
-                        completion(object: object)
+                        completion(object: returnedObject)
                     }
                 }
+            }
+
+            if TestCheck.isTesting && self.disableTestingMode == false {
+                dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
+                completion(object: returnedObject)
             }
         } else {
             completion(object: nil)
@@ -359,7 +364,11 @@ extension Networking {
                             } else if let data = data where data.length > 0 {
                                 let destinationURL = self.destinationURL(path, cacheName: cacheName)
                                 data.writeToURL(destinationURL, atomically: true)
-                                self.cache.setObject(data, forKey: destinationURL.absoluteString)
+                                if let image = UIImage(data: data) {
+                                    self.cache.setObject(image, forKey: destinationURL.absoluteString)
+                                } else {
+                                    self.cache.setObject(data, forKey: destinationURL.absoluteString)
+                                }
                                 completion(response: data, error: nil)
                             } else {
                                 completion(response: nil, error: nil)
@@ -430,7 +439,7 @@ extension Networking {
 
                 if let httpResponse = response as? NSHTTPURLResponse {
                     if httpResponse.statusCode >= 200 && httpResponse.statusCode < 300 {
-                        if let data = data where data.length > 0 && responseType == .JSON {
+                        if let data = data where data.length > 0 {
                             returnedData = data
                         }
                     } else {
