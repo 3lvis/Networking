@@ -37,7 +37,7 @@ class ImageTests: XCTestCase {
         let path = "/image/png"
         let cacheName = "hello"
         self.removeFileIfNeeded(networking, path: path, cacheName: cacheName)
-        networking.downloadImage(path, cacheName: cacheName) { image, error in
+        networking.downloadImage(path, cacheName: cacheName) { _, _ in
             networking.imageFromCache(path, cacheName: cacheName) { image in
                 synchronous = true
                 let pigImage = UIImage(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self), compatibleWithTraitCollection: nil)!
@@ -217,8 +217,7 @@ class ImageTests: XCTestCase {
         self.removeFileIfNeeded(networking, path: path)
 
         networking.downloadImage(path) { image, error in
-            let canceledCode = error?.code == -999
-            XCTAssertTrue(canceledCode)
+            XCTAssertEqual(error!.code, -999)
 
             expectation.fulfill()
         }
