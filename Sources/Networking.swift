@@ -231,7 +231,8 @@ public class Networking {
     /**
      Downloads data from a URL, caching the result.
      - parameter path: The path used to download the resource
-     - parameter completion: A closure that gets called when the download request is completed, it contains a `data` object and a `NSError`.
+     - parameter completion: A closure that gets called when the download request is completed, it contains 
+     a `data` object and a `NSError`.
      */
     public func downloadData(path: String, cacheName: String? = nil, completion: (data: NSData?, error: NSError?) -> Void) {
         self.request(.GET, path: path, cacheName: cacheName, parameterType: .JSON, parameters: nil, responseType: .Data) { response, error in
@@ -240,20 +241,21 @@ public class Networking {
     }
 
     /**
-     Retrieves data from the cache or from the filesystem
-     - parameter path: The path where the image is located
-     - parameter cacheName: The cache name used to identify the downloaded image, by default the path is used.
-     - parameter completion: A closure that returns the image from the cache, if no image is found it will
-     return nil, it contains an `UIImage` object and a `NSError`.
+     Retrieves data from the cache or from the filesystem.
+     - parameter path: The path where the image is located.
+     - parameter cacheName: The cache name used to identify the downloaded data, by default the path is used.
+     - parameter completion: A closure that returns the data from the cache, if no data is found it will
+     return nil.
      */
     public func dataFromCache(path: String, cacheName: String? = nil, completion: (data: NSData?) -> Void) {
         let destinationURL = self.destinationURL(path, cacheName: cacheName)
-        let semaphore = dispatch_semaphore_create(0)
-        var returnedData: NSData?
 
         if let data = self.cache.objectForKey(destinationURL.absoluteString) as? NSData {
             completion(data: data)
         } else if NSFileManager.defaultManager().fileExistsAtURL(destinationURL) {
+            let semaphore = dispatch_semaphore_create(0)
+            var returnedData: NSData?
+
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0)) {
                 let data = self.dataForDestinationURL(destinationURL)
                 returnedData = data
@@ -316,7 +318,24 @@ extension Networking {
                 completion(response: nil, error: error)
             }
         } else {
-            if responseType == .Data {
+            switch responseType {
+            case .JSON:
+                self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, responseType: responseType) { data, error in
+                    if let error = error {
+                        completion(response: nil, error: error)
+                    } else if let data = data where data.length > 0 && responseType == .JSON {
+                        do {
+                            let JSON = try NSJSONSerialization.JSONObjectWithData(data, options: [])
+                            completion(response: JSON, error: error)
+                        } catch let JSONError as NSError {
+                            completion(response: nil, error: JSONError)
+                        }
+                    } else {
+                        completion(response: nil, error: nil)
+                    }
+                }
+                break
+            case .Data:
                 self.dataFromCache(path, cacheName: cacheName) { data in
                     if let data = data {
                         completion(response: data, error: nil)
@@ -335,21 +354,7 @@ extension Networking {
                         }
                     }
                 }
-            } else {
-                self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, responseType: responseType) { data, error in
-                    if let error = error {
-                        completion(response: nil, error: error)
-                    } else if let data = data where data.length > 0 && responseType == .JSON {
-                        do {
-                            let JSON = try NSJSONSerialization.JSONObjectWithData(data, options: [])
-                            completion(response: JSON, error: error)
-                        } catch let JSONError as NSError {
-                            completion(response: nil, error: JSONError)
-                        }
-                    } else {
-                        completion(response: nil, error: nil)
-                    }
-                }
+                break
             }
         }
     }
