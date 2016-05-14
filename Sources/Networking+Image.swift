@@ -7,10 +7,10 @@ public extension Networking {
      - parameter cacheName: The cache name used to identify the downloaded image, by default the path is used.
      - parameter completion: A closure that returns the image from the cache, if no image is found it will return nil, it contains a image and a error.
      */
-    public func imageFromCache(path: String, cacheName: String? = nil, completion: (image: Image?) -> Void) {
+    public func imageFromCache(path: String, cacheName: String? = nil, completion: (image: NetworkingImage?) -> Void) {
         self.objectFromCache(path, cacheName: cacheName, responseType: .Image) { object in
             TestCheck.testBlock(disabled: self.disableTestingMode) {
-                completion(image: object as? Image)
+                completion(image: object as? NetworkingImage)
             }
         }
     }
@@ -21,10 +21,10 @@ public extension Networking {
      - parameter cacheName: The cache name used to identify the downloaded image, by default the path is used.
      - parameter completion: A closure that gets called when the image download request is completed, it contains a image and a error.
      */
-    public func downloadImage(path: String, cacheName: String? = nil, completion: (image: Image?, error: NSError?) -> Void) {
+    public func downloadImage(path: String, cacheName: String? = nil, completion: (image: NetworkingImage?, error: NSError?) -> Void) {
         self.request(.GET, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, responseType: .Image) { response, error in
             TestCheck.testBlock(disabled: self.disableTestingMode) {
-                completion(image: response as? Image, error: error)
+                completion(image: response as? NetworkingImage, error: error)
             }
         }
     }
@@ -43,7 +43,7 @@ public extension Networking {
      - parameter path: The path for the faked image download request.
      - parameter image: An image that will be returned when there's a request to the registered path.
      */
-    public func fakeImageDownload(path: String, image: Image?, statusCode: Int = 200) {
+    public func fakeImageDownload(path: String, image: NetworkingImage?, statusCode: Int = 200) {
         self.fake(.GET, path: path, response: image, statusCode: statusCode)
     }
 }

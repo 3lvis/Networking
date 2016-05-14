@@ -2,10 +2,10 @@ import Foundation
 
 #if os(OSX)
     import AppKit.NSImage
-    public typealias Image = NSImage
+    public typealias NetworkingImage = NSImage
 #else
     import UIKit.UIImage
-    public typealias Image = UIImage
+    public typealias NetworkingImage = UIImage
 #endif
 
 public extension Int {
@@ -284,7 +284,7 @@ extension Networking {
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0)) {
                 let object = self.dataForDestinationURL(destinationURL)
                 if responseType == .Image {
-                    returnedObject = Image(data: object)
+                    returnedObject = NetworkingImage(data: object)
                 } else {
                     returnedObject = object
                 }
@@ -390,7 +390,7 @@ extension Networking {
                                     returnedResponse = data
                                     break
                                 case .Image:
-                                    if let image = Image(data: data) {
+                                    if let image = NetworkingImage(data: data) {
                                         self.cache.setObject(image, forKey: destinationURL.absoluteString)
                                         returnedResponse = image
                                     }

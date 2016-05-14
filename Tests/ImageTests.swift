@@ -1,8 +1,8 @@
 import Foundation
 import XCTest
 
-extension Image {
-    static func find(named name: String, inBundle bundle: NSBundle) -> Image {
+extension NetworkingImage {
+    static func find(named name: String, inBundle bundle: NSBundle) -> NetworkingImage {
         #if os(OSX)
             return bundle.imageForResource(name)!
         #else
@@ -58,7 +58,7 @@ class ImageTests: XCTestCase {
         Helper.removeFileIfNeeded(networking, path: path)
 
         networking.downloadImage(path) { image, error in
-            let pigImage = Image.find(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self))
+            let pigImage = NetworkingImage.find(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self))
             let pigImageData = pigImage.PNGData()
             let imageData = image!.PNGData()
             XCTAssertEqual(pigImageData, imageData)
@@ -72,7 +72,7 @@ class ImageTests: XCTestCase {
         Helper.removeFileIfNeeded(networking, path: path)
 
         networking.downloadImage(path) { image, error in
-            let pigImage = Image.find(named: "døgnvillburgere.jpg", inBundle: NSBundle(forClass: ImageTests.self))
+            let pigImage = NetworkingImage.find(named: "døgnvillburgere.jpg", inBundle: NSBundle(forClass: ImageTests.self))
             let pigImageData = pigImage.PNGData()
             let imageData = image!.PNGData()
             XCTAssertEqual(pigImageData, imageData)
@@ -116,8 +116,8 @@ class ImageTests: XCTestCase {
 
         networking.downloadImage(path) { image, error in
             let destinationURL = try! networking.destinationURL(path)
-            let image = networking.cache.objectForKey(destinationURL.absoluteString) as! Image
-            let pigImage = Image.find(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self))
+            let image = networking.cache.objectForKey(destinationURL.absoluteString) as! NetworkingImage
+            let pigImage = NetworkingImage.find(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self))
             let pigImageData = pigImage.PNGData()
             let imageData = image.PNGData()
             XCTAssertEqual(pigImageData, imageData)
@@ -133,8 +133,8 @@ class ImageTests: XCTestCase {
 
         networking.downloadImage(path, cacheName: cacheName) { image, error in
             let destinationURL = try! networking.destinationURL(path, cacheName: cacheName)
-            let image = networking.cache.objectForKey(destinationURL.absoluteString) as! Image
-            let pigImage = Image.find(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self))
+            let image = networking.cache.objectForKey(destinationURL.absoluteString) as! NetworkingImage
+            let pigImage = NetworkingImage.find(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self))
             let pigImageData = pigImage.PNGData()
             let imageData = image.PNGData()
             XCTAssertEqual(pigImageData, imageData)
@@ -162,7 +162,7 @@ class ImageTests: XCTestCase {
 
     func testFakeImageDownload() {
         let networking = Networking(baseURL: baseURL)
-        let pigImage = Image.find(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self))
+        let pigImage = NetworkingImage.find(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self))
         networking.fakeImageDownload("/image/png", image: pigImage)
         networking.downloadImage("/image/png") { image, error in
             let pigImageData = pigImage.PNGData()
@@ -199,7 +199,7 @@ class ImageTests: XCTestCase {
         networking.downloadImage(path) { image, error in
             networking.imageFromCache(path) { image in
                 synchronous = true
-                let pigImage = Image.find(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self))
+                let pigImage = NetworkingImage.find(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self))
                 let pigImageData = pigImage.PNGData()
                 let imageData = image!.PNGData()
                 XCTAssertEqual(pigImageData, imageData)
@@ -218,7 +218,7 @@ class ImageTests: XCTestCase {
         networking.downloadImage(path, cacheName: cacheName) { _, _ in
             networking.imageFromCache(path, cacheName: cacheName) { image in
                 synchronous = true
-                let pigImage = Image.find(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self))
+                let pigImage = NetworkingImage.find(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self))
                 let pigImageData = pigImage.PNGData()
                 let imageData = image!.PNGData()
                 XCTAssertEqual(pigImageData, imageData)
@@ -239,7 +239,7 @@ class ImageTests: XCTestCase {
             cache.removeObjectForKey(destinationURL.absoluteString)
             networking.imageFromCache(path) { image in
                 synchronous = true
-                let pigImage = Image.find(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self))
+                let pigImage = NetworkingImage.find(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self))
                 let pigImageData = pigImage.PNGData()
                 let imageData = image!.PNGData()
                 XCTAssertEqual(pigImageData, imageData)
@@ -261,7 +261,7 @@ class ImageTests: XCTestCase {
             cache.removeObjectForKey(destinationURL.absoluteString)
             networking.imageFromCache(path, cacheName: cacheName) { image in
                 synchronous = true
-                let pigImage = Image.find(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self))
+                let pigImage = NetworkingImage.find(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self))
                 let pigImageData = pigImage.PNGData()
                 let imageData = image!.PNGData()
                 XCTAssertEqual(pigImageData, imageData)
