@@ -42,7 +42,7 @@ extension HTTPRequestTests {
         let networking = Networking(baseURL: baseURL)
         networking.GET("/invalidpath") { JSON, error in
             XCTAssertNil(JSON)
-            XCTAssertEqual(error?.code, 404)
+            XCTAssertEqual(error!.code, 404)
         }
     }
 
@@ -87,7 +87,7 @@ extension HTTPRequestTests {
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
         networking.GET("/get") { JSON, error in
-            let canceledCode = error?.code == -999
+            let canceledCode = error!.code == -999
             XCTAssertTrue(canceledCode)
 
             expectation.fulfill()
@@ -137,12 +137,11 @@ extension HTTPRequestTests {
 
     func testPOST() {
         let networking = Networking(baseURL: baseURL)
-        networking.POST("/post", parameters: ["username":"jameson", "password":"secret"]) { JSON, error in
+        networking.POST("/post", parameters: ["username" : "jameson", "password" : "secret"]) { JSON, error in
             let JSONResponse = (JSON as! [String : AnyObject])["json"] as! [String : String]
             XCTAssertEqual("jameson", JSONResponse["username"])
             XCTAssertEqual("secret", JSONResponse["password"])
-            XCTAssertNotNil(JSON!, "JSON not nil")
-            XCTAssertNil(error, "Error")
+            XCTAssertNil(error)
         }
     }
 
@@ -151,25 +150,23 @@ extension HTTPRequestTests {
         networking.POST("/post") { JSON, error in
             let JSONResponse = JSON as! [String : AnyObject]
             XCTAssertEqual("http://httpbin.org/post", JSONResponse["url"] as? String)
-            XCTAssertNotNil(JSON!, "JSON not nil")
-            XCTAssertNil(error, "Error")
+            XCTAssertNil(error)
         }
     }
 
     func testPOSTWithFormURLEncoded() {
         let networking = Networking(baseURL: baseURL)
-        networking.POST("/post", parameterType: .FormURLEncoded, parameters: ["custname":"jameson"]) { JSON, error in
+        networking.POST("/post", parameterType: .FormURLEncoded, parameters: ["custname" : "jameson"]) { JSON, error in
             let JSONResponse = (JSON as! [String : AnyObject])["form"] as! [String : String]
             XCTAssertEqual("jameson", JSONResponse["custname"])
-            XCTAssertNotNil(JSON!, "JSON not nil")
-            XCTAssertNil(error, "Error")
+            XCTAssertNil(error)
         }
     }
 
     func testPOSTWithIvalidPath() {
         let networking = Networking(baseURL: baseURL)
-        networking.POST("/posdddddt", parameters: ["username":"jameson", "password":"password"]) { JSON, error in
-            XCTAssertNotNil(error)
+        networking.POST("/posdddddt", parameters: ["username" : "jameson", "password" : "secret"]) { JSON, error in
+            XCTAssertEqual(error!.code, 404)
             XCTAssertNil(JSON)
         }
     }
@@ -179,7 +176,7 @@ extension HTTPRequestTests {
 
         networking.fakePOST("/story", response: [["name" : "Elvis"]])
 
-        networking.POST("/story", parameters: ["username":"jameson", "password":"password"]) { JSON, error in
+        networking.POST("/story", parameters: ["username" : "jameson", "password" : "secret"]) { JSON, error in
             let JSON = JSON as! [[String : String]]
             let value = JSON[0]["name"]
             XCTAssertEqual(value!, "Elvis")
@@ -214,8 +211,8 @@ extension HTTPRequestTests {
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
-        networking.POST("/post", parameters: ["username":"jameson", "password":"password"]) { JSON, error in
-            let canceledCode = error?.code == -999
+        networking.POST("/post", parameters: ["username" : "jameson", "password" : "secret"]) { JSON, error in
+            let canceledCode = error!.code == -999
             XCTAssertTrue(canceledCode)
 
             expectation.fulfill()
@@ -242,16 +239,18 @@ extension HTTPRequestTests {
 
     func testPUT() {
         let networking = Networking(baseURL: baseURL)
-        networking.PUT("/put", parameters: ["username":"jameson", "password":"password"]) { JSON, error in
-            XCTAssertNotNil(JSON!, "JSON not nil")
-            XCTAssertNil(error, "Error")
+        networking.PUT("/put", parameters: ["username" : "jameson", "password" : "secret"]) { JSON, error in
+            let JSONResponse = (JSON as! [String : AnyObject])["json"] as! [String : String]
+            XCTAssertEqual("jameson", JSONResponse["username"])
+            XCTAssertEqual("secret", JSONResponse["password"])
+            XCTAssertNil(error)
         }
     }
 
     func testPUTWithIvalidPath() {
         let networking = Networking(baseURL: baseURL)
-        networking.PUT("/posdddddt", parameters: ["username":"jameson", "password":"password"]) { JSON, error in
-            XCTAssertNotNil(error)
+        networking.PUT("/posdddddt", parameters: ["username" : "jameson", "password" : "secret"]) { JSON, error in
+            XCTAssertEqual(error!.code, 404)
             XCTAssertNil(JSON)
         }
     }
@@ -261,7 +260,7 @@ extension HTTPRequestTests {
 
         networking.fakePUT("/story", response: [["name" : "Elvis"]])
 
-        networking.PUT("/story", parameters: ["username":"jameson", "password":"password"]) { JSON, error in
+        networking.PUT("/story", parameters: ["username" : "jameson", "password" : "secret"]) { JSON, error in
             let JSON = JSON as! [[String : String]]
             let value = JSON[0]["name"]
             XCTAssertEqual(value!, "Elvis")
@@ -296,8 +295,8 @@ extension HTTPRequestTests {
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
-        networking.PUT("/put", parameters: ["username":"jameson", "password":"password"]) { JSON, error in
-            let canceledCode = error?.code == -999
+        networking.PUT("/put", parameters: ["username" : "jameson", "password" : "secret"]) { JSON, error in
+            let canceledCode = error!.code == -999
             XCTAssertTrue(canceledCode)
 
             expectation.fulfill()
@@ -335,7 +334,7 @@ extension HTTPRequestTests {
         let networking = Networking(baseURL: baseURL)
         networking.DELETE("/invalidpath") { JSON, error in
             XCTAssertNil(JSON)
-            XCTAssertNotNil(error)
+            XCTAssertEqual(error!.code, 404)
         }
     }
 
@@ -380,7 +379,7 @@ extension HTTPRequestTests {
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
         networking.DELETE("/delete") { JSON, error in
-            let canceledCode = error?.code == -999
+            let canceledCode = error!.code == -999
             XCTAssertTrue(canceledCode)
 
             expectation.fulfill()
