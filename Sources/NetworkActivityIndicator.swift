@@ -2,6 +2,8 @@
     import UIKit
 #endif
 
+import Foundation
+
 class NetworkActivityIndicator: NSObject {
 
     /**

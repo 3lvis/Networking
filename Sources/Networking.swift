@@ -1,7 +1,11 @@
 import Foundation
 
-#if os(iOS) || os(tvOS) || os(watchOS)
-    import UIKit
+#if os(OSX)
+    import AppKit.NSImage
+    public typealias Image = NSImage
+#else
+    import UIKit.UIImage
+    public typealias Image = UIImage
 #endif
 
 public extension Int {
@@ -280,9 +284,7 @@ extension Networking {
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0)) {
                 let object = self.dataForDestinationURL(destinationURL)
                 if responseType == .Image {
-                    #if os(iOS) || os(tvOS) || os(watchOS)
-                        returnedObject = UIImage(data: object)
-                    #endif
+                    returnedObject = Image(data: object)
                 } else {
                     returnedObject = object
                 }
@@ -388,12 +390,10 @@ extension Networking {
                                     returnedResponse = data
                                     break
                                 case .Image:
-                                    #if os(iOS) || os(tvOS) || os(watchOS)
-                                        if let image = UIImage(data: data) {
-                                            self.cache.setObject(image, forKey: destinationURL.absoluteString)
-                                            returnedResponse = image
-                                        }
-                                    #endif
+                                    if let image = Image(data: data) {
+                                        self.cache.setObject(image, forKey: destinationURL.absoluteString)
+                                        returnedResponse = image
+                                    }
                                     break
                                 default:
                                     fatalError("Response Type is different than Data and Image")
