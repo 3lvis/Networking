@@ -284,9 +284,7 @@ extension Networking {
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0)) {
                 let object = self.dataForDestinationURL(destinationURL)
                 if responseType == .Image {
-                    #if os(iOS) || os(tvOS) || os(watchOS)
-                        returnedObject = Image(data: object)
-                    #endif
+                    returnedObject = Image(data: object)
                 } else {
                     returnedObject = object
                 }
