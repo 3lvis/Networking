@@ -128,8 +128,7 @@ class NetworkingTests: XCTestCase {
         networking.downloadData(path) { data, error in
             synchronous = true
             XCTAssertTrue(NSThread.isMainThread())
-            XCTAssertNotNil(data)
-            XCTAssertTrue(data!.length == 8090, "Data size mismatch")
+            XCTAssertEqual(data!.length, 8090)
         }
         XCTAssertTrue(synchronous)
     }

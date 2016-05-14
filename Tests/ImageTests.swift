@@ -38,7 +38,6 @@ class ImageTests: XCTestCase {
         Helper.removeFileIfNeeded(networking, path: path)
 
         networking.downloadImage(path) { image, error in
-            XCTAssertNotNil(image)
             let pigImage = UIImage(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self), compatibleWithTraitCollection: nil)!
             let pigImageData = UIImagePNGRepresentation(pigImage)
             let imageData = UIImagePNGRepresentation(image!)
@@ -53,7 +52,6 @@ class ImageTests: XCTestCase {
         Helper.removeFileIfNeeded(networking, path: path)
 
         networking.downloadImage(path) { image, error in
-            XCTAssertNotNil(image)
             let pigImage = UIImage(named: "døgnvillburgere.jpg", inBundle: NSBundle(forClass: ImageTests.self), compatibleWithTraitCollection: nil)!
             let pigImageData = UIImagePNGRepresentation(pigImage)
             let imageData = UIImagePNGRepresentation(image!)
@@ -70,7 +68,8 @@ class ImageTests: XCTestCase {
         networking.downloadImage(path) { image, error in
             let destinationURL = networking.destinationURL(path)
             XCTAssertTrue(NSFileManager.defaultManager().fileExistsAtURL(destinationURL))
-            XCTAssertNotNil(NSFileManager.defaultManager().contentsAtPath(destinationURL.path!))
+            let data = NSFileManager.defaultManager().contentsAtPath(destinationURL.path!)
+            XCTAssertEqual(data?.length, 8090)
         }
     }
 
@@ -84,9 +83,11 @@ class ImageTests: XCTestCase {
         networking.downloadImage(path, cacheName: cacheName) { image, error in
             let destinationURL = networking.destinationURL(path, cacheName: cacheName)
             XCTAssertTrue(NSFileManager.defaultManager().fileExistsAtURL(destinationURL))
-            XCTAssertNotNil(NSFileManager.defaultManager().contentsAtPath(destinationURL.path!))
+            let data = NSFileManager.defaultManager().contentsAtPath(destinationURL.path!)
+            XCTAssertEqual(data?.length, 8090)
         }
     }
+
     func testDownloadedImageInCache() {
         let networking = Networking(baseURL: baseURL)
         let path = "/image/png"
@@ -95,7 +96,11 @@ class ImageTests: XCTestCase {
 
         networking.downloadImage(path) { image, error in
             let destinationURL = networking.destinationURL(path)
-            XCTAssertNotNil(networking.cache.objectForKey(destinationURL.absoluteString))
+            let image = networking.cache.objectForKey(destinationURL.absoluteString) as! UIImage
+            let pigImage = UIImage(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self), compatibleWithTraitCollection: nil)!
+            let pigImageData = UIImagePNGRepresentation(pigImage)
+            let imageData = UIImagePNGRepresentation(image)
+            XCTAssertEqual(pigImageData, imageData)
         }
     }
 
@@ -108,7 +113,11 @@ class ImageTests: XCTestCase {
 
         networking.downloadImage(path, cacheName: cacheName) { image, error in
             let destinationURL = networking.destinationURL(path, cacheName: cacheName)
-            XCTAssertNotNil(networking.cache.objectForKey(destinationURL.absoluteString))
+            let image = networking.cache.objectForKey(destinationURL.absoluteString) as! UIImage
+            let pigImage = UIImage(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self), compatibleWithTraitCollection: nil)!
+            let pigImageData = UIImagePNGRepresentation(pigImage)
+            let imageData = UIImagePNGRepresentation(image)
+            XCTAssertEqual(pigImageData, imageData)
         }
     }
 
@@ -136,7 +145,6 @@ class ImageTests: XCTestCase {
         let pigImage = UIImage(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self), compatibleWithTraitCollection: nil)!
         networking.fakeImageDownload("/image/png", image: pigImage)
         networking.downloadImage("/image/png") { image, error in
-            XCTAssertNotNil(image)
             let pigImageData = UIImagePNGRepresentation(pigImage)
             let imageData = UIImagePNGRepresentation(image!)
             XCTAssertEqual(pigImageData, imageData)
