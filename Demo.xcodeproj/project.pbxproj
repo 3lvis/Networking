@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		1413C1D61CBD1784000AF90F /* String+UTF8.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1413C1D51CBD1784000AF90F /* String+UTF8.swift */; };
-		1413F4581CE795DC00482096 /* OSXTesting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1413F4571CE795DC00482096 /* OSXTesting.swift */; };
 		1413F4661CE7963700482096 /* Dictionary+FormURLEncodedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1413F45E1CE7963700482096 /* Dictionary+FormURLEncodedTests.swift */; };
 		1413F4671CE7963700482096 /* Dictionary+FormURLEncodedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1413F45E1CE7963700482096 /* Dictionary+FormURLEncodedTests.swift */; };
 		1413F4681CE7963700482096 /* døgnvillburgere.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 1413F45F1CE7963700482096 /* døgnvillburgere.jpg */; };
@@ -86,8 +85,7 @@
 
 /* Begin PBXFileReference section */
 		1413C1D51CBD1784000AF90F /* String+UTF8.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+UTF8.swift"; sourceTree = "<group>"; };
-		1413F4551CE795DC00482096 /* OSXTesting.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OSXTesting.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		1413F4571CE795DC00482096 /* OSXTesting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSXTesting.swift; sourceTree = "<group>"; };
+		1413F4551CE795DC00482096 /* OSXTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OSXTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1413F4591CE795DC00482096 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1413F45E1CE7963700482096 /* Dictionary+FormURLEncodedTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Dictionary+FormURLEncodedTests.swift"; sourceTree = "<group>"; };
 		1413F45F1CE7963700482096 /* døgnvillburgere.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "døgnvillburgere.jpg"; sourceTree = "<group>"; };
@@ -167,13 +165,12 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		1413F4561CE795DC00482096 /* OSXTesting */ = {
+		1413F4561CE795DC00482096 /* OSXTests */ = {
 			isa = PBXGroup;
 			children = (
-				1413F4571CE795DC00482096 /* OSXTesting.swift */,
 				1413F4591CE795DC00482096 /* Info.plist */,
 			);
-			path = OSXTesting;
+			path = OSXTests;
 			sourceTree = "<group>";
 		};
 		1413F45D1CE7963700482096 /* Tests */ = {
@@ -198,7 +195,7 @@
 				14C136501AB7849300B7B07A /* Metadata */,
 				1413F45D1CE7963700482096 /* Tests */,
 				146D72AF1AB782920058798C /* iOSTests */,
-				1413F4561CE795DC00482096 /* OSXTesting */,
+				1413F4561CE795DC00482096 /* OSXTests */,
 				146D72941AB782920058798C /* Products */,
 				7C7551124581063F7B41A916 /* Frameworks */,
 			);
@@ -214,7 +211,7 @@
 				14638D121CC646F9002B9433 /* Networking.framework */,
 				14638D281CC64747002B9433 /* Networking.framework */,
 				14638D3E1CC647E4002B9433 /* Networking.framework */,
-				1413F4551CE795DC00482096 /* OSXTesting.xctest */,
+				1413F4551CE795DC00482096 /* OSXTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -311,9 +308,9 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		1413F4541CE795DC00482096 /* OSXTesting */ = {
+		1413F4541CE795DC00482096 /* OSXTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1413F45A1CE795DC00482096 /* Build configuration list for PBXNativeTarget "OSXTesting" */;
+			buildConfigurationList = 1413F45A1CE795DC00482096 /* Build configuration list for PBXNativeTarget "OSXTests" */;
 			buildPhases = (
 				1413F4511CE795DC00482096 /* Sources */,
 				1413F4521CE795DC00482096 /* Frameworks */,
@@ -323,9 +320,9 @@
 			);
 			dependencies = (
 			);
-			name = OSXTesting;
+			name = OSXTests;
 			productName = OSXTesting;
-			productReference = 1413F4551CE795DC00482096 /* OSXTesting.xctest */;
+			productReference = 1413F4551CE795DC00482096 /* OSXTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		14638CF91CC6459A002B9433 /* Networking-iOS */ = {
@@ -462,7 +459,7 @@
 			projectRoot = "";
 			targets = (
 				146D72AB1AB782920058798C /* iOSTests */,
-				1413F4541CE795DC00482096 /* OSXTesting */,
+				1413F4541CE795DC00482096 /* OSXTests */,
 				14638CF91CC6459A002B9433 /* Networking-iOS */,
 				14638D111CC646F9002B9433 /* Networking-watchOS */,
 				14638D271CC64747002B9433 /* Networking-tvOS */,
@@ -538,7 +535,6 @@
 				1413F47B1CE7969900482096 /* Networking+Image.swift in Sources */,
 				1413F46F1CE7963700482096 /* HTTPRequestTests.swift in Sources */,
 				1413F46D1CE7963700482096 /* Helpers.swift in Sources */,
-				1413F4581CE795DC00482096 /* OSXTesting.swift in Sources */,
 				1413F47D1CE7969F00482096 /* String+UTF8.swift in Sources */,
 				1413F47C1CE7969C00482096 /* NSFileManager+Helpers.swift in Sources */,
 				1413F4771CE7968E00482096 /* JSON.swift in Sources */,
@@ -641,10 +637,10 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_NO_COMMON_BLOCKS = YES;
-				INFOPLIST_FILE = OSXTesting/Info.plist;
+				INFOPLIST_FILE = OSXTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sample.3lvis.OSXTesting;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sample.3lvis.OSXTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -659,10 +655,10 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_NO_COMMON_BLOCKS = YES;
-				INFOPLIST_FILE = OSXTesting/Info.plist;
+				INFOPLIST_FILE = OSXTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sample.3lvis.OSXTesting;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sample.3lvis.OSXTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 			};
@@ -985,13 +981,14 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1413F45A1CE795DC00482096 /* Build configuration list for PBXNativeTarget "OSXTesting" */ = {
+		1413F45A1CE795DC00482096 /* Build configuration list for PBXNativeTarget "OSXTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1413F45B1CE795DC00482096 /* Debug */,
 				1413F45C1CE795DC00482096 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		14638D011CC6459A002B9433 /* Build configuration list for PBXNativeTarget "Networking-iOS" */ = {
 			isa = XCConfigurationList;

@@ -3,7 +3,9 @@ language: objective-c
 cache: cocoapods
 before_install: gem install xcpretty cocoapods obcd slather -N
 podfile: Podfile
-script: xcodebuild -project Demo.xcodeproj  -scheme Tests -sdk iphonesimulator build test -destination 'platform=iOS Simulator,name=iPhone 6' GCC_INSTRUMENT_PROGRAM_FLOW_ARCS=YES GCC_GENERATE_TEST_COVERAGE_FILES=YES clean test | xcpretty -c && exit ${PIPESTATUS[0]}
+script:
+  - xcodebuild -project Demo.xcodeproj -scheme iOSTests -sdk iphonesimulator build test -destination 'platform=iOS Simulator,name=iPhone 6' GCC_INSTRUMENT_PROGRAM_FLOW_ARCS=YES GCC_GENERATE_TEST_COVERAGE_FILES=YES clean test | xcpretty -c && exit ${PIPESTATUS[0]}
+  - xcodebuild -project Demo.xcodeproj -scheme OSXTests -sdk macosx build test GCC_INSTRUMENT_PROGRAM_FLOW_ARCS=YES GCC_GENERATE_TEST_COVERAGE_FILES=YES clean test | xcpretty -c && exit ${PIPESTATUS[0]}
 after_success: slather
 notifications:
   email: false
