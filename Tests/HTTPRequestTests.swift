@@ -1,13 +1,9 @@
 import Foundation
 import XCTest
 
-class HTTPRequestTests: XCTestCase {
+class HTTPGETRequestTests: XCTestCase {
     let baseURL = "http://httpbin.org"
-}
 
-// MARK: GET
-
-extension HTTPRequestTests {
     func testSynchronousGET() {
         var synchronous = false
         let networking = Networking(baseURL: baseURL)
@@ -122,9 +118,9 @@ extension HTTPRequestTests {
     }
 }
 
-// MARK: POST
+class HTTPPOSTRequestTests: XCTestCase {
+    let baseURL = "http://httpbin.org"
 
-extension HTTPRequestTests {
     func testSynchronousPOST() {
         var synchronous = false
         let networking = Networking(baseURL: baseURL)
@@ -224,9 +220,9 @@ extension HTTPRequestTests {
     }
 }
 
-// MARK: PUT
+class HTTPPUTRequestTests: XCTestCase {
+    let baseURL = "http://httpbin.org"
 
-extension HTTPRequestTests {
     func testSynchronousPUT() {
         var synchronous = false
         let networking = Networking(baseURL: baseURL)
@@ -308,9 +304,9 @@ extension HTTPRequestTests {
     }
 }
 
-// MARK: DELETE
+class HTTPDELETERequestTests: XCTestCase {
+    let baseURL = "http://httpbin.org"
 
-extension HTTPRequestTests {
     func testSynchronousDELETE() {
         var synchronous = false
         let networking = Networking(baseURL: baseURL)
