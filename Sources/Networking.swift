@@ -350,11 +350,13 @@ extension Networking {
                 self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, responseType: responseType) { data, error in
                     var returnedError = error
                     var returnedResponse: AnyObject?
-                    if let data = data where data.length > 0 {
-                        do {
-                            returnedResponse = try NSJSONSerialization.JSONObjectWithData(data, options: [])
-                        } catch let JSONError as NSError {
-                            returnedError = JSONError
+                    if error == nil {
+                        if let data = data where data.length > 0 {
+                            do {
+                                returnedResponse = try NSJSONSerialization.JSONObjectWithData(data, options: [])
+                            } catch let JSONError as NSError {
+                                returnedError = JSONError
+                            }
                         }
                     }
 
