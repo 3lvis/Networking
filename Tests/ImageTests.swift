@@ -66,7 +66,7 @@ class ImageTests: XCTestCase {
         Helper.removeFileIfNeeded(networking, path: path)
 
         networking.downloadImage(path) { image, error in
-            let destinationURL = networking.destinationURL(path)
+            let destinationURL = try! networking.destinationURL(path)
             XCTAssertTrue(NSFileManager.defaultManager().fileExistsAtURL(destinationURL))
             let data = NSFileManager.defaultManager().contentsAtPath(destinationURL.path!)
             XCTAssertEqual(data?.length, 8090)
@@ -81,7 +81,7 @@ class ImageTests: XCTestCase {
         Helper.removeFileIfNeeded(networking, path: path, cacheName: cacheName)
 
         networking.downloadImage(path, cacheName: cacheName) { image, error in
-            let destinationURL = networking.destinationURL(path, cacheName: cacheName)
+            let destinationURL = try! networking.destinationURL(path, cacheName: cacheName)
             XCTAssertTrue(NSFileManager.defaultManager().fileExistsAtURL(destinationURL))
             let data = NSFileManager.defaultManager().contentsAtPath(destinationURL.path!)
             XCTAssertEqual(data?.length, 8090)
@@ -95,7 +95,7 @@ class ImageTests: XCTestCase {
         Helper.removeFileIfNeeded(networking, path: path)
 
         networking.downloadImage(path) { image, error in
-            let destinationURL = networking.destinationURL(path)
+            let destinationURL = try! networking.destinationURL(path)
             let image = networking.cache.objectForKey(destinationURL.absoluteString) as! UIImage
             let pigImage = UIImage(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self), compatibleWithTraitCollection: nil)!
             let pigImageData = UIImagePNGRepresentation(pigImage)
@@ -112,7 +112,7 @@ class ImageTests: XCTestCase {
         Helper.removeFileIfNeeded(networking, path: path, cacheName: cacheName)
 
         networking.downloadImage(path, cacheName: cacheName) { image, error in
-            let destinationURL = networking.destinationURL(path, cacheName: cacheName)
+            let destinationURL = try! networking.destinationURL(path, cacheName: cacheName)
             let image = networking.cache.objectForKey(destinationURL.absoluteString) as! UIImage
             let pigImage = UIImage(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self), compatibleWithTraitCollection: nil)!
             let pigImageData = UIImagePNGRepresentation(pigImage)
@@ -215,7 +215,7 @@ class ImageTests: XCTestCase {
         let path = "/image/png"
         Helper.removeFileIfNeeded(networking, path: path)
         networking.downloadImage(path) { image, error in
-            let destinationURL = networking.destinationURL(path)
+            let destinationURL = try! networking.destinationURL(path)
             cache.removeObjectForKey(destinationURL.absoluteString)
             networking.imageFromCache(path) { image in
                 synchronous = true
@@ -237,7 +237,7 @@ class ImageTests: XCTestCase {
         let cacheName = "hello"
         Helper.removeFileIfNeeded(networking, path: path, cacheName: cacheName)
         networking.downloadImage(path, cacheName: cacheName) { image, error in
-            let destinationURL = networking.destinationURL(path, cacheName: cacheName)
+            let destinationURL = try! networking.destinationURL(path, cacheName: cacheName)
             cache.removeObjectForKey(destinationURL.absoluteString)
             networking.imageFromCache(path, cacheName: cacheName) { image in
                 synchronous = true
@@ -258,7 +258,7 @@ class ImageTests: XCTestCase {
         let path = "/image/png"
         Helper.removeFileIfNeeded(networking, path: path)
         networking.downloadImage(path) { image, error in
-            let destinationURL = networking.destinationURL(path)
+            let destinationURL = try! networking.destinationURL(path)
             cache.removeObjectForKey(destinationURL.absoluteString)
             Helper.removeFileIfNeeded(networking, path: path)
             networking.imageFromCache(path) { image in

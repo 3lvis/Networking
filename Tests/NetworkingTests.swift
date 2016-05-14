@@ -45,7 +45,7 @@ class NetworkingTests: XCTestCase {
     func testDestinationURL() {
         let networking = Networking(baseURL: baseURL)
         let path = "/image/png"
-        let destinationURL = networking.destinationURL(path)
+        let destinationURL = try! networking.destinationURL(path)
         XCTAssertEqual(destinationURL.lastPathComponent!, "http:--httpbin.org-image-png")
     }
 
@@ -53,7 +53,7 @@ class NetworkingTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         let path = "/image/png"
         let cacheName = "png/png"
-        let destinationURL = networking.destinationURL(path, cacheName: cacheName)
+        let destinationURL = try! networking.destinationURL(path, cacheName: cacheName)
         XCTAssertEqual(destinationURL.lastPathComponent!, "png-png")
     }
 
