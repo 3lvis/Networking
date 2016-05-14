@@ -183,7 +183,7 @@ public class Networking {
         #if os(tvOS)
             let directory = NSSearchPathDirectory.CachesDirectory
         #else
-            let directory = NSSearchPathDirectory.DocumentDirectory
+            let directory = TestCheck.isTesting ? NSSearchPathDirectory.CachesDirectory : NSSearchPathDirectory.DocumentDirectory
         #endif
         let finalPath = cacheName ?? self.urlForPath(path).absoluteString
         let replacedPath = finalPath.stringByReplacingOccurrencesOfString("/", withString: "-")
