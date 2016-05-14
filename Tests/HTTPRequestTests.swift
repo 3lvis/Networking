@@ -42,7 +42,7 @@ extension HTTPRequestTests {
         let networking = Networking(baseURL: baseURL)
         networking.GET("/invalidpath") { JSON, error in
             XCTAssertNil(JSON)
-            XCTAssertNotNil(error)
+            XCTAssertEqual(error?.code, 404)
         }
     }
 
