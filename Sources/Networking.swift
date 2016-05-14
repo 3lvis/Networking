@@ -179,22 +179,27 @@ public class Networking {
      - parameter path: The path used to download the resource.
      - returns: A NSURL where a resource has been stored.
      */
-    public func destinationURL(path: String, cacheName: String? = nil) -> NSURL {
-        if let cacheName = cacheName {
-            let replacedPath = cacheName.stringByReplacingOccurrencesOfString("/", withString: "-")
-            guard let url = NSURL(string: replacedPath) else { fatalError("Couldn't create a destination url using cacheName: \(replacedPath)") }
-            guard let cachesURL = NSFileManager.defaultManager().URLsForDirectory(.CachesDirectory, inDomains: .UserDomainMask).first else { fatalError("Couldn't normalize url") }
-            let destinationURL = cachesURL.URLByAppendingPathComponent(url.absoluteString)
+    public func destinationURL(path: String, cacheName: String? = nil) throws -> NSURL {
+        #if os(tvOS)
+            let directory = NSSearchPathDirectory.CachesDirectory
+        #else
+            let directory = NSSearchPathDirectory.DocumentDirectory
+        #endif
+        let finalPath = cacheName ?? self.urlForPath(path).absoluteString
+        let replacedPath = finalPath.stringByReplacingOccurrencesOfString("/", withString: "-")
+        if let url = NSURL(string: replacedPath) {
+            if let cachesURL = NSFileManager.defaultManager().URLsForDirectory(directory, inDomains: .UserDomainMask).first {
+                #if !os(tvOS)
+                try cachesURL.setResourceValue(true, forKey: NSURLIsExcludedFromBackupKey)
+                #endif
+                let destinationURL = cachesURL.URLByAppendingPathComponent(url.absoluteString)
 
-            return destinationURL
+                return destinationURL
+            } else {
+                throw NSError(domain: Networking.ErrorDomain, code: 9999, userInfo: [NSLocalizedDescriptionKey : "Couldn't normalize url"])
+            }
         } else {
-            let finalPath = self.urlForPath(path).absoluteString
-            let replacedPath = finalPath.stringByReplacingOccurrencesOfString("/", withString: "-")
-            guard let url = NSURL(string: replacedPath) else { fatalError("Couldn't create a url using replacedPath: \(replacedPath)") }
-            guard let cachesURL = NSFileManager.defaultManager().URLsForDirectory(.CachesDirectory, inDomains: .UserDomainMask).first else { fatalError("Couldn't normalize url") }
-            let destinationURL = cachesURL.URLByAppendingPathComponent(url.absoluteString)
-
-            return destinationURL
+            throw NSError(domain: Networking.ErrorDomain, code: 9999, userInfo: [NSLocalizedDescriptionKey : "Couldn't create a url using replacedPath: \(replacedPath)"])
         }
     }
 
@@ -264,7 +269,7 @@ public class Networking {
 
 extension Networking {
     func objectFromCache(path: String, cacheName: String? = nil, responseType: ResponseType, completion: (object: AnyObject?) -> Void) {
-        let destinationURL = self.destinationURL(path, cacheName: cacheName)
+        let destinationURL = try! self.destinationURL(path, cacheName: cacheName)
 
         if let object = self.cache.objectForKey(destinationURL.absoluteString) {
             completion(object: object)
@@ -375,7 +380,7 @@ extension Networking {
                         self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, responseType: responseType) { data, error in
                             var returnedResponse: AnyObject?
                             if let data = data where data.length > 0 {
-                                let destinationURL = self.destinationURL(path, cacheName: cacheName)
+                                let destinationURL = try! self.destinationURL(path, cacheName: cacheName)
                                 data.writeToURL(destinationURL, atomically: true)
                                 switch responseType {
                                 case .Data:
