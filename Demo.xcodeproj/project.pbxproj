@@ -76,7 +76,7 @@
 		14638D281CC64747002B9433 /* Networking.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Networking.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		14638D3E1CC647E4002B9433 /* Networking.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Networking.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		14676B951CCB490C00FFDC92 /* NSFileManager+Helpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSFileManager+Helpers.swift"; sourceTree = "<group>"; };
-		146D72AC1AB782920058798C /* Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		146D72AC1AB782920058798C /* iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		146D72B11AB782920058798C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1470324B1CE5323000CF59B6 /* Helpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 		1474C1BC1CA2988900E15D84 /* Dictionary+FormURLEncoded.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Dictionary+FormURLEncoded.swift"; sourceTree = "<group>"; };
@@ -144,7 +144,7 @@
 			children = (
 				1474C1BB1CA2988900E15D84 /* Sources */,
 				14C136501AB7849300B7B07A /* Metadata */,
-				146D72AF1AB782920058798C /* Tests */,
+				146D72AF1AB782920058798C /* iOSTests */,
 				146D72941AB782920058798C /* Products */,
 				7C7551124581063F7B41A916 /* Frameworks */,
 			);
@@ -155,7 +155,7 @@
 		146D72941AB782920058798C /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				146D72AC1AB782920058798C /* Tests.xctest */,
+				146D72AC1AB782920058798C /* iOSTests.xctest */,
 				14638CFA1CC6459A002B9433 /* Networking.framework */,
 				14638D121CC646F9002B9433 /* Networking.framework */,
 				14638D281CC64747002B9433 /* Networking.framework */,
@@ -164,7 +164,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		146D72AF1AB782920058798C /* Tests */ = {
+		146D72AF1AB782920058798C /* iOSTests */ = {
 			isa = PBXGroup;
 			children = (
 				1413C1D31CBD15F6000AF90F /* døgnvillburgere.jpg */,
@@ -178,7 +178,7 @@
 				146D72B01AB782920058798C /* Supporting Files */,
 				1470324B1CE5323000CF59B6 /* Helpers.swift */,
 			);
-			path = Tests;
+			path = iOSTests;
 			sourceTree = "<group>";
 		};
 		146D72B01AB782920058798C /* Supporting Files */ = {
@@ -336,9 +336,9 @@
 			productReference = 14638D3E1CC647E4002B9433 /* Networking.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		146D72AB1AB782920058798C /* Tests */ = {
+		146D72AB1AB782920058798C /* iOSTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 146D72B91AB782920058798C /* Build configuration list for PBXNativeTarget "Tests" */;
+			buildConfigurationList = 146D72B91AB782920058798C /* Build configuration list for PBXNativeTarget "iOSTests" */;
 			buildPhases = (
 				146D72A81AB782920058798C /* Sources */,
 				146D72A91AB782920058798C /* Frameworks */,
@@ -348,9 +348,9 @@
 			);
 			dependencies = (
 			);
-			name = Tests;
+			name = iOSTests;
 			productName = PodTests;
-			productReference = 146D72AC1AB782920058798C /* Tests.xctest */;
+			productReference = 146D72AC1AB782920058798C /* iOSTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
@@ -394,7 +394,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				146D72AB1AB782920058798C /* Tests */,
+				146D72AB1AB782920058798C /* iOSTests */,
 				14638CF91CC6459A002B9433 /* Networking-iOS */,
 				14638D111CC646F9002B9433 /* Networking-watchOS */,
 				14638D271CC64747002B9433 /* Networking-tvOS */,
@@ -827,7 +827,7 @@
 					"DEBUG=1",
 					"$(inherited)",
 				);
-				INFOPLIST_FILE = Tests/Info.plist;
+				INFOPLIST_FILE = iOSTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.sample.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -840,7 +840,7 @@
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
 				FRAMEWORK_SEARCH_PATHS = "";
-				INFOPLIST_FILE = Tests/Info.plist;
+				INFOPLIST_FILE = iOSTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.sample.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -895,7 +895,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		146D72B91AB782920058798C /* Build configuration list for PBXNativeTarget "Tests" */ = {
+		146D72B91AB782920058798C /* Build configuration list for PBXNativeTarget "iOSTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				146D72BA1AB782920058798C /* Debug */,
