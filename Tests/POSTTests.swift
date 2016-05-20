@@ -42,6 +42,19 @@ class POSTTests: XCTestCase {
         }
     }
 
+    func testPOSTWithFormData() {
+        let networking = Networking(baseURL: baseURL)
+
+        let pigImage = NetworkingImage.find(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self))
+        let pigImageData = pigImage.PNGData()!
+        let formData = FormData(data: pigImageData, parameter: "avatar", filename: "avatar.png", type: .PNG)
+        networking.POST("/post", formData: formData) { JSON, error in
+            let JSONResponse = JSON as! [String : AnyObject]
+            XCTAssertEqual("http://httpbin.org/post", JSONResponse["url"] as? String)
+            XCTAssertNil(error)
+        }
+    }
+
     func testPOSTWithIvalidPath() {
         let networking = Networking(baseURL: baseURL)
         networking.POST("/posdddddt", parameters: ["username" : "jameson", "password" : "secret"]) { JSON, error in
