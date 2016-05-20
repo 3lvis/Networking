@@ -121,7 +121,7 @@ networking.GET("/stories") { JSON, error in
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-networking.POST("/post", params: ["username" : "jameson", "password" : "secret"]) { JSON, error in
+networking.POST("/post", parameters: ["username" : "jameson", "password" : "secret"]) { JSON, error in
     /*
     JSON Pretty Print:
     {
