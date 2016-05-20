@@ -54,6 +54,16 @@ public extension Networking {
     }
 
     /**
+     POST request to the specified path, using the provided parameters.
+     - parameter path: The path for the POST request.
+     - parameter formData: The list of form data parts that will be sent in the request.
+     - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and a `NSError`.
+     */
+    public func POST(path: String, formData: [FormData], completion: (JSON: AnyObject?, error: NSError?) -> ()) {
+        self.request(.POST, path: path, parameterType: .FormData, parameters: formData as? AnyObject, responseType: .JSON, completion: completion)
+    }
+
+    /**
      Registers a fake POST request for the specified path. After registering this, every POST request to the path, will return the registered response.
      - parameter path: The path for the faked POST request.
      - parameter response: An `AnyObject` that will be returned when a POST request is made to the specified path.

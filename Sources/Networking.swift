@@ -65,6 +65,7 @@ public class Networking {
     public enum ParameterType {
         case JSON
         case FormURLEncoded
+        case FormData
         case Custom(String)
 
         var contentType: String {
@@ -73,6 +74,8 @@ public class Networking {
                 return "application/json"
             case .FormURLEncoded:
                 return "application/x-www-form-urlencoded"
+            case .FormData:
+                return "multipart/form-data"
             case .Custom(let value):
                 return value
             }
@@ -447,6 +450,8 @@ extension Networking {
                 guard let parametersDictionary = parameters as? [String : AnyObject] else { fatalError("Couldn't cast parameters as dictionary: \(parameters)") }
                 let formattedParameters = parametersDictionary.formURLEncodedFormat()
                 request.HTTPBody = formattedParameters.dataUsingEncoding(NSUTF8StringEncoding)
+                break
+            case .FormData:
                 break
             case .Custom(_):
                 request.HTTPBody = parameters as? NSData
