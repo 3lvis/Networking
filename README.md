@@ -13,6 +13,7 @@
 - No external dependencies
 - Optimized for unit testing
 - Minimal implementation
+- Simple request cancellation
 - Fake requests easily (mocking/stubbing)
 - Runs synchronously in automatic testing environments
 - Image downloading and caching
@@ -27,8 +28,8 @@
     * [Custom authentication header](#custom-authentication-header)
 * [Making a request](#making-a-request)
 * [Choosing a content type](#choosing-a-content-type)
-* [Faking a request](#faking-a-request)
 * [Cancelling a request](#cancelling-a-request)
+* [Faking a request](#faking-a-request)
 * [Downloading and caching an image](#downloading-and-caching-an-image)
 * [Logging errors](#logging-errors)
 * [Updating the Network Activity Indicator](#updating-the-network-activity-indicator)
@@ -176,6 +177,19 @@ networking.POST("/upload", parameterType: .Custom("application/octet-stream"), p
 }
 ```
 
+## Cancelling a request
+
+Cancelling any request for a specific path is really simple. Beware that cancelling a request will cause the request to return with an error with status code -999.
+
+```swift
+let networking = Networking(baseURL: "http://httpbin.org")
+networking.GET("/get") { JSON, error in
+    // Cancelling a GET request returns an error with code -999 which means cancelled request
+}
+
+networking.cancelGET("/get")
+```
+
 ## Faking a request
 
 Faking a request means that after calling this method on a specific path, any call to this resource, will return what you registered as a response. This technique is also known as mocking or stubbing.
@@ -214,19 +228,6 @@ networking.GET("/stories") { JSON, error in
 }
 ```
 
-## Cancelling a request
-
-Cancelling any request for a specific path is really simple. Beware that cancelling a request will cause the request to return with an error with status code -999.
-
-```swift
-let networking = Networking(baseURL: "http://httpbin.org")
-networking.GET("/get") { JSON, error in
-    // Cancelling a GET request returns an error with code -999 which means cancelled request
-}
-
-networking.cancelGET("/get")
-```
-
 ## Downloading and caching an image
 
 **Downloading**:
@@ -235,17 +236,6 @@ networking.cancelGET("/get")
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.downloadImage("/image/png") { image, error in
    // Do something with the downloaded image
-}
-```
-
-**Faking**:
-
-```swift
-let networking = Networking(baseURL: baseURL)
-let pigImage = UIImage(named: "pig.png")!
-networking.fakeImageDownload("/image/png", image: pigImage)
-networking.downloadImage("/image/png") { image, error in
-   // Here you'll get the provided pig.png image
 }
 ```
 
@@ -281,6 +271,17 @@ let networking = Networking(baseURL: "http://httpbin.org")
 let destinationURL = try networking.destinationURL("/image/png")
 if let path = destinationURL.path where NSFileManager.defaultManager().fileExistsAtPath(path) {
    try! NSFileManager.defaultManager().removeItemAtPath(path)
+}
+```
+
+**Faking**:
+
+```swift
+let networking = Networking(baseURL: baseURL)
+let pigImage = UIImage(named: "pig.png")!
+networking.fakeImageDownload("/image/png", image: pigImage)
+networking.downloadImage("/image/png") { image, error in
+   // Here you'll get the provided pig.png image
 }
 ```
 
