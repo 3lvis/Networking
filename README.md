@@ -16,7 +16,7 @@
 - Fake requests easily (mocking/stubbing)
 - Runs synchronously in automatic testing environments
 - Image downloading and caching
-- Opensource and free
+- Free
 
 ## Table of Contents
 
