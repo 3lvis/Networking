@@ -164,6 +164,8 @@ networking.POST("/post", parameterType: .FormURLEncoded, parameters: ["name" : "
 }
 ```
 
+**Multipart (coming in the next minor release)**
+
 At the moment **Networking** supports three types of `ParameterType`s out of the box: `JSON`, `FormURLEncoded` and `Custom`. Meanwhile `JSON` and `FormURLEncoded` serialize your parameters in some way, `Custom(String)` sends your parameters as plain `NSData` and sets the value inside `Custom` as the `Content-Type`.
 
 For example:
