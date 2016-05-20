@@ -262,7 +262,17 @@ networking.cancelImageDownload("/image/png")
 
 **Caching**:
 
-**Networking** stores the downloaded image in the Caches folder. It also uses NSCache internally so it doesn't have to download the same image again and again.
+**Networking** uses a multi-cache architecture when downloading images, the first time the `downloadImage` method is called for a specific path, it will store the results in disk (Documents folder) and in memory (NSCache), so in the next call it will return the cached results without hitting the network.
+
+```swift
+let networking = Networking(baseURL: "http://httpbin.org")
+networking.downloadImage("/image/png") { image, error in
+   // Image from network
+   networking.downloadImage("/image/png") { image, error in
+       // Image from cache
+   }
+}
+```
 
 If you want to remove the downloaded image you can do it like this:
 
@@ -271,23 +281,6 @@ let networking = Networking(baseURL: "http://httpbin.org")
 let destinationURL = try networking.destinationURL("/image/png")
 if let path = destinationURL.path where NSFileManager.defaultManager().fileExistsAtPath(path) {
    try! NSFileManager.defaultManager().removeItemAtPath(path)
-}
-```
-
-**Retrieving cached image**:
-
-First download an image like you normally do:
-```swift
-let networking = Networking(baseURL: baseURL)
-networking.downloadImage("/image/png") { image, error in
-    // Downloaded image
-}
-```
-
-Then you would be able to retrieve the image from the cache at any time!
-```swift
-networking.imageFromCache("/image/png") { image in
-    // Image from cache, you will get `nil` if no image is found
 }
 ```
 
