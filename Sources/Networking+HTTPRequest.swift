@@ -56,11 +56,21 @@ public extension Networking {
     /**
      POST request to the specified path, using the provided parameters.
      - parameter path: The path for the POST request.
-     - parameter formData: The list of form data parts that will be sent in the request.
+     - parameter formData: The form data that will be sent in the request.
      - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and a `NSError`.
      */
-    public func POST(path: String, formData: [FormData], completion: (JSON: AnyObject?, error: NSError?) -> ()) {
-        self.request(.POST, path: path, parameterType: .FormData, parameters: formData as? AnyObject, responseType: .JSON, completion: completion)
+    public func POST(path: String, formData: FormData, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
+        self.POST(path, formDatas: [formData], completion: completion)
+    }
+
+    /**
+     POST request to the specified path, using the provided parameters.
+     - parameter path: The path for the POST request.
+     - parameter formDatas: The list of form data parts that will be sent in the request.
+     - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and a `NSError`.
+     */
+    public func POST(path: String, formDatas: [FormData], completion: (JSON: AnyObject?, error: NSError?) -> ()) {
+        self.request(.POST, path: path, parameterType: .FormData, parameters: formDatas as? AnyObject, responseType: .JSON, completion: completion)
     }
 
     /**
