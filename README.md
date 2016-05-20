@@ -6,7 +6,7 @@
 ![platforms](https://img.shields.io/badge/platforms-iOS%20%7C%20OS%20X%20%7C%20watchOS%20%7C%20tvOS%20-lightgrey.svg)
 [![License](https://img.shields.io/cocoapods/l/Networking.svg?style=flat)](https://cocoapods.org/pods/Networking)
 
-**Networking** was born out of the necesity of having a simple networking library that didn't had crazy programming abstractions or used the latest reactive programming techniques, just a plain, simple and convenient wrapper around `NSURLSession` that supported common needs such as faking requests and caching images out of the box. A library that was small enough to read in one go but useful enough to include in any project. That's how **Networking** was born, a fully tested library that even your grandma would love.
+**Networking** was born out of the necessity of having a simple networking library that doesn't have crazy programming abstractions or uses the latest reactive programming techniques, but just a plain, simple and convenient wrapper around `NSURLSession` that supports common needs such as faking requests and caching images out of the box. A library that is small enough to read in one go but useful enough to include in any project. That's how **Networking** was born, a fully tested library that even your grandma would love.
 
 - Super friendly API
 - Singleton free
@@ -16,7 +16,7 @@
 - Fake requests easily (mocking/stubbing)
 - Runs synchronously in automatic testing environments
 - Image downloading and caching
-- Free
+- Opensource and free
 
 ## Table of Contents
 
@@ -53,7 +53,7 @@ When your app invalidates the session, all ephemeral session data is purged auto
 
  - `Background`: This configuration type is suitable for transferring data files while the app runs in the background. A session configured with this object hands control of the transfers over to the system, which handles the transfers in a separate process. In iOS, this configuration makes it possible for transfers to continue even when the app itself is suspended or terminated.
 
-If an iOS app is terminated by the system and relaunched, it retrieves the status of transfers that were in progress at the time of termination. This behavior applies only for normal termination of the app by the system. If the user terminates the app from the multitasking screen, the system cancels all of the session’s background transfers. In addition, the system does not automatically relaunch apps that were force quit by the user. The user must explicitly relaunch the app before transfers can begin again.
+If an iOS app is terminated by the system and relaunched, it retrieves the status of transfers that were in progress at the time of termination. This behavior applies only for normal termination of the app by the system. If the user terminates the app from the multitasking screen, the system cancels all of the session’s background transfers. In addition, the system does not automatically relaunch apps that were forced to quit by the user. The user must explicitly relaunch the app before transfers can start over.
 
 ```swift
 // Default
@@ -260,7 +260,7 @@ networking.cancelImageDownload("/image/png")
 
 **Caching**:
 
-**Networking** stores the download image in the Caches folder. It also uses NSCache internally so it doesn't have to download the same image again and again.
+**Networking** stores the downloaded image in the Caches folder. It also uses NSCache internally so it doesn't have to download the same image again and again.
 
 If you want to remove the downloaded image you can do it like this:
 
@@ -272,7 +272,7 @@ if let path = destinationURL.path where NSFileManager.defaultManager().fileExist
 }
 ```
 
-**Retreiving cached image**:
+**Retrieving cached image**:
 
 First download an image like you normally do:
 ```swift
