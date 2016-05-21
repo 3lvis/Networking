@@ -36,4 +36,11 @@ public struct File {
 
         return bodyData
     }
+
+    public init(data: NSData, parameterName: String, filename: String, type: FileType) {
+        self.data = data
+        self.parameterName = parameterName
+        self.filename = filename
+        self.type = type
+    }
 }
