@@ -32,6 +32,7 @@ public extension Int {
 
 public class Networking {
     static let ErrorDomain = "NetworkingErrorDomain"
+    static let Boundary = "---011000010111000001101001"
 
     struct FakeRequest {
         let response: AnyObject?
@@ -75,7 +76,7 @@ public class Networking {
             case .FormURLEncoded:
                 return "application/x-www-form-urlencoded"
             case .FormData:
-                return "multipart/form-data"
+                return "multipart/form-data; boundary=\(Networking.Boundary)"
             case .Custom(let value):
                 return value
             }
