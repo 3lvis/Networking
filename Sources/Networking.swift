@@ -448,11 +448,12 @@ extension Networking {
                 }
                 break
             case .FormURLEncoded:
-                guard let parametersDictionary = parameters as? [String : AnyObject] else { fatalError("Couldn't cast parameters as dictionary: \(parameters)") }
+                guard let parametersDictionary = parameters as? [String : AnyObject] else { fatalError("Couldn't convert parameters to a dictionary: \(parameters)") }
                 let formattedParameters = parametersDictionary.formURLEncodedFormat()
                 request.HTTPBody = formattedParameters.dataUsingEncoding(NSUTF8StringEncoding)
                 break
             case .FormData:
+                request.HTTPBody = parameters as? NSData
                 break
             case .Custom(_):
                 request.HTTPBody = parameters as? NSData

@@ -75,7 +75,24 @@ public extension Networking {
      - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and a `NSError`.
      */
     public func POST(path: String, files: [File], parameters: AnyObject? = nil, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
-        self.request(.POST, path: path, parameterType: .FormData, parameters: files as? AnyObject, responseType: .JSON, completion: completion)
+        let bodyData = NSMutableData()
+        bodyData.appendData(Networking.Boundary.dataUsingEncoding(NSUTF8StringEncoding)!)
+        for file in files {
+            bodyData.appendData(file.formData)
+        }
+
+        if let parameters = parameters {
+            guard let parametersDictionary = parameters as? [String : String] else { fatalError("Couldn't cast parameters as dictionary: \(parameters)") }
+            for (value, key) in parametersDictionary {
+                var body = ""
+                body += "--\(Networking.Boundary)\r\n"
+                body += "Content-Disposition: form-data; name=\"\(key)\""
+                body += "\r\n\r\n\(value)"
+                bodyData.appendData(body.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)!)
+            }
+        }
+
+        self.request(.POST, path: path, parameterType: .FormData, parameters: bodyData, responseType: .JSON, completion: completion)
     }
 
     /**
