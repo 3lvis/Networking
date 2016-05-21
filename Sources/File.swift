@@ -1,6 +1,6 @@
 import Foundation
 
-public enum FormDataType {
+public enum FileType {
     case PNG
     case JPG
     case Custom(String)
@@ -17,9 +17,9 @@ public enum FormDataType {
     }
 }
 
-public struct FormData {
+public struct File {
     let data: NSData
     let parameter: String
     let filename: String
-    let type: FormDataType
+    let type: FileType
 }

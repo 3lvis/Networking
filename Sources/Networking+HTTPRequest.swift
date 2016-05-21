@@ -46,7 +46,8 @@ public extension Networking {
     /**
     POST request to the specified path, using the provided parameters.
     - parameter path: The path for the POST request.
-    - parameter parameters: The parameters to be used, they will be serialized using NSJSONSerialization.
+    - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by 
+     default this is JSON.
     - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and a `NSError`.
     */
     public func POST(path: String, parameterType: ParameterType = .JSON, parameters: AnyObject? = nil, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
@@ -56,21 +57,25 @@ public extension Networking {
     /**
      POST request to the specified path, using the provided parameters.
      - parameter path: The path for the POST request.
-     - parameter formData: The form data that will be sent in the request.
+     - parameter file: The form data that will be sent in the request.
+     - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by
+     default this is JSON.
      - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and a `NSError`.
      */
-    public func POST(path: String, formData: FormData, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
-        self.POST(path, formDatas: [formData], completion: completion)
+    public func POST(path: String, file: File, parameters: AnyObject? = nil, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
+        self.POST(path, files: [file], parameters: parameters, completion: completion)
     }
 
     /**
      POST request to the specified path, using the provided parameters.
      - parameter path: The path for the POST request.
-     - parameter formDatas: The list of form data parts that will be sent in the request.
+     - parameter files: The list of form data parts that will be sent in the request.
+     - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by
+     default this is JSON.
      - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and a `NSError`.
      */
-    public func POST(path: String, formDatas: [FormData], completion: (JSON: AnyObject?, error: NSError?) -> ()) {
-        self.request(.POST, path: path, parameterType: .FormData, parameters: formDatas as? AnyObject, responseType: .JSON, completion: completion)
+    public func POST(path: String, files: [File], parameters: AnyObject? = nil, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
+        self.request(.POST, path: path, parameterType: .FormData, parameters: files as? AnyObject, responseType: .JSON, completion: completion)
     }
 
     /**
@@ -108,7 +113,8 @@ public extension Networking {
     /**
     PUT request to the specified path, using the provided parameters.
     - parameter path: The path for the PUT request.
-    - parameter parameters: The parameters to be used, they will be serialized using NSJSONSerialization.
+     - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by
+     default this is JSON.
     - parameter completion: A closure that gets called when the PUT request is completed, it contains a `JSON` object and a `NSError`.
     */
     public func PUT(path: String, parameterType: ParameterType = .JSON, parameters: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
