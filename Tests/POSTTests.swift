@@ -47,7 +47,7 @@ class POSTTests: XCTestCase {
 
         let pigImage = NetworkingImage.find(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self))
         let pigImageData = pigImage.PNGData()!
-        let file = File(data: pigImageData, parameter: "avatar", filename: "avatar.png", type: .PNG)
+        let file = File(data: pigImageData, parameterName: "avatar", filename: "avatar.png", type: .PNG)
         networking.POST("/post", file: file) { JSON, error in
             let JSONResponse = JSON as! [String : AnyObject]
             XCTAssertEqual("http://httpbin.org/post", JSONResponse["url"] as? String)

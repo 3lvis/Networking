@@ -19,14 +19,14 @@ public enum FileType {
 
 public struct File {
     let data: NSData
-    let parameter: String
+    let parameterName: String
     let filename: String
     let type: FileType
 
     var formData: NSData {
         var body = ""
         body += "--\(Networking.Boundary)\r\n"
-        body += "Content-Disposition: form-data; name=\"\(self.parameter)\""
+        body += "Content-Disposition: form-data; name=\"\(self.parameterName)\""
         body += "; filename=\"\(self.filename)\"\r\n"
         body += "Content-Type: \(self.type.contentType)\r\n\r\n"
 
@@ -34,6 +34,6 @@ public struct File {
         bodyData.appendData(body.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)!)
         bodyData.appendData(self.data)
 
-        return bodyData.copy() as! NSData
+        return bodyData
     }
 }
