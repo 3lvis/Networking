@@ -110,7 +110,7 @@ public class Networking {
     private let baseURL: String
     var fakeRequests = [RequestType : [String : FakeRequest]]()
     var token: String?
-    var customAuthorizationHeader: String?
+    var customAuthorizationHeader: (fieldName: String, fieldValue: String)?
     var cache: NSCache
     var configurationType: ConfigurationType
 
@@ -164,9 +164,18 @@ public class Networking {
      - parameter authorizationHeader: The authorization header to be used.
      */
     public func authenticate(authorizationHeader authorizationHeader: String) {
-        self.customAuthorizationHeader = authorizationHeader
+        self.customAuthorizationHeader = ("Authorization", authorizationHeader)
     }
 
+    /**
+     Authenticates using a custom HTTP header field name and value.
+     - parameter authorizationHeaderFieldName: The authorization header field name to be used.
+     - parameter value: Authorization header field value.
+     */
+    public func authenticate(authorizationHeaderFieldName fieldName: String, value: String) {
+        self.customAuthorizationHeader = (fieldName, value)
+    }
+    
     /**
      Returns a NSURL by appending the provided path to the Networking's base URL.
      - parameter path: The path to be appended to the base URL.
@@ -424,7 +433,7 @@ extension Networking {
         }
 
         if let authorizationHeader = self.customAuthorizationHeader {
-            request.setValue(authorizationHeader, forHTTPHeaderField: "Authorization")
+            request.setValue(authorizationHeader.fieldValue, forHTTPHeaderField: authorizationHeader.fieldName)
         } else if let token = self.token {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
