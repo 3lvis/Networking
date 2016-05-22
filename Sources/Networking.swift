@@ -480,12 +480,17 @@ extension Networking {
                 let bodyData = NSMutableData()
 
                 if let parameters = parameters as? [String : AnyObject] {
-                    guard let parametersDictionary = parameters as? [String : String] else { fatalError("Couldn't cast parameters as dictionary: \(parameters)") }
-                    for (key, value) in parametersDictionary {
+                    for (key, value) in parameters {
                         var body = ""
                         body += "--\(self.boundary)\r\n"
                         body += "Content-Disposition: form-data; name=\"\(key)\""
-                        body += "\r\n\r\n\(value)\r\n"
+                        if let stringValue = value as? String {
+                            body += "\r\n\r\n\(value)\r\n"
+                        } else if let numberValue = value as? NSNumber {
+                            body += "\r\n\r\n\(numberValue.stringValue)\r\n"
+                        } else {
+                            fatalError("Couldn't convert \(value) to data")
+                        }
                         bodyData.appendData(body.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)!)
                     }
                 }

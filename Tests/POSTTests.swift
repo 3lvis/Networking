@@ -51,7 +51,17 @@ class POSTTests: XCTestCase {
         let item2 = "SECONDDATA"
         let part1 = FormDataPart(data: item1.dataUsingEncoding(NSUTF8StringEncoding)!, parameterName: item1, filename: "\(item1).png")
         let part2 = FormDataPart(data: item2.dataUsingEncoding(NSUTF8StringEncoding)!, parameterName: item2, filename: "\(item2).png")
-        networking.POST("/post", parameters: ["keyA": "valueA", "keyB": "valueB"], parts: [part1, part2]) { JSON, error in
+        let parameters = [
+            "string": "valueA",
+            "int": 20,
+            "double": 20.0,
+            "bool": true,
+        ]
+        networking.POST("/post", parameters: parameters, parts: [part1, part2]) { JSON, error in
+            let data = try! NSJSONSerialization.dataWithJSONObject(JSON!, options: .PrettyPrinted)
+            let string = NSString(data: data, encoding: NSUTF8StringEncoding)!
+            print(string)
+
             XCTAssertNil(error)
 
             guard let JSON = JSON as? [String : AnyObject] else { XCTFail(); return }
@@ -65,8 +75,8 @@ class POSTTests: XCTestCase {
             XCTAssertEqual(files[item2] as? String, item2)
 
             guard let form = JSON["form"] as? [String : AnyObject] else { XCTFail(); return }
-            XCTAssertEqual(form["keyA"] as? String, "valueA")
-            XCTAssertEqual(form["keyB"] as? String, "valueB")
+            XCTAssertEqual(form["string"] as? String, "valueA")
+            XCTAssertEqual(form["int"] as? Int, 20)
         }
     }
 
