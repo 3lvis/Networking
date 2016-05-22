@@ -14,6 +14,8 @@ extension NetworkingImage {
     static func find(named name: String, inBundle bundle: NSBundle) -> NetworkingImage {
         #if os(OSX)
             return bundle.imageForResource(name)!
+        #elseif os(watchOS)
+            return UIImage(named: name)!
         #else
             return UIImage(named: name, inBundle: bundle, compatibleWithTraitCollection: nil)!
         #endif
