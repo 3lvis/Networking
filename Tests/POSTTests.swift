@@ -55,7 +55,7 @@ class POSTTests: XCTestCase {
             "string": "valueA",
             "int": 20,
             "double": 20.0,
-            "bool": true,
+            "bool": true
         ]
         networking.POST("/post", parameters: parameters, parts: [part1, part2]) { JSON, error in
             XCTAssertNil(error)
