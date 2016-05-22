@@ -150,6 +150,7 @@ The `Content-Type` HTTP specification is so unfriendly, you have to know the spe
 **Networking** by default uses `application/json` as the `Content-Type`, if you're sending JSON you don't have to do anything. But if you want to send other types of parameters you can do it by providing the `ParameterType` attribute. For example, if you want to use `application/x-www-form-urlencoded` just use the `.FormURLEncoded` parameter type, internally **Networking** will format your parameters so they use [`Percent-encoding`](https://en.wikipedia.org/wiki/Percent-encoding#The_application.2Fx-www-form-urlencoded_type). No more changes needed.
 
 **JSON parameters**:
+
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.POST("/post", parameters: ["name" : "jameson"]) { JSON, error in
@@ -158,6 +159,7 @@ networking.POST("/post", parameters: ["name" : "jameson"]) { JSON, error in
 ```
 
 **Percent encoded parameters**:
+
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.POST("/post", parameterType: .FormURLEncoded, parameters: ["name" : "jameson"]) { JSON, error in
@@ -165,7 +167,20 @@ networking.POST("/post", parameterType: .FormURLEncoded, parameters: ["name" : "
 }
 ```
 
-**Multipart (coming in the next minor release)**
+**Multipart**
+
+A multipart upload consists in appending one or several [FormPart](https://github.com/3lvis/Networking/blob/master/Sources/FormPart.swift) items to a request.
+
+```swift
+let networking = Networking(baseURL: "https://example.com")
+let imageData = UIImagePNGRepresentation(imageToUpload)!
+let part = FormPart(data: imageData, parameterName: "file", filename: "selfie.png")
+networking.POST("/image/upload", part: part) { JSON, error in
+    // do something
+}
+```
+
+**Others**
 
 At the moment **Networking** supports three types of `ParameterType`s out of the box: `JSON`, `FormURLEncoded` and `Custom`. Meanwhile `JSON` and `FormURLEncoded` serialize your parameters in some way, `Custom(String)` sends your parameters as plain `NSData` and sets the value inside `Custom` as the `Content-Type`.
 
