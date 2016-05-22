@@ -287,7 +287,7 @@ public class Networking {
 
 extension Networking {
     func objectFromCache(path: String, cacheName: String? = nil, responseType: ResponseType, completion: (object: AnyObject?) -> Void) {
-        let destinationURL = try! self.destinationURL(path, cacheName: cacheName)
+        guard let destinationURL = try? self.destinationURL(path, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
 
         if let object = self.cache.objectForKey(destinationURL.absoluteString) {
             completion(object: object)
@@ -323,7 +323,8 @@ extension Networking {
     }
 
     func dataForDestinationURL(url: NSURL) -> NSData {
-        guard let data = NSFileManager.defaultManager().contentsAtPath(url.path!) else { fatalError("Couldn't get image in destination url: \(url)") }
+        guard let path = url.path else { fatalError("Couldn't get path for url: \(url)") }
+        guard let data = NSFileManager.defaultManager().contentsAtPath(path) else { fatalError("Couldn't get image in destination url: \(url)") }
 
         return data
     }
@@ -396,7 +397,7 @@ extension Networking {
                         self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, responseType: responseType) { data, error in
                             var returnedResponse: AnyObject?
                             if let data = data where data.length > 0 {
-                                let destinationURL = try! self.destinationURL(path, cacheName: cacheName)
+                                guard let destinationURL = try? self.destinationURL(path, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
                                 data.writeToURL(destinationURL, atomically: true)
                                 switch responseType {
                                 case .Data:
@@ -593,7 +594,7 @@ extension Networking {
                 }
                 print("Response status code: \(response.statusCode) — \(NSHTTPURLResponse.localizedStringForStatusCode(response.statusCode))")
                 print(" ")
-                print("Path: \(response.URL!.absoluteString)")
+                print("Path: \(response.URL?.absoluteString)")
                 print(" ")
                 print("Response: \(response)")
                 print(" ")
