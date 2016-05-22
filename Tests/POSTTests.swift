@@ -76,7 +76,9 @@ class POSTTests: XCTestCase {
 
             guard let form = JSON["form"] as? [String : AnyObject] else { XCTFail(); return }
             XCTAssertEqual(form["string"] as? String, "valueA")
-            XCTAssertEqual(form["int"] as? Int, 20)
+            XCTAssertEqual(form["int"] as? String, "20")
+            XCTAssertEqual(form["double"] as? String, "20")
+            XCTAssertEqual(form["bool"] as? String, "1")
         }
     }
 

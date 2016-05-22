@@ -481,17 +481,12 @@ extension Networking {
 
                 if let parameters = parameters as? [String : AnyObject] {
                     for (key, value) in parameters {
+                        let usedValue: AnyObject = value is NSNull ? "null" : value
                         var body = ""
                         body += "--\(self.boundary)\r\n"
                         body += "Content-Disposition: form-data; name=\"\(key)\""
-                        if let stringValue = value as? String {
-                            body += "\r\n\r\n\(value)\r\n"
-                        } else if let numberValue = value as? NSNumber {
-                            body += "\r\n\r\n\(numberValue.stringValue)\r\n"
-                        } else {
-                            fatalError("Couldn't convert \(value) to data")
-                        }
-                        bodyData.appendData(body.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)!)
+                        body += "\r\n\r\n\(usedValue)\r\n"
+                        bodyData.appendData(body.dataUsingEncoding(NSUTF8StringEncoding)!)
                     }
                 }
 
