@@ -16,6 +16,44 @@ class NetworkingTests: XCTestCase {
         }
     }
 
+    func testBearerTokenAuth() {
+        let networking = Networking(baseURL: baseURL)
+        let token = "hi-mom"
+        networking.authenticate(token: token)
+        networking.POST("/post") { JSON, error in
+            let JSON = JSON as! [String : AnyObject]
+            let headers = JSON["headers"] as! [String : AnyObject]
+            XCTAssertEqual("Bearer \(token)", headers["Authorization"] as? String)
+        }
+    }
+
+    func testCustomAuthorizationHeaderValue() {
+        let networking = Networking(baseURL: baseURL)
+        let value = "hi-mom"
+        networking.authenticate(headerValue: value)
+        networking.POST("/post") { JSON, error in
+            let data = try! NSJSONSerialization.dataWithJSONObject(JSON!, options: .PrettyPrinted)
+            let string = NSString(data: data, encoding: NSUTF8StringEncoding)!
+            print(string)
+
+            let JSON = JSON as! [String : AnyObject]
+            let headers = JSON["headers"] as! [String : AnyObject]
+            XCTAssertEqual(value, headers["Authorization"] as? String)
+        }
+    }
+
+    func testCustomAuthorizationHeaderValueAndHeaderKey() {
+        let networking = Networking(baseURL: baseURL)
+        let key = "Anonymous-Token"
+        let value = "hi-mom"        
+        networking.authenticate(headerKey: key, headerValue: value)
+        networking.POST("/post") { JSON, error in
+            let JSON = JSON as! [String : AnyObject]
+            let headers = JSON["headers"] as! [String : AnyObject]
+            XCTAssertEqual(value, headers[key] as? String)
+        }
+    }
+
     func testURLForPath() {
         let networking = Networking(baseURL: baseURL)
         let url = networking.urlForPath("/hello")

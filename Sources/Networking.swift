@@ -110,7 +110,8 @@ public class Networking {
     private let baseURL: String
     var fakeRequests = [RequestType : [String : FakeRequest]]()
     var token: String?
-    var customAuthorizationHeader: String?
+    var authorizationHeaderValue: String?
+    var authorizationHeaderKey = "Authorization"
     var cache: NSCache
     var configurationType: ConfigurationType
 
@@ -145,7 +146,7 @@ public class Networking {
             let authString = "Basic \(base64Credentials)"
 
             let config  = self.sessionConfiguration()
-            config.HTTPAdditionalHeaders = ["Authorization" : authString]
+            config.HTTPAdditionalHeaders = [self.authorizationHeaderKey : authString]
 
             self.session = NSURLSession(configuration: config)
         }
@@ -161,10 +162,12 @@ public class Networking {
 
     /**
      Authenticates using a custom HTTP Authorization header.
-     - parameter authorizationHeader: The authorization header to be used.
+     - parameter authorizationHeaderKey: Sets this value as the key for the HTTP `Authorization` header
+     - parameter authorizationHeaderValue: Sets this value to the HTTP `Authorization` header or to the `headerKey` if you provided that
      */
-    public func authenticate(authorizationHeader authorizationHeader: String) {
-        self.customAuthorizationHeader = authorizationHeader
+    public func authenticate(headerKey headerKey: String = "Authorization", headerValue: String) {
+        self.authorizationHeaderKey = headerKey
+        self.authorizationHeaderValue = headerValue
     }
 
     /**
@@ -268,6 +271,17 @@ public class Networking {
                 completion(data: object as? NSData)
             }
         }
+    }
+
+    //*************************//
+    //**** Deprecated area ****//
+    //*************************//
+
+    /**
+     [Deprecated] Use `authenticate(headerValue)` instead.
+     */
+    @available(*, deprecated=1.1.0, message="Use `authenticate(headerValue)` instead") public func authenticate(authorizationHeader authorizationHeader: String) {
+        self.authenticate(headerValue: authorizationHeader)
     }
 }
 
@@ -423,10 +437,10 @@ extension Networking {
             request.addValue(accept, forHTTPHeaderField: "Accept")
         }
 
-        if let authorizationHeader = self.customAuthorizationHeader {
-            request.setValue(authorizationHeader, forHTTPHeaderField: "Authorization")
+        if let authorizationHeader = self.authorizationHeaderValue {
+            request.setValue(authorizationHeader, forHTTPHeaderField: self.authorizationHeaderKey)
         } else if let token = self.token {
-            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            request.setValue("Bearer \(token)", forHTTPHeaderField: self.authorizationHeaderKey)
         }
 
         dispatch_async(dispatch_get_main_queue()) {
