@@ -57,6 +57,7 @@ class POSTTests: XCTestCase {
         }
     }
 
+    /*
     func testUploadingAnImageWithFormData() {
         let networking = Networking(baseURL: "https://api.cloudinary.com")
 
@@ -80,6 +81,7 @@ class POSTTests: XCTestCase {
             XCTAssertNil(error)
         }
     }
+     */
 
     func testPOSTWithIvalidPath() {
         let networking = Networking(baseURL: baseURL)
