@@ -87,9 +87,9 @@ networking.GET("/basic-auth/aladdin/opensesame") { JSON, error in
 To authenticate using a [bearer token](https://tools.ietf.org/html/rfc6750) **"AAAFFAAAA3DAAAAAA"** you only need to do this:
 
 ```swift
-let networking = Networking(baseURL: "http://sample.org")
+let networking = Networking(baseURL: "http://httpbin.org")
 networking.authenticate(token: "AAAFFAAAA3DAAAAAA")
-networking.GET("/users") { JSON, error in
+networking.GET("/get") { JSON, error in
     // Do something...
 }
 ```
@@ -99,10 +99,20 @@ networking.GET("/users") { JSON, error in
 To authenticate using a custom authentication header, for example **"Token token=AAAFFAAAA3DAAAAAA"** you would need to set the following header field: `Authorization: Token token=AAAFFAAAA3DAAAAAA`. Luckily, **Networking** provides a simple way to do this:
 
 ```swift
-let networking = Networking(baseURL: "http://sample.org")
-networking.authenticate(authorizationHeader: "Token token=AAAFFAAAA3DAAAAAA")
-networking.GET("/users") { JSON, error in
+let networking = Networking(baseURL: "http://httpbin.org")
+networking.authenticate(headerValue: "Token token=AAAFFAAAA3DAAAAAA")
+networking.GET("/get") { JSON, error in
     // Do something...
+}
+```
+
+Providing the following authentication header `Anonymous-Token: AAAFFAAAA3DAAAAAA` is also possible:
+
+```swift
+let networking = Networking(baseURL: "http://httpbin.org")
+networking.authenticate(headerKey: "Anonymous-Token", headerValue: "AAAFFAAAA3DAAAAAA")
+networking.POST("/get") { JSON, error in
+    // Do something
 }
 ```
 
