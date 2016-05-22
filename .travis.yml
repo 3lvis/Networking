@@ -6,6 +6,5 @@ podfile: Podfile
 script:
   - xcodebuild -project Demo.xcodeproj -scheme iOSTests -sdk iphonesimulator build test -destination 'platform=iOS Simulator,name=iPhone 6' GCC_INSTRUMENT_PROGRAM_FLOW_ARCS=YES GCC_GENERATE_TEST_COVERAGE_FILES=YES clean test | xcpretty -c
   - xcodebuild -project Demo.xcodeproj -scheme OSXTests -sdk macosx build test GCC_INSTRUMENT_PROGRAM_FLOW_ARCS=YES GCC_GENERATE_TEST_COVERAGE_FILES=YES clean test | xcpretty -c
-after_success: slather
 notifications:
   email: false
