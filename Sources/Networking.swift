@@ -39,7 +39,7 @@ public class Networking {
     }
 
     /**
-     Provides the a bridge for configuring your Networking object with NSURLSessionConfiguration.
+     Provides the options for configuring your Networking object with NSURLSessionConfiguration.
      - `Default:` This configuration type manages upload and download tasks using the default options.
      - `Ephemeral:` A configuration type that uses no persistent storage for caches, cookies, or credentials. It's optimized for transferring data to and from your app’s memory.
      - `Background:` A configuration type that allows HTTP and HTTPS uploads or downloads to be performed in the background. It causes upload and download tasks to be performed by the system in a separate process.
@@ -57,22 +57,38 @@ public class Networking {
     }
 
     /**
-     Provides the rules to serialize your parameters, also sets the `Content-Type` header.
+     Sets the rules to serialize your parameters, also sets the `Content-Type` header.
      - `JSON:` Serializes your parameters using `NSJSONSerialization` and sets your `Content-Type` to `application/json`.
      - `FormURLEncoded:` Serializes your parameters using `Percent-encoding` and sets your `Content-Type` to `application/x-www-form-urlencoded`.
+     - `FormData:` Serializes your parameters and parts as multipart and sets your `Content-Type` to `multipart/form-data`.
      - `Custom(String):` Sends your parameters as plain data, sets your `Content-Type` to the value inside `Custom`.
      */
     public enum ParameterType {
+        /**
+         Serializes your parameters using `NSJSONSerialization` and sets your `Content-Type` to `application/json`.
+         */
         case JSON
+        /**
+         Serializes your parameters using `Percent-encoding` and sets your `Content-Type` to `application/x-www-form-urlencoded`.
+         */
         case FormURLEncoded
+        /**
+         Serializes your parameters and parts as multipart and sets your `Content-Type` to `multipart/form-data`.
+         */
+        case FormData
+        /**
+         Sends your parameters as plain data, sets your `Content-Type` to the value inside `Custom`.
+         */
         case Custom(String)
 
-        var contentType: String {
+        func contentType(boundary boundary: String) -> String {
             switch self {
             case .JSON:
                 return "application/json"
             case .FormURLEncoded:
                 return "application/x-www-form-urlencoded"
+            case .FormData:
+                return "multipart/form-data; boundary=\(boundary)"
             case .Custom(let value):
                 return value
             }
@@ -119,6 +135,11 @@ public class Networking {
      Flag used to disable synchronous request when running automatic tests.
      */
     var disableTestingMode = false
+
+    /**
+     The boundary used for multipart requests
+     */
+    let boundary = String(format: "net.3lvis.networking.%08x%08x", arc4random(), arc4random())
 
     lazy var session: NSURLSession = {
         return NSURLSession(configuration: self.sessionConfiguration())
@@ -254,7 +275,7 @@ public class Networking {
      - parameter completion: A closure that gets called when the download request is completed, it contains  a `data` object and a `NSError`.
      */
     public func downloadData(path: String, cacheName: String? = nil, completion: (data: NSData?, error: NSError?) -> Void) {
-        self.request(.GET, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, responseType: .Data) { response, error in
+        self.request(.GET, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .Data) { response, error in
             completion(data: response as? NSData, error: error)
         }
     }
@@ -358,7 +379,7 @@ extension Networking {
         self.fakeRequests[requestType] = fakeRequests
     }
 
-    func request(requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, responseType: ResponseType, completion: (response: AnyObject?, error: NSError?) -> ()) {
+    func request(requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, parts: [FormPart]?, responseType: ResponseType, completion: (response: AnyObject?, error: NSError?) -> ()) {
         if let responses = self.fakeRequests[requestType], fakeRequest = responses[path] {
             if fakeRequest.statusCode.statusCodeType() == .Successful {
                 completion(response: fakeRequest.response, error: nil)
@@ -369,7 +390,7 @@ extension Networking {
         } else {
             switch responseType {
             case .JSON:
-                self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, responseType: responseType) { data, error in
+                self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, error in
                     var returnedError = error
                     var returnedResponse: AnyObject?
                     if error == nil {
@@ -394,7 +415,7 @@ extension Networking {
                             completion(response: object, error: nil)
                         }
                     } else {
-                        self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, responseType: responseType) { data, error in
+                        self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, error in
                             var returnedResponse: AnyObject?
                             if let data = data where data.length > 0 {
                                 guard let destinationURL = try? self.destinationURL(path, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
@@ -426,12 +447,12 @@ extension Networking {
         }
     }
 
-    func dataRequest(requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, responseType: ResponseType, completion: (response: NSData?, error: NSError?) -> ()) {
+    func dataRequest(requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, parts: [FormPart]?, responseType: ResponseType, completion: (response: NSData?, error: NSError?) -> ()) {
         let request = NSMutableURLRequest(URL: self.urlForPath(path))
         request.HTTPMethod = requestType.rawValue
 
         if let parameterType = parameterType {
-            request.addValue(parameterType.contentType, forHTTPHeaderField: "Content-Type")
+            request.addValue(parameterType.contentType(boundary: self.boundary), forHTTPHeaderField: "Content-Type")
         }
 
         if let accept = responseType.accept {
@@ -459,9 +480,33 @@ extension Networking {
                 }
                 break
             case .FormURLEncoded:
-                guard let parametersDictionary = parameters as? [String : AnyObject] else { fatalError("Couldn't cast parameters as dictionary: \(parameters)") }
+                guard let parametersDictionary = parameters as? [String : AnyObject] else { fatalError("Couldn't convert parameters to a dictionary: \(parameters)") }
                 let formattedParameters = parametersDictionary.formURLEncodedFormat()
                 request.HTTPBody = formattedParameters.dataUsingEncoding(NSUTF8StringEncoding)
+                break
+            case .FormData:
+                let bodyData = NSMutableData()
+
+                if let parameters = parameters as? [String : AnyObject] {
+                    guard let parametersDictionary = parameters as? [String : String] else { fatalError("Couldn't cast parameters as dictionary: \(parameters)") }
+                    for (key, value) in parametersDictionary {
+                        var body = ""
+                        body += "--\(self.boundary)\r\n"
+                        body += "Content-Disposition: form-data; name=\"\(key)\""
+                        body += "\r\n\r\n\(value)\r\n"
+                        bodyData.appendData(body.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)!)
+                    }
+                }
+
+                if let parts = parts {
+                    for var part in parts {
+                        part.boundary = self.boundary
+                        bodyData.appendData(part.formData)
+                    }
+                }
+
+                bodyData.appendData("--\(self.boundary)--\r\n".dataUsingEncoding(NSUTF8StringEncoding)!)
+                request.HTTPBody = bodyData
                 break
             case .Custom(_):
                 request.HTTPBody = parameters as? NSData

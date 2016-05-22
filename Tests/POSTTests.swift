@@ -44,6 +44,51 @@ class POSTTests: XCTestCase {
         }
     }
 
+    func testPOSTWithFormData() {
+        let networking = Networking(baseURL: baseURL)
+
+        let data = "SAMPLEDATA".dataUsingEncoding(NSUTF8StringEncoding)!
+        let part = FormPart(data: data, parameterName: "pig", filename: "pig.png")
+        networking.POST("/post", parameters: ["Hi": "Bye", "Hi2": "Bye2"], part: part) { JSON, error in
+            let data = try! NSJSONSerialization.dataWithJSONObject(JSON!, options: .PrettyPrinted)
+            let string = NSString(data: data, encoding: NSUTF8StringEncoding)!
+            print(string)
+            let JSONResponse = JSON as! [String : AnyObject]
+            XCTAssertEqual("http://httpbin.org/post", JSONResponse["url"] as? String)
+            XCTAssertNil(error)
+        }
+    }
+
+    func testUploadingAnImageWithFormData() {
+        guard let path = NSBundle(forClass: POSTTests.self).pathForResource("Keys", ofType: "plist") else { return }
+        guard let dictionary = NSDictionary(contentsOfFile: path) else { return }
+        guard let CloudinaryCloudName = dictionary["CloudinaryCloudName"] as? String else { return }
+        guard let CloudinarySecret = dictionary["CloudinarySecret"] as? String else { return }
+        guard let CloudinaryAPIKey = dictionary["CloudinaryAPIKey"] as? String else { return }
+
+        let networking = Networking(baseURL: "https://api.cloudinary.com")
+
+        let pigImage = NetworkingImage.find(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self))
+        let pigImageData = pigImage.PNGData()!
+        let timestamp = "\(Int(NSDate().timeIntervalSince1970))"
+        let part = FormPart(data: pigImageData, parameterName: "file", filename: "\(timestamp).png")
+        var parameters = [
+            "timestamp": timestamp,
+            "public_id": timestamp
+        ]
+        let signature = SHA1.signatureUsingParameters(parameters, secret: CloudinarySecret)
+        parameters["api_key"] = CloudinaryAPIKey
+        parameters["signature"] = signature
+
+        networking.POST("/v1_1/\(CloudinaryCloudName)/image/upload", parameters: parameters, part: part) { JSON, error in
+            let JSONResponse = JSON as! [String : AnyObject]
+            XCTAssertEqual(timestamp, JSONResponse["original_filename"] as? String)
+            XCTAssertNil(error)
+
+            self.deleteAllCloudinaryPhotos(networking: networking, cloudName: CloudinaryCloudName, secret: CloudinarySecret, APIKey: CloudinaryAPIKey)
+        }
+    }
+
     func testPOSTWithIvalidPath() {
         let networking = Networking(baseURL: baseURL)
         networking.POST("/posdddddt", parameters: ["username" : "jameson", "password" : "secret"]) { JSON, error in
@@ -100,5 +145,10 @@ class POSTTests: XCTestCase {
         networking.cancelPOST("/post")
 
         waitForExpectationsWithTimeout(15.0, handler: nil)
+    }
+
+    func deleteAllCloudinaryPhotos(networking networking: Networking, cloudName: String, secret: String, APIKey: String) {
+        networking.authenticate(username: APIKey, password: secret)
+        networking.DELETE("/v1_1/\(cloudName)/resources/image/upload?all=true") { JSON, error in }
     }
 }

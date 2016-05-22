@@ -8,7 +8,7 @@ public extension Networking {
     - parameter completion: A closure that gets called when the GET request is completed, it contains a `JSON` object and a `NSError`.
     */
     public func GET(path: String, parameterType: ParameterType = .JSON, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
-        self.request(.GET, path: path, parameterType: parameterType, parameters: nil, responseType: .JSON, completion: completion)
+        self.request(.GET, path: path, parameterType: parameterType, parameters: nil, parts: nil, responseType: .JSON, completion: completion)
     }
 
     /**
@@ -46,11 +46,36 @@ public extension Networking {
     /**
     POST request to the specified path, using the provided parameters.
     - parameter path: The path for the POST request.
-    - parameter parameters: The parameters to be used, they will be serialized using NSJSONSerialization.
+    - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by 
+     default this is JSON.
     - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and a `NSError`.
     */
     public func POST(path: String, parameterType: ParameterType = .JSON, parameters: AnyObject? = nil, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
-        self.request(.POST, path: path, parameterType: parameterType, parameters: parameters, responseType: .JSON, completion: completion)
+        self.request(.POST, path: path, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .JSON, completion: completion)
+    }
+
+    /**
+     POST request to the specified path, using the provided parameters.
+     - parameter path: The path for the POST request.
+     - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by
+     default this is JSON.
+     - parameter part: The form data that will be sent in the request.
+     - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and a `NSError`.
+     */
+    public func POST(path: String, parameters: AnyObject? = nil, part: FormPart, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
+        self.POST(path, parameters: parameters, parts: [part], completion: completion)
+    }
+
+    /**
+     POST request to the specified path, using the provided parameters.
+     - parameter path: The path for the POST request.
+     - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by
+     default this is JSON.
+     - parameter parts: The list of form data parts that will be sent in the request.
+     - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and a `NSError`.
+     */
+    public func POST(path: String, parameters: AnyObject? = nil, parts: [FormPart], completion: (JSON: AnyObject?, error: NSError?) -> ()) {
+        self.request(.POST, path: path, parameterType: .FormData, parameters: parameters, parts: parts, responseType: .JSON, completion: completion)
     }
 
     /**
@@ -88,11 +113,12 @@ public extension Networking {
     /**
     PUT request to the specified path, using the provided parameters.
     - parameter path: The path for the PUT request.
-    - parameter parameters: The parameters to be used, they will be serialized using NSJSONSerialization.
+     - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by
+     default this is JSON.
     - parameter completion: A closure that gets called when the PUT request is completed, it contains a `JSON` object and a `NSError`.
     */
     public func PUT(path: String, parameterType: ParameterType = .JSON, parameters: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
-        self.request(.PUT, path: path, parameterType: parameterType, parameters: parameters, responseType: .JSON, completion: completion)
+        self.request(.PUT, path: path, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .JSON, completion: completion)
     }
 
     /**
@@ -133,7 +159,7 @@ public extension Networking {
     - parameter completion: A closure that gets called when the DELETE request is completed, it contains a `JSON` object and a `NSError`.
     */
     public func DELETE(path: String, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
-        self.request(.DELETE, path: path, parameterType: .JSON, parameters: nil, responseType: .JSON, completion: completion)
+        self.request(.DELETE, path: path, parameterType: .JSON, parameters: nil, parts: nil, responseType: .JSON, completion: completion)
     }
 
     /**
