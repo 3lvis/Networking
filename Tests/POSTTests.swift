@@ -48,7 +48,7 @@ class POSTTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
 
         let data = "SAMPLEDATA".dataUsingEncoding(NSUTF8StringEncoding)!
-        let part = FormPart(data: data, parameterName: "pig", filename: "pig.png")
+        let part = FormDataPart(data: data, parameterName: "pig", filename: "pig.png")
         networking.POST("/post", parameters: ["Hi": "Bye", "Hi2": "Bye2"], part: part) { JSON, error in
             let data = try! NSJSONSerialization.dataWithJSONObject(JSON!, options: .PrettyPrinted)
             let string = NSString(data: data, encoding: NSUTF8StringEncoding)!
@@ -71,7 +71,7 @@ class POSTTests: XCTestCase {
         let pigImage = NetworkingImage.find(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self))
         let pigImageData = pigImage.PNGData()!
         let timestamp = "\(Int(NSDate().timeIntervalSince1970))"
-        let part = FormPart(data: pigImageData, parameterName: "file", filename: "\(timestamp).png")
+        let part = FormDataPart(data: pigImageData, parameterName: "file", filename: "\(timestamp).png")
         var parameters = [
             "timestamp": timestamp,
             "public_id": timestamp

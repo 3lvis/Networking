@@ -1,6 +1,6 @@
 import Foundation
 
-public enum FormPartType {
+public enum FormDataPartType {
     case Data
     case PNG
     case JPG
@@ -20,11 +20,11 @@ public enum FormPartType {
     }
 }
 
-public struct FormPart {
+public struct FormDataPart {
     private let data: NSData
     private let parameterName: String
     private let filename: String
-    private let type: FormPartType
+    private let type: FormDataPartType
     var boundary: String = ""
 
     var formData: NSData {
@@ -43,7 +43,7 @@ public struct FormPart {
         return bodyData
     }
 
-    public init(type: FormPartType = .Data, data: NSData, parameterName: String, filename: String) {
+    public init(type: FormDataPartType = .Data, data: NSData, parameterName: String, filename: String) {
         self.type = type
         self.data = data
         self.parameterName = parameterName

@@ -379,7 +379,7 @@ extension Networking {
         self.fakeRequests[requestType] = fakeRequests
     }
 
-    func request(requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, parts: [FormPart]?, responseType: ResponseType, completion: (response: AnyObject?, error: NSError?) -> ()) {
+    func request(requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, parts: [FormDataPart]?, responseType: ResponseType, completion: (response: AnyObject?, error: NSError?) -> ()) {
         if let responses = self.fakeRequests[requestType], fakeRequest = responses[path] {
             if fakeRequest.statusCode.statusCodeType() == .Successful {
                 completion(response: fakeRequest.response, error: nil)
@@ -447,7 +447,7 @@ extension Networking {
         }
     }
 
-    func dataRequest(requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, parts: [FormPart]?, responseType: ResponseType, completion: (response: NSData?, error: NSError?) -> ()) {
+    func dataRequest(requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, parts: [FormDataPart]?, responseType: ResponseType, completion: (response: NSData?, error: NSError?) -> ()) {
         let request = NSMutableURLRequest(URL: self.urlForPath(path))
         request.HTTPMethod = requestType.rawValue
 

@@ -177,12 +177,12 @@ networking.POST("/post", parameterType: .FormURLEncoded, parameters: ["name" : "
 
 ### Multipart
 
-**Networking** provides a simple model to use `multipart/form-data`. A multipart request consists in appending one or several [FormPart](https://github.com/3lvis/Networking/blob/master/Sources/FormPart.swift) items to a request. The simplest multipart request would look like this.
+**Networking** provides a simple model to use `multipart/form-data`. A multipart request consists in appending one or several [FormDataPart](https://github.com/3lvis/Networking/blob/master/Sources/FormDataPart.swift) items to a request. The simplest multipart request would look like this.
 
 ```swift
 let networking = Networking(baseURL: "https://example.com")
 let imageData = UIImagePNGRepresentation(imageToUpload)!
-let part = FormPart(data: imageData, parameterName: "file", filename: "selfie.png")
+let part = FormDataPart(data: imageData, parameterName: "file", filename: "selfie.png")
 networking.POST("/image/upload", part: part) { JSON, error in
   // Successfull upload using `multipart/form-data` as `Content-Type`
 }
@@ -192,17 +192,17 @@ If you need to use several parts or append other parameters than aren't files, y
 
 ```swift
 let networking = Networking(baseURL: "https://example.com")
-let part1 = FormPart(data: imageData1, parameterName: "file1", filename: "selfie1.png")
-let part2 = FormPart(data: imageData2, parameterName: "file2", filename: "selfie2.png")
+let part1 = FormDataPart(data: imageData1, parameterName: "file1", filename: "selfie1.png")
+let part2 = FormDataPart(data: imageData2, parameterName: "file2", filename: "selfie2.png")
 let parameters = ["username" : "3lvis"]
 networking.POST("/image/upload", parts: [part1, part2], parameters: parameters) { JSON, error in
     // Do something
 }
 ```
 
-**FormPart Content-Type**:
+**FormDataPart Content-Type**:
 
-`FormPart` uses `FormPartType` to generate the `Content-Type` for each part. The default `FormPartType` is `.Data` which adds the `application/octet-stream` to your part. If you want to use a `Content-Type` that is not available between the existing `FormPartType`s, you can use `.Custom("your-content-type)`.
+`FormDataPart` uses `FormDataPartType` to generate the `Content-Type` for each part. The default `FormDataPartType` is `.Data` which adds the `application/octet-stream` to your part. If you want to use a `Content-Type` that is not available between the existing `FormDataPartType`s, you can use `.Custom("your-content-type)`.
 
 ### Others
 
