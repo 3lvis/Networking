@@ -47,15 +47,26 @@ class POSTTests: XCTestCase {
     func testPOSTWithMultipartFormData() {
         let networking = Networking(baseURL: baseURL)
 
-        let data = "SAMPLEDATA".dataUsingEncoding(NSUTF8StringEncoding)!
-        let part = FormDataPart(data: data, parameterName: "pig", filename: "pig.png")
-        networking.POST("/post", parameters: ["Hi": "Bye", "Hi2": "Bye2"], part: part) { JSON, error in
-            let data = try! NSJSONSerialization.dataWithJSONObject(JSON!, options: .PrettyPrinted)
-            let string = NSString(data: data, encoding: NSUTF8StringEncoding)!
-            print(string)
-            let JSONResponse = JSON as! [String : AnyObject]
-            XCTAssertEqual("http://httpbin.org/post", JSONResponse["url"] as? String)
+        let item1 = "FIRSTDATA"
+        let item2 = "SECONDDATA"
+        let part1 = FormDataPart(data: item1.dataUsingEncoding(NSUTF8StringEncoding)!, parameterName: item1, filename: "\(item1).png")
+        let part2 = FormDataPart(data: item2.dataUsingEncoding(NSUTF8StringEncoding)!, parameterName: item2, filename: "\(item2).png")
+        networking.POST("/post", parameters: ["keyA": "valueA", "keyB": "valueB"], parts: [part1, part2]) { JSON, error in
             XCTAssertNil(error)
+
+            guard let JSON = JSON as? [String : AnyObject] else { XCTFail(); return }
+            XCTAssertEqual(JSON["url"] as? String, "http://httpbin.org/post")
+
+            guard let headers = JSON["headers"] as? [String : AnyObject] else { XCTFail(); return }
+            XCTAssertEqual(headers["Content-Type"] as? String, "multipart/form-data; boundary=\(networking.boundary)")
+
+            guard let files = JSON["files"] as? [String : AnyObject] else { XCTFail(); return }
+            XCTAssertEqual(files[item1] as? String, item1)
+            XCTAssertEqual(files[item2] as? String, item2)
+
+            guard let form = JSON["form"] as? [String : AnyObject] else { XCTFail(); return }
+            XCTAssertEqual(form["keyA"] as? String, "valueA")
+            XCTAssertEqual(form["keyB"] as? String, "valueB")
         }
     }
 
@@ -69,7 +80,7 @@ class POSTTests: XCTestCase {
         let networking = Networking(baseURL: "https://api.cloudinary.com")
 
         let pigImage = NetworkingImage.find(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self))
-        let pigImageData = pigImage.PNGData()!
+        let pigImageData = pigImage.pngData()!
         let timestamp = "\(Int(NSDate().timeIntervalSince1970))"
         let part = FormDataPart(data: pigImageData, parameterName: "file", filename: "\(timestamp).png")
         var parameters = [
