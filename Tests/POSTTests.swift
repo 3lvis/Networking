@@ -57,14 +57,13 @@ class POSTTests: XCTestCase {
         }
     }
 
-    /*
     func testUploadingAnImageWithFormData() {
         let networking = Networking(baseURL: "https://api.cloudinary.com")
 
         let pigImage = NetworkingImage.find(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self))
         let pigImageData = pigImage.PNGData()!
         let timestamp = "\(Int(NSDate().timeIntervalSince1970))"
-        let part = FormPart(data: pigImageData, parameterName: "file", filename: "\(timestamp).png", type: .PNG)
+        let part = FormPart(data: pigImageData, parameterName: "file", filename: "\(timestamp).png", type: .Data)
         var parameters = [
             "timestamp": timestamp,
             "public_id": timestamp
@@ -77,13 +76,10 @@ class POSTTests: XCTestCase {
 
         networking.POST("/v1_1/elvisnunez/image/upload", part: part, parameters: parameters) { JSON, error in
             let JSONResponse = JSON as! [String : AnyObject]
-
-            XCTAssertEqual("http://res.cloudinary.com/elvisnunez/image/upload/v\(timestamp)/\(timestamp).png", JSONResponse["url"] as? String)
             XCTAssertEqual(timestamp, JSONResponse["original_filename"] as? String)
             XCTAssertNil(error)
         }
     }
-    */
 
     func testPOSTWithIvalidPath() {
         let networking = Networking(baseURL: baseURL)

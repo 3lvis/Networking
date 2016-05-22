@@ -1,14 +1,17 @@
 import Foundation
 
-public enum FileType {
+public enum FormPartType {
+    case Data
     case PNG
     case JPG
     case Custom(String)
 
     var contentType: String {
         switch self {
-        case .PNG:
+        case .Data:
             return "application/octet-stream"
+        case .PNG:
+            return "image/png"
         case .JPG:
             return "image/jpeg"
         case .Custom(let value):
@@ -21,7 +24,7 @@ public struct FormPart {
     let data: NSData
     let parameterName: String
     let filename: String
-    let type: FileType
+    let type: FormPartType
 
     var formData: NSData {
         var body = ""
@@ -43,7 +46,7 @@ public struct FormPart {
         return bodyData
     }
 
-    public init(data: NSData, parameterName: String, filename: String, type: FileType) {
+    public init(data: NSData, parameterName: String, filename: String, type: FormPartType) {
         self.data = data
         self.parameterName = parameterName
         self.filename = filename
