@@ -1,13 +1,5 @@
 import Foundation
 
-#if os(OSX)
-    import AppKit.NSImage
-    public typealias NetworkingImage = NSImage
-#else
-    import UIKit.UIImage
-    public typealias NetworkingImage = UIImage
-#endif
-
 public extension Int {
     /**
      Categorizes a status code.
@@ -379,7 +371,7 @@ extension Networking {
         self.fakeRequests[requestType] = fakeRequests
     }
 
-    func request(requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, parts: [FormPart]?, responseType: ResponseType, completion: (response: AnyObject?, error: NSError?) -> ()) {
+    func request(requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, parts: [FormDataPart]?, responseType: ResponseType, completion: (response: AnyObject?, error: NSError?) -> ()) {
         if let responses = self.fakeRequests[requestType], fakeRequest = responses[path] {
             if fakeRequest.statusCode.statusCodeType() == .Successful {
                 completion(response: fakeRequest.response, error: nil)
@@ -447,7 +439,7 @@ extension Networking {
         }
     }
 
-    func dataRequest(requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, parts: [FormPart]?, responseType: ResponseType, completion: (response: NSData?, error: NSError?) -> ()) {
+    func dataRequest(requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, parts: [FormDataPart]?, responseType: ResponseType, completion: (response: NSData?, error: NSError?) -> ()) {
         let request = NSMutableURLRequest(URL: self.urlForPath(path))
         request.HTTPMethod = requestType.rawValue
 
@@ -488,13 +480,13 @@ extension Networking {
                 let bodyData = NSMutableData()
 
                 if let parameters = parameters as? [String : AnyObject] {
-                    guard let parametersDictionary = parameters as? [String : String] else { fatalError("Couldn't cast parameters as dictionary: \(parameters)") }
-                    for (key, value) in parametersDictionary {
+                    for (key, value) in parameters {
+                        let usedValue: AnyObject = value is NSNull ? "null" : value
                         var body = ""
                         body += "--\(self.boundary)\r\n"
                         body += "Content-Disposition: form-data; name=\"\(key)\""
-                        body += "\r\n\r\n\(value)\r\n"
-                        bodyData.appendData(body.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)!)
+                        body += "\r\n\r\n\(usedValue)\r\n"
+                        bodyData.appendData(body.dataUsingEncoding(NSUTF8StringEncoding)!)
                     }
                 }
 
