@@ -255,7 +255,7 @@ public class Networking {
      - parameter completion: A closure that gets called when the download request is completed, it contains  a `data` object and a `NSError`.
      */
     public func downloadData(path: String, cacheName: String? = nil, completion: (data: NSData?, error: NSError?) -> Void) {
-        self.request(.GET, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, responseType: .Data) { response, error in
+        self.request(.GET, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .Data) { response, error in
             completion(data: response as? NSData, error: error)
         }
     }
@@ -347,7 +347,7 @@ extension Networking {
         self.fakeRequests[requestType] = fakeRequests
     }
 
-    func request(requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, responseType: ResponseType, completion: (response: AnyObject?, error: NSError?) -> ()) {
+    func request(requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, parts: [FormPart]?, responseType: ResponseType, completion: (response: AnyObject?, error: NSError?) -> ()) {
         if let responses = self.fakeRequests[requestType], fakeRequest = responses[path] {
             if fakeRequest.statusCode.statusCodeType() == .Successful {
                 completion(response: fakeRequest.response, error: nil)
@@ -358,7 +358,7 @@ extension Networking {
         } else {
             switch responseType {
             case .JSON:
-                self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, responseType: responseType) { data, error in
+                self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, error in
                     var returnedError = error
                     var returnedResponse: AnyObject?
                     if error == nil {
@@ -383,7 +383,7 @@ extension Networking {
                             completion(response: object, error: nil)
                         }
                     } else {
-                        self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, responseType: responseType) { data, error in
+                        self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, error in
                             var returnedResponse: AnyObject?
                             if let data = data where data.length > 0 {
                                 let destinationURL = try! self.destinationURL(path, cacheName: cacheName)
@@ -415,7 +415,7 @@ extension Networking {
         }
     }
 
-    func dataRequest(requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, responseType: ResponseType, completion: (response: NSData?, error: NSError?) -> ()) {
+    func dataRequest(requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, parts: [FormPart]?, responseType: ResponseType, completion: (response: NSData?, error: NSError?) -> ()) {
         let request = NSMutableURLRequest(URL: self.urlForPath(path))
         request.HTTPMethod = requestType.rawValue
 
@@ -453,8 +453,27 @@ extension Networking {
                 request.HTTPBody = formattedParameters.dataUsingEncoding(NSUTF8StringEncoding)
                 break
             case .FormData:
-                request.addValue("XMLHttpRequest", forHTTPHeaderField: "X-Requested-With")
-                request.HTTPBody = parameters as? NSData
+                let bodyData = NSMutableData()
+
+                if let parameters = parameters as? [String : AnyObject] {
+                    guard let parametersDictionary = parameters as? [String : String] else { fatalError("Couldn't cast parameters as dictionary: \(parameters)") }
+                    for (key, value) in parametersDictionary {
+                        var body = ""
+                        body += "--\(Networking.Boundary)\r\n"
+                        body += "Content-Disposition: form-data; name=\"\(key)\""
+                        body += "\r\n\r\n\(value)\r\n"
+                        bodyData.appendData(body.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)!)
+                    }
+                }
+
+                if let parts = parts {
+                    for part in parts {
+                        bodyData.appendData(part.formData)
+                    }
+                }
+
+                bodyData.appendData("--\(Networking.Boundary)--\r\n".dataUsingEncoding(NSUTF8StringEncoding)!)
+                request.HTTPBody = bodyData
                 break
             case .Custom(_):
                 request.HTTPBody = parameters as? NSData

@@ -21,10 +21,10 @@ public enum FormPartType {
 }
 
 public struct FormPart {
-    let data: NSData
-    let parameterName: String
-    let filename: String
-    let type: FormPartType
+    private let data: NSData
+    private let parameterName: String
+    private let filename: String
+    private let type: FormPartType
 
     var formData: NSData {
         var body = ""
@@ -36,20 +36,16 @@ public struct FormPart {
 
         let bodyData = NSMutableData()
         bodyData.appendData(body.dataUsingEncoding(NSUTF8StringEncoding)!)
-
-        let string = NSString(data: bodyData, encoding: NSUTF8StringEncoding)!
-        print(string)
-
         bodyData.appendData(self.data)
         bodyData.appendData("\r\n".dataUsingEncoding(NSUTF8StringEncoding)!)
 
         return bodyData
     }
 
-    public init(data: NSData, parameterName: String, filename: String, type: FormPartType) {
+    public init(type: FormPartType = .Data, data: NSData, parameterName: String, filename: String) {
+        self.type = type
         self.data = data
         self.parameterName = parameterName
         self.filename = filename
-        self.type = type
     }
 }
