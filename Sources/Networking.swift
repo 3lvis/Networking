@@ -1,13 +1,5 @@
 import Foundation
 
-#if os(OSX)
-    import AppKit.NSImage
-    public typealias NetworkingImage = NSImage
-#else
-    import UIKit.UIImage
-    public typealias NetworkingImage = UIImage
-#endif
-
 public extension Int {
     /**
      Categorizes a status code.
