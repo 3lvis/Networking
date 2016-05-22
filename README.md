@@ -151,9 +151,11 @@ networking.POST("/post", parameters: ["username" : "jameson", "password" : "secr
 
 The `Content-Type` HTTP specification is so unfriendly, you have to know the specifics of it before understanding that content type is really just the parameter type. Because of this **Networking** uses a `ParameterType` instead of a `ContentType`. Anyway, here's hoping this makes it more human friendly.
 
-**Networking** by default uses `application/json` as the `Content-Type`, if you're sending JSON you don't have to do anything. But if you want to send other types of parameters you can do it by providing the `ParameterType` attribute. For example, if you want to use `application/x-www-form-urlencoded` just use the `.FormURLEncoded` parameter type, internally **Networking** will format your parameters so they use [`Percent-encoding`](https://en.wikipedia.org/wiki/Percent-encoding#The_application.2Fx-www-form-urlencoded_type). No more changes needed.
-
 ### JSON
+
+**Networking** by default uses `application/json` as the `Content-Type`, if you're sending JSON you don't have to do anything. But if you want to send other types of parameters you can do it by providing the `ParameterType` attribute.
+
+When sending JSON your parameters will be serialized to data using `NSJSONSerialization`.
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
@@ -164,6 +166,8 @@ networking.POST("/post", parameters: ["name" : "jameson"]) { JSON, error in
 
 ### Percent-encoding
 
+ If you want to use `application/x-www-form-urlencoded` just use the `.FormURLEncoded` parameter type, internally **Networking** will format your parameters so they use [`Percent-encoding`](https://en.wikipedia.org/wiki/Percent-encoding#The_application.2Fx-www-form-urlencoded_type).
+
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.POST("/post", parameterType: .FormURLEncoded, parameters: ["name" : "jameson"]) { JSON, error in
@@ -173,7 +177,7 @@ networking.POST("/post", parameterType: .FormURLEncoded, parameters: ["name" : "
 
 ### Multipart
 
-A multipart upload consists in appending one or several [FormPart](https://github.com/3lvis/Networking/blob/master/Sources/FormPart.swift) items to a request. The simplest multipart request would look like this.
+**Networking** provides a simple model to use `multipart/form-data`. A multipart request consists in appending one or several [FormPart](https://github.com/3lvis/Networking/blob/master/Sources/FormPart.swift) items to a request. The simplest multipart request would look like this.
 
 ```swift
 let networking = Networking(baseURL: "https://example.com")
@@ -196,13 +200,13 @@ networking.POST("/image/upload", parts: [part1, part2], parameters: parameters) 
 }
 ```
 
-#### FormPart Content-Type
+**FormPart Content-Type**:
 
-`FormPart` uses `FormPartType` to generate the content type for each part. The default `FormPartType` is `.Data` which adds the `application/octet-stream` to your part. If you want to use a content type that is not available between the existing `FormPartType`, you can use `.Custom("your-content-type)`.
+`FormPart` uses `FormPartType` to generate the `Content-Type` for each part. The default `FormPartType` is `.Data` which adds the `application/octet-stream` to your part. If you want to use a `Content-Type` that is not available between the existing `FormPartType`s, you can use `.Custom("your-content-type)`.
 
 ### Others
 
-At the moment **Networking** supports three types of `ParameterType`s out of the box: `JSON`, `FormURLEncoded` and `Custom`. Meanwhile `JSON` and `FormURLEncoded` serialize your parameters in some way, `Custom(String)` sends your parameters as plain `NSData` and sets the value inside `Custom` as the `Content-Type`.
+At the moment **Networking** supports four types of `ParameterType`s out of the box: `JSON`, `FormURLEncoded`, `MultipartFormData` and `Custom`. Meanwhile `JSON` and `FormURLEncoded` serialize your parameters in some way, `Custom(String)` sends your parameters as plain `NSData` and sets the value inside `Custom` as the `Content-Type`.
 
 For example:
 ```swift
