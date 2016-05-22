@@ -78,11 +78,12 @@ class POSTTests: XCTestCase {
         guard let CloudinaryAPIKey = dictionary["CloudinaryAPIKey"] as? String where CloudinaryAPIKey.characters.count > 0 else { return }
 
         let networking = Networking(baseURL: "https://api.cloudinary.com")
-
-        let pigImage = NetworkingImage.find(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self))
-        let pigImageData = pigImage.pngData()!
         let timestamp = "\(Int(NSDate().timeIntervalSince1970))"
-        let part = FormDataPart(data: pigImageData, parameterName: "file", filename: "\(timestamp).png")
+
+        let pngImage = NetworkingImage.find(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self))
+        let pngImageData = pngImage.pngData()!
+        let pngPart = FormDataPart(data: pngImageData, parameterName: "file", filename: "\(timestamp).png")
+
         var parameters = [
             "timestamp": timestamp,
             "public_id": timestamp
@@ -91,7 +92,7 @@ class POSTTests: XCTestCase {
         parameters["api_key"] = CloudinaryAPIKey
         parameters["signature"] = signature
 
-        networking.POST("/v1_1/\(CloudinaryCloudName)/image/upload", parameters: parameters, part: part) { JSON, error in
+        networking.POST("/v1_1/\(CloudinaryCloudName)/image/upload", parameters: parameters, part: pngPart) { JSON, error in
             let JSONResponse = JSON as! [String : AnyObject]
             XCTAssertEqual(timestamp, JSONResponse["original_filename"] as? String)
             XCTAssertNil(error)
