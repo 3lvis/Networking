@@ -57,8 +57,12 @@ class POSTTests: XCTestCase {
         }
     }
 
-    /*
     func testUploadingAnImageWithFormData() {
+        guard let path = NSBundle(forClass: POSTTests.self).pathForResource("Keys", ofType: "plist") else { return }
+        guard let dictionary = NSDictionary(contentsOfFile: path) else { return }
+        guard let CloudinarySecret = dictionary["CloudinarySecret"] as? String else { return }
+        guard let CloudinaryAPIKey = dictionary["CloudinaryAPIKey"] as? String else { return }
+
         let networking = Networking(baseURL: "https://api.cloudinary.com")
 
         let pigImage = NetworkingImage.find(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self))
@@ -69,10 +73,8 @@ class POSTTests: XCTestCase {
             "timestamp": timestamp,
             "public_id": timestamp
         ]
-        let secret = "PROVIDE_YOUR_OWN"
-        let APIKey = "PROVIDE_YOUR_OWN"
-        let signature = SHA1.signatureUsingParameters(parameters, secret: secret)
-        parameters["api_key"] = APIKey
+        let signature = SHA1.signatureUsingParameters(parameters, secret: CloudinarySecret)
+        parameters["api_key"] = CloudinaryAPIKey
         parameters["signature"] = signature
 
         networking.POST("/v1_1/elvisnunez/image/upload", part: part, parameters: parameters) { JSON, error in
@@ -81,7 +83,6 @@ class POSTTests: XCTestCase {
             XCTAssertNil(error)
         }
     }
-     */
 
     func testPOSTWithIvalidPath() {
         let networking = Networking(baseURL: baseURL)

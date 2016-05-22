@@ -31,6 +31,8 @@
 		1413F47C1CE7969C00482096 /* NSFileManager+Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14676B951CCB490C00FFDC92 /* NSFileManager+Helpers.swift */; };
 		1413F47D1CE7969F00482096 /* String+UTF8.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1413C1D51CBD1784000AF90F /* String+UTF8.swift */; };
 		1413F47E1CE796A300482096 /* TestCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1474C1C21CA2988900E15D84 /* TestCheck.swift */; };
+		1438B1EC1CF142D700923949 /* Keys.plist in Resources */ = {isa = PBXBuildFile; fileRef = 1438B1EB1CF142D700923949 /* Keys.plist */; };
+		1438B1ED1CF142D700923949 /* Keys.plist in Resources */ = {isa = PBXBuildFile; fileRef = 1438B1EB1CF142D700923949 /* Keys.plist */; };
 		14638D041CC64620002B9433 /* Networking.h in Headers */ = {isa = PBXBuildFile; fileRef = 14638D031CC645D2002B9433 /* Networking.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		14638D051CC64629002B9433 /* Dictionary+FormURLEncoded.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1474C1BC1CA2988900E15D84 /* Dictionary+FormURLEncoded.swift */; };
 		14638D061CC64629002B9433 /* JSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1474C1BD1CA2988900E15D84 /* JSON.swift */; };
@@ -108,6 +110,7 @@
 		1413F4631CE7963700482096 /* ImageTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageTests.swift; sourceTree = "<group>"; };
 		1413F4641CE7963700482096 /* NetworkingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkingTests.swift; sourceTree = "<group>"; };
 		1413F4651CE7963700482096 /* pig.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = pig.png; sourceTree = "<group>"; };
+		1438B1EB1CF142D700923949 /* Keys.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Keys.plist; sourceTree = "<group>"; };
 		14638CFA1CC6459A002B9433 /* Networking.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Networking.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		14638D021CC645C1002B9433 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		14638D031CC645D2002B9433 /* Networking.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Networking.h; sourceTree = "<group>"; };
@@ -213,6 +216,7 @@
 				1488E23D1CF138D700C6FBA3 /* SHA1.m */,
 				1488E23A1CF138D700C6FBA3 /* iOSTests-Bridging-Header.h */,
 				1488E23B1CF138D700C6FBA3 /* OSXTests-Bridging-Header.h */,
+				1438B1EB1CF142D700923949 /* Keys.plist */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -503,6 +507,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1438B1ED1CF142D700923949 /* Keys.plist in Resources */,
 				1413F4751CE7963700482096 /* pig.png in Resources */,
 				1413F46B1CE7963700482096 /* entries.json in Resources */,
 				1413F4691CE7963700482096 /* døgnvillburgere.jpg in Resources */,
@@ -541,6 +546,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1438B1EC1CF142D700923949 /* Keys.plist in Resources */,
 				1413F4741CE7963700482096 /* pig.png in Resources */,
 				1413F46A1CE7963700482096 /* entries.json in Resources */,
 				1413F4681CE7963700482096 /* døgnvillburgere.jpg in Resources */,
