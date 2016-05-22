@@ -58,10 +58,6 @@ class POSTTests: XCTestCase {
             "bool": true,
         ]
         networking.POST("/post", parameters: parameters, parts: [part1, part2]) { JSON, error in
-            let data = try! NSJSONSerialization.dataWithJSONObject(JSON!, options: .PrettyPrinted)
-            let string = NSString(data: data, encoding: NSUTF8StringEncoding)!
-            print(string)
-
             XCTAssertNil(error)
 
             guard let JSON = JSON as? [String : AnyObject] else { XCTFail(); return }
