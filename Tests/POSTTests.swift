@@ -44,7 +44,7 @@ class POSTTests: XCTestCase {
         }
     }
 
-    func testPOSTWithFormData() {
+    func testPOSTWithMultipartFormData() {
         let networking = Networking(baseURL: baseURL)
 
         let data = "SAMPLEDATA".dataUsingEncoding(NSUTF8StringEncoding)!
@@ -59,12 +59,12 @@ class POSTTests: XCTestCase {
         }
     }
 
-    func testUploadingAnImageWithFormData() {
+    func testUploadingAnImageWithMultipartFormData() {
         guard let path = NSBundle(forClass: POSTTests.self).pathForResource("Keys", ofType: "plist") else { return }
         guard let dictionary = NSDictionary(contentsOfFile: path) else { return }
-        guard let CloudinaryCloudName = dictionary["CloudinaryCloudName"] as? String else { return }
-        guard let CloudinarySecret = dictionary["CloudinarySecret"] as? String else { return }
-        guard let CloudinaryAPIKey = dictionary["CloudinaryAPIKey"] as? String else { return }
+        guard let CloudinaryCloudName = dictionary["CloudinaryCloudName"] as? String where CloudinaryCloudName.characters.count > 0 else { return }
+        guard let CloudinarySecret = dictionary["CloudinarySecret"] as? String where CloudinarySecret.characters.count > 0 else { return }
+        guard let CloudinaryAPIKey = dictionary["CloudinaryAPIKey"] as? String where CloudinaryAPIKey.characters.count > 0 else { return }
 
         let networking = Networking(baseURL: "https://api.cloudinary.com")
 
