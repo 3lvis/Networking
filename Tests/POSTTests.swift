@@ -60,7 +60,7 @@ class POSTTests: XCTestCase {
     func testUploadingAnImageWithFormData() {
         guard let path = NSBundle(forClass: POSTTests.self).pathForResource("Keys", ofType: "plist") else { return }
         guard let dictionary = NSDictionary(contentsOfFile: path) else { return }
-        guard let CloudinaryBucketName = dictionary["CloudinaryBucketName"] as? String else { return }
+        guard let CloudinaryCloudName = dictionary["CloudinaryCloudName"] as? String else { return }
         guard let CloudinarySecret = dictionary["CloudinarySecret"] as? String else { return }
         guard let CloudinaryAPIKey = dictionary["CloudinaryAPIKey"] as? String else { return }
 
@@ -78,10 +78,12 @@ class POSTTests: XCTestCase {
         parameters["api_key"] = CloudinaryAPIKey
         parameters["signature"] = signature
 
-        networking.POST("/v1_1/\(CloudinaryBucketName)/image/upload", part: part, parameters: parameters) { JSON, error in
+        networking.POST("/v1_1/\(CloudinaryCloudName)/image/upload", part: part, parameters: parameters) { JSON, error in
             let JSONResponse = JSON as! [String : AnyObject]
             XCTAssertEqual(timestamp, JSONResponse["original_filename"] as? String)
             XCTAssertNil(error)
+
+            self.deleteAllCloudinaryPhotos(networking: networking, cloudName: CloudinaryCloudName, secret: CloudinarySecret, APIKey: CloudinaryAPIKey)
         }
     }
 
@@ -143,5 +145,10 @@ class POSTTests: XCTestCase {
         networking.cancelPOST("/post")
 
         waitForExpectationsWithTimeout(15.0, handler: nil)
+    }
+
+    func deleteAllCloudinaryPhotos(networking networking: Networking, cloudName: String, secret: String, APIKey: String) {
+        networking.authenticate(username: APIKey, password: secret)
+        networking.DELETE("/v1_1/\(cloudName)/resources/image/upload?all=true") { JSON, error in }
     }
 }
