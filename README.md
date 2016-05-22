@@ -111,7 +111,7 @@ Providing the following authentication header `Anonymous-Token: AAAFFAAAA3DAAAAA
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.authenticate(headerKey: "Anonymous-Token", headerValue: "AAAFFAAAA3DAAAAAA")
-networking.POST("/get") { JSON, error in
+networking.GET("/get") { JSON, error in
     // Do something
 }
 ```
