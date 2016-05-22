@@ -25,10 +25,11 @@ public struct FormPart {
     private let parameterName: String
     private let filename: String
     private let type: FormPartType
+    var boundary: String = ""
 
     var formData: NSData {
         var body = ""
-        body += "--\(Networking.Boundary)\r\n"
+        body += "--\(boundary)\r\n"
         body += "Content-Disposition: form-data; "
         body += "name=\"\(self.parameterName)\"; "
         body += "filename=\"\(self.filename)\"\r\n"

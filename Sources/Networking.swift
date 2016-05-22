@@ -32,7 +32,6 @@ public extension Int {
 
 public class Networking {
     static let ErrorDomain = "NetworkingErrorDomain"
-    static let Boundary = "011000010111000001101001"
 
     struct FakeRequest {
         let response: AnyObject?
@@ -40,7 +39,7 @@ public class Networking {
     }
 
     /**
-     Provides the a bridge for configuring your Networking object with NSURLSessionConfiguration.
+     Provides the options for configuring your Networking object with NSURLSessionConfiguration.
      - `Default:` This configuration type manages upload and download tasks using the default options.
      - `Ephemeral:` A configuration type that uses no persistent storage for caches, cookies, or credentials. It's optimized for transferring data to and from your app’s memory.
      - `Background:` A configuration type that allows HTTP and HTTPS uploads or downloads to be performed in the background. It causes upload and download tasks to be performed by the system in a separate process.
@@ -58,25 +57,38 @@ public class Networking {
     }
 
     /**
-     Provides the rules to serialize your parameters, also sets the `Content-Type` header.
+     Sets the rules to serialize your parameters, also sets the `Content-Type` header.
      - `JSON:` Serializes your parameters using `NSJSONSerialization` and sets your `Content-Type` to `application/json`.
      - `FormURLEncoded:` Serializes your parameters using `Percent-encoding` and sets your `Content-Type` to `application/x-www-form-urlencoded`.
+     - `FormData:` Serializes your parameters and parts as multipart and sets your `Content-Type` to `multipart/form-data`.
      - `Custom(String):` Sends your parameters as plain data, sets your `Content-Type` to the value inside `Custom`.
      */
     public enum ParameterType {
+        /**
+         Serializes your parameters using `NSJSONSerialization` and sets your `Content-Type` to `application/json`.
+         */
         case JSON
+        /**
+         Serializes your parameters using `Percent-encoding` and sets your `Content-Type` to `application/x-www-form-urlencoded`.
+         */
         case FormURLEncoded
+        /**
+         Serializes your parameters and parts as multipart and sets your `Content-Type` to `multipart/form-data`.
+         */
         case FormData
+        /**
+         Sends your parameters as plain data, sets your `Content-Type` to the value inside `Custom`.
+         */
         case Custom(String)
 
-        var contentType: String {
+        func contentType(boundary boundary: String) -> String {
             switch self {
             case .JSON:
                 return "application/json"
             case .FormURLEncoded:
                 return "application/x-www-form-urlencoded"
             case .FormData:
-                return "multipart/form-data; boundary=\(Networking.Boundary)"
+                return "multipart/form-data; boundary=\(boundary)"
             case .Custom(let value):
                 return value
             }
@@ -122,6 +134,11 @@ public class Networking {
      Flag used to disable synchronous request when running automatic tests.
      */
     var disableTestingMode = false
+
+    /**
+     The boundary used for multipart requests
+     */
+    let boundary = String(format: "net.3lvis.networking.%08x%08x", arc4random(), arc4random())
 
     lazy var session: NSURLSession = {
         return NSURLSession(configuration: self.sessionConfiguration())
@@ -420,7 +437,7 @@ extension Networking {
         request.HTTPMethod = requestType.rawValue
 
         if let parameterType = parameterType {
-            request.addValue(parameterType.contentType, forHTTPHeaderField: "Content-Type")
+            request.addValue(parameterType.contentType(boundary: self.boundary), forHTTPHeaderField: "Content-Type")
         }
 
         if let accept = responseType.accept {
@@ -459,7 +476,7 @@ extension Networking {
                     guard let parametersDictionary = parameters as? [String : String] else { fatalError("Couldn't cast parameters as dictionary: \(parameters)") }
                     for (key, value) in parametersDictionary {
                         var body = ""
-                        body += "--\(Networking.Boundary)\r\n"
+                        body += "--\(self.boundary)\r\n"
                         body += "Content-Disposition: form-data; name=\"\(key)\""
                         body += "\r\n\r\n\(value)\r\n"
                         bodyData.appendData(body.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)!)
@@ -467,12 +484,13 @@ extension Networking {
                 }
 
                 if let parts = parts {
-                    for part in parts {
+                    for var part in parts {
+                        part.boundary = self.boundary
                         bodyData.appendData(part.formData)
                     }
                 }
 
-                bodyData.appendData("--\(Networking.Boundary)--\r\n".dataUsingEncoding(NSUTF8StringEncoding)!)
+                bodyData.appendData("--\(self.boundary)--\r\n".dataUsingEncoding(NSUTF8StringEncoding)!)
                 request.HTTPBody = bodyData
                 break
             case .Custom(_):
