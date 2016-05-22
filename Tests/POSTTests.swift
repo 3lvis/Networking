@@ -17,9 +17,10 @@ class POSTTests: XCTestCase {
     func testPOST() {
         let networking = Networking(baseURL: baseURL)
         networking.POST("/post", parameters: ["username" : "jameson", "password" : "secret"]) { JSON, error in
-            let JSONResponse = (JSON as! [String : AnyObject])["json"] as! [String : String]
-            XCTAssertEqual("jameson", JSONResponse["username"])
-            XCTAssertEqual("secret", JSONResponse["password"])
+            guard let JSON = JSON as? [String : AnyObject] else { XCTFail(); return }
+            let JSONResponse = JSON["json"] as? [String : String]
+            XCTAssertEqual("jameson", JSONResponse?["username"])
+            XCTAssertEqual("secret", JSONResponse?["password"])
             XCTAssertNil(error)
         }
     }
@@ -27,8 +28,8 @@ class POSTTests: XCTestCase {
     func testPOSTWithNoParameters() {
         let networking = Networking(baseURL: baseURL)
         networking.POST("/post") { JSON, error in
-            let JSONResponse = JSON as! [String : AnyObject]
-            XCTAssertEqual("http://httpbin.org/post", JSONResponse["url"] as? String)
+            let JSONResponse = JSON as? [String : AnyObject]
+            XCTAssertEqual("http://httpbin.org/post", JSONResponse?["url"] as? String)
             XCTAssertNil(error)
         }
     }
@@ -36,8 +37,9 @@ class POSTTests: XCTestCase {
     func testPOSTWithFormURLEncoded() {
         let networking = Networking(baseURL: baseURL)
         networking.POST("/post", parameterType: .FormURLEncoded, parameters: ["custname" : "jameson"]) { JSON, error in
-            let JSONResponse = (JSON as! [String : AnyObject])["form"] as! [String : String]
-            XCTAssertEqual("jameson", JSONResponse["custname"])
+            guard let JSON = JSON as? [String : AnyObject] else { XCTFail(); return }
+            let JSONResponse = JSON["form"] as? [String : String]
+            XCTAssertEqual("jameson", JSONResponse?["custname"])
             XCTAssertNil(error)
         }
     }
@@ -45,7 +47,7 @@ class POSTTests: XCTestCase {
     func testPOSTWithIvalidPath() {
         let networking = Networking(baseURL: baseURL)
         networking.POST("/posdddddt", parameters: ["username" : "jameson", "password" : "secret"]) { JSON, error in
-            XCTAssertEqual(error!.code, 404)
+            XCTAssertEqual(error?.code, 404)
             XCTAssertNil(JSON)
         }
     }
@@ -56,9 +58,9 @@ class POSTTests: XCTestCase {
         networking.fakePOST("/story", response: [["name" : "Elvis"]])
 
         networking.POST("/story", parameters: ["username" : "jameson", "password" : "secret"]) { JSON, error in
-            let JSON = JSON as! [[String : String]]
-            let value = JSON[0]["name"]
-            XCTAssertEqual(value!, "Elvis")
+            let JSON = JSON as? [[String : String]]
+            let value = JSON?[0]["name"]
+            XCTAssertEqual(value, "Elvis")
         }
     }
 
@@ -68,19 +70,19 @@ class POSTTests: XCTestCase {
         networking.fakePOST("/story", response: nil, statusCode: 401)
 
         networking.POST("/story") { JSON, error in
-            XCTAssertEqual(401, error!.code)
+            XCTAssertEqual(error?.code, 401)
         }
     }
 
     func testFakePOSTUsingFile() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakePOST("/entries", fileName: "entries.json", bundle: NSBundle(forClass: self.classForKeyedArchiver!))
+        networking.fakePOST("/entries", fileName: "entries.json", bundle: NSBundle(forClass: POSTTests.self))
 
         networking.POST("/entries") { JSON, error in
-            let JSON = JSON as! [[String : AnyObject]]
+            guard let JSON = JSON as? [[String : AnyObject]] else { XCTFail(); return }
             let entry = JSON[0]
-            let value = entry["title"] as! String
+            let value = entry["title"] as? String
             XCTAssertEqual(value, "Entry 1")
         }
     }
@@ -91,9 +93,7 @@ class POSTTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
         networking.POST("/post", parameters: ["username" : "jameson", "password" : "secret"]) { JSON, error in
-            let canceledCode = error!.code == -999
-            XCTAssertTrue(canceledCode)
-
+            XCTAssertEqual(error?.code, -999)
             expectation.fulfill()
         }
 

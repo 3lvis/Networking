@@ -28,8 +28,8 @@ class GETTests: XCTestCase {
     func testGET() {
         let networking = Networking(baseURL: baseURL)
         networking.GET("/get") { JSON, error in
-            let JSON = JSON as! [String : AnyObject]
-            let url = JSON["url"] as! String
+            guard let JSON = JSON as? [String : AnyObject] else { XCTFail(); return}
+            guard let url = JSON["url"] as? String else { XCTFail(); return}
             XCTAssertEqual(url, "http://httpbin.org/get")
         }
     }
@@ -38,7 +38,7 @@ class GETTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.GET("/invalidpath") { JSON, error in
             XCTAssertNil(JSON)
-            XCTAssertEqual(error!.code, 404)
+            XCTAssertEqual(error?.code, 404)
         }
     }
 
@@ -48,9 +48,9 @@ class GETTests: XCTestCase {
         networking.fakeGET("/stories", response: ["name" : "Elvis"])
 
         networking.GET("/stories") { JSON, error in
-            let JSON = JSON as! [String : String]
+            guard let JSON = JSON as? [String : String] else { XCTFail(); return}
             let value = JSON["name"]
-            XCTAssertEqual(value!, "Elvis")
+            XCTAssertEqual(value, "Elvis")
         }
     }
 
@@ -60,19 +60,19 @@ class GETTests: XCTestCase {
         networking.fakeGET("/stories", response: nil, statusCode: 401)
 
         networking.GET("/stories") { JSON, error in
-            XCTAssertEqual(401, error!.code)
+            XCTAssertEqual(error?.code, 401)
         }
     }
 
     func testFakeGETUsingFile() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakeGET("/entries", fileName: "entries.json", bundle: NSBundle(forClass: self.classForKeyedArchiver!))
+        networking.fakeGET("/entries", fileName: "entries.json", bundle: NSBundle(forClass: GETTests.self))
 
         networking.GET("/entries") { JSON, error in
-            let JSON = JSON as! [[String : AnyObject]]
+            guard let JSON = JSON as? [[String : AnyObject]] else { XCTFail(); return }
             let entry = JSON[0]
-            let value = entry["title"] as! String
+            let value = entry["title"] as? String
             XCTAssertEqual(value, "Entry 1")
         }
     }
@@ -83,9 +83,7 @@ class GETTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
         networking.GET("/get") { JSON, error in
-            let canceledCode = error!.code == -999
-            XCTAssertTrue(canceledCode)
-
+            XCTAssertEqual(error?.code, -999)
             expectation.fulfill()
         }
 

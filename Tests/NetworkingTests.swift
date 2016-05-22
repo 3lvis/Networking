@@ -8,9 +8,9 @@ class NetworkingTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.authenticate(username: "user", password: "passwd")
         networking.GET("/basic-auth/user/passwd") { JSON, error in
-            let JSON = JSON as! [String : AnyObject]
-            let user = JSON["user"] as! String
-            let authenticated = JSON["authenticated"] as! Bool
+            guard let JSON = JSON as? [String : AnyObject] else { XCTFail(); return}
+            let user = JSON["user"] as? String
+            let authenticated = JSON["authenticated"] as? Bool
             XCTAssertEqual(user, "user")
             XCTAssertEqual(authenticated, true)
         }
@@ -21,9 +21,9 @@ class NetworkingTests: XCTestCase {
         let token = "hi-mom"
         networking.authenticate(token: token)
         networking.POST("/post") { JSON, error in
-            let JSON = JSON as! [String : AnyObject]
-            let headers = JSON["headers"] as! [String : AnyObject]
-            XCTAssertEqual("Bearer \(token)", headers["Authorization"] as? String)
+            guard let JSON = JSON as? [String : AnyObject] else { XCTFail(); return}
+            let headers = JSON["headers"] as? [String : AnyObject]
+            XCTAssertEqual("Bearer \(token)", headers?["Authorization"] as? String)
         }
     }
 
@@ -32,13 +32,9 @@ class NetworkingTests: XCTestCase {
         let value = "hi-mom"
         networking.authenticate(headerValue: value)
         networking.POST("/post") { JSON, error in
-            let data = try! NSJSONSerialization.dataWithJSONObject(JSON!, options: .PrettyPrinted)
-            let string = NSString(data: data, encoding: NSUTF8StringEncoding)!
-            print(string)
-
-            let JSON = JSON as! [String : AnyObject]
-            let headers = JSON["headers"] as! [String : AnyObject]
-            XCTAssertEqual(value, headers["Authorization"] as? String)
+            guard let JSON = JSON as? [String : AnyObject] else { XCTFail(); return}
+            let headers = JSON["headers"] as? [String : AnyObject]
+            XCTAssertEqual(value, headers?["Authorization"] as? String)
         }
     }
 
@@ -48,9 +44,9 @@ class NetworkingTests: XCTestCase {
         let value = "hi-mom"        
         networking.authenticate(headerKey: key, headerValue: value)
         networking.POST("/post") { JSON, error in
-            let JSON = JSON as! [String : AnyObject]
-            let headers = JSON["headers"] as! [String : AnyObject]
-            XCTAssertEqual(value, headers[key] as? String)
+            guard let JSON = JSON as? [String : AnyObject] else { XCTFail(); return}
+            let headers = JSON["headers"] as? [String : AnyObject]
+            XCTAssertEqual(value, headers?[key] as? String)
         }
     }
 
@@ -83,16 +79,16 @@ class NetworkingTests: XCTestCase {
     func testDestinationURL() {
         let networking = Networking(baseURL: baseURL)
         let path = "/image/png"
-        let destinationURL = try! networking.destinationURL(path)
-        XCTAssertEqual(destinationURL.lastPathComponent!, "http:--httpbin.org-image-png")
+        guard let destinationURL = try? networking.destinationURL(path) else { XCTFail(); return }
+        XCTAssertEqual(destinationURL.lastPathComponent, "http:--httpbin.org-image-png")
     }
 
     func testDestinationURLCache() {
         let networking = Networking(baseURL: baseURL)
         let path = "/image/png"
         let cacheName = "png/png"
-        let destinationURL = try! networking.destinationURL(path, cacheName: cacheName)
-        XCTAssertEqual(destinationURL.lastPathComponent!, "png-png")
+        guard let destinationURL = try? networking.destinationURL(path, cacheName: cacheName) else { XCTFail(); return }
+        XCTAssertEqual(destinationURL.lastPathComponent, "png-png")
     }
 
     func testStatusCodeType() {
@@ -166,7 +162,7 @@ class NetworkingTests: XCTestCase {
         networking.downloadData(path) { data, error in
             synchronous = true
             XCTAssertTrue(NSThread.isMainThread())
-            XCTAssertEqual(data!.length, 8090)
+            XCTAssertEqual(data?.length, 8090)
         }
         XCTAssertTrue(synchronous)
     }

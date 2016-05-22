@@ -17,9 +17,10 @@ class PUTTests: XCTestCase {
     func testPUT() {
         let networking = Networking(baseURL: baseURL)
         networking.PUT("/put", parameters: ["username" : "jameson", "password" : "secret"]) { JSON, error in
-            let JSONResponse = (JSON as! [String : AnyObject])["json"] as! [String : String]
-            XCTAssertEqual("jameson", JSONResponse["username"])
-            XCTAssertEqual("secret", JSONResponse["password"])
+            guard let JSON = JSON as? [String : AnyObject] else { XCTFail(); return }
+            let JSONResponse = JSON["json"] as? [String : String]
+            XCTAssertEqual("jameson", JSONResponse?["username"])
+            XCTAssertEqual("secret", JSONResponse?["password"])
             XCTAssertNil(error)
         }
     }
@@ -27,7 +28,7 @@ class PUTTests: XCTestCase {
     func testPUTWithIvalidPath() {
         let networking = Networking(baseURL: baseURL)
         networking.PUT("/posdddddt", parameters: ["username" : "jameson", "password" : "secret"]) { JSON, error in
-            XCTAssertEqual(error!.code, 404)
+            XCTAssertEqual(error?.code, 404)
             XCTAssertNil(JSON)
         }
     }
@@ -38,9 +39,9 @@ class PUTTests: XCTestCase {
         networking.fakePUT("/story", response: [["name" : "Elvis"]])
 
         networking.PUT("/story", parameters: ["username" : "jameson", "password" : "secret"]) { JSON, error in
-            let JSON = JSON as! [[String : String]]
-            let value = JSON[0]["name"]
-            XCTAssertEqual(value!, "Elvis")
+            let JSON = JSON as? [[String : String]]
+            let value = JSON?[0]["name"]
+            XCTAssertEqual(value, "Elvis")
         }
     }
 
@@ -50,19 +51,19 @@ class PUTTests: XCTestCase {
         networking.fakePUT("/story", response: nil, statusCode: 401)
 
         networking.PUT("/story", parameters: nil) { JSON, error in
-            XCTAssertEqual(401, error!.code)
+            XCTAssertEqual(error?.code, 401)
         }
     }
 
     func testFakePUTUsingFile() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakePUT("/entries", fileName: "entries.json", bundle: NSBundle(forClass: self.classForKeyedArchiver!))
+        networking.fakePUT("/entries", fileName: "entries.json", bundle: NSBundle(forClass: PUTTests.self))
 
         networking.PUT("/entries", parameters: nil) { JSON, error in
-            let JSON = JSON as! [[String : AnyObject]]
+            guard let JSON = JSON as? [[String : AnyObject]] else { XCTFail(); return }
             let entry = JSON[0]
-            let value = entry["title"] as! String
+            let value = entry["title"] as? String
             XCTAssertEqual(value, "Entry 1")
         }
     }
@@ -73,9 +74,7 @@ class PUTTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
         networking.PUT("/put", parameters: ["username" : "jameson", "password" : "secret"]) { JSON, error in
-            let canceledCode = error!.code == -999
-            XCTAssertTrue(canceledCode)
-
+            XCTAssertEqual(error?.code, -999)
             expectation.fulfill()
         }
 
