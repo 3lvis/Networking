@@ -60,7 +60,7 @@ public class Networking {
      Sets the rules to serialize your parameters, also sets the `Content-Type` header.
      - `JSON:` Serializes your parameters using `NSJSONSerialization` and sets your `Content-Type` to `application/json`.
      - `FormURLEncoded:` Serializes your parameters using `Percent-encoding` and sets your `Content-Type` to `application/x-www-form-urlencoded`.
-     - `FormData:` Serializes your parameters and parts as multipart and sets your `Content-Type` to `multipart/form-data`.
+     - `MultipartFormData:` Serializes your parameters and parts as multipart and sets your `Content-Type` to `multipart/form-data`.
      - `Custom(String):` Sends your parameters as plain data, sets your `Content-Type` to the value inside `Custom`.
      */
     public enum ParameterType {
@@ -75,7 +75,7 @@ public class Networking {
         /**
          Serializes your parameters and parts as multipart and sets your `Content-Type` to `multipart/form-data`.
          */
-        case FormData
+        case MultipartFormData
         /**
          Sends your parameters as plain data, sets your `Content-Type` to the value inside `Custom`.
          */
@@ -87,7 +87,7 @@ public class Networking {
                 return "application/json"
             case .FormURLEncoded:
                 return "application/x-www-form-urlencoded"
-            case .FormData:
+            case .MultipartFormData:
                 return "multipart/form-data; boundary=\(boundary)"
             case .Custom(let value):
                 return value
@@ -484,7 +484,7 @@ extension Networking {
                 let formattedParameters = parametersDictionary.formURLEncodedFormat()
                 request.HTTPBody = formattedParameters.dataUsingEncoding(NSUTF8StringEncoding)
                 break
-            case .FormData:
+            case .MultipartFormData:
                 let bodyData = NSMutableData()
 
                 if let parameters = parameters as? [String : AnyObject] {

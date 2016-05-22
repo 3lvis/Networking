@@ -75,7 +75,7 @@ public extension Networking {
      - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and a `NSError`.
      */
     public func POST(path: String, parameters: AnyObject? = nil, parts: [FormPart], completion: (JSON: AnyObject?, error: NSError?) -> ()) {
-        self.request(.POST, path: path, parameterType: .FormData, parameters: parameters, parts: parts, responseType: .JSON, completion: completion)
+        self.request(.POST, path: path, parameterType: .MultipartFormData, parameters: parameters, parts: parts, responseType: .JSON, completion: completion)
     }
 
     /**
