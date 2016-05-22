@@ -62,8 +62,8 @@ public extension Networking {
      default this is JSON.
      - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and a `NSError`.
      */
-    public func POST(path: String, file: File, parameters: AnyObject? = nil, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
-        self.POST(path, files: [file], parameters: parameters, completion: completion)
+    public func POST(path: String, part: FormPart, parameters: AnyObject? = nil, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
+        self.POST(path, parts: [part], parameters: parameters, completion: completion)
     }
 
     /**
@@ -74,23 +74,28 @@ public extension Networking {
      default this is JSON.
      - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and a `NSError`.
      */
-    public func POST(path: String, files: [File], parameters: AnyObject? = nil, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
+    public func POST(path: String, parts: [FormPart], parameters: AnyObject? = nil, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
         let bodyData = NSMutableData()
-        bodyData.appendData(Networking.Boundary.dataUsingEncoding(NSUTF8StringEncoding)!)
-        for file in files {
-            bodyData.appendData(file.formData)
-        }
 
         if let parameters = parameters {
             guard let parametersDictionary = parameters as? [String : String] else { fatalError("Couldn't cast parameters as dictionary: \(parameters)") }
-            for (value, key) in parametersDictionary {
+            for (key, value) in parametersDictionary {
                 var body = ""
                 body += "--\(Networking.Boundary)\r\n"
                 body += "Content-Disposition: form-data; name=\"\(key)\""
-                body += "\r\n\r\n\(value)"
+                body += "\r\n\r\n\(value)\r\n"
                 bodyData.appendData(body.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)!)
             }
         }
+
+        let string = NSString(data: bodyData, encoding: NSUTF8StringEncoding)!
+        print(string)
+
+        for part in parts {
+            bodyData.appendData(part.formData)
+        }
+
+        bodyData.appendData("--\(Networking.Boundary)--\r\n".dataUsingEncoding(NSUTF8StringEncoding)!)
 
         self.request(.POST, path: path, parameterType: .FormData, parameters: bodyData, responseType: .JSON, completion: completion)
     }

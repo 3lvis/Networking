@@ -8,7 +8,7 @@ public enum FileType {
     var contentType: String {
         switch self {
         case .PNG:
-            return "image/png"
+            return "application/octet-stream"
         case .JPG:
             return "image/jpeg"
         case .Custom(let value):
@@ -17,7 +17,7 @@ public enum FileType {
     }
 }
 
-public struct File {
+public struct FormPart {
     let data: NSData
     let parameterName: String
     let filename: String
@@ -26,13 +26,19 @@ public struct File {
     var formData: NSData {
         var body = ""
         body += "--\(Networking.Boundary)\r\n"
-        body += "Content-Disposition: form-data; name=\"\(self.parameterName)\""
-        body += "; filename=\"\(self.filename)\"\r\n"
+        body += "Content-Disposition: form-data; "
+        body += "name=\"\(self.parameterName)\"; "
+        body += "filename=\"\(self.filename)\"\r\n"
         body += "Content-Type: \(self.type.contentType)\r\n\r\n"
 
         let bodyData = NSMutableData()
-        bodyData.appendData(body.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false)!)
+        bodyData.appendData(body.dataUsingEncoding(NSUTF8StringEncoding)!)
+
+        let string = NSString(data: bodyData, encoding: NSUTF8StringEncoding)!
+        print(string)
+
         bodyData.appendData(self.data)
+        bodyData.appendData("\r\n".dataUsingEncoding(NSUTF8StringEncoding)!)
 
         return bodyData
     }

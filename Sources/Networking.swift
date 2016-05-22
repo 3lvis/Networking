@@ -32,7 +32,7 @@ public extension Int {
 
 public class Networking {
     static let ErrorDomain = "NetworkingErrorDomain"
-    static let Boundary = "---011000010111000001101001"
+    static let Boundary = "011000010111000001101001"
 
     struct FakeRequest {
         let response: AnyObject?
@@ -453,6 +453,7 @@ extension Networking {
                 request.HTTPBody = formattedParameters.dataUsingEncoding(NSUTF8StringEncoding)
                 break
             case .FormData:
+                request.addValue("XMLHttpRequest", forHTTPHeaderField: "X-Requested-With")
                 request.HTTPBody = parameters as? NSData
                 break
             case .Custom(_):
