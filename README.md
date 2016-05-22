@@ -28,6 +28,10 @@
     * [Custom authentication header](#custom-authentication-header)
 * [Making a request](#making-a-request)
 * [Choosing a content type](#choosing-a-content-type)
+    * [JSON](#json)
+    * [Percent-encoding](#percent-encoding)
+    * [Multipart](#multipart)
+    * [Others](#others)
 * [Cancelling a request](#cancelling-a-request)
 * [Faking a request](#faking-a-request)
 * [Downloading and caching an image](#downloading-and-caching-an-image)
@@ -43,7 +47,7 @@
 Since **Networking** is basically a wrapper of `NSURLSession` we can take leverage of the great configuration types that it supports, such as `Default`, `Ephemeral` and `Background`, if you don't provide any or don't have special needs then `Default` will be used.
 
  - `Default`: The default session configuration uses a persistent disk-based cache (except when the result is downloaded to a file) and stores credentials in the user’s keychain. It also stores cookies (by default) in the same shared cookie store as the NSURLConnection and NSURLDownload classes.
- 
+
 - `Ephemeral`: An ephemeral session configuration object is similar to a default session configuration object except that the corresponding session object does not store caches, credential stores, or any session-related data to disk. Instead, session-related data is stored in RAM. The only time an ephemeral session writes data to disk is when you tell it to write the contents of a URL to a file.
 
 The main advantage to using ephemeral sessions is privacy. By not writing potentially sensitive data to disk, you make it less likely that the data will be intercepted and used later. For this reason, ephemeral sessions are ideal for private browsing modes in web browsers and other similar situations.
@@ -149,7 +153,7 @@ The `Content-Type` HTTP specification is so unfriendly, you have to know the spe
 
 **Networking** by default uses `application/json` as the `Content-Type`, if you're sending JSON you don't have to do anything. But if you want to send other types of parameters you can do it by providing the `ParameterType` attribute. For example, if you want to use `application/x-www-form-urlencoded` just use the `.FormURLEncoded` parameter type, internally **Networking** will format your parameters so they use [`Percent-encoding`](https://en.wikipedia.org/wiki/Percent-encoding#The_application.2Fx-www-form-urlencoded_type). No more changes needed.
 
-**JSON parameters**:
+### JSON
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
@@ -158,7 +162,7 @@ networking.POST("/post", parameters: ["name" : "jameson"]) { JSON, error in
 }
 ```
 
-**Percent encoded parameters**:
+### Percent-encoding
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
@@ -167,20 +171,36 @@ networking.POST("/post", parameterType: .FormURLEncoded, parameters: ["name" : "
 }
 ```
 
-**Multipart**
+### Multipart
 
-A multipart upload consists in appending one or several [FormPart](https://github.com/3lvis/Networking/blob/master/Sources/FormPart.swift) items to a request.
+A multipart upload consists in appending one or several [FormPart](https://github.com/3lvis/Networking/blob/master/Sources/FormPart.swift) items to a request. The simplest multipart request would look like this.
 
 ```swift
 let networking = Networking(baseURL: "https://example.com")
 let imageData = UIImagePNGRepresentation(imageToUpload)!
 let part = FormPart(data: imageData, parameterName: "file", filename: "selfie.png")
 networking.POST("/image/upload", part: part) { JSON, error in
-    // do something
+  // Successfull upload using `multipart/form-data` as `Content-Type`
 }
 ```
 
-**Others**
+If you need to use several parts or append other parameters than aren't files, you can do it like this:
+
+```swift
+let networking = Networking(baseURL: "https://example.com")
+let part1 = FormPart(data: imageData1, parameterName: "file1", filename: "selfie1.png")
+let part2 = FormPart(data: imageData2, parameterName: "file2", filename: "selfie2.png")
+let parameters = ["username" : "3lvis"]
+networking.POST("/image/upload", parts: [part1, part2], parameters: parameters) { JSON, error in
+    // Do something
+}
+```
+
+#### FormPart Content-Type
+
+`FormPart` uses `FormPartType` to generate the content type for each part. The default `FormPartType` is `.Data` which adds the `application/octet-stream` to your part. If you want to use a content type that is not available between the existing `FormPartType`, you can use `.Custom("your-content-type)`.
+
+### Others
 
 At the moment **Networking** supports three types of `ParameterType`s out of the box: `JSON`, `FormURLEncoded` and `Custom`. Meanwhile `JSON` and `FormURLEncoded` serialize your parameters in some way, `Custom(String)` sends your parameters as plain `NSData` and sets the value inside `Custom` as the `Content-Type`.
 
