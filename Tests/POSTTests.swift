@@ -16,11 +16,23 @@ class POSTTests: XCTestCase {
 
     func testPOST() {
         let networking = Networking(baseURL: baseURL)
-        networking.POST("/post", parameters: ["username" : "jameson", "password" : "secret"]) { JSON, error in
+        let parameters = [
+            "string": "valueA",
+            "int": 20,
+            "double": 20.0,
+            "bool": true
+        ]
+        networking.POST("/post", parameters: parameters) { JSON, error in
+            let data = try! NSJSONSerialization.dataWithJSONObject(JSON!, options: .PrettyPrinted)
+            let string = NSString(data: data, encoding: NSUTF8StringEncoding)!
+            print(string)
+
             guard let JSON = JSON as? [String : AnyObject] else { XCTFail(); return }
-            let JSONResponse = JSON["json"] as? [String : String]
-            XCTAssertEqual("jameson", JSONResponse?["username"])
-            XCTAssertEqual("secret", JSONResponse?["password"])
+            guard let JSONResponse = JSON["json"] as? [String : AnyObject] else { XCTFail(); return }
+            XCTAssertEqual(JSONResponse["string"] as? String, "valueA")
+            XCTAssertEqual(JSONResponse["int"] as? Int, 20)
+            XCTAssertEqual(JSONResponse["double"] as? Double, 20.0)
+            XCTAssertEqual(JSONResponse["bool"] as? Bool, true)
             XCTAssertNil(error)
         }
     }
@@ -36,10 +48,19 @@ class POSTTests: XCTestCase {
 
     func testPOSTWithFormURLEncoded() {
         let networking = Networking(baseURL: baseURL)
-        networking.POST("/post", parameterType: .FormURLEncoded, parameters: ["custname" : "jameson"]) { JSON, error in
+        let parameters = [
+            "string": "valueA",
+            "int": 20,
+            "double": 20.0,
+            "bool": true
+        ]
+        networking.POST("/post", parameterType: .FormURLEncoded, parameters: parameters) { JSON, error in
             guard let JSON = JSON as? [String : AnyObject] else { XCTFail(); return }
-            let JSONResponse = JSON["form"] as? [String : String]
-            XCTAssertEqual("jameson", JSONResponse?["custname"])
+            guard let form = JSON["form"] as? [String : AnyObject] else { XCTFail(); return }
+            XCTAssertEqual(form["string"] as? String, "valueA")
+            XCTAssertEqual(form["int"] as? String, "20")
+            XCTAssertEqual(form["double"] as? String, "20")
+            XCTAssertEqual(form["bool"] as? String, "1")
             XCTAssertNil(error)
         }
     }
