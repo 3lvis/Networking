@@ -439,4 +439,4 @@ This library was made with love by [@3lvis](https://twitter.com/3lvis).
 
 ## Attribution
 
-The logo typeface comes thanks to [Sanid Jusić](https://dribbble.com/shots/1049674-Free-Colorfull-Triangle-Typeface)
+The logo typeface comes thanks to [Sanid Jusić](https://dribbble.com/shots/1049674-Free-Colorfull-Triangle-Typeface).
