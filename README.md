@@ -343,7 +343,7 @@ For example a cancelled request will print this:
 ```
 ========== Networking Error ==========
 
-Cancelled request: <NSMutableURLRequest: 0x7fdc80eb0e30> { URL: https://api.mmm.com/38bea9c8b75bfed1326f90c48675fce87dd04ae6/thumb/small }
+Cancelled request: https://api.mmm.com/38bea9c8b75bfed1326f90c48675fce87dd04ae6/thumb/small
 
 ================= ~ ==================
 ```
@@ -352,31 +352,39 @@ A 404 request will print something like this:
 
 ```
 ========== Networking Error ==========
+ 
+*** Request ***
 
-Error 3840: Error Domain=NSCocoaErrorDomain Code=3840 "JSON text did not start with array or object and option to allow fragments not set." UserInfo={NSDebugDescription=JSON text did not start with array or object and option to allow fragments not set.}
+Error 404: Error Domain=NetworkingErrorDomain Code=404 "not found" UserInfo={NSLocalizedDescription=not found}
 
-Request: <NSMutableURLRequest: 0x7fede8d17220> { URL: http://httpbin.org/invalidpath }
-
+URL: http://httpbin.org/posdddddt
+ 
+Parameters: {
+  "password" : "secret",
+  "username" : "jameson"
+}
+ 
 Data: <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
 <title>404 Not Found</title>
 <h1>Not Found</h1>
 <p>The requested URL was not found on the server.  If you entered the URL manually please check your spelling and try again.</p>
 
-
-Response status code: 404
-
-Path: http://httpbin.org/invalidpath
-
-Response: <NSHTTPURLResponse: 0x7fede8d0c4e0> { URL: http://httpbin.org/invalidpath } { status code: 404, headers {
+*** Response ***
+ 
+Headers: ["Accept": "application/json", "Content-Type": "application/json"]
+ 
+Status code: 404 — not found
+ 
+Full object: <NSHTTPURLResponse: 0x1006173d0> { URL: http://httpbin.org/posdddddt } { status code: 404, headers {
     "Access-Control-Allow-Credentials" = true;
     "Access-Control-Allow-Origin" = "*";
     Connection = "keep-alive";
     "Content-Length" = 233;
     "Content-Type" = "text/html";
-    Date = "Tue, 17 Nov 2015 09:59:42 GMT";
+    Date = "Tue, 24 May 2016 10:13:31 GMT";
     Server = nginx;
 } }
-
+ 
 ================= ~ ==================
 ```
 
