@@ -586,7 +586,6 @@ extension Networking {
                 print(" ")
             }
         } else {
-            print(" ")
             print("*** Request ***")
             print(" ")
 
@@ -629,7 +628,6 @@ extension Networking {
             }
 
             if let response = response as? NSHTTPURLResponse {
-                print(" ")
                 print("*** Response ***")
                 print(" ")
 
