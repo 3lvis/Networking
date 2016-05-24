@@ -581,16 +581,19 @@ extension Networking {
 
         let isCancelled = error.code == -999
         if isCancelled {
-            if let request = request {
-                print("Cancelled request: \(request)")
+            if let request = request, url = request.URL {
+                print("Cancelled request: \(url.absoluteString)")
                 print(" ")
             }
         } else {
+            print("*** Request ***")
+            print(" ")
+
             print("Error \(error.code): \(error.description)")
             print(" ")
 
-            if let request = request {
-                print("Request: \(request)")
+            if let request = request, url = request.URL {
+                print("URL: \(url.absoluteString)")
                 print(" ")
             }
 
@@ -600,8 +603,10 @@ extension Networking {
                     do {
                         let data = try NSJSONSerialization.dataWithJSONObject(parameters, options: .PrettyPrinted)
                         let string = String(data: data, encoding: NSUTF8StringEncoding)
-                        print("Parameters: \(string)")
-                        print(" ")
+                        if let string = string {
+                            print("Parameters: \(string)")
+                            print(" ")
+                        }
                     } catch let error as NSError {
                         print("Failed pretty printing parameters: \(parameters), error: \(error)")
                         print(" ")
@@ -615,25 +620,26 @@ extension Networking {
                     break
                 default: break
                 }
-
-                print(" ")
             }
 
-            if let data = data, stringData = NSString(data: data, encoding: NSUTF8StringEncoding) {
+            if let data = data, stringData = String(data: data, encoding: NSUTF8StringEncoding) {
                 print("Data: \(stringData)")
                 print(" ")
             }
 
             if let response = response as? NSHTTPURLResponse {
+                print("*** Response ***")
+                print(" ")
+
                 if let headers = request?.allHTTPHeaderFields {
                     print("Headers: \(headers)")
                     print(" ")
                 }
-                print("Response status code: \(response.statusCode) — \(NSHTTPURLResponse.localizedStringForStatusCode(response.statusCode))")
+
+                print("Status code: \(response.statusCode) — \(NSHTTPURLResponse.localizedStringForStatusCode(response.statusCode))")
                 print(" ")
-                print("Path: \(response.URL?.absoluteString)")
-                print(" ")
-                print("Response: \(response)")
+
+                print("Full object: \(response)")
                 print(" ")
             }
         }
