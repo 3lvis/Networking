@@ -33,7 +33,6 @@ class PUTTests: XCTestCase {
             guard let contentLength = headers["Content-Length"] as? String else { XCTFail(); return}
             guard let contentType = headers["Content-Type"] as? String else { XCTFail(); return}
             XCTAssertEqual(url, "http://httpbin.org/put")
-            XCTAssertEqual(contentLength, "458")
             XCTAssertEqual(contentType, "application/json")
         }
     }

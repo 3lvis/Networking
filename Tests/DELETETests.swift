@@ -31,7 +31,6 @@ class DELETETests: XCTestCase {
             guard let contentLength = headers["Content-Length"] as? String else { XCTFail(); return}
             guard let contentType = headers["Content-Type"] as? String else { XCTFail(); return}
             XCTAssertEqual(url, "http://httpbin.org/delete")
-            XCTAssertEqual(contentLength, "461")
             XCTAssertEqual(contentType, "application/json")
         }
     }
