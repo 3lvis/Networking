@@ -267,7 +267,7 @@ public class Networking {
      - parameter completion: A closure that gets called when the download request is completed, it contains  a `data` object and a `NSError`.
      */
     public func downloadData(path: String, cacheName: String? = nil, completion: (data: NSData?, error: NSError?) -> Void) {
-        self.request(.GET, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .Data) { response, error in
+        self.request(.GET, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .Data) { response, headers, error in
             completion(data: response as? NSData, error: error)
         }
     }
@@ -371,18 +371,18 @@ extension Networking {
         self.fakeRequests[requestType] = fakeRequests
     }
 
-    func request(requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, parts: [FormDataPart]?, responseType: ResponseType, completion: (response: AnyObject?, error: NSError?) -> ()) {
+    func request(requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, parts: [FormDataPart]?, responseType: ResponseType, completion: (response: AnyObject?, headers: [String : AnyObject], error: NSError?) -> ()) {
         if let responses = self.fakeRequests[requestType], fakeRequest = responses[path] {
             if fakeRequest.statusCode.statusCodeType() == .Successful {
-                completion(response: fakeRequest.response, error: nil)
+                completion(response: fakeRequest.response, headers: [String : AnyObject](), error: nil)
             } else {
                 let error = NSError(domain: Networking.ErrorDomain, code: fakeRequest.statusCode, userInfo: [NSLocalizedDescriptionKey : NSHTTPURLResponse.localizedStringForStatusCode(fakeRequest.statusCode)])
-                completion(response: nil, error: error)
+                completion(response: nil, headers: [String : AnyObject](), error: error)
             }
         } else {
             switch responseType {
             case .JSON:
-                self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, error in
+                self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, headers, error in
                     var returnedError = error
                     var returnedResponse: AnyObject?
                     if error == nil {
@@ -396,7 +396,7 @@ extension Networking {
                     }
 
                     TestCheck.testBlock(disabled: self.disableTestingMode) {
-                        completion(response: returnedResponse, error: returnedError)
+                        completion(response: returnedResponse, headers: headers, error: returnedError)
                     }
                 }
                 break
@@ -404,10 +404,10 @@ extension Networking {
                 self.objectFromCache(path, cacheName: cacheName, responseType: responseType) { object in
                     if let object = object {
                         TestCheck.testBlock(disabled: self.disableTestingMode) {
-                            completion(response: object, error: nil)
+                            completion(response: object, headers: [String : AnyObject](), error: nil)
                         }
                     } else {
-                        self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, error in
+                        self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, headers, error in
                             var returnedResponse: AnyObject?
                             if let data = data where data.length > 0 {
                                 guard let destinationURL = try? self.destinationURL(path, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
@@ -429,7 +429,7 @@ extension Networking {
                                 }
                             }
                             TestCheck.testBlock(disabled: self.disableTestingMode) {
-                                completion(response: returnedResponse, error: error)
+                                completion(response: returnedResponse, headers: [String : AnyObject](), error: error)
                             }
                         }
                     }
@@ -439,7 +439,7 @@ extension Networking {
         }
     }
 
-    func dataRequest(requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, parts: [FormDataPart]?, responseType: ResponseType, completion: (response: NSData?, error: NSError?) -> ()) {
+    func dataRequest(requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, parts: [FormDataPart]?, responseType: ResponseType, completion: (response: NSData?, headers: [String : AnyObject], error: NSError?) -> ()) {
         let request = NSMutableURLRequest(URL: self.urlForPath(path))
         request.HTTPMethod = requestType.rawValue
 
@@ -507,12 +507,13 @@ extension Networking {
         }
 
         if let serializingError = serializingError {
-            completion(response: nil, error: serializingError)
+            completion(response: nil, headers: [String : AnyObject](), error: serializingError)
         } else {
             var connectionError: NSError?
             let semaphore = dispatch_semaphore_create(0)
             var returnedResponse: NSURLResponse?
             var returnedData: NSData?
+            var returnedHeaders = [String : AnyObject]()
 
             self.session.dataTaskWithRequest(request) { data, response, error in
                 returnedResponse = response
@@ -520,6 +521,10 @@ extension Networking {
                 returnedData = data
 
                 if let httpResponse = response as? NSHTTPURLResponse {
+                    if let headers = httpResponse.allHeaderFields as? [String : AnyObject] {
+                        returnedHeaders = headers
+                    }
+
                     if httpResponse.statusCode >= 200 && httpResponse.statusCode < 300 {
                         if let data = data where data.length > 0 {
                             returnedData = data
@@ -537,14 +542,14 @@ extension Networking {
                     }
 
                     self.logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError)
-                    completion(response: returnedData, error: connectionError)
+                    completion(response: returnedData, headers: returnedHeaders, error: connectionError)
                 }
                 }.resume()
 
             if TestCheck.isTesting && self.disableTestingMode == false {
                 dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
                 self.logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError)
-                completion(response: returnedData, error: connectionError)
+                completion(response: returnedData, headers: returnedHeaders, error: connectionError)
             }
         }
     }
@@ -597,6 +602,11 @@ extension Networking {
                 print(" ")
             }
 
+            if let headers = request?.allHTTPHeaderFields {
+                print("Headers: \(headers)")
+                print(" ")
+            }
+
             if let parameterType = parameterType, parameters = parameters {
                 switch parameterType {
                 case .JSON:
@@ -631,15 +641,12 @@ extension Networking {
                 print("*** Response ***")
                 print(" ")
 
-                if let headers = request?.allHTTPHeaderFields {
+                if let headers = response.allHeaderFields as? [String : AnyObject] {
                     print("Headers: \(headers)")
                     print(" ")
                 }
 
                 print("Status code: \(response.statusCode) — \(NSHTTPURLResponse.localizedStringForStatusCode(response.statusCode))")
-                print(" ")
-
-                print("Full object: \(response)")
                 print(" ")
             }
         }
