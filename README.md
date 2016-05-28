@@ -159,6 +159,15 @@ networking.POST("/post", parameters: ["username" : "jameson", "password" : "secr
 }
 ```
 
+Just add headers to the completion block if you want headers, or remove it if you don't want it.
+
+```swift
+let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
+networking.GET("/stories") { JSON, headers, error in
+    // headers is a [String : AnyObject] dictionary
+}
+```
+
 ## Choosing a Content Type
 
 The `Content-Type` HTTP specification is so unfriendly, you have to know the specifics of it before understanding that content type is really just the parameter type. Because of this **Networking** uses a `ParameterType` instead of a `ContentType`. Anyway, here's hoping this makes it more human friendly.
