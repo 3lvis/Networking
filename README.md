@@ -54,8 +54,6 @@ Since **Networking** is basically a wrapper of `NSURLSession` we can take levera
 
 - `Background`: This configuration type is suitable for transferring data files while the app runs in the background. A session configured with this object hands control of the transfers over to the system, which handles the transfers in a separate process. In iOS, this configuration makes it possible for transfers to continue even when the app itself is suspended or terminated.
 
-If an iOS app is terminated by the system and relaunched, it retrieves the status of transfers that were in progress at the time of termination. This behavior applies only for normal termination of the app by the system. If the user terminates the app from the multitasking screen, the system cancels all of the session’s background transfers. In addition, the system does not automatically relaunch apps that were forced to quit by the user. The user must explicitly relaunch the app before transfers can start over.
-
 ```swift
 // Default
 let networking = Networking(baseURL: "http://httpbin.org")
