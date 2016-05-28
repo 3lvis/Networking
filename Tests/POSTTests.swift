@@ -37,6 +37,19 @@ class POSTTests: XCTestCase {
         }
     }
 
+    func testPOSTWithHeaders() {
+        let networking = Networking(baseURL: baseURL)
+        networking.POST("/post") { JSON, headers, error in
+            guard let JSON = JSON as? [String : AnyObject] else { XCTFail(); return}
+            guard let url = JSON["url"] as? String else { XCTFail(); return}
+            guard let contentLength = headers["Content-Length"] as? String else { XCTFail(); return}
+            guard let contentType = headers["Content-Type"] as? String else { XCTFail(); return}
+            XCTAssertEqual(url, "http://httpbin.org/post")
+            XCTAssertEqual(contentLength, "459")
+            XCTAssertEqual(contentType, "application/json")
+        }
+    }
+
     func testPOSTWithNoParameters() {
         let networking = Networking(baseURL: baseURL)
         networking.POST("/post") { JSON, error in

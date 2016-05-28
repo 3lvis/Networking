@@ -8,7 +8,7 @@ public extension Networking {
      default this is JSON.
     - parameter completion: A closure that gets called when the PUT request is completed, it contains a `JSON` object and a `NSError`.
     */
-    public func PUT(path: String, parameterType: ParameterType = .JSON, parameters: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
+    public func PUT(path: String, parameterType: ParameterType = .JSON, parameters: AnyObject? = nil, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
         self.request(.PUT, path: path, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .JSON) { JSON, headers, error in
             completion(JSON: JSON, error: error)
         }
@@ -21,7 +21,7 @@ public extension Networking {
      default this is JSON.
      - parameter completion: A closure that gets called when the PUT request is completed, it contains a `JSON` object and a `NSError`.
      */
-    public func PUT(path: String, parameterType: ParameterType = .JSON, parameters: AnyObject?, completion: (JSON: AnyObject?, headers: [String : String]?, error: NSError?) -> ()) {
+    public func PUT(path: String, parameterType: ParameterType = .JSON, parameters: AnyObject? = nil, completion: (JSON: AnyObject?, headers: [String : AnyObject], error: NSError?) -> ()) {
         self.request(.PUT, path: path, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .JSON, completion: completion)
     }
 

@@ -17,7 +17,7 @@ public extension Networking {
      - parameter path: The path for the GET request.
      - parameter completion: A closure that gets called when the GET request is completed, it contains a `JSON` object and a `NSError`.
      */
-    public func GET(path: String, parameterType: ParameterType = .JSON, completion: (JSON: AnyObject?, headers: [String : String]?, error: NSError?) -> ()) {
+    public func GET(path: String, parameterType: ParameterType = .JSON, completion: (JSON: AnyObject?, headers: [String : AnyObject], error: NSError?) -> ()) {
         self.request(.GET, path: path, parameterType: parameterType, parameters: nil, parts: nil, responseType: .JSON, completion: completion)
     }
 

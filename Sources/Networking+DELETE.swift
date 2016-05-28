@@ -17,7 +17,7 @@ public extension Networking {
      - parameter path: The path for the DELETE request.
      - parameter completion: A closure that gets called when the DELETE request is completed, it contains a `JSON` object and a `NSError`.
      */
-    public func DELETE(path: String, completion: (JSON: AnyObject?, headers: [String : String]?, error: NSError?) -> ()) {
+    public func DELETE(path: String, completion: (JSON: AnyObject?, headers: [String : AnyObject], error: NSError?) -> ()) {
         self.request(.DELETE, path: path, parameterType: .JSON, parameters: nil, parts: nil, responseType: .JSON, completion: completion)
     }
 
