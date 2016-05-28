@@ -267,7 +267,7 @@ public class Networking {
      - parameter completion: A closure that gets called when the download request is completed, it contains  a `data` object and a `NSError`.
      */
     public func downloadData(path: String, cacheName: String? = nil, completion: (data: NSData?, error: NSError?) -> Void) {
-        self.request(.GET, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .Data) { response, error in
+        self.request(.GET, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .Data) { response, headers, error in
             completion(data: response as? NSData, error: error)
         }
     }
@@ -371,13 +371,13 @@ extension Networking {
         self.fakeRequests[requestType] = fakeRequests
     }
 
-    func request(requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, parts: [FormDataPart]?, responseType: ResponseType, completion: (response: AnyObject?, error: NSError?) -> ()) {
+    func request(requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, parts: [FormDataPart]?, responseType: ResponseType, completion: (response: AnyObject?, headers: [String : String]?, error: NSError?) -> ()) {
         if let responses = self.fakeRequests[requestType], fakeRequest = responses[path] {
             if fakeRequest.statusCode.statusCodeType() == .Successful {
-                completion(response: fakeRequest.response, error: nil)
+                completion(response: fakeRequest.response, headers: nil, error: nil)
             } else {
                 let error = NSError(domain: Networking.ErrorDomain, code: fakeRequest.statusCode, userInfo: [NSLocalizedDescriptionKey : NSHTTPURLResponse.localizedStringForStatusCode(fakeRequest.statusCode)])
-                completion(response: nil, error: error)
+                completion(response: nil, headers: nil, error: error)
             }
         } else {
             switch responseType {
@@ -396,7 +396,7 @@ extension Networking {
                     }
 
                     TestCheck.testBlock(disabled: self.disableTestingMode) {
-                        completion(response: returnedResponse, error: returnedError)
+                        completion(response: returnedResponse, headers: nil, error: returnedError)
                     }
                 }
                 break
@@ -404,7 +404,7 @@ extension Networking {
                 self.objectFromCache(path, cacheName: cacheName, responseType: responseType) { object in
                     if let object = object {
                         TestCheck.testBlock(disabled: self.disableTestingMode) {
-                            completion(response: object, error: nil)
+                            completion(response: object, headers: nil, error: nil)
                         }
                     } else {
                         self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, error in
@@ -429,7 +429,7 @@ extension Networking {
                                 }
                             }
                             TestCheck.testBlock(disabled: self.disableTestingMode) {
-                                completion(response: returnedResponse, error: error)
+                                completion(response: returnedResponse, headers: nil, error: error)
                             }
                         }
                     }
