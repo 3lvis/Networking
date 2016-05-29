@@ -2,9 +2,9 @@ import Foundation
 
 struct TestCheck {
     /**
-    Method to check wheter your on testing mode or not.
-    - returns: A Bool, `true` if you're on testing mode, `false` if you're not.
-    */
+     Method to check wheter your on testing mode or not.
+     - returns: A Bool, `true` if you're on testing mode, `false` if you're not.
+     */
     static let isTesting: Bool = {
         let enviroment = NSProcessInfo.processInfo().environment
         let serviceName = enviroment["XPC_SERVICE_NAME"]

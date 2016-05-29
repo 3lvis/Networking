@@ -2,11 +2,11 @@ import Foundation
 
 public extension Networking {
     /**
-    DELETE request to the specified path, using the provided parameters.
-    - parameter path: The path for the DELETE request.
-    - parameter completion: A closure that gets called when the DELETE request is completed, it contains a `JSON` object and a `NSError`.
-    - returns: The request identifier.
-    */
+     DELETE request to the specified path, using the provided parameters.
+     - parameter path: The path for the DELETE request.
+     - parameter completion: A closure that gets called when the DELETE request is completed, it contains a `JSON` object and a `NSError`.
+     - returns: The request identifier.
+     */
     public func DELETE(path: String, completion: (JSON: AnyObject?, error: NSError?) -> ()) -> String  {
         let requestID = self.request(.DELETE, path: path, parameterType: .JSON, parameters: nil, parts: nil, responseType: .JSON) { JSON, headers, error in
             completion(JSON: JSON, error: error)
@@ -44,7 +44,7 @@ public extension Networking {
      - parameter bundle: The NSBundle where the file is located.
      */
     public func fakeDELETE(path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
-        self.fake(.DELETE, path: path, fileName: fileName, bundle: bundle)        
+        self.fake(.DELETE, path: path, fileName: fileName, bundle: bundle)
     }
 
     /**

@@ -2,11 +2,11 @@ import Foundation
 
 public extension Networking {
     /**
-    GET request to the specified path.
-    - parameter path: The path for the GET request.
-    - parameter completion: A closure that gets called when the GET request is completed, it contains a `JSON` object and a `NSError`.
-    - returns: The request identifier.
-    */
+     GET request to the specified path.
+     - parameter path: The path for the GET request.
+     - parameter completion: A closure that gets called when the GET request is completed, it contains a `JSON` object and a `NSError`.
+     - returns: The request identifier.
+     */
     public func GET(path: String, parameterType: ParameterType = .JSON, completion: (JSON: AnyObject?, error: NSError?) -> ()) -> String {
         let requestID = self.request(.GET, path: path, parameterType: parameterType, parameters: nil, parts: nil, responseType: .JSON) { JSON, headers, error in
             completion(JSON: JSON, error: error)

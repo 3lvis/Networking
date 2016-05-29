@@ -210,7 +210,7 @@ public class Networking {
         if let url = NSURL(string: replacedPath) {
             if let cachesURL = NSFileManager.defaultManager().URLsForDirectory(directory, inDomains: .UserDomainMask).first {
                 #if !os(tvOS)
-                try cachesURL.setResourceValue(true, forKey: NSURLIsExcludedFromBackupKey)
+                    try cachesURL.setResourceValue(true, forKey: NSURLIsExcludedFromBackupKey)
                 #endif
                 let destinationURL = cachesURL.URLByAppendingPathComponent(url.absoluteString)
 
@@ -572,7 +572,7 @@ extension Networking {
                     self.logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError)
                     completion(response: returnedData, headers: returnedHeaders, error: connectionError)
                 }
-                }
+            }
 
             session.taskDescription = requestID
             session.resume()
