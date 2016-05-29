@@ -45,6 +45,21 @@ class GETTests: XCTestCase {
         }
     }
 
+    func testUniqueGET() {
+        let expectation = expectationWithDescription("testCancelGET")
+        let networking = Networking(baseURL: baseURL)
+        networking.uniqueGET("/get") { JSON, error in
+        }
+        networking.uniqueGET("/get") { JSON, error in
+        }
+        networking.session.getAllTasksWithCompletionHandler { tasks in
+
+        }
+
+        // expectation.fulfill()
+        waitForExpectationsWithTimeout(15.0, handler: nil)
+    }
+
     func testGETWithInvalidPath() {
         let networking = Networking(baseURL: baseURL)
         networking.GET("/invalidpath") { JSON, error in

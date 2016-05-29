@@ -7,8 +7,8 @@ public extension Networking {
      - parameter completion: A closure that gets called when the GET request is completed, it contains a `JSON` object and a `NSError`.
      - returns: The request identifier.
      */
-    public func GET(path: String, parameterType: ParameterType = .JSON, completion: (JSON: AnyObject?, error: NSError?) -> ()) -> String {
-        let requestID = self.request(.GET, path: path, parameterType: parameterType, parameters: nil, parts: nil, responseType: .JSON) { JSON, headers, error in
+    public func GET(path: String, completion: (JSON: AnyObject?, error: NSError?) -> ()) -> String {
+        let requestID = self.request(.GET, path: path, parameterType: .JSON, parameters: nil, parts: nil, responseType: .JSON) { JSON, headers, error in
             completion(JSON: JSON, error: error)
         }
 
@@ -21,10 +21,35 @@ public extension Networking {
      - parameter completion: A closure that gets called when the GET request is completed, it contains a `JSON` object and a `NSError`.
      - returns: The request identifier.
      */
-    public func GET(path: String, parameterType: ParameterType = .JSON, completion: (JSON: AnyObject?, headers: [String : AnyObject], error: NSError?) -> ()) -> String {
-        let requestID = self.request(.GET, path: path, parameterType: parameterType, parameters: nil, parts: nil, responseType: .JSON, completion: completion)
+    public func GET(path: String, completion: (JSON: AnyObject?, headers: [String : AnyObject], error: NSError?) -> ()) -> String {
+        let requestID = self.request(.GET, path: path, parameterType: .JSON, parameters: nil, parts: nil, responseType: .JSON, completion: completion)
 
         return requestID
+    }
+
+    /**
+     GET request to the specified path, checks for in-progress requests before making a new one.
+     - parameter path: The path for the GET request.
+     - parameter completion: A closure that gets called when the GET request is completed, it contains a `JSON` object and a `NSError`.
+     - returns: The request identifier.
+     */
+    public func uniqueGET(path: String, completion: (JSON: AnyObject?, error: NSError?) -> Void) {
+        self.session.getTasksWithCompletionHandler { dataTasks, _, _ in
+            var foundTask: NSURLSessionDataTask?
+            let url = self.urlForPath(path)
+            for task in dataTasks {
+                if task.originalRequest?.HTTPMethod == RequestType.GET.rawValue && task.originalRequest?.URL?.absoluteString == url.absoluteString {
+                    foundTask = task
+                    break
+                }
+            }
+
+            if foundTask == nil {
+                self.request(.GET, path: path, parameterType: .JSON, parameters: nil, parts: nil, responseType: .JSON) { JSON, headers, error in
+                    completion(JSON: JSON, error: error)
+                }
+            }
+        }
     }
 
     /**
