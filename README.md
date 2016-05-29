@@ -229,6 +229,8 @@ networking.POST("/upload", parameterType: .Custom("application/octet-stream"), p
 
 ## Cancelling a request
 
+### Using path
+
 Cancelling any request for a specific path is really simple. Beware that cancelling a request will cause the request to return with an error with status code -999.
 
 ```swift
@@ -238,6 +240,27 @@ networking.GET("/get") { JSON, error in
 }
 
 networking.cancelGET("/get")
+```
+
+### Using request identifier
+
+Using `cancelPOST("/upload")` would cancel all POST request for the specific path, but in some cases this isn't what we want. For example if you're trying to upload two photos, but the user requests to cancel one of the uploads, using `cancelPOST("/upload") would cancell all the uploads, this is when ID based cancellation is useful.
+
+```swift
+let networking = Networking(baseURL: "http://httpbin.org")
+
+// Start first upload
+let firstRequestID = networking.POST("/upload", parts: ...) { JSON, error in
+    //...
+}
+
+// Start second upload
+let secondRequestID = networking.POST("/upload", parts: ...) { JSON, error in
+    //...
+}
+
+// Cancel only the first upload
+networking.cancel(firstRequestID)
 ```
 
 ## Faking a request
