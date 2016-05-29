@@ -88,17 +88,40 @@ class GETTests: XCTestCase {
         }
     }
 
-    func testCancelGET() {
+    func testCancelGETWithPath() {
         let expectation = expectationWithDescription("testCancelGET")
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
+        var completed = false
         networking.GET("/get") { JSON, error in
+            XCTAssertTrue(completed)
             XCTAssertEqual(error?.code, -999)
             expectation.fulfill()
         }
 
-        networking.cancelGET("/get")
+        networking.cancelGET("/get") {
+            completed = true
+        }
+
+        waitForExpectationsWithTimeout(15.0, handler: nil)
+    }
+
+    func testCancelGETWithID() {
+        let expectation = expectationWithDescription("testCancelGET")
+
+        let networking = Networking(baseURL: baseURL)
+        networking.disableTestingMode = true
+        var completed = false
+        let requestID = networking.GET("/get") { JSON, error in
+            XCTAssertTrue(completed)
+            XCTAssertEqual(error?.code, -999)
+            expectation.fulfill()
+        }
+
+        networking.cancel(requestID) {
+            completed = true
+        }
 
         waitForExpectationsWithTimeout(15.0, handler: nil)
     }

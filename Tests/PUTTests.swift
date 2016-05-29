@@ -79,17 +79,40 @@ class PUTTests: XCTestCase {
         }
     }
 
-    func testCancelPUT() {
+    func testCancelPUTWithPath() {
         let expectation = expectationWithDescription("testCancelPUT")
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
+        var completed = false
         networking.PUT("/put", parameters: ["username" : "jameson", "password" : "secret"]) { JSON, error in
+            XCTAssertTrue(completed)
             XCTAssertEqual(error?.code, -999)
             expectation.fulfill()
         }
 
-        networking.cancelPUT("/put")
+        networking.cancelPUT("/put") {
+            completed = true
+        }
+
+        waitForExpectationsWithTimeout(15.0, handler: nil)
+    }
+
+    func testCancelPUTWithID() {
+        let expectation = expectationWithDescription("testCancelPUT")
+
+        let networking = Networking(baseURL: baseURL)
+        networking.disableTestingMode = true
+        var completed = false
+        let requestID = networking.PUT("/put", parameters: ["username" : "jameson", "password" : "secret"]) { JSON, error in
+            XCTAssertTrue(completed)
+            XCTAssertEqual(error?.code, -999)
+            expectation.fulfill()
+        }
+
+        networking.cancel(requestID) {
+            completed = true
+        }
 
         waitForExpectationsWithTimeout(15.0, handler: nil)
     }

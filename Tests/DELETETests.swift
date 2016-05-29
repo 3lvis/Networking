@@ -77,17 +77,40 @@ class DELETETests: XCTestCase {
         }
     }
 
-    func testCancelDELETE() {
+    func testCancelDELETEWithPath() {
         let expectation = expectationWithDescription("testCancelDELETE")
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
+        var completed = false
         networking.DELETE("/delete") { JSON, error in
+            XCTAssertTrue(completed)
             XCTAssertEqual(error?.code, -999)
             expectation.fulfill()
         }
 
-        networking.cancelDELETE("/delete")
+        networking.cancelDELETE("/delete") {
+            completed = true
+        }
+
+        waitForExpectationsWithTimeout(15.0, handler: nil)
+    }
+
+    func testCancelDELETEWithID() {
+        let expectation = expectationWithDescription("testCancelDELETE")
+
+        let networking = Networking(baseURL: baseURL)
+        networking.disableTestingMode = true
+        var completed = false
+        let requestID = networking.DELETE("/delete") { JSON, error in
+            XCTAssertTrue(completed)
+            XCTAssertEqual(error?.code, -999)
+            expectation.fulfill()
+        }
+
+        networking.cancel(requestID) {
+            completed = true
+        }
 
         waitForExpectationsWithTimeout(15.0, handler: nil)
     }

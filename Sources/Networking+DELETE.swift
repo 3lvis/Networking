@@ -6,10 +6,12 @@ public extension Networking {
     - parameter path: The path for the DELETE request.
     - parameter completion: A closure that gets called when the DELETE request is completed, it contains a `JSON` object and a `NSError`.
     */
-    public func DELETE(path: String, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
-        self.request(.DELETE, path: path, parameterType: .JSON, parameters: nil, parts: nil, responseType: .JSON) { JSON, headers, error in
+    public func DELETE(path: String, completion: (JSON: AnyObject?, error: NSError?) -> ()) -> String  {
+        let requestID = self.request(.DELETE, path: path, parameterType: .JSON, parameters: nil, parts: nil, responseType: .JSON) { JSON, headers, error in
             completion(JSON: JSON, error: error)
         }
+
+        return requestID
     }
 
     /**
@@ -17,8 +19,10 @@ public extension Networking {
      - parameter path: The path for the DELETE request.
      - parameter completion: A closure that gets called when the DELETE request is completed, it contains a `JSON` object and a `NSError`.
      */
-    public func DELETE(path: String, completion: (JSON: AnyObject?, headers: [String : AnyObject], error: NSError?) -> ()) {
-        self.request(.DELETE, path: path, parameterType: .JSON, parameters: nil, parts: nil, responseType: .JSON, completion: completion)
+    public func DELETE(path: String, completion: (JSON: AnyObject?, headers: [String : AnyObject], error: NSError?) -> ()) -> String  {
+        let requestID = self.request(.DELETE, path: path, parameterType: .JSON, parameters: nil, parts: nil, responseType: .JSON, completion: completion)
+
+        return requestID
     }
 
     /**
@@ -38,15 +42,16 @@ public extension Networking {
      - parameter bundle: The NSBundle where the file is located.
      */
     public func fakeDELETE(path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
-        self.fake(.DELETE, path: path, fileName: fileName, bundle: bundle)
+        self.fake(.DELETE, path: path, fileName: fileName, bundle: bundle)        
     }
 
     /**
      Cancels the DELETE request for the specified path. This causes the request to complete with error code -999.
      - parameter path: The path for the cancelled DELETE request.
+     - parameter completion: A closure that gets called when the cancellation is completed.
      */
-    public func cancelDELETE(path: String) {
+    public func cancelDELETE(path: String, completion: (Void -> Void)? = nil) {
         let url = self.urlForPath(path)
-        self.cancelRequest(.Data, requestType: .DELETE, url: url)
+        self.cancelRequest(.Data, requestType: .DELETE, url: url, completion: completion)
     }
 }

@@ -239,6 +239,24 @@ public class Networking {
         return (baseURL, relativePath)
     }
 
+    func cancel(requestID: String, completion: (Void -> Void)? = nil) {
+        self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
+            var tasks = [NSURLSessionTask]()
+            tasks.appendContentsOf(dataTasks as [NSURLSessionTask])
+            tasks.appendContentsOf(uploadTasks as [NSURLSessionTask])
+            tasks.appendContentsOf(downloadTasks as [NSURLSessionTask])
+
+            for task in tasks {
+                if task.taskDescription == requestID {
+                    task.cancel()
+                    break
+                }
+            }
+
+            completion?()
+        }
+    }
+
     /**
      Cancels all the current requests.
      - parameter completion: The completion block to be called when all the requests are cancelled.
@@ -371,7 +389,9 @@ extension Networking {
         self.fakeRequests[requestType] = fakeRequests
     }
 
-    func request(requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, parts: [FormDataPart]?, responseType: ResponseType, completion: (response: AnyObject?, headers: [String : AnyObject], error: NSError?) -> ()) {
+    func request(requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, parts: [FormDataPart]?, responseType: ResponseType, completion: (response: AnyObject?, headers: [String : AnyObject], error: NSError?) -> ()) -> String {
+        var requestID = NSUUID().UUIDString
+
         if let responses = self.fakeRequests[requestType], fakeRequest = responses[path] {
             if fakeRequest.statusCode.statusCodeType() == .Successful {
                 completion(response: fakeRequest.response, headers: [String : AnyObject](), error: nil)
@@ -382,7 +402,7 @@ extension Networking {
         } else {
             switch responseType {
             case .JSON:
-                self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, headers, error in
+                requestID = self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, headers, error in
                     var returnedError = error
                     var returnedResponse: AnyObject?
                     if error == nil {
@@ -437,9 +457,12 @@ extension Networking {
                 break
             }
         }
+
+        return requestID
     }
 
-    func dataRequest(requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, parts: [FormDataPart]?, responseType: ResponseType, completion: (response: NSData?, headers: [String : AnyObject], error: NSError?) -> ()) {
+    func dataRequest(requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, parts: [FormDataPart]?, responseType: ResponseType, completion: (response: NSData?, headers: [String : AnyObject], error: NSError?) -> ()) -> String {
+        let requestID = NSUUID().UUIDString
         let request = NSMutableURLRequest(URL: self.urlForPath(path))
         request.HTTPMethod = requestType.rawValue
 
@@ -515,7 +538,7 @@ extension Networking {
             var returnedData: NSData?
             var returnedHeaders = [String : AnyObject]()
 
-            self.session.dataTaskWithRequest(request) { data, response, error in
+            let session = self.session.dataTaskWithRequest(request) { data, response, error in
                 returnedResponse = response
                 connectionError = error
                 returnedData = data
@@ -544,7 +567,10 @@ extension Networking {
                     self.logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError)
                     completion(response: returnedData, headers: returnedHeaders, error: connectionError)
                 }
-                }.resume()
+                }
+
+            session.taskDescription = requestID
+            session.resume()
 
             if TestCheck.isTesting && self.disableTestingMode == false {
                 dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
@@ -552,9 +578,11 @@ extension Networking {
                 completion(response: returnedData, headers: returnedHeaders, error: connectionError)
             }
         }
+
+        return requestID
     }
 
-    func cancelRequest(sessionTaskType: SessionTaskType, requestType: RequestType, url: NSURL) {
+    func cancelRequest(sessionTaskType: SessionTaskType, requestType: RequestType, url: NSURL, completion: (Void -> Void)?) {
         self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
             var sessionTasks = [NSURLSessionTask]()
             switch sessionTaskType {
@@ -572,8 +600,11 @@ extension Networking {
             for sessionTask in sessionTasks {
                 if sessionTask.originalRequest?.HTTPMethod == requestType.rawValue && sessionTask.originalRequest?.URL?.absoluteString == url.absoluteString {
                     sessionTask.cancel()
+                    break
                 }
             }
+
+            completion?()
         }
     }
 
