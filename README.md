@@ -341,7 +341,7 @@ Any error catched by **Networking** will be printed in your console. This is rea
 
 For example a cancelled request will print this:
 
-```swift
+```shell
 ========== Networking Error ==========
 
 Cancelled request: https://api.mmm.com/38bea9c8b75bfed1326f90c48675fce87dd04ae6/thumb/small
@@ -351,7 +351,7 @@ Cancelled request: https://api.mmm.com/38bea9c8b75bfed1326f90c48675fce87dd04ae6/
 
 A 404 request will print something like this:
 
-```swift
+```shell
 ========== Networking Error ==========
  
 *** Request ***
