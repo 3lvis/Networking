@@ -129,7 +129,7 @@ public class Networking {
     var disableTestingMode = false
 
     /**
-     The boundary used for multipart requests
+     The boundary used for multipart requests.
      */
     let boundary = String(format: "net.3lvis.networking.%08x%08x", arc4random(), arc4random())
 
@@ -176,7 +176,7 @@ public class Networking {
     /**
      Authenticates using a custom HTTP Authorization header.
      - parameter authorizationHeaderKey: Sets this value as the key for the HTTP `Authorization` header
-     - parameter authorizationHeaderValue: Sets this value to the HTTP `Authorization` header or to the `headerKey` if you provided that
+     - parameter authorizationHeaderValue: Sets this value to the HTTP `Authorization` header or to the `headerKey` if you provided that.
      */
     public func authenticate(headerKey headerKey: String = "Authorization", headerValue: String) {
         self.authorizationHeaderKey = headerKey
@@ -239,6 +239,11 @@ public class Networking {
         return (baseURL, relativePath)
     }
 
+    /**
+     Cancels the request that matches the requestID.
+     - parameter requestID: The ID of the request to be cancelled.
+     - parameter completion: The completion block to be called when the request is cancelled.
+     */
     func cancel(requestID: String, completion: (Void -> Void)? = nil) {
         self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
             var tasks = [NSURLSessionTask]()

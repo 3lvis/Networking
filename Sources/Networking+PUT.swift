@@ -2,12 +2,12 @@ import Foundation
 
 public extension Networking {
     /**
-    PUT request to the specified path, using the provided parameters.
-    - parameter path: The path for the PUT request.
-     - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by
-     default this is JSON.
-    - parameter completion: A closure that gets called when the PUT request is completed, it contains a `JSON` object and a `NSError`.
-    */
+     PUT request to the specified path, using the provided parameters.
+     - parameter path: The path for the PUT request.
+     - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by default this is JSON.
+     - parameter completion: A closure that gets called when the PUT request is completed, it contains a `JSON` object and a `NSError`.
+     - returns: The request identifier.
+     */
     public func PUT(path: String, parameterType: ParameterType = .JSON, parameters: AnyObject? = nil, completion: (JSON: AnyObject?, error: NSError?) -> ()) -> String  {
         let requestID = self.request(.PUT, path: path, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .JSON) { JSON, headers, error in
             completion(JSON: JSON, error: error)
@@ -19,9 +19,9 @@ public extension Networking {
     /**
      PUT request to the specified path, using the provided parameters.
      - parameter path: The path for the PUT request.
-     - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by
-     default this is JSON.
+     - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by default this is JSON.
      - parameter completion: A closure that gets called when the PUT request is completed, it contains a `JSON` object and a `NSError`.
+     - returns: The request identifier.
      */
     public func PUT(path: String, parameterType: ParameterType = .JSON, parameters: AnyObject? = nil, completion: (JSON: AnyObject?, headers: [String : AnyObject], error: NSError?) -> ()) -> String  {
         let requestID = self.request(.PUT, path: path, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .JSON, completion: completion)

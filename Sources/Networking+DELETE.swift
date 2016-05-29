@@ -5,6 +5,7 @@ public extension Networking {
     DELETE request to the specified path, using the provided parameters.
     - parameter path: The path for the DELETE request.
     - parameter completion: A closure that gets called when the DELETE request is completed, it contains a `JSON` object and a `NSError`.
+    - returns: The request identifier.
     */
     public func DELETE(path: String, completion: (JSON: AnyObject?, error: NSError?) -> ()) -> String  {
         let requestID = self.request(.DELETE, path: path, parameterType: .JSON, parameters: nil, parts: nil, responseType: .JSON) { JSON, headers, error in
@@ -18,6 +19,7 @@ public extension Networking {
      DELETE request to the specified path, using the provided parameters.
      - parameter path: The path for the DELETE request.
      - parameter completion: A closure that gets called when the DELETE request is completed, it contains a `JSON` object and a `NSError`.
+     - returns: The request identifier.
      */
     public func DELETE(path: String, completion: (JSON: AnyObject?, headers: [String : AnyObject], error: NSError?) -> ()) -> String  {
         let requestID = self.request(.DELETE, path: path, parameterType: .JSON, parameters: nil, parts: nil, responseType: .JSON, completion: completion)
