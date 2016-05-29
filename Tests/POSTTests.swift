@@ -184,17 +184,40 @@ class POSTTests: XCTestCase {
         }
     }
 
-    func testCancelPOST() {
+    func testCancelPOSTWithPath() {
         let expectation = expectationWithDescription("testCancelPOST")
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
+        var completed = false
         networking.POST("/post", parameters: ["username" : "jameson", "password" : "secret"]) { JSON, error in
+            XCTAssertTrue(completed)
             XCTAssertEqual(error?.code, -999)
             expectation.fulfill()
         }
 
-        networking.cancelPOST("/post")
+        networking.cancelPOST("/post") {
+            completed = true
+        }
+
+        waitForExpectationsWithTimeout(15.0, handler: nil)
+    }
+
+    func testCancelPOSTWithID() {
+        let expectation = expectationWithDescription("testCancelPOST")
+
+        let networking = Networking(baseURL: baseURL)
+        networking.disableTestingMode = true
+        var completed = false
+        let requestID = networking.POST("/post", parameters: ["username" : "jameson", "password" : "secret"]) { JSON, error in
+            XCTAssertTrue(completed)
+            XCTAssertEqual(error?.code, -999)
+            expectation.fulfill()
+        }
+
+        networking.cancel(requestID) {
+            completed = true
+        }
 
         waitForExpectationsWithTimeout(15.0, handler: nil)
     }

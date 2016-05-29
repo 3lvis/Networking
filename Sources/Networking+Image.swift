@@ -32,10 +32,11 @@ public extension Networking {
     /**
      Cancels the image download request for the specified path. This causes the request to complete with error code -999.
      - parameter path: The path for the cancelled image download request.
+     - parameter completion: A closure that gets called when the cancellation is completed.
      */
-    public func cancelImageDownload(path: String) {
+    public func cancelImageDownload(path: String, completion: (Void -> Void)? = nil) {
         let url = self.urlForPath(path)
-        self.cancelRequest(.Data, requestType: .GET, url: url)
+        self.cancelRequest(.Data, requestType: .GET, url: url, completion: completion)
     }
 
     /**

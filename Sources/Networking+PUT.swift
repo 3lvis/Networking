@@ -2,27 +2,31 @@ import Foundation
 
 public extension Networking {
     /**
-    PUT request to the specified path, using the provided parameters.
-    - parameter path: The path for the PUT request.
-     - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by
-     default this is JSON.
-    - parameter completion: A closure that gets called when the PUT request is completed, it contains a `JSON` object and a `NSError`.
-    */
-    public func PUT(path: String, parameterType: ParameterType = .JSON, parameters: AnyObject? = nil, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
-        self.request(.PUT, path: path, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .JSON) { JSON, headers, error in
+     PUT request to the specified path, using the provided parameters.
+     - parameter path: The path for the PUT request.
+     - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by default this is JSON.
+     - parameter completion: A closure that gets called when the PUT request is completed, it contains a `JSON` object and a `NSError`.
+     - returns: The request identifier.
+     */
+    public func PUT(path: String, parameterType: ParameterType = .JSON, parameters: AnyObject? = nil, completion: (JSON: AnyObject?, error: NSError?) -> ()) -> String  {
+        let requestID = self.request(.PUT, path: path, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .JSON) { JSON, headers, error in
             completion(JSON: JSON, error: error)
         }
+
+        return requestID
     }
 
     /**
      PUT request to the specified path, using the provided parameters.
      - parameter path: The path for the PUT request.
-     - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by
-     default this is JSON.
+     - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by default this is JSON.
      - parameter completion: A closure that gets called when the PUT request is completed, it contains a `JSON` object and a `NSError`.
+     - returns: The request identifier.
      */
-    public func PUT(path: String, parameterType: ParameterType = .JSON, parameters: AnyObject? = nil, completion: (JSON: AnyObject?, headers: [String : AnyObject], error: NSError?) -> ()) {
-        self.request(.PUT, path: path, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .JSON, completion: completion)
+    public func PUT(path: String, parameterType: ParameterType = .JSON, parameters: AnyObject? = nil, completion: (JSON: AnyObject?, headers: [String : AnyObject], error: NSError?) -> ()) -> String  {
+        let requestID = self.request(.PUT, path: path, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .JSON, completion: completion)
+
+        return requestID
     }
 
     /**
@@ -48,9 +52,10 @@ public extension Networking {
     /**
      Cancels the PUT request for the specified path. This causes the request to complete with error code -999.
      - parameter path: The path for the cancelled PUT request.
+     - parameter completion: A closure that gets called when the cancellation is completed.
      */
-    public func cancelPUT(path: String) {
+    public func cancelPUT(path: String, completion: (Void -> Void)? = nil) {
         let url = self.urlForPath(path)
-        self.cancelRequest(.Data, requestType: .PUT, url: url)
+        self.cancelRequest(.Data, requestType: .PUT, url: url, completion: completion)
     }
 }
