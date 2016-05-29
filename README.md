@@ -341,7 +341,7 @@ Any error catched by **Networking** will be printed in your console. This is rea
 
 For example a cancelled request will print this:
 
-```
+```swift
 ========== Networking Error ==========
 
 Cancelled request: https://api.mmm.com/38bea9c8b75bfed1326f90c48675fce87dd04ae6/thumb/small
@@ -351,14 +351,16 @@ Cancelled request: https://api.mmm.com/38bea9c8b75bfed1326f90c48675fce87dd04ae6/
 
 A 404 request will print something like this:
 
-```
+```swift
 ========== Networking Error ==========
  
 *** Request ***
-
+ 
 Error 404: Error Domain=NetworkingErrorDomain Code=404 "not found" UserInfo={NSLocalizedDescription=not found}
-
+ 
 URL: http://httpbin.org/posdddddt
+ 
+Headers: ["Accept": "application/json", "Content-Type": "application/json"]
  
 Parameters: {
   "password" : "secret",
@@ -370,21 +372,12 @@ Data: <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
 <h1>Not Found</h1>
 <p>The requested URL was not found on the server.  If you entered the URL manually please check your spelling and try again.</p>
 
+ 
 *** Response ***
  
-Headers: ["Accept": "application/json", "Content-Type": "application/json"]
+Headers: ["Content-Length": 233, "Server": nginx, "Access-Control-Allow-Origin": *, "Content-Type": text/html, "Date": Sun, 29 May 2016 07:19:13 GMT, "Access-Control-Allow-Credentials": true, "Connection": keep-alive]
  
 Status code: 404 — not found
- 
-Full object: <NSHTTPURLResponse: 0x1006173d0> { URL: http://httpbin.org/posdddddt } { status code: 404, headers {
-    "Access-Control-Allow-Credentials" = true;
-    "Access-Control-Allow-Origin" = "*";
-    Connection = "keep-alive";
-    "Content-Length" = 233;
-    "Content-Type" = "text/html";
-    Date = "Tue, 24 May 2016 10:13:31 GMT";
-    Server = nginx;
-} }
  
 ================= ~ ==================
 ```
