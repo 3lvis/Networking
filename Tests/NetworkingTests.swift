@@ -23,7 +23,7 @@ class NetworkingTests: XCTestCase {
     }
 
     func testSkipTestMode() {
-        let expectation = expectationWithDescription("testSkipTestMode")
+        let expectation = self.expectation(withDescription: "testSkipTestMode")
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
@@ -39,7 +39,7 @@ class NetworkingTests: XCTestCase {
 
         XCTAssertFalse(synchronous)
 
-        waitForExpectationsWithTimeout(15.0, handler: nil)
+        waitForExpectations(withTimeout: 15.0, handler: nil)
     }
 
     func testDestinationURL() {
@@ -58,13 +58,13 @@ class NetworkingTests: XCTestCase {
     }
 
     func testStatusCodeType() {
-        XCTAssertEqual((-999).statusCodeType(), Networking.StatusCodeType.Unknown)
-        XCTAssertEqual(99.statusCodeType(), Networking.StatusCodeType.Unknown)
-        XCTAssertEqual(101.statusCodeType(), Networking.StatusCodeType.Informational)
-        XCTAssertEqual(203.statusCodeType(), Networking.StatusCodeType.Successful)
-        XCTAssertEqual(303.statusCodeType(), Networking.StatusCodeType.Redirection)
-        XCTAssertEqual(403.statusCodeType(), Networking.StatusCodeType.ClientError)
-        XCTAssertEqual(550.statusCodeType(), Networking.StatusCodeType.ServerError)
+        XCTAssertEqual((-999).statusCodeType(), Networking.StatusCodeType.unknown)
+        XCTAssertEqual(99.statusCodeType(), Networking.StatusCodeType.unknown)
+        XCTAssertEqual(101.statusCodeType(), Networking.StatusCodeType.informational)
+        XCTAssertEqual(203.statusCodeType(), Networking.StatusCodeType.successful)
+        XCTAssertEqual(303.statusCodeType(), Networking.StatusCodeType.redirection)
+        XCTAssertEqual(403.statusCodeType(), Networking.StatusCodeType.clientError)
+        XCTAssertEqual(550.statusCodeType(), Networking.StatusCodeType.serverError)
     }
 
     func testSplitBaseURLAndRelativePath() {
@@ -78,7 +78,7 @@ class NetworkingTests: XCTestCase {
     }
 
     func testCancelRequests() {
-        let expectation = expectationWithDescription("testCancelRequests")
+        let expectation = self.expectation(withDescription: "testCancelRequests")
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
         var cancelledGET = false
@@ -104,6 +104,6 @@ class NetworkingTests: XCTestCase {
 
         networking.cancelAllRequests(nil)
 
-        waitForExpectationsWithTimeout(15.0, handler: nil)
+        waitForExpectations(withTimeout: 15.0, handler: nil)
     }
 }

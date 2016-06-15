@@ -4,10 +4,10 @@ import XCTest
 class ImageTests: XCTestCase {
     let baseURL = "http://httpbin.org"
 
-    func removeFileIfNeeded(networking: Networking, path: String, cacheName: String? = nil) {
+    func removeFileIfNeeded(_ networking: Networking, path: String, cacheName: String? = nil) {
         let destinationURL = networking.destinationURL(path, cacheName: cacheName)
-        if NSFileManager.defaultManager().fileExistsAtURL(destinationURL) {
-            NSFileManager.defaultManager().removeFileAtURL(destinationURL)
+        if FileManager.default().fileExistsAtURL(destinationURL) {
+            FileManager.default().removeFileAtURL(destinationURL)
         }
     }
 
@@ -21,7 +21,7 @@ class ImageTests: XCTestCase {
         networking.downloadImage(path) { image, error in
             networking.imageFromCache(path) { image in
                 synchronous = true
-                let pigImage = UIImage(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self), compatibleWithTraitCollection: nil)!
+                let pigImage = UIImage(named: "pig.png", in: Bundle(for: ImageTests.self), compatibleWith: nil)!
                 let pigImageData = UIImagePNGRepresentation(pigImage)
                 let imageData = UIImagePNGRepresentation(image!)
                 XCTAssertEqual(pigImageData, imageData)
@@ -40,7 +40,7 @@ class ImageTests: XCTestCase {
         networking.downloadImage(path, cacheName: cacheName) { image, error in
             networking.imageFromCache(path, cacheName: cacheName) { image in
                 synchronous = true
-                let pigImage = UIImage(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self), compatibleWithTraitCollection: nil)!
+                let pigImage = UIImage(named: "pig.png", in: Bundle(for: ImageTests.self), compatibleWith: nil)!
                 let pigImageData = UIImagePNGRepresentation(pigImage)
                 let imageData = UIImagePNGRepresentation(image!)
                 XCTAssertEqual(pigImageData, imageData)
@@ -52,16 +52,16 @@ class ImageTests: XCTestCase {
     // Test `imageFromCache` using path, expecting image from file
     func testImageFromCacheForPathInFile() {
         var synchronous = false
-        let cache = NSCache()
+        let cache: Cache<AnyObject, AnyObject> = Cache()
         let networking = Networking(baseURL: baseURL, cache: cache)
         let path = "/image/png"
         self.removeFileIfNeeded(networking, path: path)
         networking.downloadImage(path) { image, error in
             let destinationURL = networking.destinationURL(path)
-            cache.removeObjectForKey(destinationURL.absoluteString)
+            cache.removeObject(forKey: destinationURL.absoluteString!)
             networking.imageFromCache(path) { image in
                 synchronous = true
-                let pigImage = UIImage(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self), compatibleWithTraitCollection: nil)!
+                let pigImage = UIImage(named: "pig.png", in: Bundle(for: ImageTests.self), compatibleWith: nil)!
                 let pigImageData = UIImagePNGRepresentation(pigImage)
                 let imageData = UIImagePNGRepresentation(image!)
                 XCTAssertEqual(pigImageData, imageData)
@@ -73,17 +73,17 @@ class ImageTests: XCTestCase {
     // Test `imageFromCache` using cacheName instead of path, expecting image from file
     func testImageFromCacheForCustomCacheNameInFile() {
         var synchronous = false
-        let cache = NSCache()
+        let cache: Cache<AnyObject, AnyObject> = Cache()
         let networking = Networking(baseURL: baseURL, cache: cache)
         let path = "/image/png"
         let cacheName = "hello"
         self.removeFileIfNeeded(networking, path: path, cacheName: cacheName)
         networking.downloadImage(path, cacheName: cacheName) { image, error in
             let destinationURL = networking.destinationURL(path, cacheName: cacheName)
-            cache.removeObjectForKey(destinationURL.absoluteString)
+            cache.removeObject(forKey: destinationURL.absoluteString!)
             networking.imageFromCache(path, cacheName: cacheName) { image in
                 synchronous = true
-                let pigImage = UIImage(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self), compatibleWithTraitCollection: nil)!
+                let pigImage = UIImage(named: "pig.png", in: Bundle(for: ImageTests.self), compatibleWith: nil)!
                 let pigImageData = UIImagePNGRepresentation(pigImage)
                 let imageData = UIImagePNGRepresentation(image!)
                 XCTAssertEqual(pigImageData, imageData)
@@ -95,13 +95,13 @@ class ImageTests: XCTestCase {
     // Test `imageFromCache` using path, but then clearing cache, and removing files, expecting nil
     func testImageFromCacheNilImage() {
         var synchronous = false
-        let cache = NSCache()
+        let cache: Cache<AnyObject, AnyObject> = Cache()
         let networking = Networking(baseURL: baseURL, cache: cache)
         let path = "/image/png"
         self.removeFileIfNeeded(networking, path: path)
         networking.downloadImage(path) { image, error in
             let destinationURL = networking.destinationURL(path)
-            cache.removeObjectForKey(destinationURL.absoluteString)
+            cache.removeObject(forKey: destinationURL.absoluteString!)
             self.removeFileIfNeeded(networking, path: path)
             networking.imageFromCache(path) { image in
                 synchronous = true
@@ -134,7 +134,7 @@ class ImageTests: XCTestCase {
 
         networking.downloadImage(path) { image, error in
             XCTAssertNotNil(image)
-            let pigImage = UIImage(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self), compatibleWithTraitCollection: nil)!
+            let pigImage = UIImage(named: "pig.png", in: Bundle(for: ImageTests.self), compatibleWith: nil)!
             let pigImageData = UIImagePNGRepresentation(pigImage)
             let imageData = UIImagePNGRepresentation(image!)
             XCTAssertEqual(pigImageData, imageData)
@@ -149,7 +149,7 @@ class ImageTests: XCTestCase {
 
         networking.downloadImage(path) { image, error in
             XCTAssertNotNil(image)
-            let pigImage = UIImage(named: "døgnvillburgere.jpg", inBundle: NSBundle(forClass: ImageTests.self), compatibleWithTraitCollection: nil)!
+            let pigImage = UIImage(named: "døgnvillburgere.jpg", in: Bundle(for: ImageTests.self), compatibleWith: nil)!
             let pigImageData = UIImagePNGRepresentation(pigImage)
             let imageData = UIImagePNGRepresentation(image!)
             XCTAssertEqual(pigImageData, imageData)
@@ -164,8 +164,8 @@ class ImageTests: XCTestCase {
 
         networking.downloadImage(path) { image, error in
             let destinationURL = networking.destinationURL(path)
-            XCTAssertTrue(NSFileManager.defaultManager().fileExistsAtURL(destinationURL))
-            XCTAssertNotNil(NSFileManager.defaultManager().contentsAtPath(destinationURL.path!))
+            XCTAssertTrue(FileManager.default().fileExistsAtURL(destinationURL))
+            XCTAssertNotNil(FileManager.default().contents(atPath: destinationURL.path!))
         }
     }
 
@@ -178,8 +178,8 @@ class ImageTests: XCTestCase {
 
         networking.downloadImage(path, cacheName: cacheName) { image, error in
             let destinationURL = networking.destinationURL(path, cacheName: cacheName)
-            XCTAssertTrue(NSFileManager.defaultManager().fileExistsAtURL(destinationURL))
-            XCTAssertNotNil(NSFileManager.defaultManager().contentsAtPath(destinationURL.path!))
+            XCTAssertTrue(FileManager.default().fileExistsAtURL(destinationURL))
+            XCTAssertNotNil(FileManager.default().contents(atPath: destinationURL.path!))
         }
     }
     func testDownloadedImageInCache() {
@@ -190,7 +190,7 @@ class ImageTests: XCTestCase {
 
         networking.downloadImage(path) { image, error in
             let destinationURL = networking.destinationURL(path)
-            XCTAssertNotNil(networking.cache.objectForKey(destinationURL.absoluteString))
+            XCTAssertNotNil(networking.cache.object(forKey: destinationURL.absoluteString!))
         }
     }
 
@@ -203,12 +203,12 @@ class ImageTests: XCTestCase {
 
         networking.downloadImage(path, cacheName: cacheName) { image, error in
             let destinationURL = networking.destinationURL(path, cacheName: cacheName)
-            XCTAssertNotNil(networking.cache.objectForKey(destinationURL.absoluteString))
+            XCTAssertNotNil(networking.cache.object(forKey: destinationURL.absoluteString!))
         }
     }
 
     func testCancelImageDownload() {
-        let expectation = expectationWithDescription("testCancelImageDownload")
+        let expectation = self.expectation(withDescription: "testCancelImageDownload")
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
@@ -225,12 +225,12 @@ class ImageTests: XCTestCase {
 
         networking.cancelImageDownload("/image/png")
 
-        waitForExpectationsWithTimeout(15.0, handler: nil)
+        waitForExpectations(withTimeout: 15.0, handler: nil)
     }
 
     func testFakeImageDownload() {
         let networking = Networking(baseURL: baseURL)
-        let pigImage = UIImage(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self), compatibleWithTraitCollection: nil)!
+        let pigImage = UIImage(named: "pig.png", in: Bundle(for: ImageTests.self), compatibleWith: nil)!
         networking.fakeImageDownload("/image/png", image: pigImage)
         networking.downloadImage("/image/png") { image, error in
             XCTAssertNotNil(image)

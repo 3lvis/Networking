@@ -7,7 +7,7 @@ public extension Networking {
     - parameter path: The path for the GET request.
     - parameter completion: A closure that gets called when the GET request is completed, it contains a `JSON` object and a `NSError`.
     */
-    public func GET(path: String, contentType: ContentType = .JSON, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
+    public func GET(_ path: String, contentType: ContentType = .json, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
         self.request(.GET, path: path, contentType: contentType, parameters: nil, completion: completion)
     }
 
@@ -19,7 +19,7 @@ public extension Networking {
      - parameter statusCode: By default it's 200, if you provide any status code that is between 200 and 299 the
      response object will be returned, otherwise we will return an error containig the provided status code.
      */
-    public func fakeGET(path: String, response: AnyObject?, statusCode: Int = 200) {
+    public func fakeGET(_ path: String, response: AnyObject?, statusCode: Int = 200) {
         self.fake(.GET, path: path, response: response, statusCode: statusCode)
     }
 
@@ -30,7 +30,7 @@ public extension Networking {
      - parameter fileName: The name of the file, whose contents will be registered as a reponse.
      - parameter bundle: The NSBundle where the file is located.
      */
-    public func fakeGET(path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
+    public func fakeGET(_ path: String, fileName: String, bundle: Bundle = Bundle.main()) {
         self.fake(.GET, path: path, fileName: fileName, bundle: bundle)
     }
 
@@ -38,7 +38,7 @@ public extension Networking {
      Cancels the GET request for the specified path. This causes the request to complete with error code -999
      - parameter path: The path for the cancelled GET request
      */
-    public func cancelGET(path: String) {
+    public func cancelGET(_ path: String) {
         let url = self.urlForPath(path)
         self.cancelRequest(.Data, requestType: .GET, url: url)
     }
@@ -52,7 +52,7 @@ public extension Networking {
     - parameter parameters: The parameters to be used, they will be serialized using NSJSONSerialization.
     - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and a `NSError`.
     */
-    public func POST(path: String, contentType: ContentType = .JSON, parameters: AnyObject? = nil, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
+    public func POST(_ path: String, contentType: ContentType = .json, parameters: AnyObject? = nil, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
         self.request(.POST, path: path, contentType: contentType, parameters: parameters, completion: completion)
     }
 
@@ -64,7 +64,7 @@ public extension Networking {
      - parameter statusCode: By default it's 200, if you provide any status code that is between 200 and 299 the
      response object will be returned, otherwise we will return an error containig the provided status code.
      */
-    public func fakePOST(path: String, response: AnyObject?, statusCode: Int = 200) {
+    public func fakePOST(_ path: String, response: AnyObject?, statusCode: Int = 200) {
         self.fake(.POST, path: path, response: response, statusCode: statusCode)
     }
 
@@ -75,7 +75,7 @@ public extension Networking {
      - parameter fileName: The name of the file, whose contents will be registered as a reponse.
      - parameter bundle: The NSBundle where the file is located.
      */
-    public func fakePOST(path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
+    public func fakePOST(_ path: String, fileName: String, bundle: Bundle = Bundle.main()) {
         self.fake(.POST, path: path, fileName: fileName, bundle: bundle)
     }
 
@@ -83,7 +83,7 @@ public extension Networking {
      Cancels the POST request for the specified path. This causes the request to complete with error code -999
      - parameter path: The path for the cancelled POST request
      */
-    public func cancelPOST(path: String) {
+    public func cancelPOST(_ path: String) {
         let url = self.urlForPath(path)
         self.cancelRequest(.Data, requestType: .POST, url: url)
     }
@@ -97,7 +97,7 @@ public extension Networking {
     - parameter parameters: The parameters to be used, they will be serialized using NSJSONSerialization.
     - parameter completion: A closure that gets called when the PUT request is completed, it contains a `JSON` object and a `NSError`.
     */
-    public func PUT(path: String, contentType: ContentType = .JSON, parameters: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
+    public func PUT(_ path: String, contentType: ContentType = .json, parameters: AnyObject?, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
         self.request(.PUT, path: path, contentType: contentType, parameters: parameters, completion: completion)
     }
 
@@ -109,7 +109,7 @@ public extension Networking {
      - parameter statusCode: By default it's 200, if you provide any status code that is between 200 and 299 the
      response object will be returned, otherwise we will return an error containig the provided status code.
      */
-    public func fakePUT(path: String, response: AnyObject?, statusCode: Int = 200) {
+    public func fakePUT(_ path: String, response: AnyObject?, statusCode: Int = 200) {
         self.fake(.PUT, path: path, response: response, statusCode: statusCode)
     }
 
@@ -120,7 +120,7 @@ public extension Networking {
      - parameter fileName: The name of the file, whose contents will be registered as a reponse.
      - parameter bundle: The NSBundle where the file is located.
      */
-    public func fakePUT(path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
+    public func fakePUT(_ path: String, fileName: String, bundle: Bundle = Bundle.main()) {
         self.fake(.PUT, path: path, fileName: fileName, bundle: bundle)
     }
 
@@ -128,7 +128,7 @@ public extension Networking {
      Cancels the PUT request for the specified path. This causes the request to complete with error code -999
      - parameter path: The path for the cancelled PUT request
      */
-    public func cancelPUT(path: String) {
+    public func cancelPUT(_ path: String) {
         let url = self.urlForPath(path)
         self.cancelRequest(.Data, requestType: .PUT, url: url)
     }
@@ -141,8 +141,8 @@ public extension Networking {
     - parameter path: The path for the DELETE request.
     - parameter completion: A closure that gets called when the DELETE request is completed, it contains a `JSON` object and a `NSError`.
     */
-    public func DELETE(path: String, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
-        self.request(.DELETE, path: path, contentType: .JSON, parameters: nil, completion: completion)
+    public func DELETE(_ path: String, completion: (JSON: AnyObject?, error: NSError?) -> ()) {
+        self.request(.DELETE, path: path, contentType: .json, parameters: nil, completion: completion)
     }
 
     /**
@@ -153,7 +153,7 @@ public extension Networking {
      - parameter statusCode: By default it's 200, if you provide any status code that is between 200 and 299 the
      response object will be returned, otherwise we will return an error containig the provided status code.
      */
-    public func fakeDELETE(path: String, response: AnyObject?, statusCode: Int = 200) {
+    public func fakeDELETE(_ path: String, response: AnyObject?, statusCode: Int = 200) {
         self.fake(.DELETE, path: path, response: response, statusCode: statusCode)
     }
 
@@ -164,7 +164,7 @@ public extension Networking {
      - parameter fileName: The name of the file, whose contents will be registered as a reponse.
      - parameter bundle: The NSBundle where the file is located.
      */
-    public func fakeDELETE(path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
+    public func fakeDELETE(_ path: String, fileName: String, bundle: Bundle = Bundle.main()) {
         self.fake(.DELETE, path: path, fileName: fileName, bundle: bundle)
     }
 
@@ -172,7 +172,7 @@ public extension Networking {
      Cancels the DELETE request for the specified path. This causes the request to complete with error code -999
      - parameter path: The path for the cancelled DELETE request
      */
-    public func cancelDELETE(path: String) {
+    public func cancelDELETE(_ path: String) {
         let url = self.urlForPath(path)
         self.cancelRequest(.Data, requestType: .DELETE, url: url)
     }

@@ -60,7 +60,7 @@ extension HTTPRequestTests {
     func testFakeGETUsingFile() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakeGET("/entries", fileName: "entries.json", bundle: NSBundle(forClass: self.classForKeyedArchiver!))
+        networking.fakeGET("/entries", fileName: "entries.json", bundle: Bundle(for: self.classForKeyedArchiver!))
 
         networking.GET("/entries") { JSON, error in
             let JSON = JSON as! [[String : AnyObject]]
@@ -71,7 +71,7 @@ extension HTTPRequestTests {
     }
 
     func testCancelGET() {
-        let expectation = expectationWithDescription("testCancelGET")
+        let expectation = self.expectation(withDescription: "testCancelGET")
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
@@ -84,7 +84,7 @@ extension HTTPRequestTests {
 
         networking.cancelGET("/get")
 
-        waitForExpectationsWithTimeout(15.0, handler: nil)
+        waitForExpectations(withTimeout: 15.0, handler: nil)
     }
 
     func testStatusCodes() {
@@ -98,14 +98,14 @@ extension HTTPRequestTests {
         var statusCode = 300
         networking.GET("/status/\(statusCode)") { JSON, error in
             XCTAssertNil(JSON)
-            let connectionError = NSError(domain: Networking.ErrorDomain, code: statusCode, userInfo: [NSLocalizedDescriptionKey : NSHTTPURLResponse.localizedStringForStatusCode(statusCode)])
+            let connectionError = NSError(domain: Networking.ErrorDomain, code: statusCode, userInfo: [NSLocalizedDescriptionKey : HTTPURLResponse.localizedString(forStatusCode: statusCode)])
             XCTAssertEqual(error, connectionError)
         }
 
         statusCode = 400
         networking.GET("/status/\(statusCode)") { JSON, error in
             XCTAssertNil(JSON)
-            let connectionError = NSError(domain: Networking.ErrorDomain, code: statusCode, userInfo: [NSLocalizedDescriptionKey : NSHTTPURLResponse.localizedStringForStatusCode(statusCode)])
+            let connectionError = NSError(domain: Networking.ErrorDomain, code: statusCode, userInfo: [NSLocalizedDescriptionKey : HTTPURLResponse.localizedString(forStatusCode: statusCode)])
             XCTAssertEqual(error, connectionError)
         }
     }
@@ -147,7 +147,7 @@ extension HTTPRequestTests {
 
     func testPOSTWithFormURLEncoded() {
         let networking = Networking(baseURL: baseURL)
-        networking.POST("/post", contentType: .FormURLEncoded, parameters: ["custname":"jameson"]) { JSON, error in
+        networking.POST("/post", contentType: .formURLEncoded, parameters: ["custname":"jameson"]) { JSON, error in
             let JSONResponse = (JSON as! [String : AnyObject])["form"] as! [String : String]
             XCTAssertEqual("jameson", JSONResponse["custname"])
             XCTAssertNotNil(JSON!, "JSON not nil")
@@ -188,7 +188,7 @@ extension HTTPRequestTests {
     func testFakePOSTUsingFile() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakePOST("/entries", fileName: "entries.json", bundle: NSBundle(forClass: self.classForKeyedArchiver!))
+        networking.fakePOST("/entries", fileName: "entries.json", bundle: Bundle(for: self.classForKeyedArchiver!))
 
         networking.POST("/entries") { JSON, error in
             let JSON = JSON as! [[String : AnyObject]]
@@ -199,7 +199,7 @@ extension HTTPRequestTests {
     }
 
     func testCancelPOST() {
-        let expectation = expectationWithDescription("testCancelPOST")
+        let expectation = self.expectation(withDescription: "testCancelPOST")
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
@@ -212,7 +212,7 @@ extension HTTPRequestTests {
 
         networking.cancelPOST("/post")
 
-        waitForExpectationsWithTimeout(15.0, handler: nil)
+        waitForExpectations(withTimeout: 15.0, handler: nil)
     }
 }
 
@@ -270,7 +270,7 @@ extension HTTPRequestTests {
     func testFakePUTUsingFile() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakePUT("/entries", fileName: "entries.json", bundle: NSBundle(forClass: self.classForKeyedArchiver!))
+        networking.fakePUT("/entries", fileName: "entries.json", bundle: Bundle(for: self.classForKeyedArchiver!))
 
         networking.PUT("/entries", parameters: nil) { JSON, error in
             let JSON = JSON as! [[String : AnyObject]]
@@ -281,7 +281,7 @@ extension HTTPRequestTests {
     }
 
     func testCancelPUT() {
-        let expectation = expectationWithDescription("testCancelPUT")
+        let expectation = self.expectation(withDescription: "testCancelPUT")
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
@@ -294,7 +294,7 @@ extension HTTPRequestTests {
 
         networking.cancelPUT("/put")
 
-        waitForExpectationsWithTimeout(15.0, handler: nil)
+        waitForExpectations(withTimeout: 15.0, handler: nil)
     }
 }
 
@@ -353,7 +353,7 @@ extension HTTPRequestTests {
     func testFakeDELETEUsingFile() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakeDELETE("/entries", fileName: "entries.json", bundle: NSBundle(forClass: self.classForKeyedArchiver!))
+        networking.fakeDELETE("/entries", fileName: "entries.json", bundle: Bundle(for: self.classForKeyedArchiver!))
 
         networking.DELETE("/entries") { JSON, error in
             let JSON = JSON as! [[String : AnyObject]]
@@ -364,7 +364,7 @@ extension HTTPRequestTests {
     }
 
     func testCancelDELETE() {
-        let expectation = expectationWithDescription("testCancelDELETE")
+        let expectation = self.expectation(withDescription: "testCancelDELETE")
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
@@ -377,6 +377,6 @@ extension HTTPRequestTests {
 
         networking.cancelDELETE("/delete")
 
-        waitForExpectationsWithTimeout(15.0, handler: nil)
+        waitForExpectations(withTimeout: 15.0, handler: nil)
     }
 }
