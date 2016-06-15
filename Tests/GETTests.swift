@@ -22,7 +22,7 @@ class GETTests: XCTestCase {
             XCTAssertTrue(NSThread.isMainThread())
             expectation.fulfill()
         }
-        waitForExpectationsWithTimeout(15.0, handler: nil)
+        waitForExpectationsWithTimeout(20.0, handler: nil)
     }
 
     func testGET() {
