@@ -11,36 +11,36 @@
  Helper methods to handle UIImage and NSImage related tasks.
  */
 extension NetworkingImage {
-    static func find(named name: String, inBundle bundle: NSBundle) -> NetworkingImage {
+    static func find(named name: String, inBundle bundle: Bundle) -> NetworkingImage {
         #if os(OSX)
-            return bundle.imageForResource(name)!
+            return bundle.image(forResource: name)!
         #elseif os(watchOS)
             return UIImage(named: name)!
         #else
-            return UIImage(named: name, inBundle: bundle, compatibleWithTraitCollection: nil)!
+            return UIImage(named: name, in: bundle, compatibleWith: nil)!
         #endif
     }
 
     #if os(OSX)
-    func data(type type: NSBitmapImageFileType) -> NSData? {
-        let imageData = self.TIFFRepresentation!
+    func data(_ type: NSBitmapImageFileType) -> Data? {
+        let imageData = self.tiffRepresentation!
         let bitmapImageRep = NSBitmapImageRep(data: imageData)!
-        let data = bitmapImageRep.representationUsingType(type, properties: [String : AnyObject]())
+        let data = bitmapImageRep.representation(using: type, properties: [String : AnyObject]())
         return data
     }
     #endif
 
-    func pngData() -> NSData? {
+    func pngData() -> Data? {
         #if os(OSX)
-            return self.data(type: .NSPNGFileType)
+            return self.data(.NSPNGFileType)
         #else
             return UIImagePNGRepresentation(self)
         #endif
     }
 
-    func jpgData() -> NSData? {
+    func jpgData() -> Data? {
         #if os(OSX)
-            return self.data(type: .NSJPEGFileType)
+            return self.data(.NSJPEGFileType)
         #else
             return UIImageJPEGRepresentation(self, 1)
         #endif

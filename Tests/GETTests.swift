@@ -15,14 +15,14 @@ class GETTests: XCTestCase {
     }
 
     func testRequestReturnBlockInMainThread() {
-        let expectation = expectationWithDescription("testRequestReturnBlockInMainThread")
+        let expectation = self.expectation(withDescription: "testRequestReturnBlockInMainThread")
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
         networking.GET("/get") { JSON, error in
-            XCTAssertTrue(NSThread.isMainThread())
+            XCTAssertTrue(Thread.isMainThread())
             expectation.fulfill()
         }
-        waitForExpectationsWithTimeout(20.0, handler: nil)
+        waitForExpectations(withTimeout: 20.0, handler: nil)
     }
 
     func testGET() {
@@ -78,7 +78,7 @@ class GETTests: XCTestCase {
     func testFakeGETUsingFile() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakeGET("/entries", fileName: "entries.json", bundle: NSBundle(forClass: GETTests.self))
+        networking.fakeGET("/entries", fileName: "entries.json", bundle: Bundle(forClass: GETTests.self))
 
         networking.GET("/entries") { JSON, error in
             guard let JSON = JSON as? [[String : AnyObject]] else { XCTFail(); return }
@@ -89,7 +89,7 @@ class GETTests: XCTestCase {
     }
 
     func testCancelGETWithPath() {
-        let expectation = expectationWithDescription("testCancelGET")
+        let expectation = self.expectation(withDescription: "testCancelGET")
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
@@ -104,11 +104,11 @@ class GETTests: XCTestCase {
             completed = true
         }
 
-        waitForExpectationsWithTimeout(15.0, handler: nil)
+        waitForExpectations(withTimeout: 15.0, handler: nil)
     }
 
     func testCancelGETWithID() {
-        let expectation = expectationWithDescription("testCancelGET")
+        let expectation = self.expectation(withDescription: "testCancelGET")
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
@@ -123,7 +123,7 @@ class GETTests: XCTestCase {
             completed = true
         }
 
-        waitForExpectationsWithTimeout(15.0, handler: nil)
+        waitForExpectations(withTimeout: 15.0, handler: nil)
     }
 
     func testStatusCodes() {
@@ -137,14 +137,14 @@ class GETTests: XCTestCase {
         var statusCode = 300
         networking.GET("/status/\(statusCode)") { JSON, error in
             XCTAssertNil(JSON)
-            let connectionError = NSError(domain: Networking.ErrorDomain, code: statusCode, userInfo: [NSLocalizedDescriptionKey : NSHTTPURLResponse.localizedStringForStatusCode(statusCode)])
+            let connectionError = NSError(domain: Networking.ErrorDomain, code: statusCode, userInfo: [NSLocalizedDescriptionKey : HTTPURLResponse.localizedString(forStatusCode: statusCode)])
             XCTAssertEqual(error, connectionError)
         }
 
         statusCode = 400
         networking.GET("/status/\(statusCode)") { JSON, error in
             XCTAssertNil(JSON)
-            let connectionError = NSError(domain: Networking.ErrorDomain, code: statusCode, userInfo: [NSLocalizedDescriptionKey : NSHTTPURLResponse.localizedStringForStatusCode(statusCode)])
+            let connectionError = NSError(domain: Networking.ErrorDomain, code: statusCode, userInfo: [NSLocalizedDescriptionKey : HTTPURLResponse.localizedString(forStatusCode: statusCode)])
             XCTAssertEqual(error, connectionError)
         }
     }

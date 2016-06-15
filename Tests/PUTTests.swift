@@ -69,7 +69,7 @@ class PUTTests: XCTestCase {
     func testFakePUTUsingFile() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakePUT("/entries", fileName: "entries.json", bundle: NSBundle(forClass: PUTTests.self))
+        networking.fakePUT("/entries", fileName: "entries.json", bundle: Bundle(forClass: PUTTests.self))
 
         networking.PUT("/entries", parameters: nil) { JSON, error in
             guard let JSON = JSON as? [[String : AnyObject]] else { XCTFail(); return }
@@ -80,7 +80,7 @@ class PUTTests: XCTestCase {
     }
 
     func testCancelPUTWithPath() {
-        let expectation = expectationWithDescription("testCancelPUT")
+        let expectation = self.expectation(withDescription: "testCancelPUT")
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
@@ -95,11 +95,11 @@ class PUTTests: XCTestCase {
             completed = true
         }
 
-        waitForExpectationsWithTimeout(15.0, handler: nil)
+        waitForExpectations(withTimeout: 15.0, handler: nil)
     }
 
     func testCancelPUTWithID() {
-        let expectation = expectationWithDescription("testCancelPUT")
+        let expectation = self.expectation(withDescription: "testCancelPUT")
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
@@ -114,6 +114,6 @@ class PUTTests: XCTestCase {
             completed = true
         }
 
-        waitForExpectationsWithTimeout(15.0, handler: nil)
+        waitForExpectations(withTimeout: 15.0, handler: nil)
     }
 }

@@ -8,8 +8,8 @@ public extension Networking {
      - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and a `NSError`.
      - returns: The request identifier.
      */
-    public func POST(path: String, parameterType: ParameterType = .JSON, parameters: AnyObject? = nil, completion: (JSON: AnyObject?, error: NSError?) -> ()) -> String  {
-        let requestID = self.request(.POST, path: path, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .JSON) { JSON, headers, error in
+    public func POST(_ path: String, parameterType: ParameterType = .json, parameters: AnyObject? = nil, completion: (JSON: AnyObject?, error: NSError?) -> ()) -> String  {
+        let requestID = self.request(.POST, path: path, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json) { JSON, headers, error in
             completion(JSON: JSON, error: error)
         }
 
@@ -23,8 +23,8 @@ public extension Networking {
      - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and a `NSError`.
      - returns: The request identifier.
      */
-    public func POST(path: String, parameterType: ParameterType = .JSON, parameters: AnyObject? = nil, completion: (JSON: AnyObject?, headers: [String : AnyObject], error: NSError?) -> ()) -> String  {
-        let requestID = self.request(.POST, path: path, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .JSON, completion: completion)
+    public func POST(_ path: String, parameterType: ParameterType = .json, parameters: AnyObject? = nil, completion: (JSON: AnyObject?, headers: [String : AnyObject], error: NSError?) -> ()) -> String  {
+        let requestID = self.request(.POST, path: path, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
 
         return requestID
     }
@@ -37,7 +37,7 @@ public extension Networking {
      - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and a `NSError`.
      - returns: The request identifier.
      */
-    public func POST(path: String, parameters: AnyObject? = nil, part: FormDataPart, completion: (JSON: AnyObject?, error: NSError?) -> ()) -> String  {
+    public func POST(_ path: String, parameters: AnyObject? = nil, part: FormDataPart, completion: (JSON: AnyObject?, error: NSError?) -> ()) -> String  {
         let requestID = self.POST(path, parameters: parameters, parts: [part], completion: completion)
 
         return requestID
@@ -51,8 +51,8 @@ public extension Networking {
      - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and a `NSError`.
      - returns: The request identifier.
      */
-    public func POST(path: String, parameters: AnyObject? = nil, parts: [FormDataPart], completion: (JSON: AnyObject?, error: NSError?) -> ()) -> String  {
-        let requestID = self.request(.POST, path: path, parameterType: .MultipartFormData, parameters: parameters, parts: parts, responseType: .JSON) { JSON, headers, error in
+    public func POST(_ path: String, parameters: AnyObject? = nil, parts: [FormDataPart], completion: (JSON: AnyObject?, error: NSError?) -> ()) -> String  {
+        let requestID = self.request(.POST, path: path, parameterType: .multipartFormData, parameters: parameters, parts: parts, responseType: .json) { JSON, headers, error in
             completion(JSON: JSON, error: error)
         }
 
@@ -65,7 +65,7 @@ public extension Networking {
      - parameter response: An `AnyObject` that will be returned when a POST request is made to the specified path.
      - parameter statusCode: By default it's 200, if you provide any status code that is between 200 and 299 the response object will be returned, otherwise we will return an error containig the provided status code.
      */
-    public func fakePOST(path: String, response: AnyObject?, statusCode: Int = 200) {
+    public func fakePOST(_ path: String, response: AnyObject?, statusCode: Int = 200) {
         self.fake(.POST, path: path, response: response, statusCode: statusCode)
     }
 
@@ -75,7 +75,7 @@ public extension Networking {
      - parameter fileName: The name of the file, whose contents will be registered as a reponse.
      - parameter bundle: The NSBundle where the file is located.
      */
-    public func fakePOST(path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
+    public func fakePOST(_ path: String, fileName: String, bundle: Bundle = Bundle.main()) {
         self.fake(.POST, path: path, fileName: fileName, bundle: bundle)
     }
 
@@ -84,8 +84,8 @@ public extension Networking {
      - parameter path: The path for the cancelled POST request.
      - parameter completion: A closure that gets called when the cancellation is completed.
      */
-    public func cancelPOST(path: String, completion: (Void -> Void)? = nil) {
-        let url = self.urlForPath(path)
+    public func cancelPOST(_ path: String, completion: ((Void) -> Void)? = nil) {
+        let url = self.url(for: path)
         self.cancelRequest(.Data, requestType: .POST, url: url, completion: completion)
     }
 }

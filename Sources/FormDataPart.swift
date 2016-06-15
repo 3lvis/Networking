@@ -1,33 +1,33 @@
 import Foundation
 
 public enum FormDataPartType {
-    case Data
-    case PNG
-    case JPG
-    case Custom(String)
+    case data
+    case png
+    case jpg
+    case custom(String)
 
     var contentType: String {
         switch self {
-        case .Data:
+        case .data:
             return "application/octet-stream"
-        case .PNG:
+        case .png:
             return "image/png"
-        case .JPG:
+        case .jpg:
             return "image/jpeg"
-        case .Custom(let value):
+        case .custom(let value):
             return value
         }
     }
 }
 
 public struct FormDataPart {
-    private let data: NSData
+    private let data: Data
     private let parameterName: String
     private let filename: String
     private let type: FormDataPartType
     var boundary: String = ""
 
-    var formData: NSData {
+    var formData: Data {
         var body = ""
         body += "--\(boundary)\r\n"
         body += "Content-Disposition: form-data; "
@@ -36,14 +36,14 @@ public struct FormDataPart {
         body += "Content-Type: \(self.type.contentType)\r\n\r\n"
 
         let bodyData = NSMutableData()
-        bodyData.appendData(body.dataUsingEncoding(NSUTF8StringEncoding)!)
-        bodyData.appendData(self.data)
-        bodyData.appendData("\r\n".dataUsingEncoding(NSUTF8StringEncoding)!)
+        bodyData.append(body.data(using: String.Encoding.utf8)!)
+        bodyData.append(self.data)
+        bodyData.append("\r\n".data(using: String.Encoding.utf8)!)
 
-        return bodyData
+        return bodyData as Data
     }
 
-    public init(type: FormDataPartType = .Data, data: NSData, parameterName: String, filename: String) {
+    public init(type: FormDataPartType = .data, data: Data, parameterName: String, filename: String) {
         self.type = type
         self.data = data
         self.parameterName = parameterName

@@ -23,8 +23,8 @@ class POSTTests: XCTestCase {
             "bool": true
         ]
         networking.POST("/post", parameters: parameters) { JSON, error in
-            let data = try! NSJSONSerialization.dataWithJSONObject(JSON!, options: .PrettyPrinted)
-            let string = NSString(data: data, encoding: NSUTF8StringEncoding)!
+            let data = try! JSONSerialization.data(JSON!, options: .prettyPrinted)
+            let string = NSString(data: data, encoding: String.Encoding.utf8.rawValue)!
             print(string)
 
             guard let JSON = JSON as? [String : AnyObject] else { XCTFail(); return }
@@ -81,8 +81,8 @@ class POSTTests: XCTestCase {
 
         let item1 = "FIRSTDATA"
         let item2 = "SECONDDATA"
-        let part1 = FormDataPart(data: item1.dataUsingEncoding(NSUTF8StringEncoding)!, parameterName: item1, filename: "\(item1).png")
-        let part2 = FormDataPart(data: item2.dataUsingEncoding(NSUTF8StringEncoding)!, parameterName: item2, filename: "\(item2).png")
+        let part1 = FormDataPart(data: item1.data(using: String.Encoding.utf8)!, parameterName: item1, filename: "\(item1).png")
+        let part2 = FormDataPart(data: item2.data(using: String.Encoding.utf8)!, parameterName: item2, filename: "\(item2).png")
         let parameters = [
             "string": "valueA",
             "int": 20,
@@ -111,16 +111,16 @@ class POSTTests: XCTestCase {
     }
 
     func testUploadingAnImageWithMultipartFormData() {
-        guard let path = NSBundle(forClass: POSTTests.self).pathForResource("Keys", ofType: "plist") else { return }
+        guard let path = Bundle(for: POSTTests.self).pathForResource("Keys", ofType: "plist") else { return }
         guard let dictionary = NSDictionary(contentsOfFile: path) else { return }
         guard let CloudinaryCloudName = dictionary["CloudinaryCloudName"] as? String where CloudinaryCloudName.characters.count > 0 else { return }
         guard let CloudinarySecret = dictionary["CloudinarySecret"] as? String where CloudinarySecret.characters.count > 0 else { return }
         guard let CloudinaryAPIKey = dictionary["CloudinaryAPIKey"] as? String where CloudinaryAPIKey.characters.count > 0 else { return }
 
         let networking = Networking(baseURL: "https://api.cloudinary.com")
-        let timestamp = "\(Int(NSDate().timeIntervalSince1970))"
+        let timestamp = "\(Int(Date().timeIntervalSince1970))"
 
-        let pngImage = NetworkingImage.find(named: "pig.png", inBundle: NSBundle(forClass: ImageTests.self))
+        let pngImage = NetworkingImage.find(named: "pig.png", inBundle: Bundle(forClass: ImageTests.self))
         let pngImageData = pngImage.pngData()!
         let pngPart = FormDataPart(data: pngImageData, parameterName: "file", filename: "\(timestamp).png")
 
@@ -128,7 +128,7 @@ class POSTTests: XCTestCase {
             "timestamp": timestamp,
             "public_id": timestamp
         ]
-        let signature = SHA1.signatureUsingParameters(parameters, secret: CloudinarySecret)
+        let signature = SHA1.signature(usingParameters: parameters, secret: CloudinarySecret)
         parameters["api_key"] = CloudinaryAPIKey
         parameters["signature"] = signature
 
@@ -174,7 +174,7 @@ class POSTTests: XCTestCase {
     func testFakePOSTUsingFile() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakePOST("/entries", fileName: "entries.json", bundle: NSBundle(forClass: POSTTests.self))
+        networking.fakePOST("/entries", fileName: "entries.json", bundle: Bundle(forClass: POSTTests.self))
 
         networking.POST("/entries") { JSON, error in
             guard let JSON = JSON as? [[String : AnyObject]] else { XCTFail(); return }
@@ -185,7 +185,7 @@ class POSTTests: XCTestCase {
     }
 
     func testCancelPOSTWithPath() {
-        let expectation = expectationWithDescription("testCancelPOST")
+        let expectation = self.expectation(withDescription: "testCancelPOST")
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
@@ -200,11 +200,11 @@ class POSTTests: XCTestCase {
             completed = true
         }
 
-        waitForExpectationsWithTimeout(15.0, handler: nil)
+        waitForExpectations(withTimeout: 15.0, handler: nil)
     }
 
     func testCancelPOSTWithID() {
-        let expectation = expectationWithDescription("testCancelPOST")
+        let expectation = self.expectation(withDescription: "testCancelPOST")
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
@@ -219,10 +219,10 @@ class POSTTests: XCTestCase {
             completed = true
         }
 
-        waitForExpectationsWithTimeout(15.0, handler: nil)
+        waitForExpectations(withTimeout: 15.0, handler: nil)
     }
 
-    func deleteAllCloudinaryPhotos(networking networking: Networking, cloudName: String, secret: String, APIKey: String) {
+    func deleteAllCloudinaryPhotos(networking: Networking, cloudName: String, secret: String, APIKey: String) {
         networking.authenticate(username: APIKey, password: secret)
         networking.DELETE("/v1_1/\(cloudName)/resources/image/upload?all=true") { JSON, error in }
     }
