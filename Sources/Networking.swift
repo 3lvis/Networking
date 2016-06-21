@@ -507,7 +507,7 @@ extension Networking {
                 request.httpBody = formattedParameters.data(using: String.Encoding.utf8)
                 break
             case .multipartFormData:
-                let bodyData = NSMutableData()
+                var bodyData = Data()
 
                 if let parameters = parameters as? [String : AnyObject] {
                     for (key, value) in parameters {

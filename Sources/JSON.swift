@@ -9,7 +9,7 @@ class JSON {
     /**
     Returns a JSON object from a file.
     - parameter fileName: The name of the file, the expected extension is `.json`.
-    - parameter bundle:  The NSBundle where the file is located, by default is the main bundle.
+    - parameter bundle:  The Bundle where the file is located, by default is the main bundle.
     - returns: A JSON object, it can be either a Dictionary or an Array.
     */
     class func from(_ fileName: String, bundle: Bundle = Bundle.main()) throws -> AnyObject? {
@@ -27,7 +27,7 @@ class JSON {
 
 extension Data {
     /**
-    Converts NSData to a JSON object.
+    Converts Data to a JSON object.
     - returns: A JSON object, it can be either a Dictionary or an Array.
     */
     func toJSON() throws -> AnyObject? {

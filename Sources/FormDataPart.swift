@@ -35,7 +35,7 @@ public struct FormDataPart {
         body += "filename=\"\(self.filename)\"\r\n"
         body += "Content-Type: \(self.type.contentType)\r\n\r\n"
 
-        let bodyData = NSMutableData()
+        var bodyData = Data()
         bodyData.append(body.data(using: String.Encoding.utf8)!)
         bodyData.append(self.data)
         bodyData.append("\r\n".data(using: String.Encoding.utf8)!)

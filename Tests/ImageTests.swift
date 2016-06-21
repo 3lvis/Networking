@@ -173,7 +173,7 @@ class ImageTests: XCTestCase {
         waitForExpectations(withTimeout: 15.0, handler: nil)
     }
 
-    // Test `imageFromCache` using path, expecting image from NSCache
+    // Test `imageFromCache` using path, expecting image from Cache
     func testImageFromCacheForPathInCache() {
         var synchronous = false
         let networking = Networking(baseURL: baseURL)
@@ -191,7 +191,7 @@ class ImageTests: XCTestCase {
         XCTAssertTrue(synchronous)
     }
 
-    // Test `imageFromCache` using cacheName instead of path, expecting image from NSCache
+    // Test `imageFromCache` using cacheName instead of path, expecting image from Cache
     func testImageFromCacheForCustomCacheNameInCache() {
         var synchronous = false
         let networking = Networking(baseURL: baseURL)
