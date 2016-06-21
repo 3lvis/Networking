@@ -201,7 +201,7 @@ public class Networking {
      */
     public func destinationURL(_ path: String, cacheName: String? = nil) throws -> URL {
         #if os(tvOS)
-            let directory = NSSearchPathDirectory.CachesDirectory
+            let directory = FileManager.SearchPathDirectory.cachesDirectory
         #else
             let directory = TestCheck.isTesting ? FileManager.SearchPathDirectory.cachesDirectory : FileManager.SearchPathDirectory.documentDirectory
         #endif
