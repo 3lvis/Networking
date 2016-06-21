@@ -7,17 +7,17 @@ public extension Int {
      */
     public func statusCodeType() -> Networking.StatusCodeType {
         if self >= 100 && self < 200 {
-            return .Informational
+            return .informational
         } else if self >= 200 && self < 300 {
-            return .Successful
+            return .successful
         } else if self >= 300 && self < 400 {
-            return .Redirection
+            return .redirection
         } else if self >= 400 && self < 500 {
-            return .ClientError
+            return .clientError
         } else if self >= 500 && self < 600 {
-            return .ServerError
+            return .serverError
         } else {
-            return .Unknown
+            return .unknown
         }
     }
 }
@@ -37,7 +37,7 @@ public class Networking {
      - `Background:` A configuration type that allows HTTP and HTTPS uploads or downloads to be performed in the background. It causes upload and download tasks to be performed by the system in a separate process.
      */
     public enum ConfigurationType {
-        case Default, Ephemeral, Background
+        case `default`, ephemeral, background
     }
 
     enum RequestType: String {
@@ -59,42 +59,42 @@ public class Networking {
         /**
          Serializes your parameters using `NSJSONSerialization` and sets your `Content-Type` to `application/json`.
          */
-        case JSON
+        case json
         /**
          Serializes your parameters using `Percent-encoding` and sets your `Content-Type` to `application/x-www-form-urlencoded`.
          */
-        case FormURLEncoded
+        case formURLEncoded
         /**
          Serializes your parameters and parts as multipart and sets your `Content-Type` to `multipart/form-data`.
          */
-        case MultipartFormData
+        case multipartFormData
         /**
          Sends your parameters as plain data, sets your `Content-Type` to the value inside `Custom`.
          */
-        case Custom(String)
+        case custom(String)
 
-        func contentType(boundary boundary: String) -> String {
+        func contentType(boundary: String) -> String {
             switch self {
-            case .JSON:
+            case .json:
                 return "application/json"
-            case .FormURLEncoded:
+            case .formURLEncoded:
                 return "application/x-www-form-urlencoded"
-            case .MultipartFormData:
+            case .multipartFormData:
                 return "multipart/form-data; boundary=\(boundary)"
-            case .Custom(let value):
+            case .custom(let value):
                 return value
             }
         }
     }
 
     enum ResponseType {
-        case JSON
-        case Data
-        case Image
+        case json
+        case data
+        case image
 
         var accept: String? {
             switch self {
-            case .JSON:
+            case .json:
                 return "application/json"
             default:
                 return nil
@@ -112,7 +112,7 @@ public class Networking {
      - `Unknown:` This response status code could be used by Foundation for other types of states, for example when a request gets cancelled you will receive status code -999.
      */
     public enum StatusCodeType {
-        case Informational, Successful, Redirection, ClientError, ServerError, Unknown
+        case informational, successful, redirection, clientError, serverError, unknown
     }
 
     private let baseURL: String
@@ -120,7 +120,7 @@ public class Networking {
     var token: String?
     var authorizationHeaderValue: String?
     var authorizationHeaderKey = "Authorization"
-    var cache: NSCache
+    var cache: Cache<AnyObject, AnyObject>
     var configurationType: ConfigurationType
 
     /**
@@ -133,18 +133,18 @@ public class Networking {
      */
     let boundary = String(format: "net.3lvis.networking.%08x%08x", arc4random(), arc4random())
 
-    lazy var session: NSURLSession = {
-        return NSURLSession(configuration: self.sessionConfiguration())
+    lazy var session: URLSession = {
+        return URLSession(configuration: self.sessionConfiguration())
     }()
 
     /**
      Base initializer, it creates an instance of `Networking`.
      - parameter baseURL: The base URL for HTTP requests under `Networking`.
      */
-    public init(baseURL: String, configurationType: ConfigurationType = .Default, cache: NSCache? = nil) {
+    public init(baseURL: String, configurationType: ConfigurationType = .default, cache: Cache<AnyObject, AnyObject>? = nil) {
         self.baseURL = baseURL
         self.configurationType = configurationType
-        self.cache = cache ?? NSCache()
+        self.cache = cache ?? Cache()
     }
 
     /**
@@ -152,16 +152,16 @@ public class Networking {
      - parameter username: The username to be used.
      - parameter password: The password to be used.
      */
-    public func authenticate(username username: String, password: String) {
+    public func authenticate(username: String, password: String) {
         let credentialsString = "\(username):\(password)"
-        if let credentialsData = credentialsString.dataUsingEncoding(NSUTF8StringEncoding) {
-            let base64Credentials = credentialsData.base64EncodedStringWithOptions([])
+        if let credentialsData = credentialsString.data(using: String.Encoding.utf8) {
+            let base64Credentials = credentialsData.base64EncodedString([])
             let authString = "Basic \(base64Credentials)"
 
             let config  = self.sessionConfiguration()
-            config.HTTPAdditionalHeaders = [self.authorizationHeaderKey : authString]
+            config.httpAdditionalHeaders = [self.authorizationHeaderKey : authString]
 
-            self.session = NSURLSession(configuration: config)
+            self.session = URLSession(configuration: config)
         }
     }
 
@@ -169,7 +169,7 @@ public class Networking {
      Authenticates using a Bearer token, sets the Authorization header to "Bearer \(token)".
      - parameter token: The token to be used.
      */
-    public func authenticate(token token: String) {
+    public func authenticate(token: String) {
         self.token = token
     }
 
@@ -178,7 +178,7 @@ public class Networking {
      - parameter authorizationHeaderKey: Sets this value as the key for the HTTP `Authorization` header
      - parameter authorizationHeaderValue: Sets this value to the HTTP `Authorization` header or to the `headerKey` if you provided that.
      */
-    public func authenticate(headerKey headerKey: String = "Authorization", headerValue: String) {
+    public func authenticate(headerKey: String = "Authorization", headerValue: String) {
         self.authorizationHeaderKey = headerKey
         self.authorizationHeaderValue = headerValue
     }
@@ -188,9 +188,9 @@ public class Networking {
      - parameter path: The path to be appended to the base URL.
      - returns: A NSURL generated after appending the path to the base URL.
      */
-    public func urlForPath(path: String) -> NSURL {
+    public func urlForPath(_ path: String) -> URL {
         guard let encodedPath = path.encodeUTF8() else { fatalError("Couldn't encode path to UTF8: \(path)") }
-        guard let url = NSURL(string: self.baseURL + encodedPath) else { fatalError("Couldn't create a url using baseURL: \(self.baseURL) and encodedPath: \(encodedPath)") }
+        guard let url = URL(string: self.baseURL + encodedPath) else { fatalError("Couldn't create a url using baseURL: \(self.baseURL) and encodedPath: \(encodedPath)") }
         return url
     }
 
@@ -199,20 +199,20 @@ public class Networking {
      - parameter path: The path used to download the resource.
      - returns: A NSURL where a resource has been stored.
      */
-    public func destinationURL(path: String, cacheName: String? = nil) throws -> NSURL {
+    public func destinationURL(_ path: String, cacheName: String? = nil) throws -> URL {
         #if os(tvOS)
             let directory = NSSearchPathDirectory.CachesDirectory
         #else
-            let directory = TestCheck.isTesting ? NSSearchPathDirectory.CachesDirectory : NSSearchPathDirectory.DocumentDirectory
+            let directory = TestCheck.isTesting ? FileManager.SearchPathDirectory.cachesDirectory : FileManager.SearchPathDirectory.documentDirectory
         #endif
         let finalPath = cacheName ?? self.urlForPath(path).absoluteString
-        let replacedPath = finalPath.stringByReplacingOccurrencesOfString("/", withString: "-")
-        if let url = NSURL(string: replacedPath) {
-            if let cachesURL = NSFileManager.defaultManager().URLsForDirectory(directory, inDomains: .UserDomainMask).first {
+        let replacedPath = finalPath?.replacingOccurrences(of: "/", with: "-")
+        if let url = URL(string: replacedPath!) {
+            if let cachesURL = FileManager.default().urlsForDirectory(directory, inDomains: .userDomainMask).first {
                 #if !os(tvOS)
-                    try cachesURL.setResourceValue(true, forKey: NSURLIsExcludedFromBackupKey)
+                    try (cachesURL as NSURL).setResourceValue(true, forKey: URLResourceKey.isExcludedFromBackupKey)
                 #endif
-                let destinationURL = cachesURL.URLByAppendingPathComponent(url.absoluteString)
+                let destinationURL = try! cachesURL.appendingPathComponent(url.absoluteString!)
 
                 return destinationURL
             } else {
@@ -228,13 +228,13 @@ public class Networking {
      - parameter path: The full url to be splitted.
      - returns: A base url and a relative path.
      */
-    public static func splitBaseURLAndRelativePath(path: String) -> (baseURL: String, relativePath: String) {
+    public static func splitBaseURLAndRelativePath(_ path: String) -> (baseURL: String, relativePath: String) {
         guard let encodedPath = path.encodeUTF8() else { fatalError("Couldn't encode path to UTF8: \(path)") }
-        guard let url = NSURL(string: encodedPath) else { fatalError("Path \(encodedPath) can't be converted to url") }
-        guard let baseURLWithDash = NSURL(string: "/", relativeToURL: url)?.absoluteURL.absoluteString else { fatalError("Can't find absolute url of url: \(url)") }
-        let index = baseURLWithDash.endIndex.advancedBy(-1)
-        let baseURL = baseURLWithDash.substringToIndex(index)
-        let relativePath = path.stringByReplacingOccurrencesOfString(baseURL, withString: "")
+        guard let url = URL(string: encodedPath) else { fatalError("Path \(encodedPath) can't be converted to url") }
+        guard let baseURLWithDash = URL(string: "/", relativeTo: url)?.absoluteURL?.absoluteString else { fatalError("Can't find absolute url of url: \(url)") }
+        let index = baseURLWithDash.characters.index(baseURLWithDash.endIndex, offsetBy: -1)
+        let baseURL = baseURLWithDash.substring(to: index)
+        let relativePath = path.replacingOccurrences(of: baseURL, with: "")
 
         return (baseURL, relativePath)
     }
@@ -244,12 +244,12 @@ public class Networking {
      - parameter requestID: The ID of the request to be cancelled.
      - parameter completion: The completion block to be called when the request is cancelled.
      */
-    func cancel(requestID: String, completion: (Void -> Void)? = nil) {
+    func cancel(_ requestID: String, completion: ((Void) -> Void)? = nil) {
         self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
-            var tasks = [NSURLSessionTask]()
-            tasks.appendContentsOf(dataTasks as [NSURLSessionTask])
-            tasks.appendContentsOf(uploadTasks as [NSURLSessionTask])
-            tasks.appendContentsOf(downloadTasks as [NSURLSessionTask])
+            var tasks = [URLSessionTask]()
+            tasks.append(contentsOf: dataTasks as [URLSessionTask])
+            tasks.append(contentsOf: uploadTasks as [URLSessionTask])
+            tasks.append(contentsOf: downloadTasks as [URLSessionTask])
 
             for task in tasks {
                 if task.taskDescription == requestID {
@@ -266,7 +266,7 @@ public class Networking {
      Cancels all the current requests.
      - parameter completion: The completion block to be called when all the requests are cancelled.
      */
-    public func cancelAllRequests(completion: (Void -> Void)?) {
+    public func cancelAllRequests(_ completion: ((Void) -> Void)?) {
         self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
             for sessionTask in dataTasks {
                 sessionTask.cancel()
@@ -289,9 +289,9 @@ public class Networking {
      - parameter path: The path used to download the resource.
      - parameter completion: A closure that gets called when the download request is completed, it contains  a `data` object and a `NSError`.
      */
-    public func downloadData(path: String, cacheName: String? = nil, completion: (data: NSData?, error: NSError?) -> Void) {
-        self.request(.GET, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .Data) { response, headers, error in
-            completion(data: response as? NSData, error: error)
+    public func downloadData(_ path: String, cacheName: String? = nil, completion: (data: Data?, error: NSError?) -> Void) {
+        self.request(.GET, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .data) { response, headers, error in
+            completion(data: response as? Data, error: error)
         }
     }
 
@@ -301,10 +301,10 @@ public class Networking {
      - parameter cacheName: The cache name used to identify the downloaded data, by default the path is used.
      - parameter completion: A closure that returns the data from the cache, if no data is found it will return nil.
      */
-    public func dataFromCache(path: String, cacheName: String? = nil, completion: (data: NSData?) -> Void) {
-        self.objectFromCache(path, cacheName: cacheName, responseType: .Data) { object in
+    public func dataFromCache(_ path: String, cacheName: String? = nil, completion: (data: Data?) -> Void) {
+        self.objectFromCache(path, cacheName: cacheName, responseType: .data) { object in
             TestCheck.testBlock(disabled: self.disableTestingMode) {
-                completion(data: object as? NSData)
+                completion(data: object as? Data)
             }
         }
     }
@@ -316,41 +316,41 @@ public class Networking {
     /**
      [Deprecated] Use `authenticate(headerValue)` instead.
      */
-    @available(*, deprecated=1.1.0, message="Use `authenticate(headerValue)` instead") public func authenticate(authorizationHeader authorizationHeader: String) {
+    @available(*, deprecated:1.1.0, message:"Use `authenticate(headerValue)` instead") public func authenticate(authorizationHeader: String) {
         self.authenticate(headerValue: authorizationHeader)
     }
 }
 
 extension Networking {
-    func objectFromCache(path: String, cacheName: String? = nil, responseType: ResponseType, completion: (object: AnyObject?) -> Void) {
+    func objectFromCache(_ path: String, cacheName: String? = nil, responseType: ResponseType, completion: (object: AnyObject?) -> Void) {
         guard let destinationURL = try? self.destinationURL(path, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
 
-        if let object = self.cache.objectForKey(destinationURL.absoluteString) {
+        if let object = self.cache.object(forKey: destinationURL.absoluteString!) {
             completion(object: object)
-        } else if NSFileManager.defaultManager().fileExistsAtURL(destinationURL) {
-            let semaphore = dispatch_semaphore_create(0)
+        } else if FileManager.default().fileExistsAtURL(destinationURL) {
+            let semaphore = DispatchSemaphore(value: 0)
             var returnedObject: AnyObject?
 
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0)) {
+            DispatchQueue.global(attributes: DispatchQueue.GlobalAttributes.qosUtility).async {
                 let object = self.dataForDestinationURL(destinationURL)
-                if responseType == .Image {
+                if responseType == .image {
                     returnedObject = NetworkingImage(data: object)
                 } else {
                     returnedObject = object
                 }
                 if let returnedObject = returnedObject {
-                    self.cache.setObject(returnedObject, forKey: destinationURL.absoluteString)
+                    self.cache.setObject(returnedObject, forKey: destinationURL.absoluteString!)
                 }
 
                 if TestCheck.isTesting && self.disableTestingMode == false {
-                    dispatch_semaphore_signal(semaphore)
+                    semaphore.signal()
                 } else {
                     completion(object: returnedObject)
                 }
             }
 
             if TestCheck.isTesting && self.disableTestingMode == false {
-                dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
+                let _ = semaphore.wait(timeout: DispatchTime.distantFuture)
                 completion(object: returnedObject)
             }
         } else {
@@ -358,62 +358,63 @@ extension Networking {
         }
     }
 
-    func dataForDestinationURL(url: NSURL) -> NSData {
+    func dataForDestinationURL(_ url: URL) -> Data {
         guard let path = url.path else { fatalError("Couldn't get path for url: \(url)") }
-        guard let data = NSFileManager.defaultManager().contentsAtPath(path) else { fatalError("Couldn't get image in destination url: \(url)") }
+        guard let data = FileManager.default().contents(atPath: path) else { fatalError("Couldn't get image in destination url: \(url)") }
 
         return data
     }
 
-    func sessionConfiguration() -> NSURLSessionConfiguration {
+    func sessionConfiguration() -> URLSessionConfiguration {
         switch self.configurationType {
-        case .Default:
-            return NSURLSessionConfiguration.defaultSessionConfiguration()
-        case .Ephemeral:
-            return NSURLSessionConfiguration.ephemeralSessionConfiguration()
-        case .Background:
-            return NSURLSessionConfiguration.backgroundSessionConfigurationWithIdentifier("NetworkingBackgroundConfiguration")
+        case .default:
+            return URLSessionConfiguration.default()
+        case .ephemeral:
+            return URLSessionConfiguration.ephemeral()
+        case .background:
+            return URLSessionConfiguration.background(withIdentifier: "NetworkingBackgroundConfiguration")
         }
     }
 
-    func fake(requestType: RequestType, path: String, fileName: String, bundle: NSBundle = NSBundle.mainBundle()) {
+    func fake(_ requestType: RequestType, path: String, fileName: String, bundle: Bundle = Bundle.main()) {
         do {
             if let result = try JSON.from(fileName, bundle: bundle) {
                 self.fake(requestType, path: path, response: result, statusCode: 200)
             }
-        } catch ParsingError.NotFound {
+        } catch ParsingError.notFound {
             fatalError("We couldn't find \(fileName), are you sure is there?")
         } catch {
             fatalError("Converting data to JSON failed")
         }
     }
 
-    func fake(requestType: RequestType, path: String, response: AnyObject?, statusCode: Int) {
+    func fake(_ requestType: RequestType, path: String, response: AnyObject?, statusCode: Int) {
         var fakeRequests = self.fakeRequests[requestType] ?? [String : FakeRequest]()
         fakeRequests[path] = FakeRequest(response: response, statusCode: statusCode)
         self.fakeRequests[requestType] = fakeRequests
     }
 
-    func request(requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, parts: [FormDataPart]?, responseType: ResponseType, completion: (response: AnyObject?, headers: [String : AnyObject], error: NSError?) -> ()) -> String {
-        var requestID = NSUUID().UUIDString
+    @discardableResult
+    func request(_ requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, parts: [FormDataPart]?, responseType: ResponseType, completion: (response: AnyObject?, headers: [String : AnyObject], error: NSError?) -> ()) -> String {
+        var requestID = UUID().uuidString
 
         if let responses = self.fakeRequests[requestType], fakeRequest = responses[path] {
-            if fakeRequest.statusCode.statusCodeType() == .Successful {
+            if fakeRequest.statusCode.statusCodeType() == .successful {
                 completion(response: fakeRequest.response, headers: [String : AnyObject](), error: nil)
             } else {
-                let error = NSError(domain: Networking.ErrorDomain, code: fakeRequest.statusCode, userInfo: [NSLocalizedDescriptionKey : NSHTTPURLResponse.localizedStringForStatusCode(fakeRequest.statusCode)])
+                let error = NSError(domain: Networking.ErrorDomain, code: fakeRequest.statusCode, userInfo: [NSLocalizedDescriptionKey : HTTPURLResponse.localizedString(forStatusCode: fakeRequest.statusCode)])
                 completion(response: nil, headers: [String : AnyObject](), error: error)
             }
         } else {
             switch responseType {
-            case .JSON:
+            case .json:
                 requestID = self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, headers, error in
                     var returnedError = error
                     var returnedResponse: AnyObject?
                     if error == nil {
-                        if let data = data where data.length > 0 {
+                        if let data = data where data.count > 0 {
                             do {
-                                returnedResponse = try NSJSONSerialization.JSONObjectWithData(data, options: [])
+                                returnedResponse = try JSONSerialization.jsonObject(with: data, options: [])
                             } catch let JSONError as NSError {
                                 returnedError = JSONError
                             }
@@ -425,26 +426,26 @@ extension Networking {
                     }
                 }
                 break
-            case .Data, .Image:
+            case .data, .image:
                 self.objectFromCache(path, cacheName: cacheName, responseType: responseType) { object in
                     if let object = object {
                         TestCheck.testBlock(disabled: self.disableTestingMode) {
                             completion(response: object, headers: [String : AnyObject](), error: nil)
                         }
                     } else {
-                        self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, headers, error in
+                        requestID = self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, headers, error in
                             var returnedResponse: AnyObject?
-                            if let data = data where data.length > 0 {
+                            if let data = data where data.count > 0 {
                                 guard let destinationURL = try? self.destinationURL(path, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
-                                data.writeToURL(destinationURL, atomically: true)
+                                let _ = try? data.write(to: destinationURL, options: [.dataWritingAtomic])
                                 switch responseType {
-                                case .Data:
-                                    self.cache.setObject(data, forKey: destinationURL.absoluteString)
+                                case .data:
+                                    self.cache.setObject(data, forKey: destinationURL.absoluteString!)
                                     returnedResponse = data
                                     break
-                                case .Image:
+                                case .image:
                                     if let image = NetworkingImage(data: data) {
-                                        self.cache.setObject(image, forKey: destinationURL.absoluteString)
+                                        self.cache.setObject(image, forKey: destinationURL.absoluteString!)
                                         returnedResponse = image
                                     }
                                     break
@@ -466,10 +467,11 @@ extension Networking {
         return requestID
     }
 
-    func dataRequest(requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, parts: [FormDataPart]?, responseType: ResponseType, completion: (response: NSData?, headers: [String : AnyObject], error: NSError?) -> ()) -> String {
-        let requestID = NSUUID().UUIDString
-        let request = NSMutableURLRequest(URL: self.urlForPath(path))
-        request.HTTPMethod = requestType.rawValue
+    @discardableResult
+    func dataRequest(_ requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, parts: [FormDataPart]?, responseType: ResponseType, completion: (response: Data?, headers: [String : AnyObject], error: NSError?) -> ()) -> String {
+        let requestID = UUID().uuidString
+        var request = URLRequest(url: self.urlForPath(path))
+        request.httpMethod = requestType.rawValue
 
         if let parameterType = parameterType {
             request.addValue(parameterType.contentType(boundary: self.boundary), forHTTPHeaderField: "Content-Type")
@@ -485,26 +487,26 @@ extension Networking {
             request.setValue("Bearer \(token)", forHTTPHeaderField: self.authorizationHeaderKey)
         }
 
-        dispatch_async(dispatch_get_main_queue()) {
+        DispatchQueue.main.async {
             NetworkActivityIndicator.sharedIndicator.visible = true
         }
 
         var serializingError: NSError?
         if let parameterType = parameterType, parameters = parameters {
             switch parameterType {
-            case .JSON:
+            case .json:
                 do {
-                    request.HTTPBody = try NSJSONSerialization.dataWithJSONObject(parameters, options: [])
+                    request.httpBody = try JSONSerialization.data(withJSONObject: parameters, options: [])
                 } catch let error as NSError {
                     serializingError = error
                 }
                 break
-            case .FormURLEncoded:
+            case .formURLEncoded:
                 guard let parametersDictionary = parameters as? [String : AnyObject] else { fatalError("Couldn't convert parameters to a dictionary: \(parameters)") }
                 let formattedParameters = parametersDictionary.formURLEncodedFormat()
-                request.HTTPBody = formattedParameters.dataUsingEncoding(NSUTF8StringEncoding)
+                request.httpBody = formattedParameters.data(using: String.Encoding.utf8)
                 break
-            case .MultipartFormData:
+            case .multipartFormData:
                 let bodyData = NSMutableData()
 
                 if let parameters = parameters as? [String : AnyObject] {
@@ -514,22 +516,22 @@ extension Networking {
                         body += "--\(self.boundary)\r\n"
                         body += "Content-Disposition: form-data; name=\"\(key)\""
                         body += "\r\n\r\n\(usedValue)\r\n"
-                        bodyData.appendData(body.dataUsingEncoding(NSUTF8StringEncoding)!)
+                        bodyData.append(body.data(using: String.Encoding.utf8)!)
                     }
                 }
 
                 if let parts = parts {
                     for var part in parts {
                         part.boundary = self.boundary
-                        bodyData.appendData(part.formData)
+                        bodyData.append(part.formData as Data)
                     }
                 }
 
-                bodyData.appendData("--\(self.boundary)--\r\n".dataUsingEncoding(NSUTF8StringEncoding)!)
-                request.HTTPBody = bodyData
+                bodyData.append("--\(self.boundary)--\r\n".data(using: String.Encoding.utf8)!)
+                request.httpBody = bodyData as Data
                 break
-            case .Custom(_):
-                request.HTTPBody = parameters as? NSData
+            case .custom(_):
+                request.httpBody = parameters as? Data
                 break
             }
         }
@@ -538,34 +540,34 @@ extension Networking {
             completion(response: nil, headers: [String : AnyObject](), error: serializingError)
         } else {
             var connectionError: NSError?
-            let semaphore = dispatch_semaphore_create(0)
-            var returnedResponse: NSURLResponse?
-            var returnedData: NSData?
+            let semaphore = DispatchSemaphore(value: 0)
+            var returnedResponse: URLResponse?
+            var returnedData: Data?
             var returnedHeaders = [String : AnyObject]()
 
-            let session = self.session.dataTaskWithRequest(request) { data, response, error in
+            let session = self.session.dataTask(with: request) { data, response, error in
                 returnedResponse = response
                 connectionError = error
                 returnedData = data
 
-                if let httpResponse = response as? NSHTTPURLResponse {
+                if let httpResponse = response as? HTTPURLResponse {
                     if let headers = httpResponse.allHeaderFields as? [String : AnyObject] {
                         returnedHeaders = headers
                     }
 
                     if httpResponse.statusCode >= 200 && httpResponse.statusCode < 300 {
-                        if let data = data where data.length > 0 {
+                        if let data = data where data.count > 0 {
                             returnedData = data
                         }
                     } else {
-                        connectionError = NSError(domain: Networking.ErrorDomain, code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey : NSHTTPURLResponse.localizedStringForStatusCode(httpResponse.statusCode)])
+                        connectionError = NSError(domain: Networking.ErrorDomain, code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey : HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode)])
                     }
                 }
 
                 if TestCheck.isTesting && self.disableTestingMode == false {
-                    dispatch_semaphore_signal(semaphore)
+                    semaphore.signal()
                 } else {
-                    dispatch_async(dispatch_get_main_queue()) {
+                    DispatchQueue.main.async {
                         NetworkActivityIndicator.sharedIndicator.visible = false
                     }
 
@@ -578,8 +580,8 @@ extension Networking {
             session.resume()
 
             if TestCheck.isTesting && self.disableTestingMode == false {
-                dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
-                self.logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError)
+                let _ = semaphore.wait(timeout: DispatchTime.distantFuture)
+                self.logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request as URLRequest, response: returnedResponse, error: connectionError)
                 completion(response: returnedData, headers: returnedHeaders, error: connectionError)
             }
         }
@@ -587,9 +589,9 @@ extension Networking {
         return requestID
     }
 
-    func cancelRequest(sessionTaskType: SessionTaskType, requestType: RequestType, url: NSURL, completion: (Void -> Void)?) {
+    func cancelRequest(_ sessionTaskType: SessionTaskType, requestType: RequestType, url: URL, completion: ((Void) -> Void)?) {
         self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
-            var sessionTasks = [NSURLSessionTask]()
+            var sessionTasks = [URLSessionTask]()
             switch sessionTaskType {
             case .Data:
                 sessionTasks = dataTasks
@@ -603,7 +605,7 @@ extension Networking {
             }
 
             for sessionTask in sessionTasks {
-                if sessionTask.originalRequest?.HTTPMethod == requestType.rawValue && sessionTask.originalRequest?.URL?.absoluteString == url.absoluteString {
+                if sessionTask.originalRequest?.httpMethod == requestType.rawValue && sessionTask.originalRequest?.url?.absoluteString == url.absoluteString {
                     sessionTask.cancel()
                     break
                 }
@@ -613,7 +615,7 @@ extension Networking {
         }
     }
 
-    func logError(parameterType parameterType: ParameterType?, parameters: AnyObject? = nil, data: NSData?, request: NSURLRequest?, response: NSURLResponse?, error: NSError?) {
+    func logError(parameterType: ParameterType?, parameters: AnyObject? = nil, data: Data?, request: URLRequest?, response: URLResponse?, error: NSError?) {
         guard let error = error else { return }
 
         print(" ")
@@ -622,7 +624,7 @@ extension Networking {
 
         let isCancelled = error.code == -999
         if isCancelled {
-            if let request = request, url = request.URL {
+            if let request = request, url = request.url {
                 print("Cancelled request: \(url.absoluteString)")
                 print(" ")
             }
@@ -633,7 +635,7 @@ extension Networking {
             print("Error \(error.code): \(error.description)")
             print(" ")
 
-            if let request = request, url = request.URL {
+            if let request = request, url = request.url {
                 print("URL: \(url.absoluteString)")
                 print(" ")
             }
@@ -645,10 +647,10 @@ extension Networking {
 
             if let parameterType = parameterType, parameters = parameters {
                 switch parameterType {
-                case .JSON:
+                case .json:
                     do {
-                        let data = try NSJSONSerialization.dataWithJSONObject(parameters, options: .PrettyPrinted)
-                        let string = String(data: data, encoding: NSUTF8StringEncoding)
+                        let data = try JSONSerialization.data(withJSONObject: parameters, options: .prettyPrinted)
+                        let string = String(data: data, encoding: String.Encoding.utf8)
                         if let string = string {
                             print("Parameters: \(string)")
                             print(" ")
@@ -658,7 +660,7 @@ extension Networking {
                         print(" ")
                     }
                     break
-                case .FormURLEncoded:
+                case .formURLEncoded:
                     guard let parametersDictionary = parameters as? [String : AnyObject] else { fatalError("Couldn't cast parameters as dictionary: \(parameters)") }
                     let formattedParameters = parametersDictionary.formURLEncodedFormat()
                     print("Parameters: \(formattedParameters)")
@@ -668,12 +670,12 @@ extension Networking {
                 }
             }
 
-            if let data = data, stringData = String(data: data, encoding: NSUTF8StringEncoding) {
+            if let data = data, stringData = String(data: data, encoding: String.Encoding.utf8) {
                 print("Data: \(stringData)")
                 print(" ")
             }
 
-            if let response = response as? NSHTTPURLResponse {
+            if let response = response as? HTTPURLResponse {
                 print("*** Response ***")
                 print(" ")
 
@@ -682,7 +684,7 @@ extension Networking {
                     print(" ")
                 }
 
-                print("Status code: \(response.statusCode) — \(NSHTTPURLResponse.localizedStringForStatusCode(response.statusCode))")
+                print("Status code: \(response.statusCode) — \(HTTPURLResponse.localizedString(forStatusCode: response.statusCode))")
                 print(" ")
             }
         }

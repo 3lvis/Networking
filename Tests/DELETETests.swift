@@ -67,7 +67,7 @@ class DELETETests: XCTestCase {
     func testFakeDELETEUsingFile() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakeDELETE("/entries", fileName: "entries.json", bundle: NSBundle(forClass: DELETETests.self))
+        networking.fakeDELETE("/entries", fileName: "entries.json", bundle: Bundle(for: DELETETests.self))
 
         networking.DELETE("/entries") { JSON, error in
             guard let JSON = JSON as? [[String : AnyObject]] else { XCTFail(); return }
@@ -78,7 +78,7 @@ class DELETETests: XCTestCase {
     }
 
     func testCancelDELETEWithPath() {
-        let expectation = expectationWithDescription("testCancelDELETE")
+        let expectation = self.expectation(withDescription: "testCancelDELETE")
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
@@ -93,11 +93,11 @@ class DELETETests: XCTestCase {
             completed = true
         }
 
-        waitForExpectationsWithTimeout(15.0, handler: nil)
+        waitForExpectations(withTimeout: 15.0, handler: nil)
     }
 
     func testCancelDELETEWithID() {
-        let expectation = expectationWithDescription("testCancelDELETE")
+        let expectation = self.expectation(withDescription: "testCancelDELETE")
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
@@ -112,6 +112,6 @@ class DELETETests: XCTestCase {
             completed = true
         }
 
-        waitForExpectationsWithTimeout(15.0, handler: nil)
+        waitForExpectations(withTimeout: 15.0, handler: nil)
     }
 }
