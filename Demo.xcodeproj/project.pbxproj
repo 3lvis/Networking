@@ -151,13 +151,11 @@
 		44B5D3A51D19B9E5004378B9 /* pig.png in Resources */ = {isa = PBXBuildFile; fileRef = 14B0CEE31CF1D0D700049AD6 /* pig.png */; };
 		44B5D3A61D19B9E5004378B9 /* døgnvillburgere.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 14B0CEDE1CF1D0D700049AD6 /* døgnvillburgere.jpg */; };
 		44B5D3A71D19B9E5004378B9 /* sample.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 14B0CEE41CF1D0D700049AD6 /* sample.jpg */; };
-		44B5D3AF1D19BA66004378B9 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 44B5D3AE1D19BA66004378B9 /* Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		1413C1D51CBD1784000AF90F /* String+UTF8.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+UTF8.swift"; sourceTree = "<group>"; };
-		1413F4551CE795DC00482096 /* OSXTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OSXTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		1413F4591CE795DC00482096 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		1413F4551CE795DC00482096 /* macOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = macOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1413F45E1CE7963700482096 /* Dictionary+FormURLEncodedTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Dictionary+FormURLEncodedTests.swift"; sourceTree = "<group>"; };
 		1413F4611CE7963700482096 /* Helpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 		1413F4631CE7963700482096 /* ImageTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageTests.swift; sourceTree = "<group>"; };
@@ -199,6 +197,7 @@
 		14C0AF831BD6D4230009ECBE /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		14D144DD1CEED63B00048629 /* FormDataPart.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FormDataPart.swift; sourceTree = "<group>"; };
 		14DE34781CA298ED009B2E35 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		449687B41D1A433A000CF016 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		44B5D3AB1D19B9E5004378B9 /* tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = tvOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		44B5D3AE1D19BA66004378B9 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -256,14 +255,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		1413F4561CE795DC00482096 /* OSXTests */ = {
-			isa = PBXGroup;
-			children = (
-				1413F4591CE795DC00482096 /* Info.plist */,
-			);
-			path = OSXTests;
-			sourceTree = "<group>";
-		};
 		1413F45D1CE7963700482096 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
@@ -289,8 +280,8 @@
 				14C136501AB7849300B7B07A /* Metadata */,
 				1413F45D1CE7963700482096 /* Tests */,
 				146D72AF1AB782920058798C /* iOSTests */,
-				1413F4561CE795DC00482096 /* OSXTests */,
 				44B5D3AD1D19BA66004378B9 /* tvOSTests */,
+				449687B31D1A433A000CF016 /* macOSTests */,
 				146D72941AB782920058798C /* Products */,
 				7C7551124581063F7B41A916 /* Frameworks */,
 			);
@@ -306,7 +297,7 @@
 				14638D121CC646F9002B9433 /* Networking.framework */,
 				14638D281CC64747002B9433 /* Networking.framework */,
 				14638D3E1CC647E4002B9433 /* Networking.framework */,
-				1413F4551CE795DC00482096 /* OSXTests.xctest */,
+				1413F4551CE795DC00482096 /* macOSTests.xctest */,
 				44B5D3AB1D19B9E5004378B9 /* tvOSTests.xctest */,
 			);
 			name = Products;
@@ -367,6 +358,14 @@
 			name = Metadata;
 			sourceTree = "<group>";
 		};
+		449687B31D1A433A000CF016 /* macOSTests */ = {
+			isa = PBXGroup;
+			children = (
+				449687B41D1A433A000CF016 /* Info.plist */,
+			);
+			path = macOSTests;
+			sourceTree = "<group>";
+		};
 		44B5D3AD1D19BA66004378B9 /* tvOSTests */ = {
 			isa = PBXGroup;
 			children = (
@@ -420,9 +419,9 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		1413F4541CE795DC00482096 /* OSXTests */ = {
+		1413F4541CE795DC00482096 /* macOSTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1413F45A1CE795DC00482096 /* Build configuration list for PBXNativeTarget "OSXTests" */;
+			buildConfigurationList = 1413F45A1CE795DC00482096 /* Build configuration list for PBXNativeTarget "macOSTests" */;
 			buildPhases = (
 				1413F4511CE795DC00482096 /* Sources */,
 				1413F4521CE795DC00482096 /* Frameworks */,
@@ -432,9 +431,9 @@
 			);
 			dependencies = (
 			);
-			name = OSXTests;
+			name = macOSTests;
 			productName = OSXTesting;
-			productReference = 1413F4551CE795DC00482096 /* OSXTests.xctest */;
+			productReference = 1413F4551CE795DC00482096 /* macOSTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		14638CF91CC6459A002B9433 /* Networking-iOS */ = {
@@ -491,9 +490,9 @@
 			productReference = 14638D281CC64747002B9433 /* Networking.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		14638D3D1CC647E4002B9433 /* Networking-OSX */ = {
+		14638D3D1CC647E4002B9433 /* Networking-macOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 14638D431CC647E4002B9433 /* Build configuration list for PBXNativeTarget "Networking-OSX" */;
+			buildConfigurationList = 14638D431CC647E4002B9433 /* Build configuration list for PBXNativeTarget "Networking-macOS" */;
 			buildPhases = (
 				14638D391CC647E4002B9433 /* Sources */,
 				14638D3A1CC647E4002B9433 /* Frameworks */,
@@ -504,7 +503,7 @@
 			);
 			dependencies = (
 			);
-			name = "Networking-OSX";
+			name = "Networking-macOS";
 			productName = "Networking-OSX";
 			productReference = 14638D3E1CC647E4002B9433 /* Networking.framework */;
 			productType = "com.apple.product-type.framework";
@@ -590,11 +589,11 @@
 			targets = (
 				146D72AB1AB782920058798C /* iOSTests */,
 				44B5D3881D19B9E5004378B9 /* tvOSTests */,
-				1413F4541CE795DC00482096 /* OSXTests */,
+				1413F4541CE795DC00482096 /* macOSTests */,
 				14638CF91CC6459A002B9433 /* Networking-iOS */,
 				14638D111CC646F9002B9433 /* Networking-watchOS */,
 				14638D271CC64747002B9433 /* Networking-tvOS */,
-				14638D3D1CC647E4002B9433 /* Networking-OSX */,
+				14638D3D1CC647E4002B9433 /* Networking-macOS */,
 			);
 		};
 /* End PBXProject section */
@@ -606,7 +605,6 @@
 			files = (
 				14B0CEEA1CF1D0D700049AD6 /* Keys.plist in Resources */,
 				14B0CEE81CF1D0D700049AD6 /* entries.json in Resources */,
-				44B5D3AF1D19BA66004378B9 /* Info.plist in Resources */,
 				14B0CEEC1CF1D0D700049AD6 /* pig.png in Resources */,
 				14B0CEE61CF1D0D700049AD6 /* døgnvillburgere.jpg in Resources */,
 				14B0CEEE1CF1D0D700049AD6 /* sample.jpg in Resources */,
@@ -854,10 +852,10 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_NO_COMMON_BLOCKS = YES;
-				INFOPLIST_FILE = OSXTests/Info.plist;
+				INFOPLIST_FILE = macOSTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sample.3lvis.OSXTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sample.3lvis.macOSTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SWIFT_OBJC_BRIDGING_HEADER = "Tests/Resources/Bridging-Header.h";
@@ -874,10 +872,10 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_NO_COMMON_BLOCKS = YES;
-				INFOPLIST_FILE = OSXTests/Info.plist;
+				INFOPLIST_FILE = macOSTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sample.3lvis.OSXTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sample.3lvis.macOSTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SWIFT_OBJC_BRIDGING_HEADER = "Tests/Resources/Bridging-Header.h";
@@ -896,7 +894,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				GCC_NO_COMMON_BLOCKS = YES;
-				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
+				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
@@ -921,7 +919,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				GCC_NO_COMMON_BLOCKS = YES;
-				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
+				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
@@ -1000,7 +998,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				GCC_NO_COMMON_BLOCKS = YES;
-				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
+				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = net.3lvis.Networking;
@@ -1026,7 +1024,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				GCC_NO_COMMON_BLOCKS = YES;
-				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
+				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = net.3lvis.Networking;
@@ -1055,7 +1053,7 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_VERSION = A;
 				GCC_NO_COMMON_BLOCKS = YES;
-				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
+				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
@@ -1083,7 +1081,7 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_VERSION = A;
 				GCC_NO_COMMON_BLOCKS = YES;
-				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
+				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
@@ -1249,7 +1247,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1413F45A1CE795DC00482096 /* Build configuration list for PBXNativeTarget "OSXTests" */ = {
+		1413F45A1CE795DC00482096 /* Build configuration list for PBXNativeTarget "macOSTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1413F45B1CE795DC00482096 /* Debug */,
@@ -1285,7 +1283,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		14638D431CC647E4002B9433 /* Build configuration list for PBXNativeTarget "Networking-OSX" */ = {
+		14638D431CC647E4002B9433 /* Build configuration list for PBXNativeTarget "Networking-macOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				14638D441CC647E4002B9433 /* Debug */,
