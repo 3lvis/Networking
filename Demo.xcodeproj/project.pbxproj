@@ -555,22 +555,40 @@
 				TargetAttributes = {
 					1413F4541CE795DC00482096 = {
 						CreatedOnToolsVersion = 7.3.1;
+						DevelopmentTeam = C6K65RDJHL;
+						DevelopmentTeamName = "Elvis Nunez (Personal Team)";
+						ProvisioningStyle = Automatic;
 					};
 					14638CF91CC6459A002B9433 = {
 						CreatedOnToolsVersion = 7.3;
+						DevelopmentTeam = C6K65RDJHL;
+						DevelopmentTeamName = "Elvis Nunez (Personal Team)";
 					};
 					14638D111CC646F9002B9433 = {
 						CreatedOnToolsVersion = 7.3;
+						DevelopmentTeam = C6K65RDJHL;
+						DevelopmentTeamName = "Elvis Nunez (Personal Team)";
 					};
 					14638D271CC64747002B9433 = {
 						CreatedOnToolsVersion = 7.3;
+						DevelopmentTeam = C6K65RDJHL;
+						DevelopmentTeamName = "Elvis Nunez (Personal Team)";
 					};
 					14638D3D1CC647E4002B9433 = {
 						CreatedOnToolsVersion = 7.3;
+						DevelopmentTeam = C6K65RDJHL;
+						DevelopmentTeamName = "Elvis Nunez (Personal Team)";
+						ProvisioningStyle = Automatic;
 					};
 					146D72AB1AB782920058798C = {
 						CreatedOnToolsVersion = 6.2;
+						DevelopmentTeam = C6K65RDJHL;
+						DevelopmentTeamName = "Elvis Nunez (Personal Team)";
 						LastSwiftMigration = 0800;
+					};
+					44B5D3881D19B9E5004378B9 = {
+						DevelopmentTeam = C6K65RDJHL;
+						DevelopmentTeamName = "Elvis Nunez (Personal Team)";
 					};
 				};
 			};
@@ -848,7 +866,7 @@
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -868,7 +886,7 @@
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -1043,7 +1061,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES;
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
@@ -1071,7 +1089,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES;
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
