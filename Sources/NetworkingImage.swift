@@ -22,7 +22,7 @@ extension NetworkingImage {
     }
 
     #if os(OSX)
-    func data(type: NSBitmapImageFileType) -> Data? {
+    func data(_ type: NSBitmapImageFileType) -> Data? {
         let imageData = self.tiffRepresentation!
         let bitmapImageRep = NSBitmapImageRep(data: imageData)!
         let data = bitmapImageRep.representation(using: type, properties: [String : AnyObject]())
@@ -32,7 +32,7 @@ extension NetworkingImage {
 
     func pngData() -> Data? {
         #if os(OSX)
-            return self.data(type: .PNG)
+            return self.data(.PNG)
         #else
             return UIImagePNGRepresentation(self)
         #endif
@@ -40,7 +40,7 @@ extension NetworkingImage {
 
     func jpgData() -> Data? {
         #if os(OSX)
-            return self.data(type: .JPEG)
+            return self.data(.JPEG)
         #else
             return UIImageJPEGRepresentation(self, 1)
         #endif

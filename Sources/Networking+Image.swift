@@ -9,7 +9,7 @@ public extension Networking {
      */
     public func imageFromCache(_ path: String, cacheName: String? = nil, completion: (image: NetworkingImage?) -> Void) {
         self.objectFromCache(path, cacheName: cacheName, responseType: .image) { object in
-            TestCheck.testBlock(disabled: self.disableTestingMode) {
+            TestCheck.testBlock(self.disableTestingMode) {
                 completion(image: object as? NetworkingImage)
             }
         }
@@ -23,7 +23,7 @@ public extension Networking {
      */
     public func downloadImage(_ path: String, cacheName: String? = nil, completion: (image: NetworkingImage?, error: NSError?) -> Void) {
         self.request(.GET, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .image) { response, _, error in
-            TestCheck.testBlock(disabled: self.disableTestingMode) {
+            TestCheck.testBlock(self.disableTestingMode) {
                 completion(image: response as? NetworkingImage, error: error)
             }
         }
