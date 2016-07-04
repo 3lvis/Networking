@@ -102,11 +102,11 @@ class NetworkingTests: XCTestCase {
     }
 
     func testSplitBaseURLAndRelativePath() {
-        let (baseURL1, relativePath1) = Networking.splitBaseURLAndRelativePath("https://rescuejuice.com/wp-content/uploads/2015/11/døgnvillburgere.jpg")
+        let (baseURL1, relativePath1) = Networking.splitBaseURLAndRelativePath(for: "https://rescuejuice.com/wp-content/uploads/2015/11/døgnvillburgere.jpg")
         XCTAssertEqual(baseURL1, "https://rescuejuice.com")
         XCTAssertEqual(relativePath1, "/wp-content/uploads/2015/11/døgnvillburgere.jpg")
 
-        let (baseURL2, relativePath2) = Networking.splitBaseURLAndRelativePath("http://httpbin.org/basic-auth/user/passwd")
+        let (baseURL2, relativePath2) = Networking.splitBaseURLAndRelativePath(for: "http://httpbin.org/basic-auth/user/passwd")
         XCTAssertEqual(baseURL2, "http://httpbin.org")
         XCTAssertEqual(relativePath2, "/basic-auth/user/passwd")
     }
@@ -136,7 +136,7 @@ class NetworkingTests: XCTestCase {
             }
         }
 
-        networking.cancelAllRequests(nil)
+        networking.cancelAllRequests(with: nil)
 
         waitForExpectations(withTimeout: 15.0, handler: nil)
     }
@@ -150,7 +150,7 @@ class NetworkingTests: XCTestCase {
             XCTAssertEqual(error?.code, -999)
             expectation.fulfill()
         }
-        networking.cancelAllRequests(nil)
+        networking.cancelAllRequests(with: nil)
         waitForExpectations(withTimeout: 15.0, handler: nil)
     }
 

@@ -244,7 +244,7 @@ public class Networking {
      - parameter requestID: The ID of the request to be cancelled.
      - parameter completion: The completion block to be called when the request is cancelled.
      */
-    func cancel(requestID: String, completion: ((Void) -> Void)? = nil) {
+    func cancel(with requestID: String, completion: ((Void) -> Void)? = nil) {
         self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
             var tasks = [URLSessionTask]()
             tasks.append(contentsOf: dataTasks as [URLSessionTask])

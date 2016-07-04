@@ -215,7 +215,7 @@ class POSTTests: XCTestCase {
             expectation.fulfill()
         }
 
-        networking.cancel(requestID) {
+        networking.cancel(with: requestID) {
             completed = true
         }
 
