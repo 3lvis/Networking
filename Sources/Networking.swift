@@ -231,8 +231,8 @@ public class Networking {
     public static func splitBaseURLAndRelativePath(for path: String) -> (baseURL: String, relativePath: String) {
         guard let encodedPath = path.encodeUTF8() else { fatalError("Couldn't encode path to UTF8: \(path)") }
         guard let url = URL(string: encodedPath) else { fatalError("Path \(encodedPath) can't be converted to url") }
-        guard let baseURLWithDash = URL(string: "/", relativeTo: url)?.absoluteURL?.absoluteString else { fatalError("Can't find absolute url of url: \(url)") }
-        let index = baseURLWithDash.characters.index(baseURLWithDash.endIndex, offsetBy: -1)
+        guard let baseURLWithDash = URL(string: "/", relativeTo: url)?.absoluteURL!.absoluteString else { fatalError("Can't find absolute url of url: \(url)") }
+        let index = baseURLWithDash.index(before: baseURLWithDash.endIndex)
         let baseURL = baseURLWithDash.substring(to: index)
         let relativePath = path.replacingOccurrences(of: baseURL, with: "")
 
