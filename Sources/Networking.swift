@@ -322,7 +322,7 @@ extension Networking {
 
         if let object = self.cache.object(forKey: destinationURL.absoluteString!) {
             completion(object: object)
-        } else if FileManager.default().fileExistsAtURL(destinationURL) {
+        } else if FileManager.default().exists(at: destinationURL) {
             let semaphore = DispatchSemaphore(value: 0)
             var returnedObject: AnyObject?
 

@@ -66,7 +66,7 @@ class ImageTests: XCTestCase {
 
         networking.downloadImage(path) { image, error in
             guard let destinationURL = try? networking.destinationURL(for: path) else { XCTFail(); return }
-            XCTAssertTrue(FileManager.default().fileExistsAtURL(destinationURL))
+            XCTAssertTrue(FileManager.default().exists(at: destinationURL))
             guard let path = destinationURL.path else { XCTFail(); return }
             let data = FileManager.default().contents(atPath: path)
             XCTAssertEqual(data?.count, 8090)
@@ -82,7 +82,7 @@ class ImageTests: XCTestCase {
 
         networking.downloadImage(path, cacheName: cacheName) { image, error in
             guard let destinationURL = try? networking.destinationURL(for: path, cacheName: cacheName) else { XCTFail(); return }
-            XCTAssertTrue(FileManager.default().fileExistsAtURL(destinationURL))
+            XCTAssertTrue(FileManager.default().exists(at: destinationURL))
             guard let path = destinationURL.path else { XCTFail(); return }
             let data = FileManager.default().contents(atPath: path)
             XCTAssertEqual(data?.count, 8090)

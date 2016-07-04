@@ -1,13 +1,13 @@
 import Foundation
 
 extension FileManager {
-    public func fileExistsAtURL(_ url: URL) -> Bool {
+    public func exists(at url: URL) -> Bool {
         guard let path = url.path else { fatalError("Couldn't get path for url: \(url)") }
 
         return fileExists(atPath: path)
     }
 
-    public func removeFileAtURL(_ url: URL) {
+    public func remove(at url: URL) {
         guard let path = url.path else { fatalError("Couldn't get path for url: \(url)") }
 
         do {
