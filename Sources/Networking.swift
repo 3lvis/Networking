@@ -289,7 +289,7 @@ public class Networking {
      - parameter path: The path used to download the resource.
      - parameter completion: A closure that gets called when the download request is completed, it contains  a `data` object and a `NSError`.
      */
-    public func downloadData(_ path: String, cacheName: String? = nil, completion: (data: Data?, error: NSError?) -> Void) {
+    public func downloadData(for path: String, cacheName: String? = nil, completion: (data: Data?, error: NSError?) -> Void) {
         self.request(.GET, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .data) { response, headers, error in
             completion(data: response as? Data, error: error)
         }
@@ -301,28 +301,17 @@ public class Networking {
      - parameter cacheName: The cache name used to identify the downloaded data, by default the path is used.
      - parameter completion: A closure that returns the data from the cache, if no data is found it will return nil.
      */
-    public func dataFromCache(_ path: String, cacheName: String? = nil, completion: (data: Data?) -> Void) {
-        self.objectFromCache(path, cacheName: cacheName, responseType: .data) { object in
+    public func dataFromCache(for path: String, cacheName: String? = nil, completion: (data: Data?) -> Void) {
+        self.objectFromCache(for: path, cacheName: cacheName, responseType: .data) { object in
             TestCheck.testBlock(self.disableTestingMode) {
                 completion(data: object as? Data)
             }
         }
     }
-
-    //*************************//
-    //**** Deprecated area ****//
-    //*************************//
-
-    /**
-     [Deprecated] Use `authenticate(headerValue)` instead.
-     */
-    @available(*, deprecated:1.1.0, message:"Use `authenticate(headerValue)` instead") public func authenticate(authorizationHeader: String) {
-        self.authenticate(headerValue: authorizationHeader)
-    }
 }
 
 extension Networking {
-    func objectFromCache(_ path: String, cacheName: String? = nil, responseType: ResponseType, completion: (object: AnyObject?) -> Void) {
+    func objectFromCache(for path: String, cacheName: String? = nil, responseType: ResponseType, completion: (object: AnyObject?) -> Void) {
         guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
 
         if let object = self.cache.object(forKey: destinationURL.absoluteString!) {
@@ -332,7 +321,7 @@ extension Networking {
             var returnedObject: AnyObject?
 
             DispatchQueue.global(attributes: DispatchQueue.GlobalAttributes.qosUtility).async {
-                let object = self.dataForDestinationURL(destinationURL)
+                let object = self.data(for: destinationURL)
                 if responseType == .image {
                     returnedObject = NetworkingImage(data: object)
                 } else {
@@ -358,8 +347,8 @@ extension Networking {
         }
     }
 
-    func dataForDestinationURL(_ url: URL) -> Data {
-        guard let path = url.path else { fatalError("Couldn't get path for url: \(url)") }
+    func data(for destinationURL: URL) -> Data {
+        guard let path = destinationURL.path else { fatalError("Couldn't get path for url: \(destinationURL)") }
         guard let data = FileManager.default().contents(atPath: path) else { fatalError("Couldn't get image in destination url: \(url)") }
 
         return data
@@ -427,7 +416,7 @@ extension Networking {
                 }
                 break
             case .data, .image:
-                self.objectFromCache(path, cacheName: cacheName, responseType: responseType) { object in
+                self.objectFromCache(for: path, cacheName: cacheName, responseType: responseType) { object in
                     if let object = object {
                         TestCheck.testBlock(self.disableTestingMode) {
                             completion(response: object, headers: [String : AnyObject](), error: nil)

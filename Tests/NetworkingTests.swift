@@ -159,11 +159,16 @@ class NetworkingTests: XCTestCase {
         let networking = Networking(baseURL: self.baseURL)
         let path = "/image/png"
         Helper.removeFileIfNeeded(networking, path: path)
-        networking.downloadData(path) { data, error in
+        networking.downloadData(for: path) { data, error in
             synchronous = true
             XCTAssertTrue(Thread.isMainThread())
             XCTAssertEqual(data?.count, 8090)
         }
         XCTAssertTrue(synchronous)
+    }
+
+    // Needs tests
+    func testDataFromCache() {
+
     }
 }

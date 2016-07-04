@@ -8,7 +8,7 @@ public extension Networking {
      - parameter completion: A closure that returns the image from the cache, if no image is found it will return nil, it contains a image and a error.
      */
     public func imageFromCache(_ path: String, cacheName: String? = nil, completion: (image: NetworkingImage?) -> Void) {
-        self.objectFromCache(path, cacheName: cacheName, responseType: .image) { object in
+        self.objectFromCache(for: path, cacheName: cacheName, responseType: .image) { object in
             TestCheck.testBlock(self.disableTestingMode) {
                 completion(image: object as? NetworkingImage)
             }
