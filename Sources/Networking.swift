@@ -290,7 +290,7 @@ public class Networking {
      - parameter completion: A closure that gets called when the download request is completed, it contains  a `data` object and a `NSError`.
      */
     public func downloadData(for path: String, cacheName: String? = nil, completion: (data: Data?, error: NSError?) -> Void) {
-        self.request(.GET, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .data) { response, headers, error in
+        self.request(.GET, fullPath: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .data) { response, headers, error in
             completion(data: response as? Data, error: error)
         }
     }
@@ -394,8 +394,15 @@ extension Networking {
         self.fakeRequests[requestType] = fakeRequests
     }
 
-    func request(_ requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, parts: [FormDataPart]?, responseType: ResponseType, completion: (response: AnyObject?, headers: [String : AnyObject], error: NSError?) -> ()) -> String {
+    func request(_ requestType: RequestType, fullPath: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, parts: [FormDataPart]?, responseType: ResponseType, completion: (response: AnyObject?, headers: [String : AnyObject], error: NSError?) -> ()) -> String {
+
+        /*
+         Remove URL parameters from path. That can lead to writing cached files with names longer than 255char, resulting in error
+         */
+        let path = fullPath.components(separatedBy: "?").first!
+
         var requestID = UUID().uuidString
+
 
         if let responses = self.fakeRequests[requestType], fakeRequest = responses[path] {
             if fakeRequest.statusCode.statusCodeType() == .successful {

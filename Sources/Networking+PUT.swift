@@ -9,7 +9,7 @@ public extension Networking {
      - returns: The request identifier.
      */
     public func PUT(_ path: String, parameterType: ParameterType = .json, parameters: AnyObject? = nil, completion: (JSON: AnyObject?, error: NSError?) -> ()) -> String  {
-        let requestID = self.request(.PUT, path: path, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json) { JSON, headers, error in
+        let requestID = self.request(.PUT, fullPath: path, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json) { JSON, headers, error in
             completion(JSON: JSON, error: error)
         }
 
@@ -24,7 +24,7 @@ public extension Networking {
      - returns: The request identifier.
      */
     public func PUT(_ path: String, parameterType: ParameterType = .json, parameters: AnyObject? = nil, completion: (JSON: AnyObject?, headers: [String : AnyObject], error: NSError?) -> ()) -> String  {
-        let requestID = self.request(.PUT, path: path, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
+        let requestID = self.request(.PUT, fullPath: path, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
 
         return requestID
     }

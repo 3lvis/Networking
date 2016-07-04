@@ -8,7 +8,7 @@ public extension Networking {
      - returns: The request identifier.
      */
     public func GET(_ path: String, parameterType: ParameterType = .json, completion: (JSON: AnyObject?, error: NSError?) -> ()) -> String {
-        let requestID = self.request(.GET, path: path, parameterType: parameterType, parameters: nil, parts: nil, responseType: .json) { JSON, headers, error in
+        let requestID = self.request(.GET, fullPath: path, parameterType: parameterType, parameters: nil, parts: nil, responseType: .json) { JSON, headers, error in
             completion(JSON: JSON, error: error)
         }
 
@@ -22,7 +22,7 @@ public extension Networking {
      - returns: The request identifier.
      */
     public func GET(_ path: String, parameterType: ParameterType = .json, completion: (JSON: AnyObject?, headers: [String : AnyObject], error: NSError?) -> ()) -> String {
-        let requestID = self.request(.GET, path: path, parameterType: parameterType, parameters: nil, parts: nil, responseType: .json, completion: completion)
+        let requestID = self.request(.GET, fullPath: path, parameterType: parameterType, parameters: nil, parts: nil, responseType: .json, completion: completion)
 
         return requestID
     }
