@@ -152,7 +152,7 @@ public class Networking {
      - parameter username: The username to be used.
      - parameter password: The password to be used.
      */
-    public func authenticate(_ username: String, password: String) {
+    public func authenticate(username: String, password: String) {
         let credentialsString = "\(username):\(password)"
         if let credentialsData = credentialsString.data(using: String.Encoding.utf8) {
             let base64Credentials = credentialsData.base64EncodedString([])
@@ -169,7 +169,7 @@ public class Networking {
      Authenticates using a Bearer token, sets the Authorization header to "Bearer \(token)".
      - parameter token: The token to be used.
      */
-    public func authenticate(_ token: String) {
+    public func authenticate(token: String) {
         self.token = token
     }
 
@@ -178,7 +178,7 @@ public class Networking {
      - parameter authorizationHeaderKey: Sets this value as the key for the HTTP `Authorization` header
      - parameter authorizationHeaderValue: Sets this value to the HTTP `Authorization` header or to the `headerKey` if you provided that.
      */
-    public func authenticate(_ headerKey: String = "Authorization", headerValue: String) {
+    public func authenticate(headerKey: String = "Authorization", headerValue: String) {
         self.authorizationHeaderKey = headerKey
         self.authorizationHeaderValue = headerValue
     }
@@ -188,7 +188,7 @@ public class Networking {
      - parameter path: The path to be appended to the base URL.
      - returns: A NSURL generated after appending the path to the base URL.
      */
-    public func urlForPath(_ path: String) -> URL {
+    public func url(for path: String) -> URL {
         guard let encodedPath = path.encodeUTF8() else { fatalError("Couldn't encode path to UTF8: \(path)") }
         guard let url = URL(string: self.baseURL + encodedPath) else { fatalError("Couldn't create a url using baseURL: \(self.baseURL) and encodedPath: \(encodedPath)") }
         return url
@@ -199,15 +199,15 @@ public class Networking {
      - parameter path: The path used to download the resource.
      - returns: A NSURL where a resource has been stored.
      */
-    public func destinationURL(_ path: String, cacheName: String? = nil) throws -> URL {
+    public func destinationURL(for path: String, cacheName: String? = nil) throws -> URL {
         #if os(tvOS)
             let directory = FileManager.SearchPathDirectory.cachesDirectory
         #else
             let directory = TestCheck.isTesting ? FileManager.SearchPathDirectory.cachesDirectory : FileManager.SearchPathDirectory.documentDirectory
         #endif
-        let finalPath = cacheName ?? self.urlForPath(path).absoluteString
-        let replacedPath = finalPath?.replacingOccurrences(of: "/", with: "-")
-        if let url = URL(string: replacedPath!) {
+        let finalPath = cacheName ?? self.url(for: path).absoluteString
+        let replacedPath = finalPath!.replacingOccurrences(of: "/", with: "-")
+        if let url = URL(string: replacedPath) {
             if let cachesURL = FileManager.default().urlsForDirectory(directory, inDomains: .userDomainMask).first {
                 #if !os(tvOS)
                     try (cachesURL as NSURL).setResourceValue(true, forKey: URLResourceKey.isExcludedFromBackupKey)
@@ -228,11 +228,11 @@ public class Networking {
      - parameter path: The full url to be splitted.
      - returns: A base url and a relative path.
      */
-    public static func splitBaseURLAndRelativePath(_ path: String) -> (baseURL: String, relativePath: String) {
+    public static func splitBaseURLAndRelativePath(for path: String) -> (baseURL: String, relativePath: String) {
         guard let encodedPath = path.encodeUTF8() else { fatalError("Couldn't encode path to UTF8: \(path)") }
         guard let url = URL(string: encodedPath) else { fatalError("Path \(encodedPath) can't be converted to url") }
-        guard let baseURLWithDash = URL(string: "/", relativeTo: url)?.absoluteURL?.absoluteString else { fatalError("Can't find absolute url of url: \(url)") }
-        let index = baseURLWithDash.characters.index(baseURLWithDash.endIndex, offsetBy: -1)
+        guard let baseURLWithDash = URL(string: "/", relativeTo: url)?.absoluteURL!.absoluteString else { fatalError("Can't find absolute url of url: \(url)") }
+        let index = baseURLWithDash.index(before: baseURLWithDash.endIndex)
         let baseURL = baseURLWithDash.substring(to: index)
         let relativePath = path.replacingOccurrences(of: baseURL, with: "")
 
@@ -244,7 +244,7 @@ public class Networking {
      - parameter requestID: The ID of the request to be cancelled.
      - parameter completion: The completion block to be called when the request is cancelled.
      */
-    func cancel(_ requestID: String, completion: ((Void) -> Void)? = nil) {
+    func cancel(requestID: String, completion: ((Void) -> Void)? = nil) {
         self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
             var tasks = [URLSessionTask]()
             tasks.append(contentsOf: dataTasks as [URLSessionTask])
@@ -266,7 +266,7 @@ public class Networking {
      Cancels all the current requests.
      - parameter completion: The completion block to be called when all the requests are cancelled.
      */
-    public func cancelAllRequests(_ completion: ((Void) -> Void)?) {
+    public func cancelAllRequests(with completion: ((Void) -> Void)?) {
         self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
             for sessionTask in dataTasks {
                 sessionTask.cancel()
@@ -289,8 +289,8 @@ public class Networking {
      - parameter path: The path used to download the resource.
      - parameter completion: A closure that gets called when the download request is completed, it contains  a `data` object and a `NSError`.
      */
-    public func downloadData(_ path: String, cacheName: String? = nil, completion: (data: Data?, error: NSError?) -> Void) {
-        self.request(.GET, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .data) { response, headers, error in
+    public func downloadData(for path: String, cacheName: String? = nil, completion: (data: Data?, error: NSError?) -> Void) {
+        self.request(.GET, fullPath: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .data) { response, headers, error in
             completion(data: response as? Data, error: error)
         }
     }
@@ -301,8 +301,8 @@ public class Networking {
      - parameter cacheName: The cache name used to identify the downloaded data, by default the path is used.
      - parameter completion: A closure that returns the data from the cache, if no data is found it will return nil.
      */
-    public func dataFromCache(_ path: String, cacheName: String? = nil, completion: (data: Data?) -> Void) {
-        self.objectFromCache(path, cacheName: cacheName, responseType: .data) { object in
+    public func dataFromCache(for path: String, cacheName: String? = nil, completion: (data: Data?) -> Void) {
+        self.objectFromCache(for: path, cacheName: cacheName, responseType: .data) { object in
             TestCheck.testBlock(self.disableTestingMode) {
                 completion(data: object as? Data)
             }
@@ -322,8 +322,8 @@ public class Networking {
 }
 
 extension Networking {
-    func objectFromCache(_ path: String, cacheName: String? = nil, responseType: ResponseType, completion: (object: AnyObject?) -> Void) {
-        guard let destinationURL = try? self.destinationURL(path, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
+    func objectFromCache(for path: String, cacheName: String? = nil, responseType: ResponseType, completion: (object: AnyObject?) -> Void) {
+        guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
 
         if let object = self.cache.object(forKey: destinationURL.absoluteString!) {
             completion(object: object)
@@ -332,7 +332,7 @@ extension Networking {
             var returnedObject: AnyObject?
 
             DispatchQueue.global(attributes: DispatchQueue.GlobalAttributes.qosUtility).async {
-                let object = self.dataForDestinationURL(destinationURL)
+                let object = self.dataForDestinationURL(for: destinationURL)
                 if responseType == .image {
                     returnedObject = NetworkingImage(data: object)
                 } else {
@@ -350,7 +350,7 @@ extension Networking {
             }
 
             if TestCheck.isTesting && self.disableTestingMode == false {
-                let _ = semaphore.wait(timeout: DispatchTime.distantFuture)
+                semaphore.wait(timeout: DispatchTime.distantFuture)
                 completion(object: returnedObject)
             }
         } else {
@@ -358,7 +358,7 @@ extension Networking {
         }
     }
 
-    func dataForDestinationURL(_ url: URL) -> Data {
+    func dataForDestinationURL(for url: URL) -> Data {
         guard let path = url.path else { fatalError("Couldn't get path for url: \(url)") }
         guard let data = FileManager.default().contents(atPath: path) else { fatalError("Couldn't get image in destination url: \(url)") }
 
@@ -394,9 +394,15 @@ extension Networking {
         self.fakeRequests[requestType] = fakeRequests
     }
 
-    @discardableResult
-    func request(_ requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, parts: [FormDataPart]?, responseType: ResponseType, completion: (response: AnyObject?, headers: [String : AnyObject], error: NSError?) -> ()) -> String {
+    func request(_ requestType: RequestType, fullPath: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, parts: [FormDataPart]?, responseType: ResponseType, completion: (response: AnyObject?, headers: [String : AnyObject], error: NSError?) -> ()) -> String {
+
+        /*
+         Remove URL parameters from path. That can lead to writing cached files with names longer than 255char, resulting in error
+         */
+        let path = fullPath.components(separatedBy: "?").first!
+
         var requestID = UUID().uuidString
+
 
         if let responses = self.fakeRequests[requestType], fakeRequest = responses[path] {
             if fakeRequest.statusCode.statusCodeType() == .successful {
@@ -427,17 +433,17 @@ extension Networking {
                 }
                 break
             case .data, .image:
-                self.objectFromCache(path, cacheName: cacheName, responseType: responseType) { object in
+                self.objectFromCache(for: path, cacheName: cacheName, responseType: responseType) { object in
                     if let object = object {
                         TestCheck.testBlock(self.disableTestingMode) {
                             completion(response: object, headers: [String : AnyObject](), error: nil)
                         }
                     } else {
-                        requestID = self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, headers, error in
+                        self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, headers, error in
                             var returnedResponse: AnyObject?
                             if let data = data where data.count > 0 {
-                                guard let destinationURL = try? self.destinationURL(path, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
-                                let _ = try? data.write(to: destinationURL, options: [.dataWritingAtomic])
+                                guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
+                                try! data.write(to: destinationURL, options: [.dataWritingAtomic])
                                 switch responseType {
                                 case .data:
                                     self.cache.setObject(data, forKey: destinationURL.absoluteString!)
@@ -467,10 +473,9 @@ extension Networking {
         return requestID
     }
 
-    @discardableResult
     func dataRequest(_ requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, parts: [FormDataPart]?, responseType: ResponseType, completion: (response: Data?, headers: [String : AnyObject], error: NSError?) -> ()) -> String {
         let requestID = UUID().uuidString
-        var request = URLRequest(url: self.urlForPath(path))
+        let request = NSMutableURLRequest(url: self.url(for: path))
         request.httpMethod = requestType.rawValue
 
         if let parameterType = parameterType {
@@ -507,7 +512,7 @@ extension Networking {
                 request.httpBody = formattedParameters.data(using: String.Encoding.utf8)
                 break
             case .multipartFormData:
-                var bodyData = Data()
+                let bodyData = NSMutableData()
 
                 if let parameters = parameters as? [String : AnyObject] {
                     for (key, value) in parameters {
@@ -545,7 +550,7 @@ extension Networking {
             var returnedData: Data?
             var returnedHeaders = [String : AnyObject]()
 
-            let session = self.session.dataTask(with: request) { data, response, error in
+            let session = self.session.dataTask(with: request as URLRequest) { data, response, error in
                 returnedResponse = response
                 connectionError = error
                 returnedData = data
@@ -571,7 +576,7 @@ extension Networking {
                         NetworkActivityIndicator.sharedIndicator.visible = false
                     }
 
-                    self.logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError)
+                    self.logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request as URLRequest, response: returnedResponse, error: connectionError)
                     completion(response: returnedData, headers: returnedHeaders, error: connectionError)
                 }
             }
@@ -580,7 +585,7 @@ extension Networking {
             session.resume()
 
             if TestCheck.isTesting && self.disableTestingMode == false {
-                let _ = semaphore.wait(timeout: DispatchTime.distantFuture)
+                semaphore.wait(timeout: DispatchTime.distantFuture)
                 self.logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request as URLRequest, response: returnedResponse, error: connectionError)
                 completion(response: returnedData, headers: returnedHeaders, error: connectionError)
             }
