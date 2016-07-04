@@ -93,7 +93,7 @@ class DELETETests: XCTestCase {
             completed = true
         }
 
-        waitForExpectations(withTimeout: 15.0, handler: nil)
+        self.waitForExpectations(withTimeout: 15.0, handler: nil)
     }
 
     func testCancelDELETEWithID() {
@@ -112,6 +112,6 @@ class DELETETests: XCTestCase {
             completed = true
         }
 
-        waitForExpectations(withTimeout: 15.0, handler: nil)
+        self.waitForExpectations(withTimeout: 15.0, handler: nil)
     }
 }

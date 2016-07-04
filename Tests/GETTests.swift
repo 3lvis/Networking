@@ -22,7 +22,7 @@ class GETTests: XCTestCase {
             XCTAssertTrue(Thread.isMainThread())
             expectation.fulfill()
         }
-        waitForExpectations(withTimeout: 15.0, handler: nil)
+        self.waitForExpectations(withTimeout: 15.0, handler: nil)
     }
 
     func testGET() {
@@ -104,7 +104,7 @@ class GETTests: XCTestCase {
             completed = true
         }
 
-        waitForExpectations(withTimeout: 15.0, handler: nil)
+        self.waitForExpectations(withTimeout: 15.0, handler: nil)
     }
 
     func testCancelGETWithID() {
@@ -123,7 +123,7 @@ class GETTests: XCTestCase {
             completed = true
         }
 
-        waitForExpectations(withTimeout: 15.0, handler: nil)
+        self.waitForExpectations(withTimeout: 15.0, handler: nil)
     }
 
     func testStatusCodes() {

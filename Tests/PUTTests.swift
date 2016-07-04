@@ -95,7 +95,7 @@ class PUTTests: XCTestCase {
             completed = true
         }
 
-        waitForExpectations(withTimeout: 15.0, handler: nil)
+        self.waitForExpectations(withTimeout: 15.0, handler: nil)
     }
 
     func testCancelPUTWithID() {
@@ -114,6 +114,6 @@ class PUTTests: XCTestCase {
             completed = true
         }
 
-        waitForExpectations(withTimeout: 15.0, handler: nil)
+        self.waitForExpectations(withTimeout: 15.0, handler: nil)
     }
 }

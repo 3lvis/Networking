@@ -73,7 +73,7 @@ class NetworkingTests: XCTestCase {
 
         XCTAssertFalse(synchronous)
 
-        waitForExpectations(withTimeout: 15.0, handler: nil)
+        self.waitForExpectations(withTimeout: 15.0, handler: nil)
     }
 
     func testDestinationURL() {
@@ -138,7 +138,7 @@ class NetworkingTests: XCTestCase {
 
         networking.cancelAllRequests(with: nil)
 
-        waitForExpectations(withTimeout: 15.0, handler: nil)
+        self.waitForExpectations(withTimeout: 15.0, handler: nil)
     }
 
     func testCancelRequestsReturnInMainThread() {
@@ -151,7 +151,7 @@ class NetworkingTests: XCTestCase {
             expectation.fulfill()
         }
         networking.cancelAllRequests(with: nil)
-        waitForExpectations(withTimeout: 15.0, handler: nil)
+        self.waitForExpectations(withTimeout: 15.0, handler: nil)
     }
 
     func testDownloadData() {

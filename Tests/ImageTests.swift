@@ -27,7 +27,7 @@ class ImageTests: XCTestCase {
             XCTAssertTrue(Thread.isMainThread())
             expectation.fulfill()
         }
-        waitForExpectations(withTimeout: 15.0, handler: nil)
+        self.waitForExpectations(withTimeout: 15.0, handler: nil)
     }
 
     func testImageDownload() {
@@ -140,7 +140,7 @@ class ImageTests: XCTestCase {
 
         networking.cancelImageDownload("/image/png")
 
-        waitForExpectations(withTimeout: 15.0, handler: nil)
+        self.waitForExpectations(withTimeout: 15.0, handler: nil)
     }
 
     func testFakeImageDownload() {
@@ -170,7 +170,7 @@ class ImageTests: XCTestCase {
             XCTAssertTrue(Thread.isMainThread())
             expectation.fulfill()
         }
-        waitForExpectations(withTimeout: 15.0, handler: nil)
+        self.waitForExpectations(withTimeout: 15.0, handler: nil)
     }
 
     // Test `imageFromCache` using path, expecting image from Cache
