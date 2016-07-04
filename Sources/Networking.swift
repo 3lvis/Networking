@@ -228,7 +228,7 @@ public class Networking {
      - parameter path: The full url to be splitted.
      - returns: A base url and a relative path.
      */
-    public static func splitBaseURLAndRelativePath(_ path: String) -> (baseURL: String, relativePath: String) {
+    public static func splitBaseURLAndRelativePath(for path: String) -> (baseURL: String, relativePath: String) {
         guard let encodedPath = path.encodeUTF8() else { fatalError("Couldn't encode path to UTF8: \(path)") }
         guard let url = URL(string: encodedPath) else { fatalError("Path \(encodedPath) can't be converted to url") }
         guard let baseURLWithDash = URL(string: "/", relativeTo: url)?.absoluteURL?.absoluteString else { fatalError("Can't find absolute url of url: \(url)") }
