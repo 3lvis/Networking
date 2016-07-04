@@ -154,7 +154,7 @@ public class Networking {
      */
     public func authenticate(username: String, password: String) {
         let credentialsString = "\(username):\(password)"
-        if let credentialsData = credentialsString.data(using: String.Encoding.utf8) {
+        if let credentialsData = credentialsString.data(using: .utf8) {
             let base64Credentials = credentialsData.base64EncodedString([])
             let authString = "Basic \(base64Credentials)"
 
@@ -499,7 +499,7 @@ extension Networking {
             case .formURLEncoded:
                 guard let parametersDictionary = parameters as? [String : AnyObject] else { fatalError("Couldn't convert parameters to a dictionary: \(parameters)") }
                 let formattedParameters = parametersDictionary.formURLEncodedFormat()
-                request.httpBody = formattedParameters.data(using: String.Encoding.utf8)
+                request.httpBody = formattedParameters.data(using: .utf8)
                 break
             case .multipartFormData:
                 var bodyData = Data()
@@ -511,7 +511,7 @@ extension Networking {
                         body += "--\(self.boundary)\r\n"
                         body += "Content-Disposition: form-data; name=\"\(key)\""
                         body += "\r\n\r\n\(usedValue)\r\n"
-                        bodyData.append(body.data(using: String.Encoding.utf8)!)
+                        bodyData.append(body.data(using: .utf8)!)
                     }
                 }
 
@@ -522,7 +522,7 @@ extension Networking {
                     }
                 }
 
-                bodyData.append("--\(self.boundary)--\r\n".data(using: String.Encoding.utf8)!)
+                bodyData.append("--\(self.boundary)--\r\n".data(using: .utf8)!)
                 request.httpBody = bodyData as Data
                 break
             case .custom(_):
@@ -645,7 +645,7 @@ extension Networking {
                 case .json:
                     do {
                         let data = try JSONSerialization.data(withJSONObject: parameters, options: .prettyPrinted)
-                        let string = String(data: data, encoding: String.Encoding.utf8)
+                        let string = String(data: data, encoding: .utf8)
                         if let string = string {
                             print("Parameters: \(string)")
                             print(" ")
@@ -665,7 +665,7 @@ extension Networking {
                 }
             }
 
-            if let data = data, stringData = String(data: data, encoding: String.Encoding.utf8) {
+            if let data = data, stringData = String(data: data, encoding: .utf8) {
                 print("Data: \(stringData)")
                 print(" ")
             }

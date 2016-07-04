@@ -23,10 +23,6 @@ class POSTTests: XCTestCase {
             "bool": true
         ]
         networking.POST("/post", parameters: parameters) { JSON, error in
-            let data = try! JSONSerialization.data(withJSONObject: JSON!, options: .prettyPrinted)
-            let string = NSString(data: data, encoding: String.Encoding.utf8.rawValue)!
-            print(string)
-
             guard let JSON = JSON as? [String : AnyObject] else { XCTFail(); return }
             guard let JSONResponse = JSON["json"] as? [String : AnyObject] else { XCTFail(); return }
             XCTAssertEqual(JSONResponse["string"] as? String, "valueA")
@@ -81,8 +77,8 @@ class POSTTests: XCTestCase {
 
         let item1 = "FIRSTDATA"
         let item2 = "SECONDDATA"
-        let part1 = FormDataPart(data: item1.data(using: String.Encoding.utf8)!, parameterName: item1, filename: "\(item1).png")
-        let part2 = FormDataPart(data: item2.data(using: String.Encoding.utf8)!, parameterName: item2, filename: "\(item2).png")
+        let part1 = FormDataPart(data: item1.data(using: .utf8)!, parameterName: item1, filename: "\(item1).png")
+        let part2 = FormDataPart(data: item2.data(using: .utf8)!, parameterName: item2, filename: "\(item2).png")
         let parameters = [
             "string": "valueA",
             "int": 20,
