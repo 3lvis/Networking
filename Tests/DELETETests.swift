@@ -67,7 +67,7 @@ class DELETETests: XCTestCase {
     func testFakeDELETEUsingFile() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakeDELETE("/entries", fileName: "entries.json", bundle: Bundle(forClass: DELETETests.self))
+        networking.fakeDELETE("/entries", fileName: "entries.json", bundle: Bundle.init(for: ImageTests.self))
 
         networking.DELETE("/entries") { JSON, error in
             guard let JSON = JSON as? [[String : AnyObject]] else { XCTFail(); return }
@@ -108,7 +108,7 @@ class DELETETests: XCTestCase {
             expectation.fulfill()
         }
 
-        networking.cancel(requestID) {
+        networking.cancel(requestID: requestID) {
             completed = true
         }
 

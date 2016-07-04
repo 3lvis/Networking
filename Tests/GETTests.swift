@@ -78,7 +78,7 @@ class GETTests: XCTestCase {
     func testFakeGETUsingFile() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakeGET("/entries", fileName: "entries.json", bundle: Bundle(forClass: GETTests.self))
+        networking.fakeGET("/entries", fileName: "entries.json", bundle: Bundle.init(for: GETTests.self))
 
         networking.GET("/entries") { JSON, error in
             guard let JSON = JSON as? [[String : AnyObject]] else { XCTFail(); return }
@@ -119,7 +119,7 @@ class GETTests: XCTestCase {
             expectation.fulfill()
         }
 
-        networking.cancel(requestID) {
+        networking.cancel(requestID: requestID) {
             completed = true
         }
 

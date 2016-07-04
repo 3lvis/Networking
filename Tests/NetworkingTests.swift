@@ -50,7 +50,7 @@ class NetworkingTests: XCTestCase {
         }
     }
 
-    func testurl(for: ) {
+    func testurl() {
         let networking = Networking(baseURL: baseURL)
         let url = networking.url(for: "/hello")
         XCTAssertEqual(url.absoluteString, "http://httpbin.org/hello")
@@ -79,7 +79,7 @@ class NetworkingTests: XCTestCase {
     func testDestinationURL() {
         let networking = Networking(baseURL: baseURL)
         let path = "/image/png"
-        guard let destinationURL = try? networking.destinationURL(path) else { XCTFail(); return }
+        guard let destinationURL = try? networking.destinationURL(for: path) else { XCTFail(); return }
         XCTAssertEqual(destinationURL.lastPathComponent, "http:--httpbin.org-image-png")
     }
 
@@ -87,26 +87,26 @@ class NetworkingTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         let path = "/image/png"
         let cacheName = "png/png"
-        guard let destinationURL = try? networking.destinationURL(path, cacheName: cacheName) else { XCTFail(); return }
+        guard let destinationURL = try? networking.destinationURL(for: path, cacheName: cacheName) else { XCTFail(); return }
         XCTAssertEqual(destinationURL.lastPathComponent, "png-png")
     }
 
     func testStatusCodeType() {
-        XCTAssertEqual((-999).statusCodeType(), Networking.StatusCodeType.Unknown)
-        XCTAssertEqual(99.statusCodeType(), Networking.StatusCodeType.Unknown)
-        XCTAssertEqual(101.statusCodeType(), Networking.StatusCodeType.Informational)
-        XCTAssertEqual(203.statusCodeType(), Networking.StatusCodeType.Successful)
-        XCTAssertEqual(303.statusCodeType(), Networking.StatusCodeType.Redirection)
-        XCTAssertEqual(403.statusCodeType(), Networking.StatusCodeType.ClientError)
-        XCTAssertEqual(550.statusCodeType(), Networking.StatusCodeType.ServerError)
+        XCTAssertEqual((-999).statusCodeType(), Networking.StatusCodeType.unknown)
+        XCTAssertEqual(99.statusCodeType(), Networking.StatusCodeType.unknown)
+        XCTAssertEqual(101.statusCodeType(), Networking.StatusCodeType.informational)
+        XCTAssertEqual(203.statusCodeType(), Networking.StatusCodeType.successful)
+        XCTAssertEqual(303.statusCodeType(), Networking.StatusCodeType.redirection)
+        XCTAssertEqual(403.statusCodeType(), Networking.StatusCodeType.clientError)
+        XCTAssertEqual(550.statusCodeType(), Networking.StatusCodeType.serverError)
     }
 
     func testSplitBaseURLAndRelativePath() {
-        let (baseURL1, relativePath1) = Networking.splitBaseURLAndRelativePath("https://rescuejuice.com/wp-content/uploads/2015/11/døgnvillburgere.jpg")
+        let (baseURL1, relativePath1) = Networking.splitBaseURLAndRelativePath(for: "https://rescuejuice.com/wp-content/uploads/2015/11/døgnvillburgere.jpg")
         XCTAssertEqual(baseURL1, "https://rescuejuice.com")
         XCTAssertEqual(relativePath1, "/wp-content/uploads/2015/11/døgnvillburgere.jpg")
 
-        let (baseURL2, relativePath2) = Networking.splitBaseURLAndRelativePath("http://httpbin.org/basic-auth/user/passwd")
+        let (baseURL2, relativePath2) = Networking.splitBaseURLAndRelativePath(for: "http://httpbin.org/basic-auth/user/passwd")
         XCTAssertEqual(baseURL2, "http://httpbin.org")
         XCTAssertEqual(relativePath2, "/basic-auth/user/passwd")
     }
@@ -136,7 +136,7 @@ class NetworkingTests: XCTestCase {
             }
         }
 
-        networking.cancelAllRequests(nil)
+        networking.cancelAllRequests(with: nil)
 
         waitForExpectations(withTimeout: 15.0, handler: nil)
     }
@@ -150,7 +150,7 @@ class NetworkingTests: XCTestCase {
             XCTAssertEqual(error?.code, -999)
             expectation.fulfill()
         }
-        networking.cancelAllRequests(nil)
+        networking.cancelAllRequests(with: nil)
         waitForExpectations(withTimeout: 15.0, handler: nil)
     }
 
@@ -159,7 +159,7 @@ class NetworkingTests: XCTestCase {
         let networking = Networking(baseURL: self.baseURL)
         let path = "/image/png"
         Helper.removeFileIfNeeded(networking, path: path)
-        networking.downloadData(path) { data, error in
+        networking.downloadData(for: path) { data, error in
             synchronous = true
             XCTAssertTrue(Thread.isMainThread())
             XCTAssertEqual(data?.count, 8090)
