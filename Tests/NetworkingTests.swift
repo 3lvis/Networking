@@ -52,7 +52,7 @@ class NetworkingTests: XCTestCase {
 
     func testURLForPath() {
         let networking = Networking(baseURL: baseURL)
-        let url = networking.urlForPath("/hello")
+        let url = networking.url(for: "/hello")
         XCTAssertEqual(url.absoluteString, "http://httpbin.org/hello")
     }
 
@@ -79,7 +79,7 @@ class NetworkingTests: XCTestCase {
     func testDestinationURL() {
         let networking = Networking(baseURL: baseURL)
         let path = "/image/png"
-        guard let destinationURL = try? networking.destinationURL(path) else { XCTFail(); return }
+        guard let destinationURL = try? networking.destinationURL(for: path) else { XCTFail(); return }
         XCTAssertEqual(destinationURL.lastPathComponent, "http:--httpbin.org-image-png")
     }
 
@@ -87,7 +87,7 @@ class NetworkingTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         let path = "/image/png"
         let cacheName = "png/png"
-        guard let destinationURL = try? networking.destinationURL(path, cacheName: cacheName) else { XCTFail(); return }
+        guard let destinationURL = try? networking.destinationURL(for: path, cacheName: cacheName) else { XCTFail(); return }
         XCTAssertEqual(destinationURL.lastPathComponent, "png-png")
     }
 

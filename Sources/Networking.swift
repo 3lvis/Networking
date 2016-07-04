@@ -152,7 +152,7 @@ public class Networking {
      - parameter username: The username to be used.
      - parameter password: The password to be used.
      */
-    public func authenticate(_ username: String, password: String) {
+    public func authenticate(username: String, password: String) {
         let credentialsString = "\(username):\(password)"
         if let credentialsData = credentialsString.data(using: String.Encoding.utf8) {
             let base64Credentials = credentialsData.base64EncodedString([])
@@ -169,7 +169,7 @@ public class Networking {
      Authenticates using a Bearer token, sets the Authorization header to "Bearer \(token)".
      - parameter token: The token to be used.
      */
-    public func authenticate(_ token: String) {
+    public func authenticate(token: String) {
         self.token = token
     }
 
@@ -178,7 +178,7 @@ public class Networking {
      - parameter authorizationHeaderKey: Sets this value as the key for the HTTP `Authorization` header
      - parameter authorizationHeaderValue: Sets this value to the HTTP `Authorization` header or to the `headerKey` if you provided that.
      */
-    public func authenticate(_ headerKey: String = "Authorization", headerValue: String) {
+    public func authenticate(headerKey: String = "Authorization", headerValue: String) {
         self.authorizationHeaderKey = headerKey
         self.authorizationHeaderValue = headerValue
     }
@@ -188,7 +188,7 @@ public class Networking {
      - parameter path: The path to be appended to the base URL.
      - returns: A NSURL generated after appending the path to the base URL.
      */
-    public func urlForPath(_ path: String) -> URL {
+    public func url(for path: String) -> URL {
         guard let encodedPath = path.encodeUTF8() else { fatalError("Couldn't encode path to UTF8: \(path)") }
         guard let url = URL(string: self.baseURL + encodedPath) else { fatalError("Couldn't create a url using baseURL: \(self.baseURL) and encodedPath: \(encodedPath)") }
         return url
@@ -199,13 +199,13 @@ public class Networking {
      - parameter path: The path used to download the resource.
      - returns: A NSURL where a resource has been stored.
      */
-    public func destinationURL(_ path: String, cacheName: String? = nil) throws -> URL {
+    public func destinationURL(for path: String, cacheName: String? = nil) throws -> URL {
         #if os(tvOS)
             let directory = FileManager.SearchPathDirectory.cachesDirectory
         #else
             let directory = TestCheck.isTesting ? FileManager.SearchPathDirectory.cachesDirectory : FileManager.SearchPathDirectory.documentDirectory
         #endif
-        let finalPath = cacheName ?? self.urlForPath(path).absoluteString
+        let finalPath = cacheName ?? self.url(for: path).absoluteString
         let replacedPath = finalPath?.replacingOccurrences(of: "/", with: "-")
         if let url = URL(string: replacedPath!) {
             if let cachesURL = FileManager.default().urlsForDirectory(directory, inDomains: .userDomainMask).first {
@@ -323,7 +323,7 @@ public class Networking {
 
 extension Networking {
     func objectFromCache(_ path: String, cacheName: String? = nil, responseType: ResponseType, completion: (object: AnyObject?) -> Void) {
-        guard let destinationURL = try? self.destinationURL(path, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
+        guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
 
         if let object = self.cache.object(forKey: destinationURL.absoluteString!) {
             completion(object: object)
@@ -436,7 +436,7 @@ extension Networking {
                         requestID = self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, headers, error in
                             var returnedResponse: AnyObject?
                             if let data = data where data.count > 0 {
-                                guard let destinationURL = try? self.destinationURL(path, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
+                                guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
                                 let _ = try? data.write(to: destinationURL, options: [.dataWritingAtomic])
                                 switch responseType {
                                 case .data:
@@ -470,7 +470,7 @@ extension Networking {
     @discardableResult
     func dataRequest(_ requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, parts: [FormDataPart]?, responseType: ResponseType, completion: (response: Data?, headers: [String : AnyObject], error: NSError?) -> ()) -> String {
         let requestID = UUID().uuidString
-        var request = URLRequest(url: self.urlForPath(path))
+        var request = URLRequest(url: self.url(for: path))
         request.httpMethod = requestType.rawValue
 
         if let parameterType = parameterType {

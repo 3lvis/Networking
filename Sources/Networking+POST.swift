@@ -89,7 +89,7 @@ public extension Networking {
      - parameter completion: A closure that gets called when the cancellation is completed.
      */
     public func cancelPOST(_ path: String, completion: ((Void) -> Void)? = nil) {
-        let url = self.urlForPath(path)
+        let url = self.url(for: path)
         self.cancelRequest(.Data, requestType: .POST, url: url, completion: completion)
     }
 }
