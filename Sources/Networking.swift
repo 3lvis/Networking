@@ -206,8 +206,8 @@ public class Networking {
             let directory = TestCheck.isTesting ? FileManager.SearchPathDirectory.cachesDirectory : FileManager.SearchPathDirectory.documentDirectory
         #endif
         let finalPath = cacheName ?? self.url(for: path).absoluteString
-        let replacedPath = finalPath?.replacingOccurrences(of: "/", with: "-")
-        if let url = URL(string: replacedPath!) {
+        let replacedPath = finalPath!.replacingOccurrences(of: "/", with: "-")
+        if let url = URL(string: replacedPath) {
             if let cachesURL = FileManager.default().urlsForDirectory(directory, inDomains: .userDomainMask).first {
                 #if !os(tvOS)
                     try (cachesURL as NSURL).setResourceValue(true, forKey: URLResourceKey.isExcludedFromBackupKey)
@@ -345,7 +345,7 @@ extension Networking {
             }
 
             if TestCheck.isTesting && self.disableTestingMode == false {
-                let _ = semaphore.wait(timeout: DispatchTime.distantFuture)
+                semaphore.wait(timeout: DispatchTime.distantFuture)
                 completion(object: returnedObject)
             }
         } else {
@@ -389,9 +389,15 @@ extension Networking {
         self.fakeRequests[requestType] = fakeRequests
     }
 
-    @discardableResult
-    func request(_ requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, parts: [FormDataPart]?, responseType: ResponseType, completion: (response: AnyObject?, headers: [String : AnyObject], error: NSError?) -> ()) -> String {
+    func request(_ requestType: RequestType, fullPath: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, parts: [FormDataPart]?, responseType: ResponseType, completion: (response: AnyObject?, headers: [String : AnyObject], error: NSError?) -> ()) -> String {
+
+        /*
+         Remove URL parameters from path. That can lead to writing cached files with names longer than 255char, resulting in error
+         */
+        let path = fullPath.components(separatedBy: "?").first!
+
         var requestID = UUID().uuidString
+
 
         if let responses = self.fakeRequests[requestType], fakeRequest = responses[path] {
             if fakeRequest.statusCode.statusCodeType() == .successful {
@@ -428,7 +434,7 @@ extension Networking {
                             completion(response: object, headers: [String : AnyObject](), error: nil)
                         }
                     } else {
-                        requestID = self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, headers, error in
+                        self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, headers, error in
                             var returnedResponse: AnyObject?
                             if let data = data where data.count > 0 {
                                 guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
@@ -462,7 +468,6 @@ extension Networking {
         return requestID
     }
 
-    @discardableResult
     func dataRequest(_ requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, parts: [FormDataPart]?, responseType: ResponseType, completion: (response: Data?, headers: [String : AnyObject], error: NSError?) -> ()) -> String {
         let requestID = UUID().uuidString
         var request = URLRequest(url: self.url(for: path))
@@ -502,7 +507,7 @@ extension Networking {
                 request.httpBody = formattedParameters.data(using: String.Encoding.utf8)
                 break
             case .multipartFormData:
-                var bodyData = Data()
+                let bodyData = NSMutableData()
 
                 if let parameters = parameters as? [String : AnyObject] {
                     for (key, value) in parameters {
@@ -540,7 +545,7 @@ extension Networking {
             var returnedData: Data?
             var returnedHeaders = [String : AnyObject]()
 
-            let session = self.session.dataTask(with: request) { data, response, error in
+            let session = self.session.dataTask(with: request as URLRequest) { data, response, error in
                 returnedResponse = response
                 connectionError = error
                 returnedData = data
@@ -566,7 +571,7 @@ extension Networking {
                         NetworkActivityIndicator.sharedIndicator.visible = false
                     }
 
-                    self.logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError)
+                    self.logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request as URLRequest, response: returnedResponse, error: connectionError)
                     completion(response: returnedData, headers: returnedHeaders, error: connectionError)
                 }
             }
@@ -575,7 +580,7 @@ extension Networking {
             session.resume()
 
             if TestCheck.isTesting && self.disableTestingMode == false {
-                let _ = semaphore.wait(timeout: DispatchTime.distantFuture)
+                semaphore.wait(timeout: DispatchTime.distantFuture)
                 self.logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request as URLRequest, response: returnedResponse, error: connectionError)
                 completion(response: returnedData, headers: returnedHeaders, error: connectionError)
             }
