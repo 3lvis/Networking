@@ -11,7 +11,7 @@ extension FileManager {
         guard let path = url.path else { fatalError("Couldn't get path for url: \(url)") }
 
         do {
-            try FileManager.default().removeItem(atPath: path)
+            try FileManager.default.removeItem(atPath: path)
         } catch let error as NSError {
             fatalError("Couldn't remove item at path: \(path), error: \(error)")
         }
