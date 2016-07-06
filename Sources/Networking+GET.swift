@@ -45,7 +45,7 @@ public extension Networking {
      - parameter fileName: The name of the file, whose contents will be registered as a reponse.
      - parameter bundle: The NSBundle where the file is located.
      */
-    public func fakeGET(_ path: String, fileName: String, bundle: Bundle = Bundle.main()) {
+    public func fakeGET(_ path: String, fileName: String, bundle: Bundle = Bundle.main) {
         self.fake(.GET, path: path, fileName: fileName, bundle: bundle)
     }
 

@@ -24,7 +24,7 @@ class ImageTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
         networking.downloadImage("/image/png") { JSON, error in
-            XCTAssertTrue(Thread.isMainThread())
+            XCTAssertTrue(Thread.isMainThread)
             expectation.fulfill()
         }
         self.waitForExpectations(withTimeout: 15.0, handler: nil)
@@ -66,9 +66,9 @@ class ImageTests: XCTestCase {
 
         networking.downloadImage(path) { image, error in
             guard let destinationURL = try? networking.destinationURL(for: path) else { XCTFail(); return }
-            XCTAssertTrue(FileManager.default().exists(at: destinationURL))
+            XCTAssertTrue(FileManager.default.exists(at: destinationURL))
             guard let path = destinationURL.path else { XCTFail(); return }
-            let data = FileManager.default().contents(atPath: path)
+            let data = FileManager.default.contents(atPath: path)
             XCTAssertEqual(data?.count, 8090)
         }
     }
@@ -82,9 +82,9 @@ class ImageTests: XCTestCase {
 
         networking.downloadImage(path, cacheName: cacheName) { image, error in
             guard let destinationURL = try? networking.destinationURL(for: path, cacheName: cacheName) else { XCTFail(); return }
-            XCTAssertTrue(FileManager.default().exists(at: destinationURL))
+            XCTAssertTrue(FileManager.default.exists(at: destinationURL))
             guard let path = destinationURL.path else { XCTFail(); return }
-            let data = FileManager.default().contents(atPath: path)
+            let data = FileManager.default.contents(atPath: path)
             XCTAssertEqual(data?.count, 8090)
         }
     }
@@ -167,7 +167,7 @@ class ImageTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
         networking.imageFromCache("/image/png") { image in
-            XCTAssertTrue(Thread.isMainThread())
+            XCTAssertTrue(Thread.isMainThread)
             expectation.fulfill()
         }
         self.waitForExpectations(withTimeout: 15.0, handler: nil)

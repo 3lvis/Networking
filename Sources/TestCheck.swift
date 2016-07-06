@@ -6,7 +6,7 @@ struct TestCheck {
      - returns: A Bool, `true` if you're on testing mode, `false` if you're not.
      */
     static let isTesting: Bool = {
-        let enviroment = ProcessInfo.processInfo().environment
+        let enviroment = ProcessInfo.processInfo.environment
         let serviceName = enviroment["XPC_SERVICE_NAME"]
         let injectBundle = enviroment["XCInjectBundle"]
         var isRunning = (enviroment["TRAVIS"] != nil || enviroment["XCTestConfigurationFilePath"] != nil)

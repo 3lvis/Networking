@@ -155,7 +155,7 @@ public class Networking {
     public func authenticate(username: String, password: String) {
         let credentialsString = "\(username):\(password)"
         if let credentialsData = credentialsString.data(using: .utf8) {
-            let base64Credentials = credentialsData.base64EncodedString([])
+            let base64Credentials = credentialsData.base64EncodedString(options: [])
             let authString = "Basic \(base64Credentials)"
 
             let config  = self.sessionConfiguration()
@@ -208,7 +208,7 @@ public class Networking {
         let finalPath = cacheName ?? self.url(for: path).absoluteString
         let replacedPath = finalPath?.replacingOccurrences(of: "/", with: "-")
         if let url = URL(string: replacedPath!) {
-            if let cachesURL = FileManager.default().urlsForDirectory(directory, inDomains: .userDomainMask).first {
+            if let cachesURL = FileManager.default.urlsForDirectory(directory, inDomains: .userDomainMask).first {
                 #if !os(tvOS)
                     try (cachesURL as NSURL).setResourceValue(true, forKey: URLResourceKey.isExcludedFromBackupKey)
                 #endif
@@ -322,7 +322,7 @@ extension Networking {
 
         if let object = self.cache.object(forKey: destinationURL.absoluteString!) {
             completion(object: object)
-        } else if FileManager.default().exists(at: destinationURL) {
+        } else if FileManager.default.exists(at: destinationURL) {
             let semaphore = DispatchSemaphore(value: 0)
             var returnedObject: AnyObject?
 
@@ -355,7 +355,7 @@ extension Networking {
 
     func data(for destinationURL: URL) -> Data {
         guard let path = destinationURL.path else { fatalError("Couldn't get path for url: \(destinationURL)") }
-        guard let data = FileManager.default().contents(atPath: path) else { fatalError("Couldn't get image in destination url: \(url)") }
+        guard let data = FileManager.default.contents(atPath: path) else { fatalError("Couldn't get image in destination url: \(url)") }
 
         return data
     }
@@ -363,15 +363,15 @@ extension Networking {
     func sessionConfiguration() -> URLSessionConfiguration {
         switch self.configurationType {
         case .default:
-            return URLSessionConfiguration.default()
+            return URLSessionConfiguration.default
         case .ephemeral:
-            return URLSessionConfiguration.ephemeral()
+            return URLSessionConfiguration.ephemeral
         case .background:
             return URLSessionConfiguration.background(withIdentifier: "NetworkingBackgroundConfiguration")
         }
     }
 
-    func fake(_ requestType: RequestType, path: String, fileName: String, bundle: Bundle = Bundle.main()) {
+    func fake(_ requestType: RequestType, path: String, fileName: String, bundle: Bundle = Bundle.main) {
         do {
             if let result = try JSON.from(fileName, bundle: bundle) {
                 self.fake(requestType, path: path, response: result, statusCode: 200)
@@ -432,7 +432,7 @@ extension Networking {
                             var returnedResponse: AnyObject?
                             if let data = data where data.count > 0 {
                                 guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
-                                let _ = try? data.write(to: destinationURL, options: [.dataWritingAtomic])
+                                let _ = try? data.write(to: destinationURL, options: [.atomic])
                                 switch responseType {
                                 case .data:
                                     self.cache.setObject(data, forKey: destinationURL.absoluteString!)

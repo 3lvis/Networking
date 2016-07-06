@@ -146,7 +146,7 @@ class NetworkingTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
         networking.GET("/get") { JSON, error in
-            XCTAssertTrue(Thread.isMainThread())
+            XCTAssertTrue(Thread.isMainThread)
             XCTAssertEqual(error?.code, -999)
             expectation.fulfill()
         }
@@ -161,7 +161,7 @@ class NetworkingTests: XCTestCase {
         Helper.removeFileIfNeeded(networking, path: path)
         networking.downloadData(for: path) { data, error in
             synchronous = true
-            XCTAssertTrue(Thread.isMainThread())
+            XCTAssertTrue(Thread.isMainThread)
             XCTAssertEqual(data?.count, 8090)
         }
         XCTAssertTrue(synchronous)
