@@ -45,7 +45,7 @@ public extension Networking {
      - parameter fileName: The name of the file, whose contents will be registered as a reponse.
      - parameter bundle: The NSBundle where the file is located.
      */
-    public func fakeDELETE(_ path: String, fileName: String, bundle: Bundle = Bundle.main) {
+    public func fakeDELETE(_ path: String, fileName: String, bundle: Bundle = Bundle.main()) {
         self.fake(.DELETE, path: path, fileName: fileName, bundle: bundle)
     }
 

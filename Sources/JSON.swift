@@ -12,7 +12,7 @@ class JSON {
     - parameter bundle:  The Bundle where the file is located, by default is the main bundle.
     - returns: A JSON object, it can be either a Dictionary or an Array.
     */
-    class func from(_ fileName: String, bundle: Bundle = Bundle.main) throws -> AnyObject? {
+    class func from(_ fileName: String, bundle: Bundle = Bundle.main()) throws -> AnyObject? {
         var JSON: AnyObject?
 
         guard let url = URL(string: fileName), filePath = bundle.pathForResource(try! url.deletingPathExtension().absoluteString, ofType: url.pathExtension) else { throw ParsingError.notFound }

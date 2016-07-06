@@ -19,7 +19,7 @@ class GETTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
         networking.GET("/get") { JSON, error in
-            XCTAssertTrue(Thread.isMainThread)
+            XCTAssertTrue(Thread.isMainThread())
             expectation.fulfill()
         }
         self.waitForExpectations(withTimeout: 15.0, handler: nil)
