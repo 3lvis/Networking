@@ -317,8 +317,7 @@ extension Networking {
          255 characters, resulting in error. Another option to explore is to use a hash version of the url if it's 
          longer than 255 characters.
          */
-        let convertedPath = path.components(separatedBy: "?").first!
-        guard let destinationURL = try? self.destinationURL(for: convertedPath, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(convertedPath) and cacheName: \(cacheName)") }
+        guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
 
         if let object = self.cache.object(forKey: destinationURL.absoluteString!) {
             completion(object: object)
@@ -422,16 +421,19 @@ extension Networking {
                 }
                 break
             case .data, .image:
-                self.objectFromCache(for: path, cacheName: cacheName, responseType: responseType) { object in
+                let trimmedPath = path.components(separatedBy: "?").first!
+
+                self.objectFromCache(for: trimmedPath, cacheName: cacheName, responseType: responseType) { object in
                     if let object = object {
                         TestCheck.testBlock(self.disableTestingMode) {
                             completion(response: object, headers: [String : AnyObject](), error: nil)
                         }
                     } else {
                         requestID = self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, headers, error in
+
                             var returnedResponse: AnyObject?
                             if let data = data where data.count > 0 {
-                                guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
+                                guard let destinationURL = try? self.destinationURL(for: trimmedPath, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
                                 let _ = try? data.write(to: destinationURL, options: [.atomic])
                                 switch responseType {
                                 case .data:
