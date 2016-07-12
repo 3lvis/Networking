@@ -7,7 +7,7 @@ class ImageTests: XCTestCase {
     func testImageDownloadSynchronous() {
         var synchronous = false
 
-        let networking = Networking(baseURL: baseURL)
+        let networking = Networking(baseURL: self.baseURL)
         let path = "/image/png"
 
         Helper.removeFileIfNeeded(networking, path: path)
@@ -21,7 +21,7 @@ class ImageTests: XCTestCase {
 
     func testDownloadImageReturnBlockInMainThread() {
         let expectation = self.expectation(withDescription: "testDownloadImageReturnBlockInMainThread")
-        let networking = Networking(baseURL: baseURL)
+        let networking = Networking(baseURL: self.baseURL)
         networking.disableTestingMode = true
         networking.downloadImage("/image/png") { JSON, error in
             XCTAssertTrue(Thread.isMainThread)
@@ -31,7 +31,7 @@ class ImageTests: XCTestCase {
     }
 
     func testImageDownload() {
-        let networking = Networking(baseURL: baseURL)
+        let networking = Networking(baseURL: self.baseURL)
         let path = "/image/png"
 
         Helper.removeFileIfNeeded(networking, path: path)
@@ -59,7 +59,7 @@ class ImageTests: XCTestCase {
     }
 
     func testDownloadedImageInFile() {
-        let networking = Networking(baseURL: baseURL)
+        let networking = Networking(baseURL: self.baseURL)
         let path = "/image/png"
 
         Helper.removeFileIfNeeded(networking, path: path)
@@ -74,7 +74,7 @@ class ImageTests: XCTestCase {
     }
 
     func testDownloadedImageInFileUsingCustomName() {
-        let networking = Networking(baseURL: baseURL)
+        let networking = Networking(baseURL: self.baseURL)
         let path = "/image/png"
         let cacheName = "png/png"
 
@@ -90,7 +90,7 @@ class ImageTests: XCTestCase {
     }
 
     func testDownloadedImageInCache() {
-        let networking = Networking(baseURL: baseURL)
+        let networking = Networking(baseURL: self.baseURL)
         let path = "/image/png"
 
         Helper.removeFileIfNeeded(networking, path: path)
@@ -107,7 +107,7 @@ class ImageTests: XCTestCase {
     }
 
     func testDownloadedImageInCacheUsingCustomName() {
-        let networking = Networking(baseURL: baseURL)
+        let networking = Networking(baseURL: self.baseURL)
         let path = "/image/png"
         let cacheName = "png/png"
 
@@ -127,7 +127,7 @@ class ImageTests: XCTestCase {
     func testCancelImageDownload() {
         let expectation = self.expectation(withDescription: "testCancelImageDownload")
 
-        let networking = Networking(baseURL: baseURL)
+        let networking = Networking(baseURL: self.baseURL)
         networking.disableTestingMode = true
         let path = "/image/png"
 
@@ -144,7 +144,7 @@ class ImageTests: XCTestCase {
     }
 
     func testFakeImageDownload() {
-        let networking = Networking(baseURL: baseURL)
+        let networking = Networking(baseURL: self.baseURL)
         let pigImage = NetworkingImage.find(named: "pig.png", inBundle: Bundle(for: ImageTests.self))
         networking.fakeImageDownload("/image/png", image: pigImage)
         networking.downloadImage("/image/png") { image, error in
@@ -155,7 +155,7 @@ class ImageTests: XCTestCase {
     }
 
     func testFakeImageDownloadWithInvalidStatusCode() {
-        let networking = Networking(baseURL: baseURL)
+        let networking = Networking(baseURL: self.baseURL)
         networking.fakeImageDownload("/image/png", image: nil, statusCode: 401)
         networking.downloadImage("/image/png") { image, error in
             XCTAssertEqual(error?.code, 401)
@@ -164,7 +164,7 @@ class ImageTests: XCTestCase {
 
     func testImageFromCacheReturnBlockInMainThread() {
         let expectation = self.expectation(withDescription: "testImageFromCacheReturnBlockInMainThread")
-        let networking = Networking(baseURL: baseURL)
+        let networking = Networking(baseURL: self.baseURL)
         networking.disableTestingMode = true
         networking.imageFromCache("/image/png") { image in
             XCTAssertTrue(Thread.isMainThread)
@@ -176,7 +176,7 @@ class ImageTests: XCTestCase {
     // Test `imageFromCache` using path, expecting image from Cache
     func testImageFromCacheForPathInCache() {
         var synchronous = false
-        let networking = Networking(baseURL: baseURL)
+        let networking = Networking(baseURL: self.baseURL)
         let path = "/image/png"
         Helper.removeFileIfNeeded(networking, path: path)
         networking.downloadImage(path) { image, error in
@@ -194,7 +194,7 @@ class ImageTests: XCTestCase {
     // Test `imageFromCache` using cacheName instead of path, expecting image from Cache
     func testImageFromCacheForCustomCacheNameInCache() {
         var synchronous = false
-        let networking = Networking(baseURL: baseURL)
+        let networking = Networking(baseURL: self.baseURL)
         let path = "/image/png"
         let cacheName = "hello"
         Helper.removeFileIfNeeded(networking, path: path, cacheName: cacheName)
@@ -214,7 +214,7 @@ class ImageTests: XCTestCase {
     func testImageFromCacheForPathInFile() {
         var synchronous = false
         let cache = Cache<AnyObject, AnyObject>()
-        let networking = Networking(baseURL: baseURL, cache: cache)
+        let networking = Networking(baseURL: self.baseURL, cache: cache)
         let path = "/image/png"
         Helper.removeFileIfNeeded(networking, path: path)
         networking.downloadImage(path) { image, error in
@@ -236,7 +236,7 @@ class ImageTests: XCTestCase {
     func testImageFromCacheForCustomCacheNameInFile() {
         var synchronous = false
         let cache = Cache<AnyObject, AnyObject>()
-        let networking = Networking(baseURL: baseURL, cache: cache)
+        let networking = Networking(baseURL: self.baseURL, cache: cache)
         let path = "/image/png"
         let cacheName = "hello"
         Helper.removeFileIfNeeded(networking, path: path, cacheName: cacheName)
@@ -259,7 +259,7 @@ class ImageTests: XCTestCase {
     func testImageFromCacheNilImage() {
         var synchronous = false
         let cache = Cache<AnyObject, AnyObject>()
-        let networking = Networking(baseURL: baseURL, cache: cache)
+        let networking = Networking(baseURL: self.baseURL, cache: cache)
         let path = "/image/png"
         Helper.removeFileIfNeeded(networking, path: path)
         networking.downloadImage(path) { image, error in
