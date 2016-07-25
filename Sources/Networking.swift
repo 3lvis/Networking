@@ -419,7 +419,7 @@ extension Networking {
                             }
                         }
                     }
-                    
+
                     TestCheck.testBlock(disabled: self.disableTestingMode) {
                         completion(response: returnedResponse, headers: headers, error: returnedError)
                     }
