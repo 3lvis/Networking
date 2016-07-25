@@ -410,16 +410,16 @@ extension Networking {
                 requestID = self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, headers, error in
                     var returnedError = error
                     var returnedResponse: AnyObject?
-                    if error == nil {
-                        if let data = data where data.length > 0 {
-                            do {
-                                returnedResponse = try NSJSONSerialization.JSONObjectWithData(data, options: [])
-                            } catch let JSONError as NSError {
+                    if let data = data where data.length > 0 {
+                        do {
+                            returnedResponse = try NSJSONSerialization.JSONObjectWithData(data, options: [])
+                        } catch let JSONError as NSError {
+                            if error == nil {
                                 returnedError = JSONError
                             }
                         }
                     }
-
+                    
                     TestCheck.testBlock(disabled: self.disableTestingMode) {
                         completion(response: returnedResponse, headers: headers, error: returnedError)
                     }
