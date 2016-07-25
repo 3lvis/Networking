@@ -405,17 +405,30 @@ extension Networking {
                 requestID = self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, headers, error in
                     var returnedError = error
                     var returnedResponse: AnyObject?
+<<<<<<< HEAD
                     if error == nil {
                         if let data = data, data.count > 0 {
                             do {
                                 returnedResponse = try JSONSerialization.jsonObject(with: data, options: [])
                             } catch let JSONError as NSError {
+=======
+                    if let data = data where data.length > 0 {
+                        do {
+                            returnedResponse = try NSJSONSerialization.JSONObjectWithData(data, options: [])
+                        } catch let JSONError as NSError {
+                            if error == nil {
+>>>>>>> eb1b560... Always return JSON for valid data even if HTTP error occurs.
                                 returnedError = JSONError
                             }
                         }
                     }
+<<<<<<< HEAD
 
                     TestCheck.testBlock(self.disableTestingMode) {
+=======
+                    
+                    TestCheck.testBlock(disabled: self.disableTestingMode) {
+>>>>>>> eb1b560... Always return JSON for valid data even if HTTP error occurs.
                         completion(response: returnedResponse, headers: headers, error: returnedError)
                     }
                 }
