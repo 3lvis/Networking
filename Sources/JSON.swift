@@ -15,7 +15,11 @@ class JSON {
     class func from(_ fileName: String, bundle: Bundle = Bundle.main) throws -> AnyObject? {
         var JSON: AnyObject?
 
+<<<<<<< HEAD
         guard let url = URL(string: fileName), let filePath = bundle.path(forResource: url.deletingPathExtension().absoluteString, ofType: url.pathExtension) else { throw ParsingError.notFound }
+=======
+        guard let url = URL(string: fileName), let filePath = bundle.pathForResource(try! url.deletingPathExtension().absoluteString, ofType: url.pathExtension) else { throw ParsingError.notFound }
+>>>>>>> 558dfbb... Migrate using Xcode 8 Beta 3
 
         guard let data = try? Data(contentsOf: URL(fileURLWithPath: filePath)) else { throw ParsingError.failed }
 
