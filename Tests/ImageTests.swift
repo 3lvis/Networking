@@ -20,14 +20,14 @@ class ImageTests: XCTestCase {
     }
 
     func testDownloadImageReturnBlockInMainThread() {
-        let expectation = self.expectation(withDescription: "testDownloadImageReturnBlockInMainThread")
+        let expectation = self.expectation(description: "testDownloadImageReturnBlockInMainThread")
         let networking = Networking(baseURL: self.baseURL)
         networking.disableTestingMode = true
         networking.downloadImage("/image/png") { JSON, error in
             XCTAssertTrue(Thread.isMainThread)
             expectation.fulfill()
         }
-        self.waitForExpectations(withTimeout: 15.0, handler: nil)
+        self.waitForExpectations(timeout: 15.0, handler: nil)
     }
 
     func testImageDownload() {
@@ -125,7 +125,7 @@ class ImageTests: XCTestCase {
     }
 
     func testCancelImageDownload() {
-        let expectation = self.expectation(withDescription: "testCancelImageDownload")
+        let expectation = self.expectation(description: "testCancelImageDownload")
 
         let networking = Networking(baseURL: self.baseURL)
         networking.disableTestingMode = true
@@ -140,7 +140,7 @@ class ImageTests: XCTestCase {
 
         networking.cancelImageDownload("/image/png")
 
-        self.waitForExpectations(withTimeout: 15.0, handler: nil)
+        self.waitForExpectations(timeout: 15.0, handler: nil)
     }
 
     func testFakeImageDownload() {
@@ -163,14 +163,14 @@ class ImageTests: XCTestCase {
     }
 
     func testImageFromCacheReturnBlockInMainThread() {
-        let expectation = self.expectation(withDescription: "testImageFromCacheReturnBlockInMainThread")
+        let expectation = self.expectation(description: "testImageFromCacheReturnBlockInMainThread")
         let networking = Networking(baseURL: self.baseURL)
         networking.disableTestingMode = true
         networking.imageFromCache("/image/png") { image in
             XCTAssertTrue(Thread.isMainThread)
             expectation.fulfill()
         }
-        self.waitForExpectations(withTimeout: 15.0, handler: nil)
+        self.waitForExpectations(timeout: 15.0, handler: nil)
     }
 
     // Test `imageFromCache` using path, expecting image from Cache

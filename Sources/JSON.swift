@@ -15,7 +15,7 @@ class JSON {
     class func from(_ fileName: String, bundle: Bundle = Bundle.main) throws -> AnyObject? {
         var JSON: AnyObject?
 
-        guard let url = URL(string: fileName), filePath = bundle.pathForResource(try! url.deletingPathExtension().absoluteString, ofType: url.pathExtension) else { throw ParsingError.notFound }
+        guard let url = URL(string: fileName), let filePath = bundle.pathForResource(try! url.deletingPathExtension().absoluteString, ofType: url.pathExtension) else { throw ParsingError.notFound }
 
         guard let data = try? Data(contentsOf: URL(fileURLWithPath: filePath)) else { throw ParsingError.failed }
 

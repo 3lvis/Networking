@@ -57,7 +57,7 @@ class NetworkingTests: XCTestCase {
     }
 
     func testSkipTestMode() {
-        let expectation = self.expectation(withDescription: "testSkipTestMode")
+        let expectation = self.expectation(description: "testSkipTestMode")
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
@@ -73,7 +73,7 @@ class NetworkingTests: XCTestCase {
 
         XCTAssertFalse(synchronous)
 
-        self.waitForExpectations(withTimeout: 15.0, handler: nil)
+        self.waitForExpectations(timeout: 15.0, handler: nil)
     }
 
     func testDestinationURL() {
@@ -112,7 +112,7 @@ class NetworkingTests: XCTestCase {
     }
 
     func testCancelRequests() {
-        let expectation = self.expectation(withDescription: "testCancelRequests")
+        let expectation = self.expectation(description: "testCancelRequests")
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
         var cancelledGET = false
@@ -138,11 +138,11 @@ class NetworkingTests: XCTestCase {
 
         networking.cancelAllRequests(with: nil)
 
-        self.waitForExpectations(withTimeout: 15.0, handler: nil)
+        self.waitForExpectations(timeout: 15.0, handler: nil)
     }
 
     func testCancelRequestsReturnInMainThread() {
-        let expectation = self.expectation(withDescription: "testCancelRequestsReturnInMainThread")
+        let expectation = self.expectation(description: "testCancelRequestsReturnInMainThread")
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
         networking.GET("/get") { JSON, error in
@@ -151,7 +151,7 @@ class NetworkingTests: XCTestCase {
             expectation.fulfill()
         }
         networking.cancelAllRequests(with: nil)
-        self.waitForExpectations(withTimeout: 15.0, handler: nil)
+        self.waitForExpectations(timeout: 15.0, handler: nil)
     }
 
     func testDownloadData() {

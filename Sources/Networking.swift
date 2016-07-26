@@ -392,7 +392,7 @@ extension Networking {
     func request(_ requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: AnyObject?, parts: [FormDataPart]?, responseType: ResponseType, completion: (response: AnyObject?, headers: [String : AnyObject], error: NSError?) -> ()) -> String {
         var requestID = UUID().uuidString
 
-        if let responses = self.fakeRequests[requestType], fakeRequest = responses[path] {
+        if let responses = self.fakeRequests[requestType], let fakeRequest = responses[path] {
             if fakeRequest.statusCode.statusCodeType() == .successful {
                 completion(response: fakeRequest.response, headers: [String : AnyObject](), error: nil)
             } else {
@@ -406,7 +406,7 @@ extension Networking {
                     var returnedError = error
                     var returnedResponse: AnyObject?
                     if error == nil {
-                        if let data = data where data.count > 0 {
+                        if let data = data, data.count > 0 {
                             do {
                                 returnedResponse = try JSONSerialization.jsonObject(with: data, options: [])
                             } catch let JSONError as NSError {
@@ -432,7 +432,7 @@ extension Networking {
                         requestID = self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, headers, error in
 
                             var returnedResponse: AnyObject?
-                            if let data = data where data.count > 0 {
+                            if let data = data, data.count > 0 {
                                 guard let destinationURL = try? self.destinationURL(for: trimmedPath, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
                                 let _ = try? data.write(to: destinationURL, options: [.atomic])
                                 switch responseType {
@@ -489,7 +489,7 @@ extension Networking {
         }
 
         var serializingError: NSError?
-        if let parameterType = parameterType, parameters = parameters {
+        if let parameterType = parameterType, let parameters = parameters {
             switch parameterType {
             case .json:
                 do {
@@ -553,7 +553,7 @@ extension Networking {
                     }
 
                     if httpResponse.statusCode >= 200 && httpResponse.statusCode < 300 {
-                        if let data = data where data.count > 0 {
+                        if let data = data, data.count > 0 {
                             returnedData = data
                         }
                     } else {
@@ -621,7 +621,7 @@ extension Networking {
 
         let isCancelled = error.code == -999
         if isCancelled {
-            if let request = request, url = request.url {
+            if let request = request, let url = request.url {
                 print("Cancelled request: \(url.absoluteString)")
                 print(" ")
             }
@@ -632,7 +632,7 @@ extension Networking {
             print("Error \(error.code): \(error.description)")
             print(" ")
 
-            if let request = request, url = request.url {
+            if let request = request, let url = request.url {
                 print("URL: \(url.absoluteString)")
                 print(" ")
             }
@@ -642,7 +642,7 @@ extension Networking {
                 print(" ")
             }
 
-            if let parameterType = parameterType, parameters = parameters {
+            if let parameterType = parameterType, let parameters = parameters {
                 switch parameterType {
                 case .json:
                     do {
@@ -667,7 +667,7 @@ extension Networking {
                 }
             }
 
-            if let data = data, stringData = String(data: data, encoding: .utf8) {
+            if let data = data, let stringData = String(data: data, encoding: .utf8) {
                 print("Data: \(stringData)")
                 print(" ")
             }
