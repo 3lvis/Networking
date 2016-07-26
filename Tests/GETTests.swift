@@ -53,6 +53,12 @@ class GETTests: XCTestCase {
         }
     }
 
+    // TODO: I'm not sure how it implement this, since I need a service that returns a faulty
+    // status code, meaning not 2XX, and at the same time it returns a JSON response.
+    func testGETWithInvalidPathAndJSONError() {
+
+    }
+
     func testFakeGET() {
         let networking = Networking(baseURL: baseURL)
 
@@ -71,6 +77,18 @@ class GETTests: XCTestCase {
         networking.fakeGET("/stories", response: nil, statusCode: 401)
 
         networking.GET("/stories") { JSON, error in
+            XCTAssertEqual(error?.code, 401)
+        }
+    }
+
+    func testFakeGETWithInvalidPathAndJSONError() {
+        let networking = Networking(baseURL: baseURL)
+
+        let response = ["error_message" : "Shit went down"]
+        networking.fakeGET("/stories", response: response, statusCode: 401)
+
+        networking.GET("/stories") { JSON, error in
+            XCTAssertEqual(JSON as! [String : String], response)
             XCTAssertEqual(error?.code, 401)
         }
     }
