@@ -402,7 +402,7 @@ extension Networking {
                 completion(response: fakeRequest.response, headers: [String : AnyObject](), error: nil)
             } else {
                 let error = NSError(domain: Networking.ErrorDomain, code: fakeRequest.statusCode, userInfo: [NSLocalizedDescriptionKey : NSHTTPURLResponse.localizedStringForStatusCode(fakeRequest.statusCode)])
-                completion(response: nil, headers: [String : AnyObject](), error: error)
+                completion(response: fakeRequest.response, headers: [String : AnyObject](), error: error)
             }
         } else {
             switch responseType {
