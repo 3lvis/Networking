@@ -405,11 +405,11 @@ extension Networking {
                 requestID = self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, headers, error in
                     var returnedError = error
                     var returnedResponse: AnyObject?
-                    if error == nil {
-                        if let data = data, data.count > 0 {
-                            do {
-                                returnedResponse = try JSONSerialization.jsonObject(with: data, options: [])
-                            } catch let JSONError as NSError {
+                    if let data = data, data.count > 0 {
+                        do {
+                            returnedResponse = try JSONSerialization.jsonObject(with: data, options: [])
+                        } catch let JSONError as NSError {
+                            if error == nil {
                                 returnedError = JSONError
                             }
                         }
