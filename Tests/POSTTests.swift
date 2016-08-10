@@ -107,11 +107,11 @@ class POSTTests: XCTestCase {
     }
 
     func testUploadingAnImageWithMultipartFormData() {
-        guard let path = Bundle(for: POSTTests.self).pathForResource("Keys", ofType: "plist") else { return }
+        guard let path = Bundle(for: POSTTests.self).path(forResource: "Keys", ofType: "plist") else { return }
         guard let dictionary = NSDictionary(contentsOfFile: path) else { return }
-        guard let CloudinaryCloudName = dictionary["CloudinaryCloudName"] as? String where CloudinaryCloudName.characters.count > 0 else { return }
-        guard let CloudinarySecret = dictionary["CloudinarySecret"] as? String where CloudinarySecret.characters.count > 0 else { return }
-        guard let CloudinaryAPIKey = dictionary["CloudinaryAPIKey"] as? String where CloudinaryAPIKey.characters.count > 0 else { return }
+        guard let CloudinaryCloudName = dictionary["CloudinaryCloudName"] as? String, CloudinaryCloudName.characters.count > 0 else { return }
+        guard let CloudinarySecret = dictionary["CloudinarySecret"] as? String, CloudinarySecret.characters.count > 0 else { return }
+        guard let CloudinaryAPIKey = dictionary["CloudinaryAPIKey"] as? String, CloudinaryAPIKey.characters.count > 0 else { return }
 
         let networking = Networking(baseURL: "https://api.cloudinary.com")
         let timestamp = "\(Int(Date().timeIntervalSince1970))"
@@ -181,7 +181,7 @@ class POSTTests: XCTestCase {
     }
 
     func testCancelPOSTWithPath() {
-        let expectation = self.expectation(withDescription: "testCancelPOST")
+        let expectation = self.expectation(description: "testCancelPOST")
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
@@ -196,11 +196,11 @@ class POSTTests: XCTestCase {
             completed = true
         }
 
-        self.waitForExpectations(withTimeout: 15.0, handler: nil)
+        self.waitForExpectations(timeout: 15.0, handler: nil)
     }
 
     func testCancelPOSTWithID() {
-        let expectation = self.expectation(withDescription: "testCancelPOST")
+        let expectation = self.expectation(description: "testCancelPOST")
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
@@ -215,7 +215,7 @@ class POSTTests: XCTestCase {
             completed = true
         }
 
-        self.waitForExpectations(withTimeout: 15.0, handler: nil)
+        self.waitForExpectations(timeout: 15.0, handler: nil)
     }
 
     func deleteAllCloudinaryPhotos(networking: Networking, cloudName: String, secret: String, APIKey: String) {

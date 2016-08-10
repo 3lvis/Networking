@@ -80,7 +80,7 @@ class PUTTests: XCTestCase {
     }
 
     func testCancelPUTWithPath() {
-        let expectation = self.expectation(withDescription: "testCancelPUT")
+        let expectation = self.expectation(description: "testCancelPUT")
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
@@ -95,11 +95,11 @@ class PUTTests: XCTestCase {
             completed = true
         }
 
-        self.waitForExpectations(withTimeout: 15.0, handler: nil)
+        self.waitForExpectations(timeout: 15.0, handler: nil)
     }
 
     func testCancelPUTWithID() {
-        let expectation = self.expectation(withDescription: "testCancelPUT")
+        let expectation = self.expectation(description: "testCancelPUT")
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
@@ -114,6 +114,6 @@ class PUTTests: XCTestCase {
             completed = true
         }
 
-        self.waitForExpectations(withTimeout: 15.0, handler: nil)
+        self.waitForExpectations(timeout: 15.0, handler: nil)
     }
 }

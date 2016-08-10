@@ -8,7 +8,7 @@ extension String {
 
         let optionalLastComponent = self.characters.split { $0 == "/" }.last
         if let lastComponent = optionalLastComponent {
-            let lastComponentAsString = lastComponent.map { String($0) }.reduce("", combine: +)
+            let lastComponentAsString = lastComponent.map { String($0) }.reduce("", +)
             if let rangeOfLastComponent = self.range(of: lastComponentAsString) {
                 let stringWithoutLastComponent = self.substring(to: rangeOfLastComponent.lowerBound)
                 if let lastComponentEncoded = lastComponentAsString.addingPercentEncoding(withAllowedCharacters: CharacterSet.alphanumerics) {

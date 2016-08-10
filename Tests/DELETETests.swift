@@ -78,7 +78,7 @@ class DELETETests: XCTestCase {
     }
 
     func testCancelDELETEWithPath() {
-        let expectation = self.expectation(withDescription: "testCancelDELETE")
+        let expectation = self.expectation(description: "testCancelDELETE")
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
@@ -93,11 +93,11 @@ class DELETETests: XCTestCase {
             completed = true
         }
 
-        self.waitForExpectations(withTimeout: 15.0, handler: nil)
+        self.waitForExpectations(timeout: 15.0, handler: nil)
     }
 
     func testCancelDELETEWithID() {
-        let expectation = self.expectation(withDescription: "testCancelDELETE")
+        let expectation = self.expectation(description: "testCancelDELETE")
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
@@ -112,6 +112,6 @@ class DELETETests: XCTestCase {
             completed = true
         }
 
-        self.waitForExpectations(withTimeout: 15.0, handler: nil)
+        self.waitForExpectations(timeout: 15.0, handler: nil)
     }
 }
