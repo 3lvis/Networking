@@ -1,6 +1,6 @@
 import Foundation
 
-extension Dictionary where Key: StringLiteralConvertible {
+extension Dictionary where Key: ExpressibleByStringLiteral {
     func formURLEncodedFormat() -> String {
         var converted = ""
         for (index, entry) in self.enumerated() {

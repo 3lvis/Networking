@@ -120,7 +120,7 @@ public class Networking {
     var token: String?
     var authorizationHeaderValue: String?
     var authorizationHeaderKey = "Authorization"
-    var cache: Cache<AnyObject, AnyObject>
+    var cache: NSCache<AnyObject, AnyObject>
     var configurationType: ConfigurationType
 
     /**
@@ -141,10 +141,10 @@ public class Networking {
      Base initializer, it creates an instance of `Networking`.
      - parameter baseURL: The base URL for HTTP requests under `Networking`.
      */
-    public init(baseURL: String, configurationType: ConfigurationType = .default, cache: Cache<AnyObject, AnyObject>? = nil) {
+    public init(baseURL: String, configurationType: ConfigurationType = .default, cache: NSCache<AnyObject, AnyObject>? = nil) {
         self.baseURL = baseURL
         self.configurationType = configurationType
-        self.cache = cache ?? Cache()
+        self.cache = cache ?? NSCache()
     }
 
     /**
@@ -206,13 +206,13 @@ public class Networking {
             let directory = TestCheck.isTesting ? FileManager.SearchPathDirectory.cachesDirectory : FileManager.SearchPathDirectory.documentDirectory
         #endif
         let finalPath = cacheName ?? self.url(for: path).absoluteString
-        let replacedPath = finalPath?.replacingOccurrences(of: "/", with: "-")
-        if let url = URL(string: replacedPath!) {
-            if let cachesURL = FileManager.default.urlsForDirectory(directory, inDomains: .userDomainMask).first {
+        let replacedPath = finalPath.replacingOccurrences(of: "/", with: "-")
+        if let url = URL(string: replacedPath) {
+            if let cachesURL = FileManager.default.urls(for: directory, in: .userDomainMask).first {
                 #if !os(tvOS)
                     try (cachesURL as NSURL).setResourceValue(true, forKey: URLResourceKey.isExcludedFromBackupKey)
                 #endif
-                let destinationURL = try! cachesURL.appendingPathComponent(url.absoluteString!)
+                let destinationURL = cachesURL.appendingPathComponent(url.absoluteString)
 
                 return destinationURL
             } else {
@@ -231,7 +231,7 @@ public class Networking {
     public static func splitBaseURLAndRelativePath(for path: String) -> (baseURL: String, relativePath: String) {
         guard let encodedPath = path.encodeUTF8() else { fatalError("Couldn't encode path to UTF8: \(path)") }
         guard let url = URL(string: encodedPath) else { fatalError("Path \(encodedPath) can't be converted to url") }
-        guard let baseURLWithDash = URL(string: "/", relativeTo: url)?.absoluteURL!.absoluteString else { fatalError("Can't find absolute url of url: \(url)") }
+        guard let baseURLWithDash = URL(string: "/", relativeTo: url)?.absoluteURL.absoluteString else { fatalError("Can't find absolute url of url: \(url)") }
         let index = baseURLWithDash.index(before: baseURLWithDash.endIndex)
         let baseURL = baseURLWithDash.substring(to: index)
         let relativePath = path.replacingOccurrences(of: baseURL, with: "")
@@ -319,13 +319,13 @@ extension Networking {
          */
         guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
 
-        if let object = self.cache.object(forKey: destinationURL.absoluteString!) {
+        if let object = self.cache.object(forKey: destinationURL.absoluteString) {
             completion(object: object)
         } else if FileManager.default.exists(at: destinationURL) {
             let semaphore = DispatchSemaphore(value: 0)
             var returnedObject: AnyObject?
 
-            DispatchQueue.global(attributes: DispatchQueue.GlobalAttributes.qosUtility).async {
+            DispatchQueue.global(qos: .utility).async {
                 let object = self.data(for: destinationURL)
                 if responseType == .image {
                     returnedObject = NetworkingImage(data: object)
@@ -333,7 +333,7 @@ extension Networking {
                     returnedObject = object
                 }
                 if let returnedObject = returnedObject {
-                    self.cache.setObject(returnedObject, forKey: destinationURL.absoluteString!)
+                    self.cache.setObject(returnedObject, forKey: destinationURL.absoluteString)
                 }
 
                 if TestCheck.isTesting && self.disableTestingMode == false {
@@ -353,7 +353,7 @@ extension Networking {
     }
 
     func data(for destinationURL: URL) -> Data {
-        guard let path = destinationURL.path else { fatalError("Couldn't get path for url: \(destinationURL)") }
+        let path = destinationURL.path
         guard let data = FileManager.default.contents(atPath: path) else { fatalError("Couldn't get image in destination url: \(url)") }
 
         return data
@@ -405,16 +405,15 @@ extension Networking {
                 requestID = self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, headers, error in
                     var returnedError = error
                     var returnedResponse: AnyObject?
-                    if let data = data, data.count > 0 {
-                        do {
-                            returnedResponse = try JSONSerialization.jsonObject(with: data, options: [])
-                        } catch let JSONError as NSError {
-                            if error == nil {
+                    if error == nil {
+                        if let data = data, data.count > 0 {
+                            do {
+                                returnedResponse = try JSONSerialization.jsonObject(with: data, options: [])
+                            } catch let JSONError as NSError {
                                 returnedError = JSONError
                             }
                         }
                     }
-
                     TestCheck.testBlock(self.disableTestingMode) {
                         completion(response: returnedResponse, headers: headers, error: returnedError)
                     }
@@ -437,12 +436,12 @@ extension Networking {
                                 let _ = try? data.write(to: destinationURL, options: [.atomic])
                                 switch responseType {
                                 case .data:
-                                    self.cache.setObject(data, forKey: destinationURL.absoluteString!)
+                                    self.cache.setObject(data, forKey: destinationURL.absoluteString)
                                     returnedResponse = data
                                     break
                                 case .image:
                                     if let image = NetworkingImage(data: data) {
-                                        self.cache.setObject(image, forKey: destinationURL.absoluteString!)
+                                        self.cache.setObject(image, forKey: destinationURL.absoluteString)
                                         returnedResponse = image
                                     }
                                     break
@@ -536,7 +535,7 @@ extension Networking {
         if let serializingError = serializingError {
             completion(response: nil, headers: [String : AnyObject](), error: serializingError)
         } else {
-            var connectionError: NSError?
+            var connectionError: Error?
             let semaphore = DispatchSemaphore(value: 0)
             var returnedResponse: URLResponse?
             var returnedData: Data?

@@ -107,7 +107,7 @@ class POSTTests: XCTestCase {
     }
 
     func testUploadingAnImageWithMultipartFormData() {
-        guard let path = Bundle(for: POSTTests.self).pathForResource("Keys", ofType: "plist") else { return }
+        guard let path = Bundle(for: POSTTests.self).path(forResource: "Keys", ofType: "plist") else { return }
         guard let dictionary = NSDictionary(contentsOfFile: path) else { return }
         guard let CloudinaryCloudName = dictionary["CloudinaryCloudName"] as? String, CloudinaryCloudName.characters.count > 0 else { return }
         guard let CloudinarySecret = dictionary["CloudinarySecret"] as? String, CloudinarySecret.characters.count > 0 else { return }
