@@ -3,6 +3,7 @@ import Foundation
 extension FileManager {
     public func exists(at url: URL) -> Bool {
         let path = url.path
+        
         return fileExists(atPath: path)
     }
 
