@@ -396,7 +396,7 @@ extension Networking {
                 completion(fakeRequest.response, [String : Any](), nil)
             } else {
                 let error = NSError(domain: Networking.ErrorDomain, code: fakeRequest.statusCode, userInfo: [NSLocalizedDescriptionKey : HTTPURLResponse.localizedString(forStatusCode: fakeRequest.statusCode)])
-                completion(nil, [String : Any](), error)
+                completion(fakeRequest.response, [String : Any](), error)
             }
         } else {
             switch responseType {
