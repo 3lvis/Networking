@@ -28,7 +28,7 @@ class GETTests: XCTestCase {
     func testGET() {
         let networking = Networking(baseURL: baseURL)
         networking.GET("/get") { JSON, error in
-            guard let JSON = JSON as? [String : AnyObject] else { XCTFail(); return}
+            guard let JSON = JSON as? [String : Any] else { XCTFail(); return}
             guard let url = JSON["url"] as? String else { XCTFail(); return}
             XCTAssertEqual(url, "http://httpbin.org/get")
         }
@@ -37,7 +37,7 @@ class GETTests: XCTestCase {
     func testGETWithHeaders() {
         let networking = Networking(baseURL: baseURL)
         networking.GET("/get") { JSON, headers, error in
-            guard let JSON = JSON as? [String : AnyObject] else { XCTFail(); return}
+            guard let JSON = JSON as? [String : Any] else { XCTFail(); return}
             guard let url = JSON["url"] as? String else { XCTFail(); return}
             guard let contentType = headers["Content-Type"] as? String else { XCTFail(); return}
             XCTAssertEqual(url, "http://httpbin.org/get")
@@ -81,7 +81,7 @@ class GETTests: XCTestCase {
         networking.fakeGET("/entries", fileName: "entries.json", bundle: Bundle(for: GETTests.self))
 
         networking.GET("/entries") { JSON, error in
-            guard let JSON = JSON as? [[String : AnyObject]] else { XCTFail(); return }
+            guard let JSON = JSON as? [[String : Any]] else { XCTFail(); return }
             let entry = JSON[0]
             let value = entry["title"] as? String
             XCTAssertEqual(value, "Entry 1")

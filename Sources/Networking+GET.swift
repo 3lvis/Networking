@@ -8,9 +8,9 @@ public extension Networking {
      - returns: The request identifier.
      */
     @discardableResult
-    public func GET(_ path: String, parameterType: ParameterType = .json, completion: (JSON: AnyObject?, error: NSError?) -> ()) -> String {
+    public func GET(_ path: String, parameterType: ParameterType = .json, completion: @escaping (_ JSON: Any?, _ error: NSError?) -> ()) -> String {
         let requestID = self.request(.GET, path: path, parameterType: parameterType, parameters: nil, parts: nil, responseType: .json) { JSON, headers, error in
-            completion(JSON: JSON, error: error)
+            completion(JSON, error)
         }
 
         return requestID
@@ -23,7 +23,7 @@ public extension Networking {
      - returns: The request identifier.
      */
     @discardableResult
-    public func GET(_ path: String, parameterType: ParameterType = .json, completion: (JSON: AnyObject?, headers: [String : AnyObject], error: NSError?) -> ()) -> String {
+    public func GET(_ path: String, parameterType: ParameterType = .json, completion: @escaping (_ JSON: Any?, _ headers: [AnyHashable : Any], _ error: NSError?) -> ()) -> String {
         let requestID = self.request(.GET, path: path, parameterType: parameterType, parameters: nil, parts: nil, responseType: .json, completion: completion)
 
         return requestID
@@ -32,10 +32,10 @@ public extension Networking {
     /**
      Registers a fake GET request for the specified path. After registering this, every GET request to the path, will return the registered response.
      - parameter path: The path for the faked GET request.
-     - parameter response: An `AnyObject` that will be returned when a GET request is made to the specified path.
+     - parameter response: An `Any` that will be returned when a GET request is made to the specified path.
      - parameter statusCode: By default it's 200, if you provide any status code that is between 200 and 299 the response object will be returned, otherwise we will return an error containig the provided status code.
      */
-    public func fakeGET(_ path: String, response: AnyObject?, statusCode: Int = 200) {
+    public func fakeGET(_ path: String, response: Any?, statusCode: Int = 200) {
         self.fake(.GET, path: path, response: response, statusCode: statusCode)
     }
 

@@ -17,7 +17,7 @@ class PUTTests: XCTestCase {
     func testPUT() {
         let networking = Networking(baseURL: baseURL)
         networking.PUT("/put", parameters: ["username" : "jameson", "password" : "secret"]) { JSON, error in
-            guard let JSON = JSON as? [String : AnyObject] else { XCTFail(); return }
+            guard let JSON = JSON as? [String : Any] else { XCTFail(); return }
             let JSONResponse = JSON["json"] as? [String : String]
             XCTAssertEqual("jameson", JSONResponse?["username"])
             XCTAssertEqual("secret", JSONResponse?["password"])
@@ -28,7 +28,7 @@ class PUTTests: XCTestCase {
     func testPUTWithHeaders() {
         let networking = Networking(baseURL: baseURL)
         networking.PUT("/put") { JSON, headers, error in
-            guard let JSON = JSON as? [String : AnyObject] else { XCTFail(); return}
+            guard let JSON = JSON as? [String : Any] else { XCTFail(); return}
             guard let url = JSON["url"] as? String else { XCTFail(); return}
             guard let contentType = headers["Content-Type"] as? String else { XCTFail(); return}
             XCTAssertEqual(url, "http://httpbin.org/put")
@@ -72,7 +72,7 @@ class PUTTests: XCTestCase {
         networking.fakePUT("/entries", fileName: "entries.json", bundle: Bundle(for: PUTTests.self))
 
         networking.PUT("/entries", parameters: nil) { JSON, error in
-            guard let JSON = JSON as? [[String : AnyObject]] else { XCTFail(); return }
+            guard let JSON = JSON as? [[String : Any]] else { XCTFail(); return }
             let entry = JSON[0]
             let value = entry["title"] as? String
             XCTAssertEqual(value, "Entry 1")

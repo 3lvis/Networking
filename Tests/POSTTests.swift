@@ -21,10 +21,10 @@ class POSTTests: XCTestCase {
             "int": 20,
             "double": 20.0,
             "bool": true
-        ]
+        ] as [String : Any]
         networking.POST("/post", parameters: parameters) { JSON, error in
-            guard let JSON = JSON as? [String : AnyObject] else { XCTFail(); return }
-            guard let JSONResponse = JSON["json"] as? [String : AnyObject] else { XCTFail(); return }
+            guard let JSON = JSON as? [String : Any] else { XCTFail(); return }
+            guard let JSONResponse = JSON["json"] as? [String : Any] else { XCTFail(); return }
             XCTAssertEqual(JSONResponse["string"] as? String, "valueA")
             XCTAssertEqual(JSONResponse["int"] as? Int, 20)
             XCTAssertEqual(JSONResponse["double"] as? Double, 20.0)
@@ -36,7 +36,7 @@ class POSTTests: XCTestCase {
     func testPOSTWithHeaders() {
         let networking = Networking(baseURL: baseURL)
         networking.POST("/post") { JSON, headers, error in
-            guard let JSON = JSON as? [String : AnyObject] else { XCTFail(); return}
+            guard let JSON = JSON as? [String : Any] else { XCTFail(); return}
             guard let url = JSON["url"] as? String else { XCTFail(); return}
             guard let contentType = headers["Content-Type"] as? String else { XCTFail(); return}
             XCTAssertEqual(url, "http://httpbin.org/post")
@@ -47,7 +47,7 @@ class POSTTests: XCTestCase {
     func testPOSTWithNoParameters() {
         let networking = Networking(baseURL: baseURL)
         networking.POST("/post") { JSON, error in
-            let JSONResponse = JSON as? [String : AnyObject]
+            let JSONResponse = JSON as? [String : Any]
             XCTAssertEqual("http://httpbin.org/post", JSONResponse?["url"] as? String)
             XCTAssertNil(error)
         }
@@ -60,10 +60,10 @@ class POSTTests: XCTestCase {
             "int": 20,
             "double": 20.0,
             "bool": true
-        ]
+        ] as [String : Any]
         networking.POST("/post", parameterType: .formURLEncoded, parameters: parameters) { JSON, error in
-            guard let JSON = JSON as? [String : AnyObject] else { XCTFail(); return }
-            guard let form = JSON["form"] as? [String : AnyObject] else { XCTFail(); return }
+            guard let JSON = JSON as? [String : Any] else { XCTFail(); return }
+            guard let form = JSON["form"] as? [String : Any] else { XCTFail(); return }
             XCTAssertEqual(form["string"] as? String, "valueA")
             XCTAssertEqual(form["int"] as? String, "20")
             XCTAssertEqual(form["double"] as? String, "20")
@@ -84,21 +84,21 @@ class POSTTests: XCTestCase {
             "int": 20,
             "double": 20.0,
             "bool": true
-        ]
-        networking.POST("/post", parameters: parameters, parts: [part1, part2]) { JSON, error in
+        ] as [String : Any]
+        networking.POST("/post", parameters: parameters as Any?, parts: [part1, part2]) { JSON, error in
             XCTAssertNil(error)
 
-            guard let JSON = JSON as? [String : AnyObject] else { XCTFail(); return }
+            guard let JSON = JSON as? [String : Any] else { XCTFail(); return }
             XCTAssertEqual(JSON["url"] as? String, "http://httpbin.org/post")
 
-            guard let headers = JSON["headers"] as? [String : AnyObject] else { XCTFail(); return }
+            guard let headers = JSON["headers"] as? [String : Any] else { XCTFail(); return }
             XCTAssertEqual(headers["Content-Type"] as? String, "multipart/form-data; boundary=\(networking.boundary)")
 
-            guard let files = JSON["files"] as? [String : AnyObject] else { XCTFail(); return }
+            guard let files = JSON["files"] as? [String : Any] else { XCTFail(); return }
             XCTAssertEqual(files[item1] as? String, item1)
             XCTAssertEqual(files[item2] as? String, item2)
 
-            guard let form = JSON["form"] as? [String : AnyObject] else { XCTFail(); return }
+            guard let form = JSON["form"] as? [String : Any] else { XCTFail(); return }
             XCTAssertEqual(form["string"] as? String, "valueA")
             XCTAssertEqual(form["int"] as? String, "20")
             XCTAssertEqual(form["double"] as? String, "20")
@@ -128,8 +128,8 @@ class POSTTests: XCTestCase {
         parameters["api_key"] = CloudinaryAPIKey
         parameters["signature"] = signature
 
-        networking.POST("/v1_1/\(CloudinaryCloudName)/image/upload", parameters: parameters, part: pngPart) { JSON, error in
-            let JSONResponse = JSON as! [String : AnyObject]
+        networking.POST("/v1_1/\(CloudinaryCloudName)/image/upload", parameters: parameters as Any?, part: pngPart) { JSON, error in
+            let JSONResponse = JSON as! [String : Any]
             XCTAssertEqual(timestamp, JSONResponse["original_filename"] as? String)
             XCTAssertNil(error)
 
@@ -173,7 +173,7 @@ class POSTTests: XCTestCase {
         networking.fakePOST("/entries", fileName: "entries.json", bundle: Bundle(for: POSTTests.self))
 
         networking.POST("/entries") { JSON, error in
-            guard let JSON = JSON as? [[String : AnyObject]] else { XCTFail(); return }
+            guard let JSON = JSON as? [[String : Any]] else { XCTFail(); return }
             let entry = JSON[0]
             let value = entry["title"] as? String
             XCTAssertEqual(value, "Entry 1")

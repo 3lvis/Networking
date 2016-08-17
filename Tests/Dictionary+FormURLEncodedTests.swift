@@ -21,7 +21,7 @@ class Dictionary_FormURLEncodedTests: XCTestCase {
     }
 
     func testFormattingWithEmpty() {
-        let parameters = [String : AnyObject]()
+        let parameters = [String : Any]()
         let formatted = parameters.formURLEncodedFormat()
         XCTAssertEqual(formatted, "")
     }

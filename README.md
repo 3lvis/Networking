@@ -128,7 +128,7 @@ Just add headers to the completion block if you want headers, or remove it if yo
 ```swift
 let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
 networking.GET("/stories") { JSON, headers, error in
-    // headers is a [String : AnyObject] dictionary
+    // headers is a [String : Any] dictionary
 }
 ```
 

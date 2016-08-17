@@ -8,7 +8,7 @@ class NetworkingTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.authenticate(username: "user", password: "passwd")
         networking.GET("/basic-auth/user/passwd") { JSON, error in
-            guard let JSON = JSON as? [String : AnyObject] else { XCTFail(); return}
+            guard let JSON = JSON as? [String : Any] else { XCTFail(); return}
             let user = JSON["user"] as? String
             let authenticated = JSON["authenticated"] as? Bool
             XCTAssertEqual(user, "user")
@@ -21,8 +21,8 @@ class NetworkingTests: XCTestCase {
         let token = "hi-mom"
         networking.authenticate(token: token)
         networking.POST("/post") { JSON, error in
-            guard let JSON = JSON as? [String : AnyObject] else { XCTFail(); return}
-            let headers = JSON["headers"] as? [String : AnyObject]
+            guard let JSON = JSON as? [String : Any] else { XCTFail(); return}
+            let headers = JSON["headers"] as? [String : Any]
             XCTAssertEqual("Bearer \(token)", headers?["Authorization"] as? String)
         }
     }
@@ -32,8 +32,8 @@ class NetworkingTests: XCTestCase {
         let value = "hi-mom"
         networking.authenticate(headerValue: value)
         networking.POST("/post") { JSON, error in
-            guard let JSON = JSON as? [String : AnyObject] else { XCTFail(); return}
-            let headers = JSON["headers"] as? [String : AnyObject]
+            guard let JSON = JSON as? [String : Any] else { XCTFail(); return}
+            let headers = JSON["headers"] as? [String : Any]
             XCTAssertEqual(value, headers?["Authorization"] as? String)
         }
     }
@@ -44,8 +44,8 @@ class NetworkingTests: XCTestCase {
         let value = "hi-mom"        
         networking.authenticate(headerKey: key, headerValue: value)
         networking.POST("/post") { JSON, error in
-            guard let JSON = JSON as? [String : AnyObject] else { XCTFail(); return}
-            let headers = JSON["headers"] as? [String : AnyObject]
+            guard let JSON = JSON as? [String : Any] else { XCTFail(); return}
+            let headers = JSON["headers"] as? [String : Any]
             XCTAssertEqual(value, headers?[key] as? String)
         }
     }

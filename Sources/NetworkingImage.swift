@@ -25,7 +25,7 @@ extension NetworkingImage {
     func data(_ type: NSBitmapImageFileType) -> Data? {
         let imageData = self.tiffRepresentation!
         let bitmapImageRep = NSBitmapImageRep(data: imageData)!
-        let data = bitmapImageRep.representation(using: type, properties: [String : AnyObject]())
+        let data = bitmapImageRep.representation(using: type, properties: [String : Any]())
         return data
     }
     #endif

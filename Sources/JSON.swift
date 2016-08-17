@@ -12,8 +12,8 @@ class JSON {
     - parameter bundle:  The Bundle where the file is located, by default is the main bundle.
     - returns: A JSON object, it can be either a Dictionary or an Array.
     */
-    class func from(_ fileName: String, bundle: Bundle = Bundle.main) throws -> AnyObject? {
-        var JSON: AnyObject?
+    class func from(_ fileName: String, bundle: Bundle = Bundle.main) throws -> Any? {
+        var JSON: Any?
 
         guard let url = URL(string: fileName), let filePath = bundle.path(forResource: url.deletingPathExtension().absoluteString, ofType: url.pathExtension) else { throw ParsingError.notFound }
         guard let data = try? Data(contentsOf: URL(fileURLWithPath: filePath)) else { throw ParsingError.failed }
@@ -29,8 +29,8 @@ extension Data {
     Converts Data to a JSON object.
     - returns: A JSON object, it can be either a Dictionary or an Array.
     */
-    func toJSON() throws -> AnyObject? {
-        var JSON: AnyObject?
+    func toJSON() throws -> Any? {
+        var JSON: Any?
         do {
             JSON = try JSONSerialization.jsonObject(with: self, options: [])
         } catch {
