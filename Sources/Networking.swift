@@ -68,10 +68,6 @@ public class Networking {
          Serializes your parameters and parts as multipart and sets your `Content-Type` to `multipart/form-data`.
          */
         case MultipartFormData
-        /**
-         Sends your parameters as plain data, sets your `Content-Type` to the value inside `Custom`.
-         */
-        case Custom(String)
 
         func contentType(boundary boundary: String) -> String {
             switch self {
@@ -81,8 +77,6 @@ public class Networking {
                 return "application/x-www-form-urlencoded"
             case .MultipartFormData:
                 return "multipart/form-data; boundary=\(boundary)"
-            case .Custom(let value):
-                return value
             }
         }
     }
@@ -498,12 +492,10 @@ extension Networking {
                 } catch let error as NSError {
                     serializingError = error
                 }
-                break
             case .FormURLEncoded:
                 guard let parametersDictionary = parameters as? [String : AnyObject] else { fatalError("Couldn't convert parameters to a dictionary: \(parameters)") }
                 let formattedParameters = parametersDictionary.formURLEncodedFormat()
                 request.HTTPBody = formattedParameters.dataUsingEncoding(NSUTF8StringEncoding)
-                break
             case .MultipartFormData:
                 let bodyData = NSMutableData()
 
@@ -527,10 +519,6 @@ extension Networking {
 
                 bodyData.appendData("--\(self.boundary)--\r\n".dataUsingEncoding(NSUTF8StringEncoding)!)
                 request.HTTPBody = bodyData
-                break
-            case .Custom(_):
-                request.HTTPBody = parameters as? NSData
-                break
             }
         }
 
