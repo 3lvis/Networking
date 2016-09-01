@@ -53,7 +53,6 @@ public class Networking {
      - `JSON:` Serializes your parameters using `NSJSONSerialization` and sets your `Content-Type` to `application/json`.
      - `FormURLEncoded:` Serializes your parameters using `Percent-encoding` and sets your `Content-Type` to `application/x-www-form-urlencoded`.
      - `MultipartFormData:` Serializes your parameters and parts as multipart and sets your `Content-Type` to `multipart/form-data`.
-     - `Custom(String):` Sends your parameters as plain data, sets your `Content-Type` to the value inside `Custom`.
      */
     public enum ParameterType {
         /**
