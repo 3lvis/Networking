@@ -312,6 +312,10 @@ public class Networking {
     @available(*, deprecated=1.1.0, message="Use `authenticate(headerValue)` instead") public func authenticate(authorizationHeader authorizationHeader: String) {
         self.authenticate(headerValue: authorizationHeader)
     }
+
+    public func upload(path path: String, fileURL: NSURL, completion: (error: NSError?) -> Void) {        
+        completion(error: NSError(domain: "", code: 0, userInfo: nil))
+    }
 }
 
 extension Networking {
