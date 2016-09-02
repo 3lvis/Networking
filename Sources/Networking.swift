@@ -206,15 +206,24 @@ public class Networking {
             let directory = TestCheck.isTesting ? NSSearchPathDirectory.CachesDirectory : NSSearchPathDirectory.DocumentDirectory
         #endif
         let finalPath = cacheName ?? self.urlForPath(path).absoluteString
-        let replacedPath = finalPath.stringByReplacingOccurrencesOfString("/", withString: "-")
+        #if swift(>=2.3)
+            let replacedPath = finalPath!.stringByReplacingOccurrencesOfString("/", withString: "-")
+        #else
+            let replacedPath = finalPath.stringByReplacingOccurrencesOfString("/", withString: "-")
+        #endif
         if let url = NSURL(string: replacedPath) {
             if let cachesURL = NSFileManager.defaultManager().URLsForDirectory(directory, inDomains: .UserDomainMask).first {
                 #if !os(tvOS)
                     try cachesURL.setResourceValue(true, forKey: NSURLIsExcludedFromBackupKey)
                 #endif
-                let destinationURL = cachesURL.URLByAppendingPathComponent(url.absoluteString)
 
-                return destinationURL
+                #if swift(>=2.3)
+                    let destinationURL = cachesURL.URLByAppendingPathComponent(url.absoluteString!)
+                    return destinationURL!
+                #else
+                    let destinationURL = cachesURL.URLByAppendingPathComponent(url.absoluteString)
+                    return destinationURL
+                #endif
             } else {
                 throw NSError(domain: Networking.ErrorDomain, code: 9999, userInfo: [NSLocalizedDescriptionKey : "Couldn't normalize url"])
             }
@@ -231,7 +240,11 @@ public class Networking {
     public static func splitBaseURLAndRelativePath(path: String) -> (baseURL: String, relativePath: String) {
         guard let encodedPath = path.encodeUTF8() else { fatalError("Couldn't encode path to UTF8: \(path)") }
         guard let url = NSURL(string: encodedPath) else { fatalError("Path \(encodedPath) can't be converted to url") }
-        guard let baseURLWithDash = NSURL(string: "/", relativeToURL: url)?.absoluteURL.absoluteString else { fatalError("Can't find absolute url of url: \(url)") }
+        #if swift(>=2.3)
+            guard let baseURLWithDash = NSURL(string: "/", relativeToURL: url)?.absoluteURL!.absoluteString else { fatalError("Can't find absolute url of url: \(url)") }
+        #else
+            guard let baseURLWithDash = NSURL(string: "/", relativeToURL: url)?.absoluteURL.absoluteString else { fatalError("Can't find absolute url of url: \(url)") }
+        #endif
         let index = baseURLWithDash.endIndex.advancedBy(-1)
         let baseURL = baseURLWithDash.substringToIndex(index)
         let relativePath = path.stringByReplacingOccurrencesOfString(baseURL, withString: "")
@@ -325,7 +338,12 @@ extension Networking {
     func objectFromCache(path: String, cacheName: String? = nil, responseType: ResponseType, completion: (object: AnyObject?) -> Void) {
         guard let destinationURL = try? self.destinationURL(path, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
 
-        if let object = self.cache.objectForKey(destinationURL.absoluteString) {
+        #if swift(>=2.3)
+            let key = destinationURL.absoluteString!
+        #else
+            let key = destinationURL.absoluteString
+        #endif
+        if let object = self.cache.objectForKey(key) {
             completion(object: object)
         } else if NSFileManager.defaultManager().fileExistsAtURL(destinationURL) {
             let semaphore = dispatch_semaphore_create(0)
@@ -339,7 +357,11 @@ extension Networking {
                     returnedObject = object
                 }
                 if let returnedObject = returnedObject {
-                    self.cache.setObject(returnedObject, forKey: destinationURL.absoluteString)
+                    #if swift(>=2.3)
+                        self.cache.setObject(returnedObject, forKey: destinationURL.absoluteString!)
+                    #else
+                        self.cache.setObject(returnedObject, forKey: destinationURL.absoluteString)
+                    #endif
                 }
 
                 if TestCheck.isTesting && self.disableTestingMode == false {
@@ -439,12 +461,20 @@ extension Networking {
                                 data.writeToURL(destinationURL, atomically: true)
                                 switch responseType {
                                 case .Data:
-                                    self.cache.setObject(data, forKey: destinationURL.absoluteString)
+                                    #if swift(>=2.3)
+                                        self.cache.setObject(data, forKey: destinationURL.absoluteString!)
+                                    #else
+                                        self.cache.setObject(data, forKey: destinationURL.absoluteString)
+                                    #endif
                                     returnedResponse = data
                                     break
                                 case .Image:
                                     if let image = NetworkingImage(data: data) {
-                                        self.cache.setObject(image, forKey: destinationURL.absoluteString)
+                                        #if swift(>=2.3)
+                                            self.cache.setObject(image, forKey: destinationURL.absoluteString!)
+                                        #else
+                                            self.cache.setObject(image, forKey: destinationURL.absoluteString)
+                                        #endif
                                         returnedResponse = image
                                     }
                                     break
