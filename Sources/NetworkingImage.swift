@@ -32,7 +32,11 @@ extension NetworkingImage {
 
     func pngData() -> NSData? {
         #if os(OSX)
-            return self.data(type: .PNG)
+            #if swift(>=2.3)
+                return self.data(type: .PNG)
+            #else
+                return self.data(type: .NSPNGFileType)
+            #endif
         #else
             return UIImagePNGRepresentation(self)
         #endif
@@ -40,7 +44,11 @@ extension NetworkingImage {
 
     func jpgData() -> NSData? {
         #if os(OSX)
-            return self.data(type: .JPEG)
+            #if swift(>=2.3)
+                return self.data(type: .JPEG)
+            #else
+                return self.data(type: .NSJPEGFileType)
+            #endif
         #else
             return UIImageJPEGRepresentation(self, 1)
         #endif
