@@ -312,8 +312,8 @@ public class Networking {
 extension Networking {
     func objectFromCache(for path: String, cacheName: String? = nil, responseType: ResponseType, completion: @escaping (_ object: Any?) -> Void) {
         /*
-         Workaround: Remove URL parameters from path. That can lead to writing cached files with names longer than 
-         255 characters, resulting in error. Another option to explore is to use a hash version of the url if it's 
+         Workaround: Remove URL parameters from path. That can lead to writing cached files with names longer than
+         255 characters, resulting in error. Another option to explore is to use a hash version of the url if it's
          longer than 255 characters.
          */
         guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
@@ -667,14 +667,14 @@ extension Networking {
                 print("Data: \(stringData)")
                 print(" ")
             }
-
+            
             if let response = response as? HTTPURLResponse {
                 print("*** Response ***")
                 print(" ")
-
+                
                 print("Headers: \(response.allHeaderFields)")
                 print(" ")
-
+                
                 print("Status code: \(response.statusCode) — \(HTTPURLResponse.localizedString(forStatusCode: response.statusCode))")
                 print(" ")
             }
