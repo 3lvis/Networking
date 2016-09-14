@@ -128,7 +128,7 @@ Just add headers to the completion block if you want headers, or remove it if yo
 ```swift
 let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
 networking.GET("/stories") { JSON, headers, error in
-    // headers is a [String : AnyObject] dictionary
+    // headers is a [String : Any] dictionary
 }
 ```
 
@@ -341,7 +341,7 @@ If you want to remove the downloaded image you can do it like this:
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-let destinationURL = try networking.destinationURL("/image/png")
+let destinationURL = try networking.destinationURL(for: "/image/png")
 if let path = destinationURL.path where NSFileManager.defaultManager().fileExistsAtPath(path) {
    try! NSFileManager.defaultManager().removeItemAtPath(path)
 }

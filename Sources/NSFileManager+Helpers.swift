@@ -1,17 +1,16 @@
 import Foundation
 
-extension NSFileManager {
-    public func fileExistsAtURL(url: NSURL) -> Bool {
-        guard let path = url.path else { fatalError("Couldn't get path for url: \(url)") }
-
-        return fileExistsAtPath(path)
+extension FileManager {
+    public func exists(at url: URL) -> Bool {
+        let path = url.path
+        
+        return fileExists(atPath: path)
     }
 
-    public func removeFileAtURL(url: NSURL) {
-        guard let path = url.path else { fatalError("Couldn't get path for url: \(url)") }
-
+    public func remove(at url: URL) {
+        let path = url.path
         do {
-            try NSFileManager.defaultManager().removeItemAtPath(path)
+            try FileManager.default.removeItem(atPath: path)
         } catch let error as NSError {
             fatalError("Couldn't remove item at path: \(path), error: \(error)")
         }

@@ -17,7 +17,7 @@ class PUTTests: XCTestCase {
     func testPUT() {
         let networking = Networking(baseURL: baseURL)
         networking.PUT("/put", parameters: ["username" : "jameson", "password" : "secret"]) { JSON, error in
-            guard let JSON = JSON as? [String : AnyObject] else { XCTFail(); return }
+            guard let JSON = JSON as? [String : Any] else { XCTFail(); return }
             let JSONResponse = JSON["json"] as? [String : String]
             XCTAssertEqual("jameson", JSONResponse?["username"])
             XCTAssertEqual("secret", JSONResponse?["password"])
@@ -28,7 +28,7 @@ class PUTTests: XCTestCase {
     func testPUTWithHeaders() {
         let networking = Networking(baseURL: baseURL)
         networking.PUT("/put") { JSON, headers, error in
-            guard let JSON = JSON as? [String : AnyObject] else { XCTFail(); return}
+            guard let JSON = JSON as? [String : Any] else { XCTFail(); return}
             guard let url = JSON["url"] as? String else { XCTFail(); return}
             guard let contentType = headers["Content-Type"] as? String else { XCTFail(); return}
             XCTAssertEqual(url, "http://httpbin.org/put")
@@ -69,10 +69,10 @@ class PUTTests: XCTestCase {
     func testFakePUTUsingFile() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakePUT("/entries", fileName: "entries.json", bundle: NSBundle(forClass: PUTTests.self))
+        networking.fakePUT("/entries", fileName: "entries.json", bundle: Bundle(for: PUTTests.self))
 
         networking.PUT("/entries", parameters: nil) { JSON, error in
-            guard let JSON = JSON as? [[String : AnyObject]] else { XCTFail(); return }
+            guard let JSON = JSON as? [[String : Any]] else { XCTFail(); return }
             let entry = JSON[0]
             let value = entry["title"] as? String
             XCTAssertEqual(value, "Entry 1")
@@ -80,7 +80,7 @@ class PUTTests: XCTestCase {
     }
 
     func testCancelPUTWithPath() {
-        let expectation = expectationWithDescription("testCancelPUT")
+        let expectation = self.expectation(description: "testCancelPUT")
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
@@ -95,11 +95,11 @@ class PUTTests: XCTestCase {
             completed = true
         }
 
-        waitForExpectationsWithTimeout(15.0, handler: nil)
+        self.waitForExpectations(timeout: 15.0, handler: nil)
     }
 
     func testCancelPUTWithID() {
-        let expectation = expectationWithDescription("testCancelPUT")
+        let expectation = self.expectation(description: "testCancelPUT")
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
@@ -110,10 +110,10 @@ class PUTTests: XCTestCase {
             expectation.fulfill()
         }
 
-        networking.cancel(requestID) {
+        networking.cancel(with: requestID) {
             completed = true
         }
 
-        waitForExpectationsWithTimeout(15.0, handler: nil)
+        self.waitForExpectations(timeout: 15.0, handler: nil)
     }
 }

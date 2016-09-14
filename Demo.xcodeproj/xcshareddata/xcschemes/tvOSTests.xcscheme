@@ -9,14 +9,14 @@
          <BuildActionEntry
             buildForTesting = "YES"
             buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "14638D3D1CC647E4002B9433"
-               BuildableName = "Networking.framework"
-               BlueprintName = "Networking-OSX"
+               BlueprintIdentifier = "44B5D3881D19B9E5004378B9"
+               BuildableName = "tvOSTests.xctest"
+               BlueprintName = "tvOSTests"
                ReferencedContainer = "container:Demo.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -28,6 +28,16 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "44B5D3881D19B9E5004378B9"
+               BuildableName = "tvOSTests.xctest"
+               BlueprintName = "tvOSTests"
+               ReferencedContainer = "container:Demo.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <AdditionalOptions>
       </AdditionalOptions>
@@ -45,9 +55,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "14638D3D1CC647E4002B9433"
-            BuildableName = "Networking.framework"
-            BlueprintName = "Networking-OSX"
+            BlueprintIdentifier = "44B5D3881D19B9E5004378B9"
+            BuildableName = "tvOSTests.xctest"
+            BlueprintName = "tvOSTests"
             ReferencedContainer = "container:Demo.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -63,9 +73,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "14638D3D1CC647E4002B9433"
-            BuildableName = "Networking.framework"
-            BlueprintName = "Networking-OSX"
+            BlueprintIdentifier = "44B5D3881D19B9E5004378B9"
+            BuildableName = "tvOSTests.xctest"
+            BlueprintName = "tvOSTests"
             ReferencedContainer = "container:Demo.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
