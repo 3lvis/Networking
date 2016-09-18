@@ -7,12 +7,10 @@ public extension Networking {
      - parameter cacheName: The cache name used to identify the downloaded image, by default the path is used.
      - parameter completion: A closure that returns the image from the cache, if no image is found it will return nil, it contains a image and a error.
      */
-    public func imageFromCache(path: String, cacheName: String? = nil, completion: (image: NetworkingImage?) -> Void) {
-        self.objectFromCache(path, cacheName: cacheName, responseType: .Image) { object in
-            TestCheck.testBlock(disabled: self.disableTestingMode) {
-                completion(image: object as? NetworkingImage)
-            }
-        }
+    public func imageFromCache(path: String, cacheName: String? = nil) -> NetworkingImage? {
+        let object = self.objectFromCache(path, cacheName: cacheName, responseType: .Image)
+
+        return object as? NetworkingImage
     }
 
     /**
