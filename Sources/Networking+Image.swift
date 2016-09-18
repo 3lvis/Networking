@@ -7,6 +7,19 @@ public extension Networking {
      - parameter cacheName: The cache name used to identify the downloaded image, by default the path is used.
      - parameter completion: A closure that returns the image from the cache, if no image is found it will return nil, it contains a image and a error.
      */
+    @available(*, deprecated=1.2.0, message="Use `imageFromCache(path: String, cacheName: String?)` instead. The asynchronous version will be removed since it's synchronous now")
+    public func imageFromCache(path: String, cacheName: String? = nil, completion: (image: NetworkingImage?) -> Void) {
+        let object = self.imageFromCache(path, cacheName: cacheName)
+        TestCheck.testBlock(disabled: self.disableTestingMode) {
+            completion(image: object)
+        }
+    }
+
+    /**
+     Retrieves an image from the cache or from the filesystem.
+     - parameter path: The path where the image is located.
+     - parameter cacheName: The cache name used to identify the downloaded image, by default the path is used.
+     */
     public func imageFromCache(path: String, cacheName: String? = nil) -> NetworkingImage? {
         let object = self.objectFromCache(path, cacheName: cacheName, responseType: .Image)
 
