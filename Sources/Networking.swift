@@ -300,17 +300,29 @@ public class Networking {
      - parameter cacheName: The cache name used to identify the downloaded data, by default the path is used.
      - parameter completion: A closure that returns the data from the cache, if no data is found it will return nil.
      */
+    @available(*, deprecated: 2.0.1, message: "Use `dataFromCache(path: String, cacheName: String?)` instead. The asynchronous version will be removed since it's synchronous now.")
     public func dataFromCache(for path: String, cacheName: String? = nil, completion: @escaping (_ data: Data?) -> Void) {
-        self.objectFromCache(for: path, cacheName: cacheName, responseType: .data) { object in
-            TestCheck.testBlock(self.disableTestingMode) {
-                completion(object as? Data)
-            }
+        let object = self.objectFromCache(for: path, cacheName: cacheName, responseType: .data)
+
+        TestCheck.testBlock(self.disableTestingMode) {
+            completion(object as? Data)
         }
+    }
+
+    /**
+     Retrieves data from the cache or from the filesystem.
+     - parameter path: The path where the image is located.
+     - parameter cacheName: The cache name used to identify the downloaded data, by default the path is used.
+     */
+    public func dataFromCache(for path: String, cacheName: String? = nil) -> Data? {
+        let object = self.objectFromCache(for: path, cacheName: cacheName, responseType: .data)
+
+        return object as? Data
     }
 }
 
 extension Networking {
-    func objectFromCache(for path: String, cacheName: String? = nil, responseType: ResponseType, completion: @escaping (_ object: Any?) -> Void) {
+    func objectFromCache(for path: String, cacheName: String? = nil, responseType: ResponseType) -> Any? {
         /*
          Workaround: Remove URL parameters from path. That can lead to writing cached files with names longer than
          255 characters, resulting in error. Another option to explore is to use a hash version of the url if it's
@@ -319,35 +331,23 @@ extension Networking {
         guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
 
         if let object = self.cache.object(forKey: destinationURL.absoluteString as AnyObject) {
-            completion(object)
+            return object
         } else if FileManager.default.exists(at: destinationURL) {
-            let semaphore = DispatchSemaphore(value: 0)
             var returnedObject: Any?
 
-            DispatchQueue.global(qos: .utility).async {
-                let object = self.data(for: destinationURL)
-                if responseType == .image {
-                    returnedObject = NetworkingImage(data: object)
-                } else {
-                    returnedObject = object
-                }
-                if let returnedObject = returnedObject {
-                    self.cache.setObject(returnedObject as AnyObject, forKey: destinationURL.absoluteString as AnyObject)
-                }
-
-                if TestCheck.isTesting && self.disableTestingMode == false {
-                    semaphore.signal()
-                } else {
-                    completion(returnedObject)
-                }
+            let object = self.data(for: destinationURL)
+            if responseType == .image {
+                returnedObject = NetworkingImage(data: object)
+            } else {
+                returnedObject = object
+            }
+            if let returnedObject = returnedObject {
+                self.cache.setObject(returnedObject as AnyObject, forKey: destinationURL.absoluteString as AnyObject)
             }
 
-            if TestCheck.isTesting && self.disableTestingMode == false {
-                let _ = semaphore.wait(timeout: DispatchTime.distantFuture)
-                completion(returnedObject)
-            }
+            return returnedObject
         } else {
-            completion(nil)
+            return nil
         }
     }
 
@@ -407,53 +407,52 @@ extension Networking {
                     if let data = data, data.count > 0 {
                         do {
                             returnedResponse = try JSONSerialization.jsonObject(with: data, options: [])
-                        } catch let JSONError as NSError {
-                            returnedError = JSONError
+                        } catch let JSONParsingError as NSError {
+                            if returnedError == nil {
+                                returnedError = JSONParsingError
+                            }
                         }
                     }
                     TestCheck.testBlock(self.disableTestingMode) {
                         completion(returnedResponse, headers, returnedError)
                     }
                 }
-                break
             case .data, .image:
                 let trimmedPath = path.components(separatedBy: "?").first!
 
-                self.objectFromCache(for: trimmedPath, cacheName: cacheName, responseType: responseType) { object in
-                    if let object = object {
-                        TestCheck.testBlock(self.disableTestingMode) {
-                            completion(object, [String : Any](), nil)
-                        }
-                    } else {
-                        requestID = self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, headers, error in
+                let object = self.objectFromCache(for: trimmedPath, cacheName: cacheName, responseType: responseType)
+                if let object = object {
+                    TestCheck.testBlock(self.disableTestingMode) {
+                        completion(object, [String : Any](), nil)
+                    }
+                } else {
+                    requestID = self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, headers, error in
 
-                            var returnedResponse: Any?
-                            if let data = data, data.count > 0 {
-                                guard let destinationURL = try? self.destinationURL(for: trimmedPath, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
-                                let _ = try? data.write(to: destinationURL, options: [.atomic])
-                                switch responseType {
-                                case .data:
-                                    self.cache.setObject(data as AnyObject, forKey: destinationURL.absoluteString as AnyObject)
-                                    returnedResponse = data
-                                    break
-                                case .image:
-                                    if let image = NetworkingImage(data: data) {
-                                        self.cache.setObject(image, forKey: destinationURL.absoluteString as AnyObject)
-                                        returnedResponse = image
-                                    }
-                                    break
-                                default:
-                                    fatalError("Response Type is different than Data and Image")
-                                    break
+                        var returnedResponse: Any?
+                        if let data = data, data.count > 0 {
+                            guard let destinationURL = try? self.destinationURL(for: trimmedPath, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
+                            let _ = try? data.write(to: destinationURL, options: [.atomic])
+                            switch responseType {
+                            case .data:
+                                self.cache.setObject(data as AnyObject, forKey: destinationURL.absoluteString as AnyObject)
+                                returnedResponse = data
+                                break
+                            case .image:
+                                if let image = NetworkingImage(data: data) {
+                                    self.cache.setObject(image, forKey: destinationURL.absoluteString as AnyObject)
+                                    returnedResponse = image
                                 }
+                                break
+                            default:
+                                fatalError("Response Type is different than Data and Image")
+                                break
                             }
-                            TestCheck.testBlock(self.disableTestingMode) {
-                                completion(returnedResponse, [String : Any](), error)
-                            }
+                        }
+                        TestCheck.testBlock(self.disableTestingMode) {
+                            completion(returnedResponse, [String : Any](), error)
                         }
                     }
                 }
-                break
             }
         }
 
