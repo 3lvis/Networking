@@ -314,12 +314,10 @@ public class Networking {
      - parameter cacheName: The cache name used to identify the downloaded data, by default the path is used.
      - parameter completion: A closure that returns the data from the cache, if no data is found it will return nil.
      */
-    public func dataFromCache(path: String, cacheName: String? = nil, completion: (data: NSData?) -> Void) {
-        self.objectFromCache(path, cacheName: cacheName, responseType: .Data) { object in
-            TestCheck.testBlock(disabled: self.disableTestingMode) {
-                completion(data: object as? NSData)
-            }
-        }
+    public func dataFromCache(path: String, cacheName: String? = nil) -> NSData? {
+        let object = self.objectFromCache(path, cacheName: cacheName, responseType: .Data)
+
+        return object as? NSData
     }
 
     //*************************//
@@ -335,7 +333,7 @@ public class Networking {
 }
 
 extension Networking {
-    func objectFromCache(path: String, cacheName: String? = nil, responseType: ResponseType, completion: (object: AnyObject?) -> Void) {
+    func objectFromCache(path: String, cacheName: String? = nil, responseType: ResponseType) -> AnyObject? {
         guard let destinationURL = try? self.destinationURL(path, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
 
         #if swift(>=2.3)
@@ -344,12 +342,10 @@ extension Networking {
             let key = destinationURL.absoluteString
         #endif
         if let object = self.cache.objectForKey(key) {
-            completion(object: object)
+            return object
         } else if NSFileManager.defaultManager().fileExistsAtURL(destinationURL) {
-            let semaphore = dispatch_semaphore_create(0)
             var returnedObject: AnyObject?
 
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0)) {
                 let object = self.dataForDestinationURL(destinationURL)
                 if responseType == .Image {
                     returnedObject = NetworkingImage(data: object)
@@ -364,19 +360,9 @@ extension Networking {
                     #endif
                 }
 
-                if TestCheck.isTesting && self.disableTestingMode == false {
-                    dispatch_semaphore_signal(semaphore)
-                } else {
-                    completion(object: returnedObject)
-                }
-            }
-
-            if TestCheck.isTesting && self.disableTestingMode == false {
-                dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
-                completion(object: returnedObject)
-            }
+                return returnedObject
         } else {
-            completion(object: nil)
+            return nil
         }
     }
 
@@ -446,50 +432,47 @@ extension Networking {
                         completion(response: returnedResponse, headers: headers, error: returnedError)
                     }
                 }
-                break
             case .Data, .Image:
-                self.objectFromCache(path, cacheName: cacheName, responseType: responseType) { object in
-                    if let object = object {
-                        TestCheck.testBlock(disabled: self.disableTestingMode) {
-                            completion(response: object, headers: [String : AnyObject](), error: nil)
-                        }
-                    } else {
-                        self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, headers, error in
-                            var returnedResponse: AnyObject?
-                            if let data = data where data.length > 0 {
-                                guard let destinationURL = try? self.destinationURL(path, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
-                                data.writeToURL(destinationURL, atomically: true)
-                                switch responseType {
-                                case .Data:
+                let object = self.objectFromCache(path, cacheName: cacheName, responseType: responseType)
+                if let object = object {
+                    TestCheck.testBlock(disabled: self.disableTestingMode) {
+                        completion(response: object, headers: [String : AnyObject](), error: nil)
+                    }
+                } else {
+                    self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, headers, error in
+                        var returnedResponse: AnyObject?
+                        if let data = data where data.length > 0 {
+                            guard let destinationURL = try? self.destinationURL(path, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
+                            data.writeToURL(destinationURL, atomically: true)
+                            switch responseType {
+                            case .Data:
+                                #if swift(>=2.3)
+                                    self.cache.setObject(data, forKey: destinationURL.absoluteString!)
+                                #else
+                                    self.cache.setObject(data, forKey: destinationURL.absoluteString)
+                                #endif
+                                returnedResponse = data
+                                break
+                            case .Image:
+                                if let image = NetworkingImage(data: data) {
                                     #if swift(>=2.3)
-                                        self.cache.setObject(data, forKey: destinationURL.absoluteString!)
+                                        self.cache.setObject(image, forKey: destinationURL.absoluteString!)
                                     #else
-                                        self.cache.setObject(data, forKey: destinationURL.absoluteString)
+                                        self.cache.setObject(image, forKey: destinationURL.absoluteString)
                                     #endif
-                                    returnedResponse = data
-                                    break
-                                case .Image:
-                                    if let image = NetworkingImage(data: data) {
-                                        #if swift(>=2.3)
-                                            self.cache.setObject(image, forKey: destinationURL.absoluteString!)
-                                        #else
-                                            self.cache.setObject(image, forKey: destinationURL.absoluteString)
-                                        #endif
-                                        returnedResponse = image
-                                    }
-                                    break
-                                default:
-                                    fatalError("Response Type is different than Data and Image")
-                                    break
+                                    returnedResponse = image
                                 }
+                                break
+                            default:
+                                fatalError("Response Type is different than Data and Image")
+                                break
                             }
-                            TestCheck.testBlock(disabled: self.disableTestingMode) {
-                                completion(response: returnedResponse, headers: [String : AnyObject](), error: error)
-                            }
+                        }
+                        TestCheck.testBlock(disabled: self.disableTestingMode) {
+                            completion(response: returnedResponse, headers: [String : AnyObject](), error: error)
                         }
                     }
                 }
-                break
             }
         }
 
