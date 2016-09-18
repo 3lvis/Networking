@@ -302,10 +302,10 @@ public class Networking {
      */
     @available(*, deprecated: 2.0.1, message: "Use `dataFromCache(path: String, cacheName: String?)` instead. The asynchronous version will be removed since it's synchronous now.")
     public func dataFromCache(for path: String, cacheName: String? = nil, completion: @escaping (_ data: Data?) -> Void) {
-        let object = self.objectFromCache(for: path, cacheName: cacheName, responseType: .data)
+        let object = self.dataFromCache(for: path, cacheName: cacheName)
 
         TestCheck.testBlock(self.disableTestingMode) {
-            completion(object as? Data)
+            completion(object)
         }
     }
 
