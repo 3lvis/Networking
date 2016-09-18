@@ -2,8 +2,9 @@ import Foundation
 import XCTest
 
 class Dictionary_FormURLEncodedTests: XCTestCase {
+
     func testFormatting() {
-        let parameters = ["username" : "elvis", "password" : "secret"]
+        let parameters = ["username": "elvis", "password": "secret"]
         let formatted = parameters.formURLEncodedFormat()
 
         // Here I'm checking for both because looping dictionaries can be quite inconsistent.
@@ -15,13 +16,13 @@ class Dictionary_FormURLEncodedTests: XCTestCase {
     }
 
     func testFormattingOneParameter() {
-        let parameters = ["name" : "Elvis Nuñez"]
+        let parameters = ["name": "Elvis Nuñez"]
         let formatted = parameters.formURLEncodedFormat()
         XCTAssertEqual(formatted, "name=Elvis%20Nu%C3%B1ez")
     }
 
     func testFormattingWithEmpty() {
-        let parameters = [String : Any]()
+        let parameters = [String: Any]()
         let formatted = parameters.formURLEncodedFormat()
         XCTAssertEqual(formatted, "")
     }

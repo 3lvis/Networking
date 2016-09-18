@@ -28,8 +28,8 @@ class GETTests: XCTestCase {
     func testGET() {
         let networking = Networking(baseURL: baseURL)
         networking.GET("/get") { JSON, error in
-            guard let JSON = JSON as? [String : Any] else { XCTFail(); return}
-            guard let url = JSON["url"] as? String else { XCTFail(); return}
+            guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
+            guard let url = JSON["url"] as? String else { XCTFail(); return }
             XCTAssertEqual(url, "http://httpbin.org/get")
         }
     }
@@ -37,9 +37,9 @@ class GETTests: XCTestCase {
     func testGETWithHeaders() {
         let networking = Networking(baseURL: baseURL)
         networking.GET("/get") { JSON, headers, error in
-            guard let JSON = JSON as? [String : Any] else { XCTFail(); return}
-            guard let url = JSON["url"] as? String else { XCTFail(); return}
-            guard let contentType = headers["Content-Type"] as? String else { XCTFail(); return}
+            guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
+            guard let url = JSON["url"] as? String else { XCTFail(); return }
+            guard let contentType = headers["Content-Type"] as? String else { XCTFail(); return }
             XCTAssertEqual(url, "http://httpbin.org/get")
             XCTAssertEqual(contentType, "application/json")
         }
@@ -56,16 +56,15 @@ class GETTests: XCTestCase {
     // TODO: I'm not sure how it implement this, since I need a service that returns a faulty
     // status code, meaning not 2XX, and at the same time it returns a JSON response.
     func testGETWithInvalidPathAndJSONError() {
-
     }
 
     func testFakeGET() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakeGET("/stories", response: ["name" : "Elvis"])
+        networking.fakeGET("/stories", response: ["name": "Elvis"])
 
         networking.GET("/stories") { JSON, error in
-            guard let JSON = JSON as? [String : String] else { XCTFail(); return}
+            guard let JSON = JSON as? [String: String] else { XCTFail(); return }
             let value = JSON["name"]
             XCTAssertEqual(value, "Elvis")
         }
@@ -84,11 +83,11 @@ class GETTests: XCTestCase {
     func testFakeGETWithInvalidPathAndJSONError() {
         let networking = Networking(baseURL: baseURL)
 
-        let response = ["error_message" : "Shit went down"]
+        let response = ["error_message": "Shit went down"]
         networking.fakeGET("/stories", response: response, statusCode: 401)
 
         networking.GET("/stories") { JSON, error in
-            XCTAssertEqual(JSON as! [String : String], response)
+            XCTAssertEqual(JSON as! [String: String], response)
             XCTAssertEqual(error?.code, 401)
         }
     }
@@ -99,7 +98,7 @@ class GETTests: XCTestCase {
         networking.fakeGET("/entries", fileName: "entries.json", bundle: Bundle(for: GETTests.self))
 
         networking.GET("/entries") { JSON, error in
-            guard let JSON = JSON as? [[String : Any]] else { XCTFail(); return }
+            guard let JSON = JSON as? [[String: Any]] else { XCTFail(); return }
             let entry = JSON[0]
             let value = entry["title"] as? String
             XCTAssertEqual(value, "Entry 1")
@@ -155,14 +154,14 @@ class GETTests: XCTestCase {
         var statusCode = 300
         networking.GET("/status/\(statusCode)") { JSON, error in
             XCTAssertNil(JSON)
-            let connectionError = NSError(domain: Networking.ErrorDomain, code: statusCode, userInfo: [NSLocalizedDescriptionKey : HTTPURLResponse.localizedString(forStatusCode: statusCode)])
+            let connectionError = NSError(domain: Networking.ErrorDomain, code: statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: statusCode)])
             XCTAssertEqual(error, connectionError)
         }
 
         statusCode = 400
         networking.GET("/status/\(statusCode)") { JSON, error in
             XCTAssertNil(JSON)
-            let connectionError = NSError(domain: Networking.ErrorDomain, code: statusCode, userInfo: [NSLocalizedDescriptionKey : HTTPURLResponse.localizedString(forStatusCode: statusCode)])
+            let connectionError = NSError(domain: Networking.ErrorDomain, code: statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: statusCode)])
             XCTAssertEqual(error, connectionError)
         }
     }

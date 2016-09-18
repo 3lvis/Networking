@@ -1,7 +1,7 @@
 import Foundation
 
 struct TestCheck {
-    /**
+    /** 
      Method to check wheter your on testing mode or not.
      - returns: A Bool, `true` if you're on testing mode, `false` if you're not.
      */
@@ -26,10 +26,10 @@ struct TestCheck {
         return isRunning
     }()
 
-    /**
+    /** 
      If it's in a unit testing target then it will return in the current thread, otherwise it will return in the main thread.
      */
-    static func testBlock(_ disabled: Bool, block: @escaping (Void) -> Void) {
+    static func testBlock(_ disabled: Bool, block: @escaping(Void) -> Void) {
         if TestCheck.isTesting && disabled == false {
             block()
         } else {

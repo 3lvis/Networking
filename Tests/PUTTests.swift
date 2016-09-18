@@ -16,9 +16,9 @@ class PUTTests: XCTestCase {
 
     func testPUT() {
         let networking = Networking(baseURL: baseURL)
-        networking.PUT("/put", parameters: ["username" : "jameson", "password" : "secret"]) { JSON, error in
-            guard let JSON = JSON as? [String : Any] else { XCTFail(); return }
-            let JSONResponse = JSON["json"] as? [String : String]
+        networking.PUT("/put", parameters: ["username": "jameson", "password": "secret"]) { JSON, error in
+            guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
+            let JSONResponse = JSON["json"] as? [String: String]
             XCTAssertEqual("jameson", JSONResponse?["username"])
             XCTAssertEqual("secret", JSONResponse?["password"])
             XCTAssertNil(error)
@@ -28,9 +28,9 @@ class PUTTests: XCTestCase {
     func testPUTWithHeaders() {
         let networking = Networking(baseURL: baseURL)
         networking.PUT("/put") { JSON, headers, error in
-            guard let JSON = JSON as? [String : Any] else { XCTFail(); return}
-            guard let url = JSON["url"] as? String else { XCTFail(); return}
-            guard let contentType = headers["Content-Type"] as? String else { XCTFail(); return}
+            guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
+            guard let url = JSON["url"] as? String else { XCTFail(); return }
+            guard let contentType = headers["Content-Type"] as? String else { XCTFail(); return }
             XCTAssertEqual(url, "http://httpbin.org/put")
             XCTAssertEqual(contentType, "application/json")
         }
@@ -38,7 +38,7 @@ class PUTTests: XCTestCase {
 
     func testPUTWithIvalidPath() {
         let networking = Networking(baseURL: baseURL)
-        networking.PUT("/posdddddt", parameters: ["username" : "jameson", "password" : "secret"]) { JSON, error in
+        networking.PUT("/posdddddt", parameters: ["username": "jameson", "password": "secret"]) { JSON, error in
             XCTAssertEqual(error?.code, 404)
             XCTAssertNil(JSON)
         }
@@ -47,10 +47,10 @@ class PUTTests: XCTestCase {
     func testFakePUT() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakePUT("/story", response: [["name" : "Elvis"]])
+        networking.fakePUT("/story", response: [["name": "Elvis"]])
 
-        networking.PUT("/story", parameters: ["username" : "jameson", "password" : "secret"]) { JSON, error in
-            let JSON = JSON as? [[String : String]]
+        networking.PUT("/story", parameters: ["username": "jameson", "password": "secret"]) { JSON, error in
+            let JSON = JSON as? [[String: String]]
             let value = JSON?[0]["name"]
             XCTAssertEqual(value, "Elvis")
         }
@@ -72,7 +72,7 @@ class PUTTests: XCTestCase {
         networking.fakePUT("/entries", fileName: "entries.json", bundle: Bundle(for: PUTTests.self))
 
         networking.PUT("/entries", parameters: nil) { JSON, error in
-            guard let JSON = JSON as? [[String : Any]] else { XCTFail(); return }
+            guard let JSON = JSON as? [[String: Any]] else { XCTFail(); return }
             let entry = JSON[0]
             let value = entry["title"] as? String
             XCTAssertEqual(value, "Entry 1")
@@ -85,7 +85,7 @@ class PUTTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
         var completed = false
-        networking.PUT("/put", parameters: ["username" : "jameson", "password" : "secret"]) { JSON, error in
+        networking.PUT("/put", parameters: ["username": "jameson", "password": "secret"]) { JSON, error in
             XCTAssertTrue(completed)
             XCTAssertEqual(error?.code, -999)
             expectation.fulfill()
@@ -104,7 +104,7 @@ class PUTTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
         var completed = false
-        let requestID = networking.PUT("/put", parameters: ["username" : "jameson", "password" : "secret"]) { JSON, error in
+        let requestID = networking.PUT("/put", parameters: ["username": "jameson", "password": "secret"]) { JSON, error in
             XCTAssertTrue(completed)
             XCTAssertEqual(error?.code, -999)
             expectation.fulfill()

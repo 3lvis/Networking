@@ -1,6 +1,7 @@
 import Foundation
 
 extension String {
+
     func encodeUTF8() -> String? {
         if let _ = URL(string: self) {
             return self
@@ -18,6 +19,6 @@ extension String {
             }
         }
 
-        return nil;
+        return nil
     }
 }

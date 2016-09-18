@@ -17,8 +17,8 @@ class DELETETests: XCTestCase {
     func testDELETE() {
         let networking = Networking(baseURL: baseURL)
         networking.DELETE("/delete") { JSON, error in
-            guard let JSON = JSON as? [String : Any] else { XCTFail(); return}
-            guard let url = JSON["url"] as? String else { XCTFail(); return}
+            guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
+            guard let url = JSON["url"] as? String else { XCTFail(); return }
             XCTAssertEqual(url, "http://httpbin.org/delete")
         }
     }
@@ -26,9 +26,9 @@ class DELETETests: XCTestCase {
     func testDELETEWithHeaders() {
         let networking = Networking(baseURL: baseURL)
         networking.DELETE("/delete") { JSON, headers, error in
-            guard let JSON = JSON as? [String : Any] else { XCTFail(); return}
-            guard let url = JSON["url"] as? String else { XCTFail(); return}
-            guard let contentType = headers["Content-Type"] as? String else { XCTFail(); return}
+            guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
+            guard let url = JSON["url"] as? String else { XCTFail(); return }
+            guard let contentType = headers["Content-Type"] as? String else { XCTFail(); return }
             XCTAssertEqual(url, "http://httpbin.org/delete")
             XCTAssertEqual(contentType, "application/json")
         }
@@ -45,10 +45,10 @@ class DELETETests: XCTestCase {
     func testFakeDELETE() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakeDELETE("/stories", response: ["name" : "Elvis"])
+        networking.fakeDELETE("/stories", response: ["name": "Elvis"])
 
         networking.DELETE("/stories") { JSON, error in
-            guard let JSON = JSON as? [String : String] else { XCTFail(); return}
+            guard let JSON = JSON as? [String: String] else { XCTFail(); return }
             let value = JSON["name"]
             XCTAssertEqual(value, "Elvis")
         }
@@ -70,7 +70,7 @@ class DELETETests: XCTestCase {
         networking.fakeDELETE("/entries", fileName: "entries.json", bundle: Bundle(for: DELETETests.self))
 
         networking.DELETE("/entries") { JSON, error in
-            guard let JSON = JSON as? [[String : Any]] else { XCTFail(); return }
+            guard let JSON = JSON as? [[String: Any]] else { XCTFail(); return }
             let entry = JSON[0]
             let value = entry["title"] as? String
             XCTAssertEqual(value, "Entry 1")

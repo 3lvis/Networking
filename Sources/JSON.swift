@@ -6,12 +6,13 @@ enum ParsingError: Error {
 }
 
 class JSON {
-    /**
-    Returns a JSON object from a file.
-    - parameter fileName: The name of the file, the expected extension is `.json`.
-    - parameter bundle:  The Bundle where the file is located, by default is the main bundle.
-    - returns: A JSON object, it can be either a Dictionary or an Array.
-    */
+
+    /** 
+     Returns a JSON object from a file.
+     - parameter fileName: The name of the file, the expected extension is `.json`.
+     - parameter bundle:  The Bundle where the file is located, by default is the main bundle.
+     - returns: A JSON object, it can be either a Dictionary or an Array.
+     */
     class func from(_ fileName: String, bundle: Bundle = Bundle.main) throws -> Any? {
         var JSON: Any?
 
@@ -25,10 +26,11 @@ class JSON {
 }
 
 extension Data {
-    /**
-    Converts Data to a JSON object.
-    - returns: A JSON object, it can be either a Dictionary or an Array.
-    */
+
+    /** 
+     Converts Data to a JSON object.
+     - returns: A JSON object, it can be either a Dictionary or an Array.
+     */
     func toJSON() throws -> Any? {
         var JSON: Any?
         do {
@@ -36,7 +38,7 @@ extension Data {
         } catch {
             throw ParsingError.failed
         }
-        
+
         return JSON
     }
 }
