@@ -3,6 +3,6 @@ language: objective-c
 script:
   - xcodebuild -project Demo.xcodeproj -scheme iOSTests build test -destination 'platform=iOS Simulator,name=iPhone 6' GCC_INSTRUMENT_PROGRAM_FLOW_ARCS=YES GCC_GENERATE_TEST_COVERAGE_FILES=YES clean test | xcpretty -c
   - xcodebuild -project Demo.xcodeproj -scheme tvOSTests build test -destination 'platform=tvOS Simulator,name=Apple TV 1080p' GCC_INSTRUMENT_PROGRAM_FLOW_ARCS=YES GCC_GENERATE_TEST_COVERAGE_FILES=YES clean test | xcpretty -c
-  - xcodebuild -project Demo.xcodeproj -scheme macOSTests build test GCC_INSTRUMENT_PROGRAM_FLOW_ARCS=YES GCC_GENERATE_TEST_COVERAGE_FILES=YES clean test | xcpretty -c
+  - xcodebuild -project Demo.xcodeproj -scheme macOSTests build test GCC_INSTRUMENT_PROGRAM_FLOW_ARCS=YES GCC_GENERATE_TEST_COVERAGE_FILES=YES clean test CODE_SIGNING_REQUIRED=NO | xcpretty -c
 notifications:
   email: false
