@@ -154,14 +154,14 @@ class GETTests: XCTestCase {
         var statusCode = 300
         networking.GET("/status/\(statusCode)") { JSON, error in
             XCTAssertNil(JSON)
-            let connectionError = NSError(domain: Networking.ErrorDomain, code: statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: statusCode)])
+            let connectionError = NSError(domain: Networking.domain, code: statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: statusCode)])
             XCTAssertEqual(error, connectionError)
         }
 
         statusCode = 400
         networking.GET("/status/\(statusCode)") { JSON, error in
             XCTAssertNil(JSON)
-            let connectionError = NSError(domain: Networking.ErrorDomain, code: statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: statusCode)])
+            let connectionError = NSError(domain: Networking.domain, code: statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: statusCode)])
             XCTAssertEqual(error, connectionError)
         }
     }
