@@ -58,6 +58,6 @@ public extension Networking {
      - parameter image: An image that will be returned when there's a request to the registered path.
      */
     public func fakeImageDownload(_ path: String, image: NetworkingImage?, statusCode: Int = 200) {
-        self.fake(.GET, path: path, response: image, statusCode: statusCode)
+        self.fake(.GET, path: path, response: image, responseType: .image, statusCode: statusCode)
     }
 }

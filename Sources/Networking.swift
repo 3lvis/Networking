@@ -28,6 +28,7 @@ public class Networking {
 
     struct FakeRequest {
         let response: Any?
+        let responseType: ResponseType
         let statusCode: Int
     }
 
@@ -374,7 +375,7 @@ extension Networking {
     func fake(_ requestType: RequestType, path: String, fileName: String, bundle: Bundle = Bundle.main) {
         do {
             if let result = try JSON.from(fileName, bundle: bundle) {
-                self.fake(requestType, path: path, response: result, statusCode: 200)
+                self.fake(requestType, path: path, response: result, responseType: .json, statusCode: 200)
             }
         } catch ParsingError.notFound {
             fatalError("We couldn't find \(fileName), are you sure is there?")
@@ -383,9 +384,9 @@ extension Networking {
         }
     }
 
-    func fake(_ requestType: RequestType, path: String, response: Any?, statusCode: Int) {
+    func fake(_ requestType: RequestType, path: String, response: Any?, responseType: ResponseType, statusCode: Int) {
         var fakeRequests = self.fakeRequests[requestType] ?? [String: FakeRequest]()
-        fakeRequests[path] = FakeRequest(response: response, statusCode: statusCode)
+        fakeRequests[path] = FakeRequest(response: response, responseType: responseType, statusCode: statusCode)
         self.fakeRequests[requestType] = fakeRequests
     }
 
@@ -393,7 +394,7 @@ extension Networking {
     func request(_ requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping(_ response: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> ()) -> String {
         var requestID = UUID().uuidString
 
-        if let responses = self.fakeRequests[requestType], let fakeRequest = responses[path] {
+        if let fakeRequests = self.fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
             if fakeRequest.statusCode.statusCodeType() == .successful {
                 completion(fakeRequest.response, [String: Any](), nil)
             } else {

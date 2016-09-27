@@ -39,7 +39,7 @@ public extension Networking {
      - parameter statusCode: By default it's 200, if you provide any status code that is between 200 and 299 the response object will be returned, otherwise we will return an error containig the provided status code.
      */
     public func fakePUT(_ path: String, response: Any?, statusCode: Int = 200) {
-        self.fake(.PUT, path: path, response: response, statusCode: statusCode)
+        self.fake(.PUT, path: path, response: response, responseType: .json, statusCode: statusCode)
     }
 
     /** 
