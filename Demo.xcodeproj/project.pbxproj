@@ -151,6 +151,10 @@
 		44B5D3A51D19B9E5004378B9 /* pig.png in Resources */ = {isa = PBXBuildFile; fileRef = 14B0CEE31CF1D0D700049AD6 /* pig.png */; };
 		44B5D3A61D19B9E5004378B9 /* døgnvillburgere.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 14B0CEDE1CF1D0D700049AD6 /* døgnvillburgere.jpg */; };
 		44B5D3A71D19B9E5004378B9 /* sample.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 14B0CEE41CF1D0D700049AD6 /* sample.jpg */; };
+		44DFD3901D9A2D5A0014E9F2 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44DFD38F1D9A2D5A0014E9F2 /* AppDelegate.swift */; };
+		44DFD3921D9A2D5A0014E9F2 /* OptionsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44DFD3911D9A2D5A0014E9F2 /* OptionsController.swift */; };
+		44DFD3971D9A2D5A0014E9F2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 44DFD3961D9A2D5A0014E9F2 /* Assets.xcassets */; };
+		44DFD39A1D9A2D5A0014E9F2 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 44DFD3981D9A2D5A0014E9F2 /* LaunchScreen.storyboard */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -200,6 +204,12 @@
 		449687B41D1A433A000CF016 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		44B5D3AB1D19B9E5004378B9 /* tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = tvOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		44B5D3AE1D19BA66004378B9 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		44DFD38D1D9A2D5A0014E9F2 /* iOSDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iOSDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		44DFD38F1D9A2D5A0014E9F2 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		44DFD3911D9A2D5A0014E9F2 /* OptionsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OptionsController.swift; sourceTree = "<group>"; };
+		44DFD3961D9A2D5A0014E9F2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		44DFD3991D9A2D5A0014E9F2 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		44DFD39B1D9A2D5A0014E9F2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -252,6 +262,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		44DFD38A1D9A2D5A0014E9F2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -282,6 +299,7 @@
 				146D72AF1AB782920058798C /* iOSTests */,
 				44B5D3AD1D19BA66004378B9 /* tvOSTests */,
 				449687B31D1A433A000CF016 /* macOSTests */,
+				44DFD38E1D9A2D5A0014E9F2 /* iOSDemo */,
 				146D72941AB782920058798C /* Products */,
 				7C7551124581063F7B41A916 /* Frameworks */,
 			);
@@ -299,6 +317,7 @@
 				14638D3E1CC647E4002B9433 /* Networking.framework */,
 				1413F4551CE795DC00482096 /* macOSTests.xctest */,
 				44B5D3AB1D19B9E5004378B9 /* tvOSTests.xctest */,
+				44DFD38D1D9A2D5A0014E9F2 /* iOSDemo.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -372,6 +391,18 @@
 				44B5D3AE1D19BA66004378B9 /* Info.plist */,
 			);
 			path = tvOSTests;
+			sourceTree = "<group>";
+		};
+		44DFD38E1D9A2D5A0014E9F2 /* iOSDemo */ = {
+			isa = PBXGroup;
+			children = (
+				44DFD38F1D9A2D5A0014E9F2 /* AppDelegate.swift */,
+				44DFD3911D9A2D5A0014E9F2 /* OptionsController.swift */,
+				44DFD3961D9A2D5A0014E9F2 /* Assets.xcassets */,
+				44DFD3981D9A2D5A0014E9F2 /* LaunchScreen.storyboard */,
+				44DFD39B1D9A2D5A0014E9F2 /* Info.plist */,
+			);
+			path = iOSDemo;
 			sourceTree = "<group>";
 		};
 		7C7551124581063F7B41A916 /* Frameworks */ = {
@@ -545,6 +576,23 @@
 			productReference = 44B5D3AB1D19B9E5004378B9 /* tvOSTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		44DFD38C1D9A2D5A0014E9F2 /* iOSDemo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 44DFD39E1D9A2D5A0014E9F2 /* Build configuration list for PBXNativeTarget "iOSDemo" */;
+			buildPhases = (
+				44DFD3891D9A2D5A0014E9F2 /* Sources */,
+				44DFD38A1D9A2D5A0014E9F2 /* Frameworks */,
+				44DFD38B1D9A2D5A0014E9F2 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = iOSDemo;
+			productName = iOSDemo;
+			productReference = 44DFD38D1D9A2D5A0014E9F2 /* iOSDemo.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -552,7 +600,7 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = "";
-				LastSwiftUpdateCheck = 0730;
+				LastSwiftUpdateCheck = 0800;
 				LastUpgradeCheck = 0800;
 				ORGANIZATIONNAME = "";
 				TargetAttributes = {
@@ -598,6 +646,10 @@
 						LastSwiftMigration = 0800;
 						ProvisioningStyle = Manual;
 					};
+					44DFD38C1D9A2D5A0014E9F2 = {
+						CreatedOnToolsVersion = 8.0;
+						ProvisioningStyle = Automatic;
+					};
 				};
 			};
 			buildConfigurationList = 146D728E1AB782920058798C /* Build configuration list for PBXProject "Demo" */;
@@ -613,6 +665,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
+				44DFD38C1D9A2D5A0014E9F2 /* iOSDemo */,
 				146D72AB1AB782920058798C /* iOSTests */,
 				44B5D3881D19B9E5004378B9 /* tvOSTests */,
 				1413F4541CE795DC00482096 /* macOSTests */,
@@ -686,6 +739,15 @@
 				44B5D3A51D19B9E5004378B9 /* pig.png in Resources */,
 				44B5D3A61D19B9E5004378B9 /* døgnvillburgere.jpg in Resources */,
 				44B5D3A71D19B9E5004378B9 /* sample.jpg in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		44DFD38B1D9A2D5A0014E9F2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				44DFD39A1D9A2D5A0014E9F2 /* LaunchScreen.storyboard in Resources */,
+				44DFD3971D9A2D5A0014E9F2 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -911,7 +973,27 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		44DFD3891D9A2D5A0014E9F2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				44DFD3921D9A2D5A0014E9F2 /* OptionsController.swift in Sources */,
+				44DFD3901D9A2D5A0014E9F2 /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		44DFD3981D9A2D5A0014E9F2 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				44DFD3991D9A2D5A0014E9F2 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		1413F45B1CE795DC00482096 /* Debug */ = {
@@ -1331,6 +1413,47 @@
 			};
 			name = Release;
 		};
+		44DFD39C1D9A2D5A0014E9F2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVES = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = iOSDemo/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.3lvis.networking.iOSDemo;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Debug;
+		};
+		44DFD39D1D9A2D5A0014E9F2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVES = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = iOSDemo/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.3lvis.networking.iOSDemo;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1405,6 +1528,14 @@
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
+		};
+		44DFD39E1D9A2D5A0014E9F2 /* Build configuration list for PBXNativeTarget "iOSDemo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				44DFD39C1D9A2D5A0014E9F2 /* Debug */,
+				44DFD39D1D9A2D5A0014E9F2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
 		};
 /* End XCConfigurationList section */
 	};
