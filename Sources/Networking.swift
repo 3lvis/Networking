@@ -399,16 +399,6 @@ extension Networking {
 
         if let fakeRequests = self.fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
             if fakeRequest.statusCode.statusCodeType() == .successful {
-                if fakeRequest.responseType == .image {
-                    let trimmedPath = path.components(separatedBy: "?").first!
-                    let image = fakeRequest.response as? NetworkingImage
-                    if let image = image, let data = image.pngData(), data.count > 0 {
-                        guard let destinationURL = try? self.destinationURL(for: trimmedPath, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
-                        let _ = try? data.write(to: destinationURL, options: [.atomic])
-                        self.cache.setObject(image, forKey: destinationURL.absoluteString as AnyObject)
-                    }
-                }
-
                 completion(fakeRequest.response, [String: Any](), nil)
             } else {
                 let error = NSError(domain: Networking.domain, code: fakeRequest.statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: fakeRequest.statusCode)])
