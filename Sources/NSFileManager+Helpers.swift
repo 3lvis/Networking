@@ -10,6 +10,8 @@ extension FileManager {
 
     public func remove(at url: URL) {
         let path = url.path
+        guard FileManager.default.isDeletableFile(atPath: url.path) else { return }
+
         do {
             try FileManager.default.removeItem(atPath: path)
         } catch let error as NSError {

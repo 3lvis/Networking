@@ -24,10 +24,11 @@ public extension Int {
 }
 
 public class Networking {
-    static let ErrorDomain = "NetworkingErrorDomain"
+    static let domain = "com.3lvis.networking"
 
     struct FakeRequest {
         let response: Any?
+        let responseType: ResponseType
         let statusCode: Int
     }
 
@@ -189,7 +190,7 @@ public class Networking {
      - returns: A NSURL generated after appending the path to the base URL.
      */
     public func url(for path: String) -> URL {
-        guard let encodedPath = path.encodeUTF8() else { fatalError("Couldn't encode path to UTF8: \(path)") }
+        let encodedPath = path.encodeUTF8() ?? path
         guard let url = URL(string: self.baseURL + encodedPath) else { fatalError("Couldn't create a url using baseURL: \(self.baseURL) and encodedPath: \(encodedPath)") }
         return url
     }
@@ -200,26 +201,28 @@ public class Networking {
      - returns: A NSURL where a resource has been stored.
      */
     public func destinationURL(for path: String, cacheName: String? = nil) throws -> URL {
-        #if os(tvOS)
-            let directory = FileManager.SearchPathDirectory.cachesDirectory
-        #else
-            let directory = TestCheck.isTesting ? FileManager.SearchPathDirectory.cachesDirectory : FileManager.SearchPathDirectory.documentDirectory
-        #endif
-        let finalPath = cacheName ?? self.url(for: path).absoluteString
-        let replacedPath = finalPath.replacingOccurrences(of: "/", with: "-")
-        if let url = URL(string: replacedPath) {
-            if let cachesURL = FileManager.default.urls(for: directory, in: .userDomainMask).first {
-                #if !os(tvOS)
-                    try (cachesURL as NSURL).setResourceValue(true, forKey: URLResourceKey.isExcludedFromBackupKey)
-                #endif
+        let resourcesPath = cacheName ?? self.url(for: path).absoluteString
+        let normalizedResourcesPath = resourcesPath.replacingOccurrences(of: "/", with: "-")
+        let folderPath = Networking.domain
+        let finalPath = "\(folderPath)/\(normalizedResourcesPath)"
+
+        if let url = URL(string: finalPath) {
+            if let cachesURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first {
+                try (cachesURL as NSURL).setResourceValue(true, forKey: URLResourceKey.isExcludedFromBackupKey)
+                let folderURL = cachesURL.appendingPathComponent(URL(string: folderPath)!.absoluteString)
+
+                if FileManager.default.exists(at: folderURL) == false {
+                    try FileManager.default.createDirectory(at: folderURL, withIntermediateDirectories: false, attributes: nil)
+                }
+
                 let destinationURL = cachesURL.appendingPathComponent(url.absoluteString)
 
                 return destinationURL
             } else {
-                throw NSError(domain: Networking.ErrorDomain, code: 9999, userInfo: [NSLocalizedDescriptionKey: "Couldn't normalize url"])
+                throw NSError(domain: Networking.domain, code: 9999, userInfo: [NSLocalizedDescriptionKey: "Couldn't normalize url"])
             }
         } else {
-            throw NSError(domain: Networking.ErrorDomain, code: 9999, userInfo: [NSLocalizedDescriptionKey: "Couldn't create a url using replacedPath: \(replacedPath)"])
+            throw NSError(domain: Networking.domain, code: 9999, userInfo: [NSLocalizedDescriptionKey: "Couldn't create a url using replacedPath: \(finalPath)"])
         }
     }
 
@@ -320,6 +323,19 @@ public class Networking {
 
         return object as? Data
     }
+
+    /** 
+     Deletes the downloaded/cached files.
+     */
+    public static func deleteCachedFiles() {
+        if let cachesURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first {
+            let folderURL = cachesURL.appendingPathComponent(URL(string: Networking.domain)!.absoluteString)
+
+            if FileManager.default.exists(at: folderURL) {
+                FileManager.default.remove(at: folderURL)
+            }
+        }
+    }
 }
 
 extension Networking {
@@ -374,7 +390,7 @@ extension Networking {
     func fake(_ requestType: RequestType, path: String, fileName: String, bundle: Bundle = Bundle.main) {
         do {
             if let result = try JSON.from(fileName, bundle: bundle) {
-                self.fake(requestType, path: path, response: result, statusCode: 200)
+                self.fake(requestType, path: path, response: result, responseType: .json, statusCode: 200)
             }
         } catch ParsingError.notFound {
             fatalError("We couldn't find \(fileName), are you sure is there?")
@@ -383,9 +399,9 @@ extension Networking {
         }
     }
 
-    func fake(_ requestType: RequestType, path: String, response: Any?, statusCode: Int) {
+    func fake(_ requestType: RequestType, path: String, response: Any?, responseType: ResponseType, statusCode: Int) {
         var fakeRequests = self.fakeRequests[requestType] ?? [String: FakeRequest]()
-        fakeRequests[path] = FakeRequest(response: response, statusCode: statusCode)
+        fakeRequests[path] = FakeRequest(response: response, responseType: responseType, statusCode: statusCode)
         self.fakeRequests[requestType] = fakeRequests
     }
 
@@ -393,11 +409,11 @@ extension Networking {
     func request(_ requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping(_ response: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> ()) -> String {
         var requestID = UUID().uuidString
 
-        if let responses = self.fakeRequests[requestType], let fakeRequest = responses[path] {
+        if let fakeRequests = self.fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
             if fakeRequest.statusCode.statusCodeType() == .successful {
                 completion(fakeRequest.response, [String: Any](), nil)
             } else {
-                let error = NSError(domain: Networking.ErrorDomain, code: fakeRequest.statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: fakeRequest.statusCode)])
+                let error = NSError(domain: Networking.domain, code: fakeRequest.statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: fakeRequest.statusCode)])
                 completion(fakeRequest.response, [String: Any](), error)
             }
         } else {
@@ -552,7 +568,7 @@ extension Networking {
                             returnedData = data
                         }
                     } else {
-                        connectionError = NSError(domain: Networking.ErrorDomain, code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode)])
+                        connectionError = NSError(domain: Networking.domain, code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode)])
                     }
                 }
 
