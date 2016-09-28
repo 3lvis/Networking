@@ -166,7 +166,7 @@ class ImageTests: XCTestCase {
     func testImageFromCacheForPathInCache() {
         let networking = Networking(baseURL: self.baseURL)
         let path = "/image/png"
-        Helper.removeFileIfNeeded(networking, path: path)
+        Helper.cleanDownloadsFolder()
         networking.downloadImage(path) { image, error in
             let image = networking.imageFromCache(path)
             let pigImage = NetworkingImage.find(named: "pig.png", inBundle: Bundle(for: ImageTests.self))

@@ -190,7 +190,7 @@ public class Networking {
      - returns: A NSURL generated after appending the path to the base URL.
      */
     public func url(for path: String) -> URL {
-        guard let encodedPath = path.encodeUTF8() else { fatalError("Couldn't encode path to UTF8: \(path)") }
+        let encodedPath = path.encodeUTF8() ?? path
         guard let url = URL(string: self.baseURL + encodedPath) else { fatalError("Couldn't create a url using baseURL: \(self.baseURL) and encodedPath: \(encodedPath)") }
         return url
     }
@@ -201,14 +201,13 @@ public class Networking {
      - returns: A NSURL where a resource has been stored.
      */
     public func destinationURL(for path: String, cacheName: String? = nil) throws -> URL {
-        let directory = FileManager.SearchPathDirectory.cachesDirectory
         let resourcesPath = cacheName ?? self.url(for: path).absoluteString
         let normalizedResourcesPath = resourcesPath.replacingOccurrences(of: "/", with: "-")
         let folderPath = Networking.domain
         let finalPath = "\(folderPath)/\(normalizedResourcesPath)"
 
         if let url = URL(string: finalPath) {
-            if let cachesURL = FileManager.default.urls(for: directory, in: .userDomainMask).first {
+            if let cachesURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first {
                 try (cachesURL as NSURL).setResourceValue(true, forKey: URLResourceKey.isExcludedFromBackupKey)
                 let folderURL = cachesURL.appendingPathComponent(URL(string: folderPath)!.absoluteString)
 
