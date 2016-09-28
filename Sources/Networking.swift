@@ -211,7 +211,7 @@ public class Networking {
                 try (cachesURL as NSURL).setResourceValue(true, forKey: URLResourceKey.isExcludedFromBackupKey)
                 let folderURL = cachesURL.appendingPathComponent(URL(string: folderPath)!.absoluteString)
 
-                if FileManager.default.fileExists(atPath: folderURL.path) == false {
+                if FileManager.default.exists(at: folderURL) == false {
                     try FileManager.default.createDirectory(at: folderURL, withIntermediateDirectories: false, attributes: nil)
                 }
 
@@ -322,6 +322,19 @@ public class Networking {
         let object = self.objectFromCache(for: path, cacheName: cacheName, responseType: .data)
 
         return object as? Data
+    }
+
+    /** 
+     Deletes the downloaded/cached files.
+     */
+    public static func deleteDownloadedFiles() {
+        if let cachesURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first {
+            let folderURL = cachesURL.appendingPathComponent(URL(string: Networking.domain)!.absoluteString)
+
+            if FileManager.default.exists(at: folderURL) {
+                FileManager.default.remove(at: folderURL)
+            }
+        }
     }
 }
 

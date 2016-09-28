@@ -170,4 +170,15 @@ class NetworkingTests: XCTestCase {
     // Needs tests
     func testDataFromCache() {
     }
+
+    func testDeleteDownloadedFiles() {
+        let networking = Networking(baseURL: self.baseURL)
+        networking.downloadImage("/image/png") { image, error in
+            let cachesURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
+            let folderURL = cachesURL.appendingPathComponent(URL(string: Networking.domain)!.absoluteString)
+            XCTAssertTrue(FileManager.default.exists(at: folderURL))
+            Networking.deleteDownloadedFiles()
+            XCTAssertFalse(FileManager.default.exists(at: folderURL))
+        }
+    }
 }

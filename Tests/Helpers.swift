@@ -8,15 +8,4 @@ struct Helper {
             FileManager.default.remove(at: destinationURL)
         }
     }
-
-    static func cleanDownloadsFolder() {
-        if let cachesURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first {
-            let folderURL = cachesURL.appendingPathComponent(URL(string: Networking.domain)!.absoluteString)
-            print("folderURL: \(folderURL)")
-
-            if FileManager.default.exists(at: folderURL) {
-                FileManager.default.remove(at: folderURL)
-            }
-        }
-    }
 }
