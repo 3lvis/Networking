@@ -321,7 +321,7 @@ public class Networking {
     /** 
      Deletes the downloaded/cached files.
      */
-    public static func deleteDownloadedFiles() {
+    public static func deleteCachedFiles() {
         if let cachesURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first {
             let folderURL = cachesURL.appendingPathComponent(URL(string: Networking.domain)!.absoluteString)
 

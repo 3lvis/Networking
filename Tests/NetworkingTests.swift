@@ -186,7 +186,7 @@ class NetworkingTests: XCTestCase {
             let cachesURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
             let folderURL = cachesURL.appendingPathComponent(URL(string: Networking.domain)!.absoluteString)
             XCTAssertTrue(FileManager.default.exists(at: folderURL))
-            Networking.deleteDownloadedFiles()
+            Networking.deleteCachedFiles()
             XCTAssertFalse(FileManager.default.exists(at: folderURL))
         }
     }
