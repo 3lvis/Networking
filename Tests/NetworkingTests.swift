@@ -168,7 +168,7 @@ class NetworkingTests: XCTestCase {
     }
 
 
-    func testCacheRetrieval() {
+    func testDataFromCache() {
         let cache = NSCache<AnyObject, AnyObject>()
         let networking = Networking(baseURL: "http://store.storeimages.cdn-apple.com", cache: cache)
         let path = "/4973/as-images.apple.com/is/image/AppleInc/aos/published/images/i/pa/ipad/pro/ipad-pro-201603-gallery3?wid=4000&amp%3Bhei=1536&amp%3Bfmt=jpeg&amp%3Bqlt=95&amp%3Bop_sharpen=0&amp%3BresMode=bicub&amp%3Bop_usm=0.5%2C0.5%2C0%2C0&amp%3BiccEmbed=0&amp%3Blayer=comp&amp%3B.v=Y7wkx0&hei=3072"
