@@ -105,6 +105,30 @@ class GETTests: XCTestCase {
         }
     }
 
+    func testFakeGETUsingPattern() {
+        let networking = Networking(baseURL: baseURL)
+
+        networking.fakeGET("/users/{userID}", fileName: "users.json", bundle: Bundle(for: GETTests.self))
+
+        networking.GET("/users/10") { JSON, error in
+            guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
+            let id = JSON["id"] as? String
+            XCTAssertEqual(id, "10")
+
+            let name = JSON["name"] as? String
+            XCTAssertEqual(name, "Name 10")
+        }
+
+        networking.GET("/users/20") { JSON, error in
+            guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
+            let id = JSON["id"] as? String
+            XCTAssertEqual(id, "20")
+
+            let name = JSON["name"] as? String
+            XCTAssertEqual(name, "Name 20")
+        }
+    }
+
     func testCancelGETWithPath() {
         let expectation = self.expectation(description: "testCancelGET")
 
