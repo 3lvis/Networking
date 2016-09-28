@@ -108,7 +108,7 @@ class GETTests: XCTestCase {
     func testFakeGETUsingPattern() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakeGET("/users/{userID}", fileName: "users.json", bundle: Bundle(for: GETTests.self))
+        networking.fakeGET("/users/{userID}", fileName: "user.json", bundle: Bundle(for: GETTests.self))
 
         networking.GET("/users/10") { JSON, error in
             guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
