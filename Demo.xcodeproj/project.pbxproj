@@ -601,6 +601,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 44DFD39E1D9A2D5A0014E9F2 /* Build configuration list for PBXNativeTarget "iOSDemo" */;
 			buildPhases = (
+				4405BBF01D9B64A400C703D4 /* Format Swift Code */,
 				44DFD3891D9A2D5A0014E9F2 /* Sources */,
 				44DFD38A1D9A2D5A0014E9F2 /* Frameworks */,
 				44DFD38B1D9A2D5A0014E9F2 /* Resources */,
@@ -805,6 +806,20 @@
 			shellScript = "\"${SRCROOT}/swiftformat\" \"${SRCROOT}/Sources\"";
 		};
 		140372E31D8F397F00F5F502 /* Format Swift Code */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Format Swift Code";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/swiftformat\" \"${SRCROOT}/Sources\"";
+		};
+		4405BBF01D9B64A400C703D4 /* Format Swift Code */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -1574,6 +1589,7 @@
 				44DFD39D1D9A2D5A0014E9F2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
