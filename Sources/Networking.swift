@@ -26,12 +26,6 @@ public extension Int {
 public class Networking {
     static let domain = "com.3lvis.networking"
 
-    struct FakeRequest {
-        let response: Any?
-        let responseType: ResponseType
-        let statusCode: Int
-    }
-
     /** 
      Provides the options for configuring your Networking object with NSURLSessionConfiguration.
      - `Default:` This configuration type manages upload and download tasks using the default options.
@@ -409,7 +403,7 @@ extension Networking {
     func request(_ requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping(_ response: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> ()) -> String {
         var requestID = UUID().uuidString
 
-        if let fakeRequests = self.fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
+        if let fakeRequest = FakeRequest.find(ofType: requestType, forPath: path, in: self.fakeRequests) {
             if fakeRequest.statusCode.statusCodeType() == .successful {
                 completion(fakeRequest.response, [String: Any](), nil)
             } else {

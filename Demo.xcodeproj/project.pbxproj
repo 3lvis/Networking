@@ -125,6 +125,14 @@
 		4488DBBD1D9BB08F007D7A14 /* user.json in Resources */ = {isa = PBXBuildFile; fileRef = 4488DBBC1D9BB08F007D7A14 /* user.json */; };
 		4488DBBE1D9BB08F007D7A14 /* user.json in Resources */ = {isa = PBXBuildFile; fileRef = 4488DBBC1D9BB08F007D7A14 /* user.json */; };
 		4488DBBF1D9BB08F007D7A14 /* user.json in Resources */ = {isa = PBXBuildFile; fileRef = 4488DBBC1D9BB08F007D7A14 /* user.json */; };
+		4488DBC11D9BBFCF007D7A14 /* FakeRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4488DBC01D9BBFCF007D7A14 /* FakeRequest.swift */; };
+		4488DBC21D9BBFCF007D7A14 /* FakeRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4488DBC01D9BBFCF007D7A14 /* FakeRequest.swift */; };
+		4488DBC31D9BBFCF007D7A14 /* FakeRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4488DBC01D9BBFCF007D7A14 /* FakeRequest.swift */; };
+		4488DBC41D9BBFCF007D7A14 /* FakeRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4488DBC01D9BBFCF007D7A14 /* FakeRequest.swift */; };
+		4488DBC51D9BBFCF007D7A14 /* FakeRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4488DBC01D9BBFCF007D7A14 /* FakeRequest.swift */; };
+		4488DBC61D9BBFCF007D7A14 /* FakeRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4488DBC01D9BBFCF007D7A14 /* FakeRequest.swift */; };
+		4488DBC71D9BBFCF007D7A14 /* FakeRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4488DBC01D9BBFCF007D7A14 /* FakeRequest.swift */; };
+		4488DBC81D9BBFCF007D7A14 /* FakeRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4488DBC01D9BBFCF007D7A14 /* FakeRequest.swift */; };
 		44B5D38A1D19B9E5004378B9 /* TestCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1474C1C21CA2988900E15D84 /* TestCheck.swift */; };
 		44B5D38B1D19B9E5004378B9 /* ImageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1413F4631CE7963700482096 /* ImageTests.swift */; };
 		44B5D38C1D19B9E5004378B9 /* Dictionary+FormURLEncodedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1413F45E1CE7963700482096 /* Dictionary+FormURLEncodedTests.swift */; };
@@ -222,6 +230,7 @@
 		14D144DD1CEED63B00048629 /* FormDataPart.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FormDataPart.swift; sourceTree = "<group>"; };
 		14DE34781CA298ED009B2E35 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4488DBBC1D9BB08F007D7A14 /* user.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = user.json; sourceTree = "<group>"; };
+		4488DBC01D9BBFCF007D7A14 /* FakeRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FakeRequest.swift; sourceTree = "<group>"; };
 		449687B41D1A433A000CF016 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		44B5D3AB1D19B9E5004378B9 /* tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = tvOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		44B5D3AE1D19BA66004378B9 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -371,6 +380,7 @@
 				1474C1C21CA2988900E15D84 /* TestCheck.swift */,
 				14D144DD1CEED63B00048629 /* FormDataPart.swift */,
 				148341701CF1CF0500E91F01 /* NetworkingImage.swift */,
+				4488DBC01D9BBFCF007D7A14 /* FakeRequest.swift */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -860,6 +870,7 @@
 				147B32F81CF9B1C500D5BAED /* Networking+GET.swift in Sources */,
 				1413F4761CE7968B00482096 /* Dictionary+FormURLEncoded.swift in Sources */,
 				146EF9181CEBCEA50059DDB1 /* PUTTests.swift in Sources */,
+				4488DBC41D9BBFCF007D7A14 /* FakeRequest.swift in Sources */,
 				1413F47B1CE7969900482096 /* Networking+Image.swift in Sources */,
 				14D144DF1CEED63B00048629 /* FormDataPart.swift in Sources */,
 				146EF9121CEBCEA50059DDB1 /* DELETETests.swift in Sources */,
@@ -890,6 +901,7 @@
 				14676B971CCB490C00FFDC92 /* NSFileManager+Helpers.swift in Sources */,
 				147B32F31CF9B1C500D5BAED /* Networking+DELETE.swift in Sources */,
 				14638D0A1CC64629002B9433 /* Networking.swift in Sources */,
+				4488DBC51D9BBFCF007D7A14 /* FakeRequest.swift in Sources */,
 				14638D0B1CC64629002B9433 /* TestCheck.swift in Sources */,
 				14638D0C1CC64629002B9433 /* String+UTF8.swift in Sources */,
 			);
@@ -911,6 +923,7 @@
 				14676B981CCB490C00FFDC92 /* NSFileManager+Helpers.swift in Sources */,
 				147B32F41CF9B1C500D5BAED /* Networking+DELETE.swift in Sources */,
 				14638D201CC64733002B9433 /* Networking.swift in Sources */,
+				4488DBC61D9BBFCF007D7A14 /* FakeRequest.swift in Sources */,
 				14638D211CC64733002B9433 /* TestCheck.swift in Sources */,
 				14638D221CC64733002B9433 /* String+UTF8.swift in Sources */,
 			);
@@ -932,6 +945,7 @@
 				14676B991CCB490C00FFDC92 /* NSFileManager+Helpers.swift in Sources */,
 				147B32F51CF9B1C500D5BAED /* Networking+DELETE.swift in Sources */,
 				14638D361CC647B8002B9433 /* Networking.swift in Sources */,
+				4488DBC71D9BBFCF007D7A14 /* FakeRequest.swift in Sources */,
 				14638D371CC647B8002B9433 /* TestCheck.swift in Sources */,
 				14638D381CC647B8002B9433 /* String+UTF8.swift in Sources */,
 			);
@@ -953,6 +967,7 @@
 				14676B9A1CCB490C00FFDC92 /* NSFileManager+Helpers.swift in Sources */,
 				147B32F61CF9B1C500D5BAED /* Networking+DELETE.swift in Sources */,
 				14638D4C1CC64829002B9433 /* Networking.swift in Sources */,
+				4488DBC81D9BBFCF007D7A14 /* FakeRequest.swift in Sources */,
 				14638D4D1CC64829002B9433 /* TestCheck.swift in Sources */,
 				14638D4E1CC64829002B9433 /* String+UTF8.swift in Sources */,
 			);
@@ -974,6 +989,7 @@
 				147B32F71CF9B1C500D5BAED /* Networking+GET.swift in Sources */,
 				1474C1C51CA2988900E15D84 /* NetworkActivityIndicator.swift in Sources */,
 				146EF9171CEBCEA50059DDB1 /* PUTTests.swift in Sources */,
+				4488DBC21D9BBFCF007D7A14 /* FakeRequest.swift in Sources */,
 				1474C1C31CA2988900E15D84 /* Dictionary+FormURLEncoded.swift in Sources */,
 				146EF9111CEBCEA50059DDB1 /* DELETETests.swift in Sources */,
 				14D144DE1CEED63B00048629 /* FormDataPart.swift in Sources */,
@@ -1004,6 +1020,7 @@
 				44B5D3931D19B9E5004378B9 /* Networking+GET.swift in Sources */,
 				44B5D3941D19B9E5004378B9 /* NetworkActivityIndicator.swift in Sources */,
 				44B5D3951D19B9E5004378B9 /* PUTTests.swift in Sources */,
+				4488DBC31D9BBFCF007D7A14 /* FakeRequest.swift in Sources */,
 				44B5D3961D19B9E5004378B9 /* Dictionary+FormURLEncoded.swift in Sources */,
 				44B5D3971D19B9E5004378B9 /* DELETETests.swift in Sources */,
 				44B5D3981D19B9E5004378B9 /* FormDataPart.swift in Sources */,
@@ -1034,6 +1051,7 @@
 				44DFD3AE1D9A34540014E9F2 /* TestCheck.swift in Sources */,
 				44DFD3A61D9A34540014E9F2 /* Networking.swift in Sources */,
 				44DFD3A21D9A33610014E9F2 /* FakeImageController.swift in Sources */,
+				4488DBC11D9BBFCF007D7A14 /* FakeRequest.swift in Sources */,
 				44DFD3A81D9A34540014E9F2 /* Networking+GET.swift in Sources */,
 				44DFD3AD1D9A34540014E9F2 /* String+UTF8.swift in Sources */,
 				44DFD3A41D9A344D0014E9F2 /* JSON.swift in Sources */,
