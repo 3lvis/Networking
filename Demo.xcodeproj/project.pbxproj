@@ -628,6 +628,7 @@
 				TargetAttributes = {
 					1413F4541CE795DC00482096 = {
 						CreatedOnToolsVersion = 7.3.1;
+						DevelopmentTeam = C6K65RDJHL;
 						DevelopmentTeamName = "Elvis Nunez (Personal Team)";
 						LastSwiftMigration = 0800;
 						ProvisioningStyle = Manual;
@@ -1057,7 +1058,7 @@
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = C6K65RDJHL;
 				GCC_NO_COMMON_BLOCKS = YES;
 				INFOPLIST_FILE = macOSTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
@@ -1079,7 +1080,7 @@
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = C6K65RDJHL;
 				GCC_NO_COMMON_BLOCKS = YES;
 				INFOPLIST_FILE = macOSTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
