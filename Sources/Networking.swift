@@ -201,7 +201,12 @@ public class Networking {
         let finalPath = "\(folderPath)/\(normalizedResourcesPath)"
 
         if let url = URL(string: finalPath) {
-            if let cachesURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first {
+            #if os(tvOS)
+                let directory = FileManager.SearchPathDirectory.cachesDirectory
+            #else
+                let directory = TestCheck.isTesting ? FileManager.SearchPathDirectory.cachesDirectory : FileManager.SearchPathDirectory.documentDirectory
+            #endif
+            if let cachesURL = FileManager.default.urls(for: directory, in: .userDomainMask).first {
                 try (cachesURL as NSURL).setResourceValue(true, forKey: URLResourceKey.isExcludedFromBackupKey)
                 let folderURL = cachesURL.appendingPathComponent(URL(string: folderPath)!.absoluteString)
 
@@ -322,7 +327,12 @@ public class Networking {
      Deletes the downloaded/cached files.
      */
     public static func deleteCachedFiles() {
-        if let cachesURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first {
+        #if os(tvOS)
+            let directory = FileManager.SearchPathDirectory.cachesDirectory
+        #else
+            let directory = TestCheck.isTesting ? FileManager.SearchPathDirectory.cachesDirectory : FileManager.SearchPathDirectory.documentDirectory
+        #endif
+        if let cachesURL = FileManager.default.urls(for: directory, in: .userDomainMask).first {
             let folderURL = cachesURL.appendingPathComponent(URL(string: Networking.domain)!.absoluteString)
 
             if FileManager.default.exists(at: folderURL) {
