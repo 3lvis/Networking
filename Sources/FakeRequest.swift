@@ -5,9 +5,41 @@ struct FakeRequest {
 
     static func find(ofType type: Networking.RequestType, forPath path: String, in collection: [Networking.RequestType: [String: FakeRequest]]) -> FakeRequest? {
         guard let requests = collection[type] else { return nil }
+
+        guard path.characters.count > 0 else { return nil }
+        var evaluatedPath = path
+        evaluatedPath.removeFirstLetterIfDash()
+        evaluatedPath.removeLastLetterIfDash()
+        let evaluatedParts = evaluatedPath.components(separatedBy: "/")
+
         for originalFakedPath in requests.keys {
             guard originalFakedPath.characters.count > 0 else { continue }
-            let trimmedPath = originalFakedPath.characters
+            var fakedPath = originalFakedPath
+            fakedPath.removeFirstLetterIfDash()
+            fakedPath.removeLastLetterIfDash()
+            let parts = fakedPath.components(separatedBy: "/")
+            guard evaluatedParts.count == parts.count else { continue }
+            guard evaluatedParts.first == parts.first else { continue }
+
+            if evaluatedParts.count == 1 && parts.count == 1 {
+                return requests[originalFakedPath]
+            } else {
+                let evaluatedPart2 = evaluatedParts[1]
+                let parts2 = parts[1]
+                if parts2.contains("{") {
+                    let request = requests[originalFakedPath]
+                    let response = request?.response
+                    
+                }
+            }
+
+            // take first element from requested path
+            // search in list of faked paths
+            // Not found? Continue.
+            // Found?
+            // If that's all the components, use the path
+            // If there are more components, continue with next component
+            // Next component. Starts with {?
         }
 
         // Before this was just a dictionary and you could use the path to get it. But now is more complex than that.
