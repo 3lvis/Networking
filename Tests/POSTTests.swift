@@ -219,7 +219,7 @@ class POSTTests: XCTestCase {
     }
 
     func deleteAllCloudinaryPhotos(networking: Networking, cloudName: String, secret: String, APIKey: String) {
-        networking.addBasicAuthenticationField(username: APIKey, password: secret)
+        networking.basicAuthenticationHeaderField = (APIKey, secret)
         networking.DELETE("/v1_1/\(cloudName)/resources/image/upload?all=true") { JSON, error in }
     }
 }

@@ -4,9 +4,9 @@ import XCTest
 class NetworkingTests: XCTestCase {
     let baseURL = "http://httpbin.org"
 
-    func testBasicAuth() {
+    func testBasicAuthenticationHeaderField() {
         let networking = Networking(baseURL: baseURL)
-        networking.addBasicAuthenticationField(username: "user", password: "passwd")
+        networking.basicAuthenticationHeaderField = (username: "user", password: "passwd")
         networking.GET("/basic-auth/user/passwd") { JSON, error in
             guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
             let user = JSON["user"] as? String
@@ -16,10 +16,10 @@ class NetworkingTests: XCTestCase {
         }
     }
 
-    func testBearerTokenAuth() {
+    func testAuthenticationHeaderFieldValue() {
         let networking = Networking(baseURL: baseURL)
         let token = "hi-mom"
-        networking.addBasicAuthenticationField(token: token)
+        networking.authenticationHeaderFieldValue = "Bearer \(token)"
         networking.POST("/post") { JSON, error in
             guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
             let headers = JSON["headers"] as? [String: Any]
@@ -27,26 +27,13 @@ class NetworkingTests: XCTestCase {
         }
     }
 
-    func testCustomAuthorizationHeaderValue() {
+    func testHeaderField() {
         let networking = Networking(baseURL: baseURL)
-        let value = "hi-mom"
-        networking.addBasicAuthenticationHeader(headerValue: value)
+        networking.headerFields = ["HeaderKey": "HeaderValue"]
         networking.POST("/post") { JSON, error in
             guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
             let headers = JSON["headers"] as? [String: Any]
-            XCTAssertEqual(value, headers?["Authorization"] as? String)
-        }
-    }
-
-    func testCustomAuthorizationHeaderValueAndHeaderKey() {
-        let networking = Networking(baseURL: baseURL)
-        let key = "Anonymous-Token"
-        let value = "hi-mom"
-        networking.addBasicAuthenticationHeader(headerKey: key, headerValue: value)
-        networking.POST("/post") { JSON, error in
-            guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
-            let headers = JSON["headers"] as? [String: Any]
-            XCTAssertEqual(value, headers?[key] as? String)
+            XCTAssertEqual("HeaderValue", headers?["HeaderKey"] as? String)
         }
     }
 

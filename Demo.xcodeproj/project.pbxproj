@@ -352,21 +352,21 @@
 		1474C1BB1CA2988900E15D84 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				1474C1BC1CA2988900E15D84 /* Dictionary+FormURLEncoded.swift */,
-				1474C1BD1CA2988900E15D84 /* JSON.swift */,
-				1474C1BE1CA2988900E15D84 /* NetworkActivityIndicator.swift */,
 				14638D031CC645D2002B9433 /* Networking.h */,
 				1474C1C11CA2988900E15D84 /* Networking.swift */,
-				1474C1C01CA2988900E15D84 /* Networking+Image.swift */,
 				147B32EE1CF9B1C500D5BAED /* Networking+GET.swift */,
 				147B32EF1CF9B1C500D5BAED /* Networking+POST.swift */,
 				147B32F01CF9B1C500D5BAED /* Networking+PUT.swift */,
 				147B32ED1CF9B1C500D5BAED /* Networking+DELETE.swift */,
+				1474C1C01CA2988900E15D84 /* Networking+Image.swift */,
+				14D144DD1CEED63B00048629 /* FormDataPart.swift */,
+				1474C1BC1CA2988900E15D84 /* Dictionary+FormURLEncoded.swift */,
 				14676B951CCB490C00FFDC92 /* NSFileManager+Helpers.swift */,
 				1413C1D51CBD1784000AF90F /* String+UTF8.swift */,
-				1474C1C21CA2988900E15D84 /* TestCheck.swift */,
-				14D144DD1CEED63B00048629 /* FormDataPart.swift */,
+				1474C1BD1CA2988900E15D84 /* JSON.swift */,
 				148341701CF1CF0500E91F01 /* NetworkingImage.swift */,
+				1474C1C21CA2988900E15D84 /* TestCheck.swift */,
+				1474C1BE1CA2988900E15D84 /* NetworkActivityIndicator.swift */,
 			);
 			path = Sources;
 			sourceTree = "<group>";

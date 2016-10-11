@@ -120,10 +120,9 @@ public class Networking {
     private let baseURL: String
     var fakeRequests = [RequestType: [String: FakeRequest]]()
     var token: String?
-    var authorizationHeaderValue: String?
-    var authorizationHeaderKey = "Authorization"
     var cache: NSCache<AnyObject, AnyObject>
     var configurationType: ConfigurationType
+    fileprivate let authorizationHeaderKey = "Authorization"
 
     /** 
      Flag used to disable synchronous request when running automatic tests.
@@ -150,39 +149,33 @@ public class Networking {
     }
 
     /** 
-     Authenticates using Basic Authentication, it converts username:password to Base64 then sets the Authorization header to "Basic \(Base64(username:password))".
-     - parameter username: The username to be used.
-     - parameter password: The password to be used.
+     Sets the HTTP "Authorization" header using Basic Authentication, it converts username:password to Base64 then sets the header to "Basic \(Base64(username:password))".
      */
-    public func addBasicAuthenticationField(username: String, password: String) {
-        let credentialsString = "\(username):\(password)"
-        if let credentialsData = credentialsString.data(using: .utf8) {
-            let base64Credentials = credentialsData.base64EncodedString(options: [])
-            let authString = "Basic \(base64Credentials)"
+    public var basicAuthenticationHeaderField: (username: String, password: String)? {
+        didSet {
+            guard let headerField = self.basicAuthenticationHeaderField else { return }
 
-            let config = self.sessionConfiguration()
-            config.httpAdditionalHeaders = [self.authorizationHeaderKey as AnyHashable: authString]
-            self.session = URLSession(configuration: config)
+            let credentialsString = "\(headerField.username):\(headerField.password)"
+            if let credentialsData = credentialsString.data(using: .utf8) {
+                let base64Credentials = credentialsData.base64EncodedString(options: [])
+                let authString = "Basic \(base64Credentials)"
+
+                let config = self.sessionConfiguration()
+                config.httpAdditionalHeaders = [self.authorizationHeaderKey as AnyHashable: authString]
+                self.session = URLSession(configuration: config)
+            }
         }
     }
 
     /** 
-     Authenticates using a Bearer token, sets the Authorization header to "Bearer \(token)".
-     - parameter token: The token to be used.
+     Sets the value of the the HTTP "Authorization" header.
      */
-    public func addBasicAuthenticationField(token: String) {
-        self.token = token
-    }
+    public var authenticationHeaderFieldValue: String?
 
     /** 
-     Authenticates using a custom HTTP Authorization header.
-     - parameter authorizationHeaderKey: Sets this value as the key for the HTTP `Authorization` header
-     - parameter authorizationHeaderValue: Sets this value to the HTTP `Authorization` header or to the `headerKey` if you provided that.
+     Sets the header fields for every HTTP call.
      */
-    public func addBasicAuthenticationHeader(headerKey: String = "Authorization", headerValue: String) {
-        self.authorizationHeaderKey = headerKey
-        self.authorizationHeaderValue = headerValue
-    }
+    public var headerFields: [String: String]?
 
     /** 
      Returns a NSURL by appending the provided path to the Networking's base URL.
@@ -501,10 +494,14 @@ extension Networking {
             request.addValue(accept, forHTTPHeaderField: "Accept")
         }
 
-        if let authorizationHeader = self.authorizationHeaderValue {
-            request.setValue(authorizationHeader, forHTTPHeaderField: self.authorizationHeaderKey)
-        } else if let token = self.token {
-            request.setValue("Bearer \(token)", forHTTPHeaderField: self.authorizationHeaderKey)
+        if let authenticationHeaderFieldValue = self.authenticationHeaderFieldValue {
+            request.setValue(authenticationHeaderFieldValue, forHTTPHeaderField: self.authorizationHeaderKey)
+        }
+
+        if let headerFields = self.headerFields {
+            for (key, value) in headerFields {
+                request.setValue(value, forHTTPHeaderField: key)
+            }
         }
 
         DispatchQueue.main.async {
