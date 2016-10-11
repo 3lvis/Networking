@@ -119,7 +119,6 @@ public class Networking {
 
     private let baseURL: String
     var fakeRequests = [RequestType: [String: FakeRequest]]()
-    var token: String?
     var cache: NSCache<AnyObject, AnyObject>
     var configurationType: ConfigurationType
     fileprivate let authorizationHeaderKey = "Authorization"
@@ -146,6 +145,35 @@ public class Networking {
         self.baseURL = baseURL
         self.configurationType = configurationType
         self.cache = cache ?? NSCache()
+    }
+
+    /** 
+     Authenticates using Basic Authentication, it converts username:password to Base64 then sets the Authorization header to "Basic \(Base64(username:password))".
+     - parameter username: The username to be used.
+     - parameter password: The password to be used.
+     */
+    @available(*, deprecated: 2.2.0, message: "Use `var basicAuthenticationHeaderField` instead.")
+    public func authenticate(username: String, password: String) {
+        self.basicAuthenticationHeaderField = (username, password)
+    }
+
+    /** 
+     Authenticates using a Bearer token, sets the Authorization header to "Bearer \(token)".
+     - parameter token: The token to be used.
+     */
+    @available(*, deprecated: 2.2.0, message: "Use `var authenticationHeaderFieldValue` with \"Bearer \\(token)\" as value instead.")
+    public func authenticate(token: String) {
+        self.authenticationHeaderFieldValue = "Bearer \(token)"
+    }
+
+    /** 
+     Authenticates using a custom HTTP Authorization header.
+     - parameter authorizationHeaderKey: Sets this value as the key for the HTTP `Authorization` header
+     - parameter authorizationHeaderValue: Sets this value to the HTTP `Authorization` header or to the `headerKey` if you provided that.
+     */
+    @available(*, deprecated: 2.2.0, message: "Use `var headerFields` instead.")
+    public func authenticate(headerKey: String = "Authorization", headerValue: String) {
+        self.headerFields = [headerKey: headerValue]
     }
 
     /** 
