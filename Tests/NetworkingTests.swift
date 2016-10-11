@@ -6,7 +6,7 @@ class NetworkingTests: XCTestCase {
 
     func testBasicAuth() {
         let networking = Networking(baseURL: baseURL)
-        networking.authenticate(username: "user", password: "passwd")
+        networking.addBasicAuthenticationField(username: "user", password: "passwd")
         networking.GET("/basic-auth/user/passwd") { JSON, error in
             guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
             let user = JSON["user"] as? String
@@ -19,7 +19,7 @@ class NetworkingTests: XCTestCase {
     func testBearerTokenAuth() {
         let networking = Networking(baseURL: baseURL)
         let token = "hi-mom"
-        networking.authenticate(token: token)
+        networking.addBasicAuthenticationField(token: token)
         networking.POST("/post") { JSON, error in
             guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
             let headers = JSON["headers"] as? [String: Any]
@@ -30,7 +30,7 @@ class NetworkingTests: XCTestCase {
     func testCustomAuthorizationHeaderValue() {
         let networking = Networking(baseURL: baseURL)
         let value = "hi-mom"
-        networking.authenticate(headerValue: value)
+        networking.addBasicAuthenticationHeader(headerValue: value)
         networking.POST("/post") { JSON, error in
             guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
             let headers = JSON["headers"] as? [String: Any]
@@ -42,7 +42,7 @@ class NetworkingTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         let key = "Anonymous-Token"
         let value = "hi-mom"
-        networking.authenticate(headerKey: key, headerValue: value)
+        networking.addBasicAuthenticationHeader(headerKey: key, headerValue: value)
         networking.POST("/post") { JSON, error in
             guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
             let headers = JSON["headers"] as? [String: Any]
