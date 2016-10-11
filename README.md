@@ -29,7 +29,7 @@
 * [Making a request](#making-a-request)
 * [Choosing a content or parameter type](#choosing-a-content-or-parameter-type)
     * [JSON](#json)
-    * [Percent-encoding](#percent-encoding)
+    * [URL-encoding](#url-encoding)
     * [Multipart](#multipart)
     * [Others](#others)
 * [Cancelling a request](#cancelling-a-request)
@@ -173,9 +173,9 @@ networking.POST("/post", parameters: ["name" : "jameson"]) { JSON, error in
 }
 ```
 
-### Percent-encoding
+### URL-encoding
 
- If you want to use `application/x-www-form-urlencoded` just use the `.FormURLEncoded` parameter type, internally **Networking** will format your parameters so they use [`Percent-encoding`](https://en.wikipedia.org/wiki/Percent-encoding#The_application.2Fx-www-form-urlencoded_type).
+ If you want to use `application/x-www-form-urlencoded` just use the `.FormURLEncoded` parameter type, internally **Networking** will format your parameters so they use [`Percent-encoding` or `URL-enconding`](https://en.wikipedia.org/wiki/Percent-encoding#The_application.2Fx-www-form-urlencoded_type).
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
