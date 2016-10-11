@@ -27,7 +27,7 @@
     * [Bearer token](#bearer-token)
     * [Custom authentication header](#custom-authentication-header)
 * [Making a request](#making-a-request)
-* [Choosing a content or parameter type](#choosing-a-content-or-parameter-type)
+* [Choosing a content or parameter type](#choosing-a-content-or-paramter-type)
     * [JSON](#json)
     * [URL-encoding](#url-encoding)
     * [Multipart](#multipart)
