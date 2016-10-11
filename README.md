@@ -27,7 +27,7 @@
     * [Bearer token](#bearer-token)
     * [Custom authentication header](#custom-authentication-header)
 * [Making a request](#making-a-request)
-* [Choosing a content or parameter type](#choosing-a-content-or-paramter-type)
+* [Choosing a content or parameter type](#choosing-a-content-or-parameter-type)
     * [JSON](#json)
     * [URL-encoding](#url-encoding)
     * [Multipart](#multipart)
@@ -156,7 +156,7 @@ networking.POST("/post", parameters: ["username" : "jameson", "password" : "secr
 }
 ```
 
-## Choosing a Content or Paramter Type
+## Choosing a Content or Parameter Type
 
 The `Content-Type` HTTP specification is so unfriendly, you have to know the specifics of it before understanding that content type is really just the parameter type. Because of this **Networking** uses a `ParameterType` instead of a `ContentType`. Anyway, here's hoping this makes it more human friendly.
 
