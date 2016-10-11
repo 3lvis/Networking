@@ -5,8 +5,6 @@
 ![platforms](https://img.shields.io/badge/platforms-iOS%20%7C%20OS%20X%20%7C%20watchOS%20%7C%20tvOS%20-lightgrey.svg)
 [![License](https://img.shields.io/cocoapods/l/Networking.svg?style=flat)](https://cocoapods.org/pods/Networking)
 
->使用简单、功能惊喜，基于 NSURLSession 的网络封装库。功能包括带身份验证请求，支持单元测试（mocking/stubbing），异步执行，图片下载及缓存等实用特性。
-
 **Networking** was born out of the necessity of having a simple networking library that doesn't have crazy programming abstractions or uses the latest reactive programming techniques, but just a plain, simple and convenient wrapper around `NSURLSession` that supports common needs such as faking requests and caching images out of the box. A library that is small enough to read in one go but useful enough to include in any project. That's how **Networking** came to life, a fully tested library for iOS, tvOS, watchOS and OS X that will always be there for you.
 
 - Super friendly API
@@ -454,3 +452,7 @@ This library was made with love by [@3lvis](https://twitter.com/3lvis).
 ## Attribution
 
 The logo typeface comes thanks to [Sanid Jusić](https://dribbble.com/shots/1049674-Free-Colorfull-Triangle-Typeface).
+
+
+## Chinese description
+>使用简单、功能惊喜，基于 NSURLSession 的网络封装库。功能包括带身份验证请求，支持单元测试（mocking/stubbing），异步执行，图片下载及缓存等实用特性。
