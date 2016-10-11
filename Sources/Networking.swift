@@ -523,7 +523,7 @@ extension Networking {
                 break
             case .formURLEncoded:
                 guard let parametersDictionary = parameters as? [String: Any] else { fatalError("Couldn't convert parameters to a dictionary: \(parameters)") }
-                let formattedParameters = parametersDictionary.formURLEncodedFormat()
+                let formattedParameters = parametersDictionary.urlEncodedString()
                 request.httpBody = formattedParameters.data(using: .utf8)
                 break
             case .multipartFormData:
@@ -680,7 +680,7 @@ extension Networking {
                     break
                 case .formURLEncoded:
                     guard let parametersDictionary = parameters as? [String: Any] else { fatalError("Couldn't cast parameters as dictionary: \(parameters)") }
-                    let formattedParameters = parametersDictionary.formURLEncodedFormat()
+                    let formattedParameters = parametersDictionary.urlEncodedString()
                     print("Parameters: \(formattedParameters)")
                     print(" ")
                     break
