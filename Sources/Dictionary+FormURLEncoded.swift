@@ -1,17 +1,14 @@
 import Foundation
 
-extension Dictionary where Key: ExpressibleByStringLiteral {
+public extension Dictionary where Key: ExpressibleByStringLiteral {
 
-    func formURLEncodedFormat() -> String {
-        var converted = ""
-        for (index, entry) in self.enumerated() {
-            if index > 0 {
-                converted.append("&")
-            }
-            converted.append("\(entry.0)=\(entry.1)")
-        }
+    /** 
+     Returns the parameters in using URL-enconding, for example ["username": "Michael", "age": 20] will become "username=Michael&age=20".
+     */
+    public func urlEncodedString() -> String {
+        let converted = self.map { key, value in "\(key)=\(value)" }.joined(separator: "&")
+        guard let encodedParameters = converted.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed) else { fatalError("Couldn't encode parameters: \(converted)") }
 
-        guard let encodedParameters = converted.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed) else { fatalError("Couldn't convert parameters to form url: \(converted)") }
         return encodedParameters
     }
 }
