@@ -12,7 +12,7 @@ extension String {
             let lastComponentAsString = lastComponent.map { String($0) }.reduce("", +)
             if let rangeOfLastComponent = self.range(of: lastComponentAsString) {
                 let stringWithoutLastComponent = self.substring(to: rangeOfLastComponent.lowerBound)
-                if let lastComponentEncoded = lastComponentAsString.addingPercentEncoding(withAllowedCharacters: CharacterSet.alphanumerics) {
+                if let lastComponentEncoded = lastComponentAsString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
                     let encodedString = stringWithoutLastComponent + lastComponentEncoded
                     return encodedString
                 }
