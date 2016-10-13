@@ -83,6 +83,20 @@ class NetworkingTests: XCTestCase {
         XCTAssertEqual(destinationURL.lastPathComponent, "http:--httpbin.org-image-png")
     }
 
+    func testDestinationURLWithSpecialCharactersInPath() {
+        let networking = Networking(baseURL: baseURL)
+        let path = "/h�sttur.jpg"
+        guard let destinationURL = try? networking.destinationURL(for: path) else { XCTFail(); return }
+        XCTAssertEqual(destinationURL.lastPathComponent, "http:--httpbin.org-h%EF%BF%BDsttur.jpg")
+    }
+
+    func testDestinationURLWithSpecialCharactersInCacheName() {
+        let networking = Networking(baseURL: baseURL)
+        let path = "/the-url-doesnt-really-matter"
+        guard let destinationURL = try? networking.destinationURL(for: path, cacheName: "h�sttur.jpg-25-03/small") else { XCTFail(); return }
+        XCTAssertEqual(destinationURL.lastPathComponent, "h%EF%BF%BDsttur.jpg-25-03-small")
+    }
+
     func testDestinationURLCache() {
         let networking = Networking(baseURL: baseURL)
         let path = "/image/png"
