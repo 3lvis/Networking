@@ -96,6 +96,16 @@ class NetworkingTests: XCTestCase {
         }
     }
 
+    func testHeaderField() {
+        let networking = Networking(baseURL: baseURL)
+        networking.headerFields = ["HeaderKey": "HeaderValue"]
+        networking.POST("/post") { JSON, error in
+            guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
+            let headers = JSON["headers"] as? [String: Any]
+            XCTAssertEqual("HeaderValue", headers?["Headerkey"] as? String)
+        }
+    }
+
     func testURLForPath() {
         let networking = Networking(baseURL: baseURL)
         let url = networking.url(for: "/hello")

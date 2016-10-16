@@ -175,6 +175,11 @@ public class Networking {
     }
 
     /** 
+     Sets the header fields for every HTTP call.
+     */
+    public var headerFields: [String: String]?
+
+    /** 
      Authenticates using a custom HTTP Authorization header.
      - parameter authorizationHeaderKey: Sets this value as the key for the HTTP `Authorization` header
      - parameter authorizationHeaderValue: Sets this value to the HTTP `Authorization` header or to the `headerKey` if you provided that.
@@ -535,6 +540,12 @@ extension Networking {
             request.setValue(authorizationHeader, forHTTPHeaderField: self.authorizationHeaderKey)
         } else if let token = self.token {
             request.setValue("Bearer \(token)", forHTTPHeaderField: self.authorizationHeaderKey)
+        }
+
+        if let headerFields = self.headerFields {
+            for (key, value) in headerFields {
+                request.setValue(value, forHTTPHeaderField: key)
+            }
         }
 
         DispatchQueue.main.async {
