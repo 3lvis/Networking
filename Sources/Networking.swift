@@ -154,7 +154,7 @@ public class Networking {
      */
     @available(*, deprecated: 2.2.0, message: "Use `var basicAuthenticationHeaderField` instead.")
     public func authenticate(username: String, password: String) {
-        self.basicAuthenticationHeaderField = (username, password)
+        self.setBasicAuthenticationHeader(username: username, password: password)
     }
 
     /** 
@@ -179,21 +179,22 @@ public class Networking {
     /** 
      Sets the HTTP "Authorization" header using Basic Authentication, it converts username:password to Base64 then sets the header to "Basic \(Base64(username:password))".
      */
-    public var basicAuthenticationHeaderField: (username: String, password: String)? {
-        didSet {
-            guard let headerField = self.basicAuthenticationHeaderField else { return }
+    public func setBasicAuthenticationHeader(username: String, password: String) {
+        let credentialsString = "\(username):\(password)"
+        if let credentialsData = credentialsString.data(using: .utf8) {
+            let base64Credentials = credentialsData.base64EncodedString(options: [])
+            let authString = "Basic \(base64Credentials)"
 
-            let credentialsString = "\(headerField.username):\(headerField.password)"
-            if let credentialsData = credentialsString.data(using: .utf8) {
-                let base64Credentials = credentialsData.base64EncodedString(options: [])
-                let authString = "Basic \(base64Credentials)"
-
-                let config = self.sessionConfiguration()
-                config.httpAdditionalHeaders = [self.authorizationHeaderKey as AnyHashable: authString]
-                self.session = URLSession(configuration: config)
-            }
+            let config = self.sessionConfiguration()
+            config.httpAdditionalHeaders = [self.authorizationHeaderKey as AnyHashable: authString]
+            self.session = URLSession(configuration: config)
         }
     }
+
+    /** 
+     Authenticates using a Bearer token, sets the Authorization header to "Bearer \(token)".
+     */
+    public var bearerTokenAuthenticationHeader: String?
 
     /** 
      Sets the value of the the HTTP "Authorization" header.
@@ -525,6 +526,10 @@ extension Networking {
 
         if let authenticationHeaderFieldValue = self.authenticationHeaderFieldValue {
             request.setValue(authenticationHeaderFieldValue, forHTTPHeaderField: self.authorizationHeaderKey)
+        }
+
+        if let token = self.bearerTokenAuthenticationHeader {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: self.authorizationHeaderKey)
         }
 
         if let headerFields = self.headerFields {

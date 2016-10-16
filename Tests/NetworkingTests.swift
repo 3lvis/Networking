@@ -52,8 +52,8 @@ class NetworkingTests: XCTestCase {
 
     func testBasicAuthenticationHeaderField() {
         let networking = Networking(baseURL: baseURL)
-        networking.basicAuthenticationHeaderField = (username: "user", password: "passwd")
-        networking.GET("/basic-auth/user/passwd") { JSON, error in
+        networking.setBasicAuthenticationHeader(username: "user", password: "s3cr3t")
+        networking.GET("/basic-auth/user/s3cr3t") { JSON, error in
             guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
             let user = JSON["user"] as? String
             let authenticated = JSON["authenticated"] as? Bool
@@ -65,7 +65,7 @@ class NetworkingTests: XCTestCase {
     func testAuthenticationHeaderFieldValue() {
         let networking = Networking(baseURL: baseURL)
         let token = "hi-mom"
-        networking.authenticationHeaderFieldValue = "Bearer \(token)"
+        networking.bearerTokenAuthenticationHeader = token
         networking.POST("/post") { JSON, error in
             guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
             let headers = JSON["headers"] as? [String: Any]
@@ -79,7 +79,7 @@ class NetworkingTests: XCTestCase {
         networking.POST("/post") { JSON, error in
             guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
             let headers = JSON["headers"] as? [String: Any]
-            XCTAssertEqual("HeaderValue", headers?["HeaderKey"] as? String)
+            XCTAssertEqual("HeaderValue", headers?["Headerkey"] as? String)
         }
     }
 
