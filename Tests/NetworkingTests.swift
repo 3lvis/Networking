@@ -50,6 +50,52 @@ class NetworkingTests: XCTestCase {
         }
     }
 
+    func testSetAuthorizationHeaderWithUsernameAndPassword() {
+        let networking = Networking(baseURL: baseURL)
+        networking.setAuthorizationHeader(username: "user", password: "passwd")
+        networking.GET("/basic-auth/user/passwd") { JSON, error in
+            guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
+            let user = JSON["user"] as? String
+            let authenticated = JSON["authenticated"] as? Bool
+            XCTAssertEqual(user, "user")
+            XCTAssertEqual(authenticated, true)
+        }
+    }
+
+    func testSetAuthorizationHeaderWithBearerToken() {
+        let networking = Networking(baseURL: baseURL)
+        let token = "hi-mom"
+        networking.setAuthorizationHeader(token: token)
+        networking.POST("/post") { JSON, error in
+            guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
+            let headers = JSON["headers"] as? [String: Any]
+            XCTAssertEqual("Bearer \(token)", headers?["Authorization"] as? String)
+        }
+    }
+
+    func setAuthorizationHeaderCustomValue() {
+        let networking = Networking(baseURL: baseURL)
+        let value = "hi-mom"
+        networking.setAuthorizationHeader(headerValue: value)
+        networking.POST("/post") { JSON, error in
+            guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
+            let headers = JSON["headers"] as? [String: Any]
+            XCTAssertEqual(value, headers?["Authorization"] as? String)
+        }
+    }
+
+    func setAuthorizationHeaderCustomHeaderKeyAndValue() {
+        let networking = Networking(baseURL: baseURL)
+        let key = "Anonymous-Token"
+        let value = "hi-mom"
+        networking.setAuthorizationHeader(headerKey: key, headerValue: value)
+        networking.POST("/post") { JSON, error in
+            guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
+            let headers = JSON["headers"] as? [String: Any]
+            XCTAssertEqual(value, headers?[key] as? String)
+        }
+    }
+
     func testURLForPath() {
         let networking = Networking(baseURL: baseURL)
         let url = networking.url(for: "/hello")

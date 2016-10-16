@@ -154,7 +154,7 @@ public class Networking {
      - parameter username: The username to be used.
      - parameter password: The password to be used.
      */
-    public func authenticate(username: String, password: String) {
+    public func setAuthorizationHeader(username: String, password: String) {
         let credentialsString = "\(username):\(password)"
         if let credentialsData = credentialsString.data(using: .utf8) {
             let base64Credentials = credentialsData.base64EncodedString(options: [])
@@ -170,7 +170,7 @@ public class Networking {
      Authenticates using a Bearer token, sets the Authorization header to "Bearer \(token)".
      - parameter token: The token to be used.
      */
-    public func authenticate(token: String) {
+    public func setAuthorizationHeader(token: String) {
         self.token = token
     }
 
@@ -179,9 +179,38 @@ public class Networking {
      - parameter authorizationHeaderKey: Sets this value as the key for the HTTP `Authorization` header
      - parameter authorizationHeaderValue: Sets this value to the HTTP `Authorization` header or to the `headerKey` if you provided that.
      */
-    public func authenticate(headerKey: String = "Authorization", headerValue: String) {
+    public func setAuthorizationHeader(headerKey: String = "Authorization", headerValue: String) {
         self.authorizationHeaderKey = headerKey
         self.authorizationHeaderValue = headerValue
+    }
+
+    /** 
+     Authenticates using Basic Authentication, it converts username:password to Base64 then sets the Authorization header to "Basic \(Base64(username:password))".
+     - parameter username: The username to be used.
+     - parameter password: The password to be used.
+     */
+    @available(*, deprecated: 2.2.0, message: "Use `func setAuthorizationHeader(username:password)` instead.")
+    public func authenticate(username: String, password: String) {
+        self.setAuthorizationHeader(username: username, password: password)
+    }
+
+    /** 
+     Authenticates using a Bearer token, sets the Authorization header to "Bearer \(token)".
+     - parameter token: The token to be used.
+     */
+    @available(*, deprecated: 2.2.0, message: "Use `func setAuthorizationHeader(token)` instead")
+    public func authenticate(token: String) {
+        self.setAuthorizationHeader(token: token)
+    }
+
+    /** 
+     Authenticates using a custom HTTP Authorization header.
+     - parameter authorizationHeaderKey: Sets this value as the key for the HTTP `Authorization` header
+     - parameter authorizationHeaderValue: Sets this value to the HTTP `Authorization` header or to the `headerKey` if you provided that.
+     */
+    @available(*, deprecated: 2.2.0, message: "Use `func setAuthorizationHeader(headerKey:headerValue)` instead.")
+    public func authenticate(headerKey: String = "Authorization", headerValue: String) {
+        self.setAuthorizationHeader(headerKey: headerKey, headerValue: headerValue)
     }
 
     /** 
