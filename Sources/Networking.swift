@@ -222,7 +222,8 @@ public class Networking {
      - returns: A NSURL where a resource has been stored.
      */
     public func destinationURL(for path: String, cacheName: String? = nil) throws -> URL {
-        let resourcesPath = cacheName ?? self.url(for: path).absoluteString
+        let normalizedCacheName = cacheName?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
+        let resourcesPath = normalizedCacheName ?? self.url(for: path).absoluteString
         let normalizedResourcesPath = resourcesPath.replacingOccurrences(of: "/", with: "-")
         let folderPath = Networking.domain
         let finalPath = "\(folderPath)/\(normalizedResourcesPath)"
