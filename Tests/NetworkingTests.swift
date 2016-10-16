@@ -171,8 +171,28 @@ class NetworkingTests: XCTestCase {
         XCTAssertEqual(relativePath2, "/basic-auth/user/passwd")
     }
 
-    func testCancelRequests() {
-        let expectation = self.expectation(description: "testCancelRequests")
+    func testCancelWithRequestID() {
+        let expectation = self.expectation(description: "testCancelAllRequests")
+        let networking = Networking(baseURL: baseURL)
+        networking.disableTestingMode = true
+        var cancelledGET = false
+
+        let requestID = networking.GET("/get") { JSON, error in
+            cancelledGET = error?.code == -999
+            XCTAssertTrue(cancelledGET)
+
+            if cancelledGET {
+                expectation.fulfill()
+            }
+        }
+
+        networking.cancel(with: requestID, completion: nil)
+
+        self.waitForExpectations(timeout: 15.0, handler: nil)
+    }
+
+    func testCancelAllRequests() {
+        let expectation = self.expectation(description: "testCancelAllRequests")
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
         var cancelledGET = false
