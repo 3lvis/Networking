@@ -2,7 +2,7 @@ import Foundation
 
 public extension Int {
 
-    /** 
+    /**
      Categorizes a status code.
      - returns: The NetworkingStatusCodeType of the status code.
      */
@@ -32,7 +32,7 @@ public class Networking {
         let statusCode: Int
     }
 
-    /** 
+    /**
      Provides the options for configuring your Networking object with NSURLSessionConfiguration.
      - `Default:` This configuration type manages upload and download tasks using the default options.
      - `Ephemeral:` A configuration type that uses no persistent storage for caches, cookies, or credentials. It's optimized for transferring data to and from your app’s memory.
@@ -50,7 +50,7 @@ public class Networking {
         case Data, Upload, Download
     }
 
-    /** 
+    /**
      Sets the rules to serialize your parameters, also sets the `Content-Type` header.
      - `JSON:` Serializes your parameters using `NSJSONSerialization` and sets your `Content-Type` to `application/json`.
      - `FormURLEncoded:` Serializes your parameters using `Percent-encoding` and sets your `Content-Type` to `application/x-www-form-urlencoded`.
@@ -58,19 +58,19 @@ public class Networking {
      - `Custom(String):` Sends your parameters as plain data, sets your `Content-Type` to the value inside `Custom`.
      */
     public enum ParameterType {
-        /** 
+        /**
          Serializes your parameters using `NSJSONSerialization` and sets your `Content-Type` to `application/json`.
          */
         case json
-        /** 
+        /**
          Serializes your parameters using `Percent-encoding` and sets your `Content-Type` to `application/x-www-form-urlencoded`.
          */
         case formURLEncoded
-        /** 
+        /**
          Serializes your parameters and parts as multipart and sets your `Content-Type` to `multipart/form-data`.
          */
         case multipartFormData
-        /** 
+        /**
          Sends your parameters as plain data, sets your `Content-Type` to the value inside `Custom`.
          */
         case custom(String)
@@ -104,7 +104,7 @@ public class Networking {
         }
     }
 
-    /** 
+    /**
      Categorizes a status code.
      - `Informational`: This class of status code indicates a provisional response, consisting only of the Status-Line and optional headers, and is terminated by an empty line.
      - `Successful`: This class of status code indicates that the client's request was successfully received, understood, and accepted.
@@ -125,12 +125,12 @@ public class Networking {
     var cache: NSCache<AnyObject, AnyObject>
     var configurationType: ConfigurationType
 
-    /** 
+    /**
      Flag used to disable synchronous request when running automatic tests.
      */
     var disableTestingMode = false
 
-    /** 
+    /**
      The boundary used for multipart requests.
      */
     let boundary = String(format: "net.3lvis.networking.%08x%08x", arc4random(), arc4random())
@@ -139,7 +139,7 @@ public class Networking {
         return URLSession(configuration: self.sessionConfiguration())
     }()
 
-    /** 
+    /**
      Base initializer, it creates an instance of `Networking`.
      - parameter baseURL: The base URL for HTTP requests under `Networking`.
      */
@@ -149,7 +149,7 @@ public class Networking {
         self.cache = cache ?? NSCache()
     }
 
-    /** 
+    /**
      Authenticates using Basic Authentication, it converts username:password to Base64 then sets the Authorization header to "Basic \(Base64(username:password))".
      - parameter username: The username to be used.
      - parameter password: The password to be used.
@@ -166,7 +166,7 @@ public class Networking {
         }
     }
 
-    /** 
+    /**
      Authenticates using a Bearer token, sets the Authorization header to "Bearer \(token)".
      - parameter token: The token to be used.
      */
@@ -174,12 +174,12 @@ public class Networking {
         self.token = token
     }
 
-    /** 
+    /**
      Sets the header fields for every HTTP call.
      */
     public var headerFields: [String: String]?
 
-    /** 
+    /**
      Authenticates using a custom HTTP Authorization header.
      - parameter authorizationHeaderKey: Sets this value as the key for the HTTP `Authorization` header
      - parameter authorizationHeaderValue: Sets this value to the HTTP `Authorization` header or to the `headerKey` if you provided that.
@@ -189,7 +189,7 @@ public class Networking {
         self.authorizationHeaderValue = headerValue
     }
 
-    /** 
+    /**
      Authenticates using Basic Authentication, it converts username:password to Base64 then sets the Authorization header to "Basic \(Base64(username:password))".
      - parameter username: The username to be used.
      - parameter password: The password to be used.
@@ -199,7 +199,7 @@ public class Networking {
         self.setAuthorizationHeader(username: username, password: password)
     }
 
-    /** 
+    /**
      Authenticates using a Bearer token, sets the Authorization header to "Bearer \(token)".
      - parameter token: The token to be used.
      */
@@ -208,7 +208,7 @@ public class Networking {
         self.setAuthorizationHeader(token: token)
     }
 
-    /** 
+    /**
      Authenticates using a custom HTTP Authorization header.
      - parameter authorizationHeaderKey: Sets this value as the key for the HTTP `Authorization` header
      - parameter authorizationHeaderValue: Sets this value to the HTTP `Authorization` header or to the `headerKey` if you provided that.
@@ -218,7 +218,7 @@ public class Networking {
         self.setAuthorizationHeader(headerKey: headerKey, headerValue: headerValue)
     }
 
-    /** 
+    /**
      Returns a NSURL by appending the provided path to the Networking's base URL.
      - parameter path: The path to be appended to the base URL.
      - returns: A NSURL generated after appending the path to the base URL.
@@ -229,7 +229,7 @@ public class Networking {
         return url
     }
 
-    /** 
+    /**
      Returns the NSURL used to store a resource for a certain path. Useful to find where a download image is located.
      - parameter path: The path used to download the resource.
      - returns: A NSURL where a resource has been stored.
@@ -266,7 +266,7 @@ public class Networking {
         }
     }
 
-    /** 
+    /**
      Splits a url in base url and relative path.
      - parameter path: The full url to be splitted.
      - returns: A base url and a relative path.
@@ -282,7 +282,7 @@ public class Networking {
         return (baseURL, relativePath)
     }
 
-    /** 
+    /**
      Cancels the request that matches the requestID.
      - parameter requestID: The ID of the request to be cancelled.
      - parameter completion: The completion block to be called when the request is cancelled.
@@ -305,7 +305,7 @@ public class Networking {
         }
     }
 
-    /** 
+    /**
      Cancels all the current requests.
      - parameter completion: The completion block to be called when all the requests are cancelled.
      */
@@ -327,25 +327,25 @@ public class Networking {
         }
     }
 
-    /** 
+    /**
      Downloads data from a URL, caching the result.
      - parameter path: The path used to download the resource.
      - parameter completion: A closure that gets called when the download request is completed, it contains  a `data` object and a `NSError`.
      */
-    public func downloadData(for path: String, cacheName: String? = nil, completion: @escaping(_ data: Data?, _ error: NSError?) -> Void) {
+    public func downloadData(for path: String, cacheName: String? = nil, completion: @escaping (_ data: Data?, _ error: NSError?) -> Void) {
         self.request(.GET, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .data) { response, headers, error in
             completion(response as? Data, error)
         }
     }
 
-    /** 
+    /**
      Retrieves data from the cache or from the filesystem.
      - parameter path: The path where the image is located.
      - parameter cacheName: The cache name used to identify the downloaded data, by default the path is used.
      - parameter completion: A closure that returns the data from the cache, if no data is found it will return nil.
      */
     @available(*, deprecated: 2.0.1, message: "Use `dataFromCache(path: String, cacheName: String?)` instead. The asynchronous version will be removed since it's synchronous now.")
-    public func dataFromCache(for path: String, cacheName: String? = nil, completion: @escaping(_ data: Data?) -> Void) {
+    public func dataFromCache(for path: String, cacheName: String? = nil, completion: @escaping (_ data: Data?) -> Void) {
         let object = self.dataFromCache(for: path, cacheName: cacheName)
 
         TestCheck.testBlock(self.disableTestingMode) {
@@ -353,7 +353,7 @@ public class Networking {
         }
     }
 
-    /** 
+    /**
      Retrieves data from the cache or from the filesystem.
      - parameter path: The path where the image is located.
      - parameter cacheName: The cache name used to identify the downloaded data, by default the path is used.
@@ -364,7 +364,7 @@ public class Networking {
         return object as? Data
     }
 
-    /** 
+    /**
      Deletes the downloaded/cached files.
      */
     public static func deleteCachedFiles() {
@@ -451,7 +451,7 @@ extension Networking {
     }
 
     @discardableResult
-    func request(_ requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping(_ response: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> ()) -> String {
+    func request(_ requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> ()) -> String {
         var requestID = UUID().uuidString
 
         if let fakeRequests = self.fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
@@ -523,7 +523,7 @@ extension Networking {
     }
 
     @discardableResult
-    func dataRequest(_ requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping(_ response: Data?, _ headers: [AnyHashable: Any], _ error: NSError?) -> ()) -> String {
+    func dataRequest(_ requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Data?, _ headers: [AnyHashable: Any], _ error: NSError?) -> ()) -> String {
         let requestID = UUID().uuidString
         var request = URLRequest(url: self.url(for: path))
         request.httpMethod = requestType.rawValue
