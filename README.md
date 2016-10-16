@@ -68,7 +68,7 @@ To authenticate using [basic authentication](http://www.w3.org/Protocols/HTTP/1.
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-networking.authenticate(username: "aladdin", password: "opensesame")
+networking.setAuthorizationHeader(username: "aladdin", password: "opensesame")
 networking.GET("/basic-auth/aladdin/opensesame") { JSON, error in
     // Successfully logged in! Now do something with the JSON
 }
@@ -80,7 +80,7 @@ To authenticate using a [bearer token](https://tools.ietf.org/html/rfc6750) **"A
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-networking.authenticate(token: "AAAFFAAAA3DAAAAAA")
+networking.setAuthorizationHeader(token: "AAAFFAAAA3DAAAAAA")
 networking.GET("/get") { JSON, error in
     // Do something...
 }
@@ -92,7 +92,7 @@ To authenticate using a custom authentication header, for example **"Token token
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-networking.authenticate(headerValue: "Token token=AAAFFAAAA3DAAAAAA")
+networking.setAuthorizationHeader(headerValue: "Token token=AAAFFAAAA3DAAAAAA")
 networking.GET("/get") { JSON, error in
     // Do something...
 }
@@ -102,7 +102,7 @@ Providing the following authentication header `Anonymous-Token: AAAFFAAAA3DAAAAA
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-networking.authenticate(headerKey: "Anonymous-Token", headerValue: "AAAFFAAAA3DAAAAAA")
+networking.setAuthorizationHeader(headerKey: "Anonymous-Token", headerValue: "AAAFFAAAA3DAAAAAA")
 networking.GET("/get") { JSON, error in
     // Do something
 }
