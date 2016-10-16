@@ -480,7 +480,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1413F45A1CE795DC00482096 /* Build configuration list for PBXNativeTarget "macOSTests" */;
 			buildPhases = (
-				140372E31D8F397F00F5F502 /* Format Swift Code */,
 				1413F4511CE795DC00482096 /* Sources */,
 				1413F4521CE795DC00482096 /* Frameworks */,
 				1413F4531CE795DC00482096 /* Resources */,
@@ -570,7 +569,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 146D72B91AB782920058798C /* Build configuration list for PBXNativeTarget "iOSTests" */;
 			buildPhases = (
-				140372E11D8F391C00F5F502 /* Format Swift Code */,
 				146D72A81AB782920058798C /* Sources */,
 				146D72A91AB782920058798C /* Frameworks */,
 				146D72AA1AB782920058798C /* Resources */,
@@ -588,7 +586,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 44B5D3A81D19B9E5004378B9 /* Build configuration list for PBXNativeTarget "tvOSTests" */;
 			buildPhases = (
-				140372E21D8F397100F5F502 /* Format Swift Code */,
 				44B5D3891D19B9E5004378B9 /* Sources */,
 				44B5D3A11D19B9E5004378B9 /* Frameworks */,
 				44B5D3A21D19B9E5004378B9 /* Resources */,
@@ -606,7 +603,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 44DFD39E1D9A2D5A0014E9F2 /* Build configuration list for PBXNativeTarget "iOSDemo" */;
 			buildPhases = (
-				4405BBF01D9B64A400C703D4 /* Format Swift Code */,
 				44DFD3891D9A2D5A0014E9F2 /* Sources */,
 				44DFD38A1D9A2D5A0014E9F2 /* Frameworks */,
 				44DFD38B1D9A2D5A0014E9F2 /* Resources */,
@@ -781,65 +777,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		140372E11D8F391C00F5F502 /* Format Swift Code */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Format Swift Code";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/swiftformat\" \"${SRCROOT}/Sources\"";
-		};
-		140372E21D8F397100F5F502 /* Format Swift Code */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Format Swift Code";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/swiftformat\" \"${SRCROOT}/Sources\"";
-		};
-		140372E31D8F397F00F5F502 /* Format Swift Code */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Format Swift Code";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/swiftformat\" \"${SRCROOT}/Sources\"";
-		};
-		4405BBF01D9B64A400C703D4 /* Format Swift Code */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Format Swift Code";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/swiftformat\" \"${SRCROOT}/Sources\"";
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		1413F4511CE795DC00482096 /* Sources */ = {
