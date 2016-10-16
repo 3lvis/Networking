@@ -50,10 +50,10 @@ class NetworkingTests: XCTestCase {
         }
     }
 
-    func testBasicAuthenticationHeaderField() {
+    func testSetAuthorizationHeaderWithUsernameAndPassword() {
         let networking = Networking(baseURL: baseURL)
-        networking.setBasicAuthenticationHeader(username: "user", password: "s3cr3t")
-        networking.GET("/basic-auth/user/s3cr3t") { JSON, error in
+        networking.setAuthorizationHeader(username: "user", password: "passwd")
+        networking.GET("/basic-auth/user/passwd") { JSON, error in
             guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
             let user = JSON["user"] as? String
             let authenticated = JSON["authenticated"] as? Bool
@@ -62,10 +62,10 @@ class NetworkingTests: XCTestCase {
         }
     }
 
-    func testAuthenticationHeaderFieldValue() {
+    func testSetAuthorizationHeaderWithBearerToken() {
         let networking = Networking(baseURL: baseURL)
         let token = "hi-mom"
-        networking.bearerTokenAuthenticationHeader = token
+        networking.setAuthorizationHeader(token: token)
         networking.POST("/post") { JSON, error in
             guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
             let headers = JSON["headers"] as? [String: Any]
@@ -73,13 +73,26 @@ class NetworkingTests: XCTestCase {
         }
     }
 
-    func testHeaderField() {
+    func setAuthorizationHeaderCustomValue() {
         let networking = Networking(baseURL: baseURL)
-        networking.headerFields = ["HeaderKey": "HeaderValue"]
+        let value = "hi-mom"
+        networking.setAuthorizationHeader(headerValue: value)
         networking.POST("/post") { JSON, error in
             guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
             let headers = JSON["headers"] as? [String: Any]
-            XCTAssertEqual("HeaderValue", headers?["Headerkey"] as? String)
+            XCTAssertEqual(value, headers?["Authorization"] as? String)
+        }
+    }
+
+    func setAuthorizationHeaderCustomHeaderKeyAndValue() {
+        let networking = Networking(baseURL: baseURL)
+        let key = "Anonymous-Token"
+        let value = "hi-mom"
+        networking.setAuthorizationHeader(headerKey: key, headerValue: value)
+        networking.POST("/post") { JSON, error in
+            guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
+            let headers = JSON["headers"] as? [String: Any]
+            XCTAssertEqual(value, headers?[key] as? String)
         }
     }
 

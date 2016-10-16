@@ -119,9 +119,11 @@ public class Networking {
 
     private let baseURL: String
     var fakeRequests = [RequestType: [String: FakeRequest]]()
+    var token: String?
+    var authorizationHeaderValue: String?
+    var authorizationHeaderKey = "Authorization"
     var cache: NSCache<AnyObject, AnyObject>
     var configurationType: ConfigurationType
-    fileprivate let authorizationHeaderKey = "Authorization"
 
     /** 
      Flag used to disable synchronous request when running automatic tests.
@@ -152,34 +154,7 @@ public class Networking {
      - parameter username: The username to be used.
      - parameter password: The password to be used.
      */
-    @available(*, deprecated: 2.2.0, message: "Use `var basicAuthenticationHeaderField` instead.")
-    public func authenticate(username: String, password: String) {
-        self.setBasicAuthenticationHeader(username: username, password: password)
-    }
-
-    /** 
-     Authenticates using a Bearer token, sets the Authorization header to "Bearer \(token)".
-     - parameter token: The token to be used.
-     */
-    @available(*, deprecated: 2.2.0, message: "Use `var authenticationHeaderFieldValue` with \"Bearer \\(token)\" as value instead.")
-    public func authenticate(token: String) {
-        self.authenticationHeaderFieldValue = "Bearer \(token)"
-    }
-
-    /** 
-     Authenticates using a custom HTTP Authorization header.
-     - parameter authorizationHeaderKey: Sets this value as the key for the HTTP `Authorization` header
-     - parameter authorizationHeaderValue: Sets this value to the HTTP `Authorization` header or to the `headerKey` if you provided that.
-     */
-    @available(*, deprecated: 2.2.0, message: "Use `var headerFields` instead.")
-    public func authenticate(headerKey: String = "Authorization", headerValue: String) {
-        self.headerFields = [headerKey: headerValue]
-    }
-
-    /** 
-     Sets the HTTP "Authorization" header using Basic Authentication, it converts username:password to Base64 then sets the header to "Basic \(Base64(username:password))".
-     */
-    public func setBasicAuthenticationHeader(username: String, password: String) {
+    public func setAuthorizationHeader(username: String, password: String) {
         let credentialsString = "\(username):\(password)"
         if let credentialsData = credentialsString.data(using: .utf8) {
             let base64Credentials = credentialsData.base64EncodedString(options: [])
@@ -193,18 +168,50 @@ public class Networking {
 
     /** 
      Authenticates using a Bearer token, sets the Authorization header to "Bearer \(token)".
+     - parameter token: The token to be used.
      */
-    public var bearerTokenAuthenticationHeader: String?
+    public func setAuthorizationHeader(token: String) {
+        self.token = token
+    }
 
     /** 
-     Sets the value of the the HTTP "Authorization" header.
+     Authenticates using a custom HTTP Authorization header.
+     - parameter authorizationHeaderKey: Sets this value as the key for the HTTP `Authorization` header
+     - parameter authorizationHeaderValue: Sets this value to the HTTP `Authorization` header or to the `headerKey` if you provided that.
      */
-    public var authenticationHeaderFieldValue: String?
+    public func setAuthorizationHeader(headerKey: String = "Authorization", headerValue: String) {
+        self.authorizationHeaderKey = headerKey
+        self.authorizationHeaderValue = headerValue
+    }
 
     /** 
-     Sets the header fields for every HTTP call.
+     Authenticates using Basic Authentication, it converts username:password to Base64 then sets the Authorization header to "Basic \(Base64(username:password))".
+     - parameter username: The username to be used.
+     - parameter password: The password to be used.
      */
-    public var headerFields: [String: String]?
+    @available(*, deprecated: 2.2.0, message: "Use `func setAuthorizationHeader(username:password)` instead.")
+    public func authenticate(username: String, password: String) {
+        self.setAuthorizationHeader(username: username, password: password)
+    }
+
+    /** 
+     Authenticates using a Bearer token, sets the Authorization header to "Bearer \(token)".
+     - parameter token: The token to be used.
+     */
+    @available(*, deprecated: 2.2.0, message: "Use `func setAuthorizationHeader(token)` instead")
+    public func authenticate(token: String) {
+        self.setAuthorizationHeader(token: token)
+    }
+
+    /** 
+     Authenticates using a custom HTTP Authorization header.
+     - parameter authorizationHeaderKey: Sets this value as the key for the HTTP `Authorization` header
+     - parameter authorizationHeaderValue: Sets this value to the HTTP `Authorization` header or to the `headerKey` if you provided that.
+     */
+    @available(*, deprecated: 2.2.0, message: "Use `func setAuthorizationHeader(headerKey:headerValue)` instead.")
+    public func authenticate(headerKey: String = "Authorization", headerValue: String) {
+        self.setAuthorizationHeader(headerKey: headerKey, headerValue: headerValue)
+    }
 
     /** 
      Returns a NSURL by appending the provided path to the Networking's base URL.
@@ -524,18 +531,10 @@ extension Networking {
             request.addValue(accept, forHTTPHeaderField: "Accept")
         }
 
-        if let authenticationHeaderFieldValue = self.authenticationHeaderFieldValue {
-            request.setValue(authenticationHeaderFieldValue, forHTTPHeaderField: self.authorizationHeaderKey)
-        }
-
-        if let token = self.bearerTokenAuthenticationHeader {
+        if let authorizationHeader = self.authorizationHeaderValue {
+            request.setValue(authorizationHeader, forHTTPHeaderField: self.authorizationHeaderKey)
+        } else if let token = self.token {
             request.setValue("Bearer \(token)", forHTTPHeaderField: self.authorizationHeaderKey)
-        }
-
-        if let headerFields = self.headerFields {
-            for (key, value) in headerFields {
-                request.setValue(value, forHTTPHeaderField: key)
-            }
         }
 
         DispatchQueue.main.async {
