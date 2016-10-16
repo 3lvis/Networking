@@ -57,4 +57,3 @@ class OptionsController: UITableViewController {
         object.action()
     }
 }
-

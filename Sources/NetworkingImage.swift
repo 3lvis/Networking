@@ -6,7 +6,7 @@
     public typealias NetworkingImage = UIImage
 #endif
 
-/** 
+/**
  Helper methods to handle UIImage and NSImage related tasks.
  */
 extension NetworkingImage {

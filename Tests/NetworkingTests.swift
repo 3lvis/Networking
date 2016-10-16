@@ -257,7 +257,6 @@ class NetworkingTests: XCTestCase {
         XCTAssertTrue(synchronous)
     }
 
-
     func testDataFromCache() {
         let cache = NSCache<AnyObject, AnyObject>()
         let networking = Networking(baseURL: "http://store.storeimages.cdn-apple.com", cache: cache)
