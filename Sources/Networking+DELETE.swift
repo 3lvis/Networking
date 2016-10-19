@@ -10,7 +10,7 @@ public extension Networking {
      */
     @discardableResult
     public func DELETE(_ path: String, completion: @escaping (_ JSON: Any?, _ error: NSError?) -> ()) -> String {
-        let requestID = self.request(.DELETE, path: path, parameterType: .json, parameters: nil, parts: nil, responseType: .json) { JSON, headers, error in
+        let requestID = self.request(.DELETE, path: path, parameterType: .none, parameters: nil, parts: nil, responseType: .json) { JSON, headers, error in
             completion(JSON, error)
         }
 
@@ -25,7 +25,7 @@ public extension Networking {
      */
     @discardableResult
     public func DELETE(_ path: String, completion: @escaping (_ JSON: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> ()) -> String {
-        let requestID = self.request(.DELETE, path: path, parameterType: .json, parameters: nil, parts: nil, responseType: .json, completion: completion)
+        let requestID = self.request(.DELETE, path: path, parameterType: .none, parameters: nil, parts: nil, responseType: .json, completion: completion)
 
         return requestID
     }
