@@ -1,9 +1,3 @@
-machine:
-  xcode:
-    version: "8.0"
-  environment:
-    GYM_CODE_SIGNING_IDENTITY: "Developer ID Application: Bakken & Bæck AS (29X3GG489T)"
-
 test:
   override:
     - xcodebuild
