@@ -22,6 +22,9 @@ class PUTTests: XCTestCase {
             XCTAssertEqual("jameson", JSONResponse?["username"])
             XCTAssertEqual("secret", JSONResponse?["password"])
             XCTAssertNil(error)
+
+            guard let headers = JSON["headers"] as? [String: String] else { XCTFail(); return }
+            XCTAssertEqual(headers["Content-Type"], "application/json")
         }
     }
 
@@ -30,9 +33,11 @@ class PUTTests: XCTestCase {
         networking.PUT("/put") { JSON, headers, error in
             guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
             guard let url = JSON["url"] as? String else { XCTFail(); return }
-            guard let contentType = headers["Content-Type"] as? String else { XCTFail(); return }
             XCTAssertEqual(url, "http://httpbin.org/put")
-            XCTAssertEqual(contentType, "application/json")
+
+            guard let connection = headers["Connection"] as? String else { XCTFail(); return }
+            XCTAssertEqual(connection, "keep-alive")
+            XCTAssertNil(headers["Content-Type"])
         }
     }
 

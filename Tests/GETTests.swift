@@ -28,9 +28,15 @@ class GETTests: XCTestCase {
     func testGET() {
         let networking = Networking(baseURL: baseURL)
         networking.GET("/get") { JSON, error in
+            print(String(data: try! JSONSerialization.data(withJSONObject: JSON!, options: .prettyPrinted), encoding: .utf8)!)
             guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
+
             guard let url = JSON["url"] as? String else { XCTFail(); return }
             XCTAssertEqual(url, "http://httpbin.org/get")
+
+            guard let headers = JSON["headers"] as? [String: String] else { XCTFail(); return }
+            let contentType = headers["Content-Type"]
+            XCTAssertNil(contentType)
         }
     }
 
@@ -39,9 +45,11 @@ class GETTests: XCTestCase {
         networking.GET("/get") { JSON, headers, error in
             guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
             guard let url = JSON["url"] as? String else { XCTFail(); return }
-            guard let contentType = headers["Content-Type"] as? String else { XCTFail(); return }
             XCTAssertEqual(url, "http://httpbin.org/get")
-            XCTAssertEqual(contentType, "application/json")
+
+            guard let connection = headers["Connection"] as? String else { XCTFail(); return }
+            XCTAssertEqual(connection, "keep-alive")
+            XCTAssertNil(headers["Content-Type"])
         }
     }
 
