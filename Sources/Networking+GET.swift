@@ -9,7 +9,7 @@ public extension Networking {
      - returns: The request identifier.
      */
     @discardableResult
-    public func GET(_ path: String, parameterType: ParameterType = .json, completion: @escaping (_ JSON: Any?, _ error: NSError?) -> ()) -> String {
+    public func GET(_ path: String, parameterType: ParameterType = .none, completion: @escaping (_ JSON: Any?, _ error: NSError?) -> ()) -> String {
         let requestID = self.request(.GET, path: path, parameterType: parameterType, parameters: nil, parts: nil, responseType: .json) { JSON, headers, error in
             completion(JSON, error)
         }
@@ -24,7 +24,7 @@ public extension Networking {
      - returns: The request identifier.
      */
     @discardableResult
-    public func GET(_ path: String, parameterType: ParameterType = .json, completion: @escaping (_ JSON: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> ()) -> String {
+    public func GET(_ path: String, parameterType: ParameterType = .none, completion: @escaping (_ JSON: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> ()) -> String {
         let requestID = self.request(.GET, path: path, parameterType: parameterType, parameters: nil, parts: nil, responseType: .json, completion: completion)
 
         return requestID
