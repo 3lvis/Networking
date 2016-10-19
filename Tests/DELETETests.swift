@@ -36,7 +36,7 @@ class DELETETests: XCTestCase {
 
             guard let connection = headers["Connection"] as? String else { XCTFail(); return }
             XCTAssertEqual(connection, "keep-alive")
-            XCTAssertNil(headers["Content-Type"])
+            XCTAssertEqual(headers["Content-Type"] as? String, "application/json")
         }
     }
 

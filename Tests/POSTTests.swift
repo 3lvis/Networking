@@ -22,8 +22,7 @@ class POSTTests: XCTestCase {
             XCTAssertNil(error)
 
             guard let headers = JSON["headers"] as? [String: String] else { XCTFail(); return }
-            let contentType = headers["Content-Type"]
-            XCTAssertNil(contentType)
+            XCTAssertEqual(headers["Content-Type"], "application/json")
         }
     }
 
@@ -59,7 +58,7 @@ class POSTTests: XCTestCase {
 
             guard let connection = headers["Connection"] as? String else { XCTFail(); return }
             XCTAssertEqual(connection, "keep-alive")
-            XCTAssertNil(headers["Content-Type"])
+            XCTAssertEqual(headers["Content-Type"] as? String, "application/json")
         }
     }
 
