@@ -6,17 +6,17 @@ test:
         -destination 'platform=iOS Simulator,name=iPhone 6'
         build test |
       tee $CIRCLE_ARTIFACTS/xcode_raw.log |
-      xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results.xml
+      xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results.xml && exit ${PIPESTATUS[0]}
     - xcodebuild
         -project Demo.xcodeproj
         -scheme tvOSTests
         -destination 'platform=tvOS Simulator,name=Apple TV 1080p'
         build test |
       tee $CIRCLE_ARTIFACTS/xcode_raw.log |
-      xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results.xml
+      xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results.xml && exit ${PIPESTATUS[0]}
     - xcodebuild
         -project Demo.xcodeproj
         -scheme macOSTests
         build test |
       tee $CIRCLE_ARTIFACTS/xcode_raw.log |
-      xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results.xml
+      xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results.xml && exit ${PIPESTATUS[0]}
