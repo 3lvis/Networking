@@ -81,7 +81,7 @@ public class Networking {
 
         func contentType(_ boundary: String) -> String {
             switch self {
-            case none:
+            case .none:
                 return ""
             case .json:
                 return "application/json"
