@@ -4,10 +4,21 @@ machine:
 
 test:
   override:
-    - set -o pipefail &&
-      xcodebuild
+    - xcodebuild
         -project Demo.xcodeproj
         -scheme iOSTests
         -destination 'platform=iOS Simulator,name=iPhone 6'
+        build test |
+      xcpretty -c
+    - xcodebuild
+        -project Demo.xcodeproj
+        -scheme tvOSTests
+        -destination 'platform=tvOS Simulator,name=Apple TV 1080p'
+        build test |
+      xcpretty -c
+    - xcodebuild
+        CODE_SIGNING_REQUIRED=NO
+        -project Demo.xcodeproj
+        -scheme macOSTests
         build test |
       xcpretty -c
