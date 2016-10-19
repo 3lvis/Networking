@@ -469,7 +469,7 @@ extension Networking {
             }
         } else {
             switch responseType {
-            case .none, .json:
+            case .json:
                 requestID = self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, headers, error in
                     var returnedError = error
                     var returnedResponse: Any?
