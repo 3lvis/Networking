@@ -17,7 +17,6 @@ test:
         build test |
       xcpretty -c
     - xcodebuild
-        CODE_SIGNING_REQUIRED=NO
         -project Demo.xcodeproj
         -scheme macOSTests
         build test |
