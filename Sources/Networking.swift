@@ -59,6 +59,10 @@ public class Networking {
      */
     public enum ParameterType {
         /**
+         Don't specify any `Content-Type`.
+         */
+        case none
+        /**
          Serializes your parameters using `NSJSONSerialization` and sets your `Content-Type` to `application/json`.
          */
         case json
@@ -75,8 +79,10 @@ public class Networking {
          */
         case custom(String)
 
-        func contentType(_ boundary: String) -> String {
+        func contentType(_ boundary: String) -> String? {
             switch self {
+            case .none:
+                return nil
             case .json:
                 return "application/json"
             case .formURLEncoded:
@@ -528,8 +534,8 @@ extension Networking {
         var request = URLRequest(url: self.url(for: path))
         request.httpMethod = requestType.rawValue
 
-        if let parameterType = parameterType {
-            request.addValue(parameterType.contentType(self.boundary), forHTTPHeaderField: "Content-Type")
+        if let parameterType = parameterType, let contentType = parameterType.contentType(self.boundary) {
+            request.addValue(contentType, forHTTPHeaderField: "Content-Type")
         }
 
         if let accept = responseType.accept {
@@ -555,6 +561,8 @@ extension Networking {
         var serializingError: NSError?
         if let parameterType = parameterType, let parameters = parameters {
             switch parameterType {
+            case .none:
+                break
             case .json:
                 do {
                     request.httpBody = try JSONSerialization.data(withJSONObject: parameters, options: [])
