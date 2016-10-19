@@ -632,7 +632,7 @@
 						DevelopmentTeam = 29X3GG489T;
 						DevelopmentTeamName = "Elvis Nunez (Personal Team)";
 						LastSwiftMigration = 0800;
-						ProvisioningStyle = Manual;
+						ProvisioningStyle = Automatic;
 					};
 					14638CF91CC6459A002B9433 = {
 						CreatedOnToolsVersion = 7.3;
