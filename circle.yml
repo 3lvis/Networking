@@ -1,0 +1,13 @@
+machine:
+  xcode:
+    version: "8"
+
+test:
+  override:
+    - set -o pipefail &&
+      xcodebuild
+        -project Demo.xcodeproj
+        -scheme iOSTests
+        -destination 'platform=iOS Simulator,name=iPhone 6'
+        build test |
+      xcpretty -c
