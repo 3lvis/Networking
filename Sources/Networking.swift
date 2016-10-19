@@ -59,6 +59,10 @@ public class Networking {
      */
     public enum ParameterType {
         /**
+         Don't specify any `Content-Type`.
+         */
+        case none
+        /**
          Serializes your parameters using `NSJSONSerialization` and sets your `Content-Type` to `application/json`.
          */
         case json
@@ -77,6 +81,8 @@ public class Networking {
 
         func contentType(_ boundary: String) -> String {
             switch self {
+            case none:
+                return ""
             case .json:
                 return "application/json"
             case .formURLEncoded:
