@@ -561,6 +561,8 @@ extension Networking {
         var serializingError: NSError?
         if let parameterType = parameterType, let parameters = parameters {
             switch parameterType {
+            case .none:
+                break
             case .json:
                 do {
                     request.httpBody = try JSONSerialization.data(withJSONObject: parameters, options: [])
