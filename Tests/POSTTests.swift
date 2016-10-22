@@ -11,7 +11,7 @@ class POSTTests: XCTestCase {
             synchronous = true
         }
 
-        XCTAssertTrue(synchronous)
+        XCTAssertFalse(synchronous)
     }
 
     func testPOSTWithoutParameters() {
