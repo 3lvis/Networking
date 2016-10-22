@@ -20,14 +20,8 @@ test:
       xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results.xml && exit ${PIPESTATUS[0]}
     - xcodebuild
         -project Demo.xcodeproj
-        -scheme Networking-watchOS
-        -destination 'platform=watchOS Simulator,name=Apple Watch - 38mm'
-        test |
-      tee $CIRCLE_ARTIFACTS/xcode_raw.log |
-      xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results.xml && exit ${PIPESTATUS[0]}}
-    - xcodebuild
-        -project Demo.xcodeproj
-        -scheme Networking-macOS
+        -scheme macOSTests
+        -destination 'platform=OS X'
         build |
       tee $CIRCLE_ARTIFACTS/xcode_raw.log |
       xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results.xml && exit ${PIPESTATUS[0]}
