@@ -8,19 +8,20 @@ test:
         -project Demo.xcodeproj
         -scheme iOSTests
         -destination 'platform=iOS Simulator,name=iPhone 6'
-        build test |
+        test |
       tee $CIRCLE_ARTIFACTS/xcode_raw.log |
       xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results.xml && exit ${PIPESTATUS[0]}
     - xcodebuild
         -project Demo.xcodeproj
         -scheme tvOSTests
         -destination 'platform=tvOS Simulator,name=Apple TV 1080p'
-        build test |
+        test |
       tee $CIRCLE_ARTIFACTS/xcode_raw.log |
       xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results.xml && exit ${PIPESTATUS[0]}
     - xcodebuild
         -project Demo.xcodeproj
         -scheme macOSTests
-        build test |
+        -destination 'platform=OS X'
+        test |
       tee $CIRCLE_ARTIFACTS/xcode_raw.log |
       xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results.xml && exit ${PIPESTATUS[0]}
