@@ -14,9 +14,9 @@
             buildForAnalyzing = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "1413F4541CE795DC00482096"
-               BuildableName = "macOSTests.xctest"
-               BlueprintName = "macOSTests"
+               BlueprintIdentifier = "146D72AB1AB782920058798C"
+               BuildableName = "Tests.xctest"
+               BlueprintName = "Tests"
                ReferencedContainer = "container:Demo.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -32,9 +32,9 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "1413F4541CE795DC00482096"
-               BuildableName = "macOSTests.xctest"
-               BlueprintName = "macOSTests"
+               BlueprintIdentifier = "146D72AB1AB782920058798C"
+               BuildableName = "Tests.xctest"
+               BlueprintName = "Tests"
                ReferencedContainer = "container:Demo.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -55,19 +55,12 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "1413F4541CE795DC00482096"
-            BuildableName = "macOSTests.xctest"
-            BlueprintName = "macOSTests"
+            BlueprintIdentifier = "146D72AB1AB782920058798C"
+            BuildableName = "Tests.xctest"
+            BlueprintName = "Tests"
             ReferencedContainer = "container:Demo.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
-      <EnvironmentVariables>
-         <EnvironmentVariable
-            key = "OS_ACTIVITY_MODE"
-            value = "disable"
-            isEnabled = "YES">
-         </EnvironmentVariable>
-      </EnvironmentVariables>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>
@@ -80,9 +73,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "1413F4541CE795DC00482096"
-            BuildableName = "macOSTests.xctest"
-            BlueprintName = "macOSTests"
+            BlueprintIdentifier = "146D72AB1AB782920058798C"
+            BuildableName = "Tests.xctest"
+            BlueprintName = "Tests"
             ReferencedContainer = "container:Demo.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
