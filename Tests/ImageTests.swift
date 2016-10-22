@@ -1,7 +1,11 @@
 import Foundation
+
+#if !os(watchOS)
 import XCTest
+#endif
 
 class ImageTests: XCTestCase {
+    #if !os(watchOS)
     let baseURL = "http://httpbin.org"
 
     func testImageDownloadSynchronous() {
@@ -243,4 +247,5 @@ class ImageTests: XCTestCase {
             XCTAssertNil(image)
         }
     }
+    #endif
 }

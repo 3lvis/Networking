@@ -32,6 +32,7 @@
 		1474C1C71CA2988900E15D84 /* Networking+Image.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1474C1C01CA2988900E15D84 /* Networking+Image.swift */; };
 		1474C1C81CA2988900E15D84 /* Networking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1474C1C11CA2988900E15D84 /* Networking.swift */; };
 		1474C1C91CA2988900E15D84 /* TestCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1474C1C21CA2988900E15D84 /* TestCheck.swift */; };
+		1476F8F11DBBB30700716EB7 /* MultiplatformTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1476F8F01DBBB30700716EB7 /* MultiplatformTests.swift */; };
 		147B32F11CF9B1C500D5BAED /* Networking+DELETE.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147B32ED1CF9B1C500D5BAED /* Networking+DELETE.swift */; };
 		147B32F31CF9B1C500D5BAED /* Networking+DELETE.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147B32ED1CF9B1C500D5BAED /* Networking+DELETE.swift */; };
 		147B32F71CF9B1C500D5BAED /* Networking+GET.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147B32EE1CF9B1C500D5BAED /* Networking+GET.swift */; };
@@ -95,6 +96,7 @@
 		1474C1C01CA2988900E15D84 /* Networking+Image.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Networking+Image.swift"; sourceTree = "<group>"; };
 		1474C1C11CA2988900E15D84 /* Networking.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Networking.swift; sourceTree = "<group>"; };
 		1474C1C21CA2988900E15D84 /* TestCheck.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestCheck.swift; sourceTree = "<group>"; };
+		1476F8F01DBBB30700716EB7 /* MultiplatformTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MultiplatformTests.swift; sourceTree = "<group>"; };
 		147B32ED1CF9B1C500D5BAED /* Networking+DELETE.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Networking+DELETE.swift"; sourceTree = "<group>"; };
 		147B32EE1CF9B1C500D5BAED /* Networking+GET.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Networking+GET.swift"; sourceTree = "<group>"; };
 		147B32EF1CF9B1C500D5BAED /* Networking+POST.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Networking+POST.swift"; sourceTree = "<group>"; };
@@ -167,6 +169,7 @@
 				1488E23D1CF138D700C6FBA3 /* SHA1.m */,
 				1488E23C1CF138D700C6FBA3 /* SHA1.h */,
 				4496E8E51DAFB27A0092254E /* String+UTF8Tests.swift */,
+				1476F8F01DBBB30700716EB7 /* MultiplatformTests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -465,6 +468,7 @@
 			files = (
 				1474C1C91CA2988900E15D84 /* TestCheck.swift in Sources */,
 				1413F4701CE7963700482096 /* ImageTests.swift in Sources */,
+				1476F8F11DBBB30700716EB7 /* MultiplatformTests.swift in Sources */,
 				1413F4661CE7963700482096 /* Dictionary+FormURLEncodedTests.swift in Sources */,
 				147B32FD1CF9B1C500D5BAED /* Networking+POST.swift in Sources */,
 				148341711CF1CF0500E91F01 /* NetworkingImage.swift in Sources */,
