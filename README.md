@@ -20,7 +20,7 @@
     <img src="https://img.shields.io/cocoapods/l/Networking.svg?style=flat" />
   </a>
   <a href="https://gitter.im/SwiftNetworking/Lobby?utm_source=share-link&utm_medium=link&utm_campaign=share-link">
-    <img src="https://img.shields.io/gitter/room/nwjs/nw.js.svg" />
+    <img src="https://badges.gitter.im/SwiftNetworking/Lobby.svg" />    
   </a>
   <br>
   <br>
