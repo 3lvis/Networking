@@ -1,10 +1,5 @@
 ![Networking](https://raw.githubusercontent.com/3lvis/Networking/master/Images/cover-v3.png)
 
-[![Version](https://img.shields.io/cocoapods/v/Networking.svg?style=flat)](https://cocoapods.org/pods/Networking)
-[![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/3lvis/Networking)
-![platforms](https://img.shields.io/badge/platforms-iOS%20%7C%20OS%20X%20%7C%20watchOS%20%7C%20tvOS%20-lightgrey.svg)
-[![License](https://img.shields.io/cocoapods/l/Networking.svg?style=flat)](https://cocoapods.org/pods/Networking)
-
 **Networking** was born out of the necessity of having a simple networking library that doesn't have crazy programming abstractions or uses the latest reactive programming techniques, but just a plain, simple and convenient wrapper around `NSURLSession` that supports common needs such as faking requests and caching images out of the box. A library that is small enough to read in one go but useful enough to include in any project. That's how **Networking** came to life, a fully tested library for iOS, tvOS, watchOS and OS X that will always be there for you.
 
 - Super friendly API
@@ -18,10 +13,33 @@
 - Image downloading and caching
 - Free
  
+ <div align = "center">
+  <a href="https://cocoapods.org/pods/Networking">
+    <img src="https://img.shields.io/cocoapods/v/Networking.svg?style=flat" />
+  </a>
+  <a href="https://github.com/SyncDB/Networking">
+    <img src="https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat" />
+  </a>
+  <a href="https://github.com/SyncDB/Networking#installation">
+    <img src="https://img.shields.io/badge/compatible-swift%203.0%20-orange.svg" />
+  </a>
+</div>
+
+<div align = "center">
+  <a href="https://cocoapods.org/pods/Networking" target="blank">
+    <img src="https://img.shields.io/cocoapods/p/Networking.svg?style=flat" />
+  </a>
+  <a href="https://cocoapods.org/pods/Networking" target="blank">
+    <img src="https://img.shields.io/cocoapods/l/Networking.svg?style=flat" />
+  </a>
+  <a href="https://gitter.im/SwiftNetworking/Lobby?utm_source=share-link&utm_medium=link&utm_campaign=share-link">
+    <img src="https://img.shields.io/gitter/room/nwjs/nw.js.svg" />
+  </a>
+  <br>
+  <br>
+</div>
 
 ## Table of Contents
-
-[![Join the chat at https://gitter.im/SwiftNetworking/Lobby](https://badges.gitter.im/SwiftNetworking/Lobby.svg)](https://gitter.im/SwiftNetworking/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 * [Choosing a configuration type](#choosing-a-configuration-type)
 * [Authenticating](#authenticating)
