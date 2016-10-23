@@ -1,18 +1,5 @@
 ![Networking](https://raw.githubusercontent.com/3lvis/Networking/master/Images/cover-v3.png)
 
-**Networking** was born out of the necessity of having a simple networking library that doesn't have crazy programming abstractions or uses the latest reactive programming techniques, but just a plain, simple and convenient wrapper around `NSURLSession` that supports common needs such as faking requests and caching images out of the box. A library that is small enough to read in one go but useful enough to include in any project. That's how **Networking** came to life, a fully tested library for iOS, tvOS, watchOS and OS X that will always be there for you.
-
-- Super friendly API
-- Singleton free
-- No external dependencies
-- Optimized for unit testing
-- Minimal implementation
-- Simple request cancellation
-- Fake requests easily (mocking/stubbing)
-- Runs synchronously in automatic testing environments
-- Image downloading and caching
-- Free
- 
  <div align = "center">
   <a href="https://cocoapods.org/pods/Networking">
     <img src="https://img.shields.io/cocoapods/v/Networking.svg?style=flat" />
@@ -38,6 +25,19 @@
   <br>
   <br>
 </div>
+
+**Networking** was born out of the necessity of having a simple networking library that doesn't have crazy programming abstractions or uses the latest reactive programming techniques, but just a plain, simple and convenient wrapper around `NSURLSession` that supports common needs such as faking requests and caching images out of the box. A library that is small enough to read in one go but useful enough to include in any project. That's how **Networking** came to life, a fully tested library for iOS, tvOS, watchOS and OS X that will always be there for you.
+
+- Super friendly API
+- Singleton free
+- No external dependencies
+- Optimized for unit testing
+- Minimal implementation
+- Simple request cancellation
+- Fake requests easily (mocking/stubbing)
+- Runs synchronously in automatic testing environments
+- Image downloading and caching
+- Free
 
 ## Table of Contents
 
