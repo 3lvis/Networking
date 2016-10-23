@@ -21,6 +21,8 @@
 
 ## Table of Contents
 
+[![Join the chat at https://gitter.im/SwiftNetworking/Lobby](https://badges.gitter.im/SwiftNetworking/Lobby.svg)](https://gitter.im/SwiftNetworking/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 * [Choosing a configuration type](#choosing-a-configuration-type)
 * [Authenticating](#authenticating)
     * [HTTP basic](#http-basic)
