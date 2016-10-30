@@ -2,7 +2,7 @@ import Foundation
 
 public extension Networking {
 
-    /** 
+    /**
      POST request to the specified path, using the provided parameters.
      - parameter path: The path for the POST request.
      - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by default this is JSON.
@@ -10,7 +10,7 @@ public extension Networking {
      - returns: The request identifier.
      */
     @discardableResult
-    public func POST(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping(_ JSON: Any?, _ error: NSError?) -> ()) -> String {
+    public func POST(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ JSON: Any?, _ error: NSError?) -> ()) -> String {
         let requestID = self.request(.POST, path: path, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json) { JSON, headers, error in
             completion(JSON, error)
         }
@@ -18,7 +18,7 @@ public extension Networking {
         return requestID
     }
 
-    /** 
+    /**
      POST request to the specified path, using the provided parameters.
      - parameter path: The path for the POST request.
      - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by default this is JSON.
@@ -26,13 +26,13 @@ public extension Networking {
      - returns: The request identifier.
      */
     @discardableResult
-    public func POST(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping(_ JSON: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> ()) -> String {
+    public func POST(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ JSON: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> ()) -> String {
         let requestID = self.request(.POST, path: path, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
 
         return requestID
     }
 
-    /** 
+    /**
      POST request to the specified path, using the provided parameters.
      - parameter path: The path for the POST request.
      - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by default this is JSON.
@@ -41,13 +41,13 @@ public extension Networking {
      - returns: The request identifier.
      */
     @discardableResult
-    public func POST(_ path: String, parameters: Any? = nil, part: FormDataPart, completion: @escaping(_ JSON: Any?, _ error: NSError?) -> ()) -> String {
+    public func POST(_ path: String, parameters: Any? = nil, part: FormDataPart, completion: @escaping (_ JSON: Any?, _ error: NSError?) -> ()) -> String {
         let requestID = self.POST(path, parameters: parameters, parts: [part], completion: completion)
 
         return requestID
     }
 
-    /** 
+    /**
      POST request to the specified path, using the provided parameters.
      - parameter path: The path for the POST request.
      - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by default this is JSON.
@@ -56,7 +56,7 @@ public extension Networking {
      - returns: The request identifier.
      */
     @discardableResult
-    public func POST(_ path: String, parameters: Any? = nil, parts: [FormDataPart], completion: @escaping(_ JSON: Any?, _ error: NSError?) -> ()) -> String {
+    public func POST(_ path: String, parameters: Any? = nil, parts: [FormDataPart], completion: @escaping (_ JSON: Any?, _ error: NSError?) -> ()) -> String {
         let requestID = self.request(.POST, path: path, parameterType: .multipartFormData, parameters: parameters, parts: parts, responseType: .json) { JSON, headers, error in
             completion(JSON, error)
         }
@@ -64,7 +64,7 @@ public extension Networking {
         return requestID
     }
 
-    /** 
+    /**
      Registers a fake POST request for the specified path. After registering this, every POST request to the path, will return the registered response.
      - parameter path: The path for the faked POST request.
      - parameter response: An `Any` that will be returned when a POST request is made to the specified path.
@@ -74,7 +74,7 @@ public extension Networking {
         self.fake(.POST, path: path, response: response, responseType: .json, statusCode: statusCode)
     }
 
-    /** 
+    /**
      Registers a fake POST request to the specified path using the contents of a file. After registering this, every POST request to the path, will return the contents of the registered file.
      - parameter path: The path for the faked POST request.
      - parameter fileName: The name of the file, whose contents will be registered as a reponse.
@@ -84,7 +84,7 @@ public extension Networking {
         self.fake(.POST, path: path, fileName: fileName, bundle: bundle)
     }
 
-    /** 
+    /**
      Cancels the POST request for the specified path. This causes the request to complete with error code -999.
      - parameter path: The path for the cancelled POST request.
      - parameter completion: A closure that gets called when the cancellation is completed.

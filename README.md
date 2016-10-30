@@ -1,11 +1,30 @@
 ![Networking](https://raw.githubusercontent.com/3lvis/Networking/master/Images/cover-v3.png)
 
-[![Version](https://img.shields.io/cocoapods/v/Networking.svg?style=flat)](https://cocoapods.org/pods/Networking)
-[![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/3lvis/Networking)
-![platforms](https://img.shields.io/badge/platforms-iOS%20%7C%20OS%20X%20%7C%20watchOS%20%7C%20tvOS%20-lightgrey.svg)
-[![License](https://img.shields.io/cocoapods/l/Networking.svg?style=flat)](https://cocoapods.org/pods/Networking)
+ <div align = "center">
+  <a href="https://cocoapods.org/pods/Networking">
+    <img src="https://img.shields.io/cocoapods/v/Networking.svg?style=flat" />
+  </a>
+  <a href="https://github.com/SyncDB/Networking">
+    <img src="https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat" />
+  </a>
+  <a href="https://github.com/SyncDB/Networking#installation">
+    <img src="https://img.shields.io/badge/compatible-swift%203.0%20-orange.svg" />
+  </a>
+</div>
 
->使用简单、功能惊喜，基于 NSURLSession 的网络封装库。功能包括带身份验证请求，支持单元测试（mocking/stubbing），异步执行，图片下载及缓存等实用特性。
+<div align = "center">
+  <a href="https://cocoapods.org/pods/Networking" target="blank">
+    <img src="https://img.shields.io/cocoapods/p/Networking.svg?style=flat" />
+  </a>
+  <a href="https://cocoapods.org/pods/Networking" target="blank">
+    <img src="https://img.shields.io/cocoapods/l/Networking.svg?style=flat" />
+  </a>
+  <a href="https://gitter.im/SwiftNetworking/Lobby?utm_source=share-link&utm_medium=link&utm_campaign=share-link">
+    <img src="https://badges.gitter.im/SwiftNetworking/Lobby.svg" />    
+  </a>
+  <br>
+  <br>
+</div>
 
 **Networking** was born out of the necessity of having a simple networking library that doesn't have crazy programming abstractions or uses the latest reactive programming techniques, but just a plain, simple and convenient wrapper around `NSURLSession` that supports common needs such as faking requests and caching images out of the box. A library that is small enough to read in one go but useful enough to include in any project. That's how **Networking** came to life, a fully tested library for iOS, tvOS, watchOS and OS X that will always be there for you.
 
@@ -19,7 +38,6 @@
 - Runs synchronously in automatic testing environments
 - Image downloading and caching
 - Free
- 
 
 ## Table of Contents
 
@@ -29,9 +47,9 @@
     * [Bearer token](#bearer-token)
     * [Custom authentication header](#custom-authentication-header)
 * [Making a request](#making-a-request)
-* [Choosing a content type](#choosing-a-content-type)
+* [Choosing a content or parameter type](#choosing-a-content-or-parameter-type)
     * [JSON](#json)
-    * [Percent-encoding](#percent-encoding)
+    * [URL-encoding](#url-encoding)
     * [Multipart](#multipart)
     * [Others](#others)
 * [Cancelling a request](#cancelling-a-request)
@@ -70,7 +88,7 @@ To authenticate using [basic authentication](http://www.w3.org/Protocols/HTTP/1.
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-networking.authenticate(username: "aladdin", password: "opensesame")
+networking.setAuthorizationHeader(username: "aladdin", password: "opensesame")
 networking.GET("/basic-auth/aladdin/opensesame") { JSON, error in
     // Successfully logged in! Now do something with the JSON
 }
@@ -82,7 +100,7 @@ To authenticate using a [bearer token](https://tools.ietf.org/html/rfc6750) **"A
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-networking.authenticate(token: "AAAFFAAAA3DAAAAAA")
+networking.setAuthorizationHeader(token: "AAAFFAAAA3DAAAAAA")
 networking.GET("/get") { JSON, error in
     // Do something...
 }
@@ -94,7 +112,7 @@ To authenticate using a custom authentication header, for example **"Token token
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-networking.authenticate(headerValue: "Token token=AAAFFAAAA3DAAAAAA")
+networking.setAuthorizationHeader(headerValue: "Token token=AAAFFAAAA3DAAAAAA")
 networking.GET("/get") { JSON, error in
     // Do something...
 }
@@ -104,7 +122,7 @@ Providing the following authentication header `Anonymous-Token: AAAFFAAAA3DAAAAA
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-networking.authenticate(headerKey: "Anonymous-Token", headerValue: "AAAFFAAAA3DAAAAAA")
+networking.setAuthorizationHeader(headerKey: "Anonymous-Token", headerValue: "AAAFFAAAA3DAAAAAA")
 networking.GET("/get") { JSON, error in
     // Do something
 }
@@ -158,7 +176,7 @@ networking.POST("/post", parameters: ["username" : "jameson", "password" : "secr
 }
 ```
 
-## Choosing a Content Type
+## Choosing a Content or Parameter Type
 
 The `Content-Type` HTTP specification is so unfriendly, you have to know the specifics of it before understanding that content type is really just the parameter type. Because of this **Networking** uses a `ParameterType` instead of a `ContentType`. Anyway, here's hoping this makes it more human friendly.
 
@@ -175,9 +193,9 @@ networking.POST("/post", parameters: ["name" : "jameson"]) { JSON, error in
 }
 ```
 
-### Percent-encoding
+### URL-encoding
 
- If you want to use `application/x-www-form-urlencoded` just use the `.FormURLEncoded` parameter type, internally **Networking** will format your parameters so they use [`Percent-encoding`](https://en.wikipedia.org/wiki/Percent-encoding#The_application.2Fx-www-form-urlencoded_type).
+ If you want to use `application/x-www-form-urlencoded` just use the `.FormURLEncoded` parameter type, internally **Networking** will format your parameters so they use [`Percent-encoding` or `URL-enconding`](https://en.wikipedia.org/wiki/Percent-encoding#The_application.2Fx-www-form-urlencoded_type).
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
@@ -454,3 +472,7 @@ This library was made with love by [@3lvis](https://twitter.com/3lvis).
 ## Attribution
 
 The logo typeface comes thanks to [Sanid Jusić](https://dribbble.com/shots/1049674-Free-Colorfull-Triangle-Typeface).
+
+
+## Chinese description
+>使用简单、功能惊喜，基于 NSURLSession 的网络封装库。功能包括带身份验证请求，支持单元测试（mocking/stubbing），异步执行，图片下载及缓存等实用特性。

@@ -4,9 +4,9 @@ import XCTest
 class NetworkingTests: XCTestCase {
     let baseURL = "http://httpbin.org"
 
-    func testBasicAuth() {
+    func testSetAuthorizationHeaderWithUsernameAndPassword() {
         let networking = Networking(baseURL: baseURL)
-        networking.authenticate(username: "user", password: "passwd")
+        networking.setAuthorizationHeader(username: "user", password: "passwd")
         networking.GET("/basic-auth/user/passwd") { JSON, error in
             guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
             let user = JSON["user"] as? String
@@ -16,10 +16,10 @@ class NetworkingTests: XCTestCase {
         }
     }
 
-    func testBearerTokenAuth() {
+    func testSetAuthorizationHeaderWithBearerToken() {
         let networking = Networking(baseURL: baseURL)
         let token = "hi-mom"
-        networking.authenticate(token: token)
+        networking.setAuthorizationHeader(token: token)
         networking.POST("/post") { JSON, error in
             guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
             let headers = JSON["headers"] as? [String: Any]
@@ -27,10 +27,10 @@ class NetworkingTests: XCTestCase {
         }
     }
 
-    func testCustomAuthorizationHeaderValue() {
+    func setAuthorizationHeaderCustomValue() {
         let networking = Networking(baseURL: baseURL)
         let value = "hi-mom"
-        networking.authenticate(headerValue: value)
+        networking.setAuthorizationHeader(headerValue: value)
         networking.POST("/post") { JSON, error in
             guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
             let headers = JSON["headers"] as? [String: Any]
@@ -38,15 +38,25 @@ class NetworkingTests: XCTestCase {
         }
     }
 
-    func testCustomAuthorizationHeaderValueAndHeaderKey() {
+    func setAuthorizationHeaderCustomHeaderKeyAndValue() {
         let networking = Networking(baseURL: baseURL)
         let key = "Anonymous-Token"
         let value = "hi-mom"
-        networking.authenticate(headerKey: key, headerValue: value)
+        networking.setAuthorizationHeader(headerKey: key, headerValue: value)
         networking.POST("/post") { JSON, error in
             guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
             let headers = JSON["headers"] as? [String: Any]
             XCTAssertEqual(value, headers?[key] as? String)
+        }
+    }
+
+    func testHeaderField() {
+        let networking = Networking(baseURL: baseURL)
+        networking.headerFields = ["HeaderKey": "HeaderValue"]
+        networking.POST("/post") { JSON, error in
+            guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
+            let headers = JSON["headers"] as? [String: Any]
+            XCTAssertEqual("HeaderValue", headers?["Headerkey"] as? String)
         }
     }
 
@@ -83,6 +93,20 @@ class NetworkingTests: XCTestCase {
         XCTAssertEqual(destinationURL.lastPathComponent, "http:--httpbin.org-image-png")
     }
 
+    func testDestinationURLWithSpecialCharactersInPath() {
+        let networking = Networking(baseURL: baseURL)
+        let path = "/h�sttur.jpg"
+        guard let destinationURL = try? networking.destinationURL(for: path) else { XCTFail(); return }
+        XCTAssertEqual(destinationURL.lastPathComponent, "http:--httpbin.org-h%EF%BF%BDsttur.jpg")
+    }
+
+    func testDestinationURLWithSpecialCharactersInCacheName() {
+        let networking = Networking(baseURL: baseURL)
+        let path = "/the-url-doesnt-really-matter"
+        guard let destinationURL = try? networking.destinationURL(for: path, cacheName: "h�sttur.jpg-25-03/small") else { XCTFail(); return }
+        XCTAssertEqual(destinationURL.lastPathComponent, "h%EF%BF%BDsttur.jpg-25-03-small")
+    }
+
     func testDestinationURLCache() {
         let networking = Networking(baseURL: baseURL)
         let path = "/image/png"
@@ -111,8 +135,28 @@ class NetworkingTests: XCTestCase {
         XCTAssertEqual(relativePath2, "/basic-auth/user/passwd")
     }
 
-    func testCancelRequests() {
-        let expectation = self.expectation(description: "testCancelRequests")
+    func testCancelWithRequestID() {
+        let expectation = self.expectation(description: "testCancelAllRequests")
+        let networking = Networking(baseURL: baseURL)
+        networking.disableTestingMode = true
+        var cancelledGET = false
+
+        let requestID = networking.GET("/get") { JSON, error in
+            cancelledGET = error?.code == -999
+            XCTAssertTrue(cancelledGET)
+
+            if cancelledGET {
+                expectation.fulfill()
+            }
+        }
+
+        networking.cancel(with: requestID, completion: nil)
+
+        self.waitForExpectations(timeout: 15.0, handler: nil)
+    }
+
+    func testCancelAllRequests() {
+        let expectation = self.expectation(description: "testCancelAllRequests")
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
         var cancelledGET = false
@@ -166,7 +210,6 @@ class NetworkingTests: XCTestCase {
         }
         XCTAssertTrue(synchronous)
     }
-
 
     func testDataFromCache() {
         let cache = NSCache<AnyObject, AnyObject>()

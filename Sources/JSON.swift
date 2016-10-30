@@ -7,7 +7,7 @@ enum ParsingError: Error {
 
 class JSON {
 
-    /** 
+    /**
      Returns a JSON object from a file.
      - parameter fileName: The name of the file, the expected extension is `.json`.
      - parameter bundle:  The Bundle where the file is located, by default is the main bundle.
@@ -27,7 +27,7 @@ class JSON {
 
 extension Data {
 
-    /** 
+    /**
      Converts Data to a JSON object.
      - returns: A JSON object, it can be either a Dictionary or an Array.
      */

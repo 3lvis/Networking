@@ -14,7 +14,19 @@ class POSTTests: XCTestCase {
         XCTAssertTrue(synchronous)
     }
 
-    func testPOST() {
+    func testPOSTWithoutParameters() {
+        let networking = Networking(baseURL: baseURL)
+        networking.POST("/post", parameters: nil) { JSON, error in
+            print(String(data: try! JSONSerialization.data(withJSONObject: JSON!, options: .prettyPrinted), encoding: .utf8)!)
+            guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
+            XCTAssertNil(error)
+
+            guard let headers = JSON["headers"] as? [String: String] else { XCTFail(); return }
+            XCTAssertEqual(headers["Content-Type"], "application/json")
+        }
+    }
+
+    func testPOSTWithParameters() {
         let networking = Networking(baseURL: baseURL)
         let parameters = [
             "string": "valueA",
@@ -30,6 +42,10 @@ class POSTTests: XCTestCase {
             XCTAssertEqual(JSONResponse["double"] as? Double, 20.0)
             XCTAssertEqual(JSONResponse["bool"] as? Bool, true)
             XCTAssertNil(error)
+
+            guard let headers = JSON["headers"] as? [String: String] else { XCTFail(); return }
+            let contentType = headers["Content-Type"]
+            XCTAssertEqual(contentType, "application/json")
         }
     }
 
@@ -38,9 +54,11 @@ class POSTTests: XCTestCase {
         networking.POST("/post") { JSON, headers, error in
             guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
             guard let url = JSON["url"] as? String else { XCTFail(); return }
-            guard let contentType = headers["Content-Type"] as? String else { XCTFail(); return }
             XCTAssertEqual(url, "http://httpbin.org/post")
-            XCTAssertEqual(contentType, "application/json")
+
+            guard let connection = headers["Connection"] as? String else { XCTFail(); return }
+            XCTAssertEqual(connection, "keep-alive")
+            XCTAssertEqual(headers["Content-Type"] as? String, "application/json")
         }
     }
 
@@ -219,7 +237,7 @@ class POSTTests: XCTestCase {
     }
 
     func deleteAllCloudinaryPhotos(networking: Networking, cloudName: String, secret: String, APIKey: String) {
-        networking.authenticate(username: APIKey, password: secret)
+        networking.setAuthorizationHeader(username: APIKey, password: secret)
         networking.DELETE("/v1_1/\(cloudName)/resources/image/upload?all=true") { JSON, error in }
     }
 }
