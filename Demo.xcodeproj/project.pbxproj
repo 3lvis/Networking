@@ -122,11 +122,9 @@
 		14D144E11CEED63B00048629 /* FormDataPart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D144DD1CEED63B00048629 /* FormDataPart.swift */; };
 		14D144E21CEED63B00048629 /* FormDataPart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D144DD1CEED63B00048629 /* FormDataPart.swift */; };
 		14D144E31CEED63B00048629 /* FormDataPart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D144DD1CEED63B00048629 /* FormDataPart.swift */; };
-<<<<<<< HEAD
 		4488DBBD1D9BB08F007D7A14 /* user.json in Resources */ = {isa = PBXBuildFile; fileRef = 4488DBBC1D9BB08F007D7A14 /* user.json */; };
 		4488DBBE1D9BB08F007D7A14 /* user.json in Resources */ = {isa = PBXBuildFile; fileRef = 4488DBBC1D9BB08F007D7A14 /* user.json */; };
 		4488DBBF1D9BB08F007D7A14 /* user.json in Resources */ = {isa = PBXBuildFile; fileRef = 4488DBBC1D9BB08F007D7A14 /* user.json */; };
-		4488DBC11D9BBFCF007D7A14 /* FakeRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4488DBC01D9BBFCF007D7A14 /* FakeRequest.swift */; };
 		4488DBC21D9BBFCF007D7A14 /* FakeRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4488DBC01D9BBFCF007D7A14 /* FakeRequest.swift */; };
 		4488DBC31D9BBFCF007D7A14 /* FakeRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4488DBC01D9BBFCF007D7A14 /* FakeRequest.swift */; };
 		4488DBC41D9BBFCF007D7A14 /* FakeRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4488DBC01D9BBFCF007D7A14 /* FakeRequest.swift */; };
@@ -137,11 +135,9 @@
 		4488DBCA1D9BCA0E007D7A14 /* FakeRequestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4488DBC91D9BCA0E007D7A14 /* FakeRequestTests.swift */; };
 		4488DBCB1D9BCA0E007D7A14 /* FakeRequestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4488DBC91D9BCA0E007D7A14 /* FakeRequestTests.swift */; };
 		4488DBCC1D9BCA0E007D7A14 /* FakeRequestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4488DBC91D9BCA0E007D7A14 /* FakeRequestTests.swift */; };
-=======
 		4496E8E61DAFB27A0092254E /* String+UTF8Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4496E8E51DAFB27A0092254E /* String+UTF8Tests.swift */; };
 		4496E8E71DAFB27A0092254E /* String+UTF8Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4496E8E51DAFB27A0092254E /* String+UTF8Tests.swift */; };
 		4496E8E81DAFB27A0092254E /* String+UTF8Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4496E8E51DAFB27A0092254E /* String+UTF8Tests.swift */; };
->>>>>>> master
 		44B5D38A1D19B9E5004378B9 /* TestCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1474C1C21CA2988900E15D84 /* TestCheck.swift */; };
 		44B5D38B1D19B9E5004378B9 /* ImageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1413F4631CE7963700482096 /* ImageTests.swift */; };
 		44B5D38C1D19B9E5004378B9 /* Dictionary+FormURLEncodedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1413F45E1CE7963700482096 /* Dictionary+FormURLEncodedTests.swift */; };
@@ -238,15 +234,10 @@
 		14C0AF821BD6D4230009ECBE /* CONTRIBUTING.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CONTRIBUTING.md; sourceTree = "<group>"; };
 		14C0AF831BD6D4230009ECBE /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		14D144DD1CEED63B00048629 /* FormDataPart.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FormDataPart.swift; sourceTree = "<group>"; };
-<<<<<<< HEAD
-		14DE34781CA298ED009B2E35 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4488DBBC1D9BB08F007D7A14 /* user.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = user.json; sourceTree = "<group>"; };
 		4488DBC01D9BBFCF007D7A14 /* FakeRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FakeRequest.swift; sourceTree = "<group>"; };
 		4488DBC91D9BCA0E007D7A14 /* FakeRequestTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FakeRequestTests.swift; sourceTree = "<group>"; };
-		449687B41D1A433A000CF016 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-=======
 		4496E8E51DAFB27A0092254E /* String+UTF8Tests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+UTF8Tests.swift"; sourceTree = "<group>"; };
->>>>>>> master
 		44B5D3AB1D19B9E5004378B9 /* tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = tvOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		44DFD38D1D9A2D5A0014E9F2 /* iOSDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iOSDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		44DFD38F1D9A2D5A0014E9F2 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -322,20 +313,15 @@
 			isa = PBXGroup;
 			children = (
 				14B0CEDD1CF1D0D700049AD6 /* Resources */,
-				1413F4641CE7963700482096 /* NetworkingTests.swift */,
 				146EF90E1CEBCEA50059DDB1 /* GETTests.swift */,
 				146EF90F1CEBCEA50059DDB1 /* POSTTests.swift */,
 				146EF9101CEBCEA50059DDB1 /* PUTTests.swift */,
 				146EF90D1CEBCEA50059DDB1 /* DELETETests.swift */,
 				1413F4631CE7963700482096 /* ImageTests.swift */,
-<<<<<<< HEAD
 				1413F4641CE7963700482096 /* NetworkingTests.swift */,
 				4488DBC91D9BCA0E007D7A14 /* FakeRequestTests.swift */,
-				1488E23C1CF138D700C6FBA3 /* SHA1.h */,
-=======
 				1413F45E1CE7963700482096 /* Dictionary+FormURLEncodedTests.swift */,
 				1413F4611CE7963700482096 /* Helpers.swift */,
->>>>>>> master
 				1488E23D1CF138D700C6FBA3 /* SHA1.m */,
 				1488E23C1CF138D700C6FBA3 /* SHA1.h */,
 				4496E8E51DAFB27A0092254E /* String+UTF8Tests.swift */,
@@ -388,12 +374,9 @@
 				1413C1D51CBD1784000AF90F /* String+UTF8.swift */,
 				1474C1BD1CA2988900E15D84 /* JSON.swift */,
 				148341701CF1CF0500E91F01 /* NetworkingImage.swift */,
-<<<<<<< HEAD
 				4488DBC01D9BBFCF007D7A14 /* FakeRequest.swift */,
-=======
 				1474C1C21CA2988900E15D84 /* TestCheck.swift */,
 				1474C1BE1CA2988900E15D84 /* NetworkActivityIndicator.swift */,
->>>>>>> master
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -632,7 +615,7 @@
 			attributes = {
 				CLASSPREFIX = "";
 				LastSwiftUpdateCheck = 0800;
-				LastUpgradeCheck = 0800;
+				LastUpgradeCheck = 0810;
 				ORGANIZATIONNAME = "";
 				TargetAttributes = {
 					1413F4541CE795DC00482096 = {
@@ -992,32 +975,6 @@
 				44DFD3AE1D9A34540014E9F2 /* TestCheck.swift in Sources */,
 				44DFD3A61D9A34540014E9F2 /* Networking.swift in Sources */,
 				44DFD3A21D9A33610014E9F2 /* FakeImageController.swift in Sources */,
-				4488DBC11D9BBFCF007D7A14 /* FakeRequest.swift in Sources */,
-				44DFD3A81D9A34540014E9F2 /* Networking+GET.swift in Sources */,
-				44DFD3AD1D9A34540014E9F2 /* String+UTF8.swift in Sources */,
-				44DFD3A41D9A344D0014E9F2 /* JSON.swift in Sources */,
-				44DFD3B01D9A34540014E9F2 /* NetworkingImage.swift in Sources */,
-				44DFD3A01D9A2EA70014E9F2 /* CellData.swift in Sources */,
-				44DFD3A31D9A344B0014E9F2 /* Dictionary+FormURLEncoded.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		44DFD3891D9A2D5A0014E9F2 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				44DFD3AB1D9A34540014E9F2 /* Networking+DELETE.swift in Sources */,
-				44DFD3A51D9A34500014E9F2 /* NetworkActivityIndicator.swift in Sources */,
-				44DFD3AF1D9A34540014E9F2 /* FormDataPart.swift in Sources */,
-				44DFD3A71D9A34540014E9F2 /* Networking+Image.swift in Sources */,
-				44DFD3921D9A2D5A0014E9F2 /* OptionsController.swift in Sources */,
-				44DFD3AC1D9A34540014E9F2 /* NSFileManager+Helpers.swift in Sources */,
-				44DFD3AA1D9A34540014E9F2 /* Networking+PUT.swift in Sources */,
-				44DFD3A91D9A34540014E9F2 /* Networking+POST.swift in Sources */,
-				44DFD3901D9A2D5A0014E9F2 /* AppDelegate.swift in Sources */,
-				44DFD3AE1D9A34540014E9F2 /* TestCheck.swift in Sources */,
-				44DFD3A61D9A34540014E9F2 /* Networking.swift in Sources */,
-				44DFD3A21D9A33610014E9F2 /* FakeImageController.swift in Sources */,
 				44DFD3A81D9A34540014E9F2 /* Networking+GET.swift in Sources */,
 				44DFD3AD1D9A34540014E9F2 /* String+UTF8.swift in Sources */,
 				44DFD3A41D9A344D0014E9F2 /* JSON.swift in Sources */,
@@ -1090,6 +1047,7 @@
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_ANALYZER_NONNULL = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEFINES_MODULE = YES;
@@ -1117,6 +1075,7 @@
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_ANALYZER_NONNULL = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEFINES_MODULE = YES;
@@ -1144,6 +1103,7 @@
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_ANALYZER_NONNULL = YES;
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEFINES_MODULE = YES;
@@ -1172,6 +1132,7 @@
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_ANALYZER_NONNULL = YES;
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEFINES_MODULE = YES;
@@ -1199,6 +1160,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES;
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEFINES_MODULE = YES;
@@ -1226,6 +1188,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES;
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEFINES_MODULE = YES;
@@ -1253,7 +1216,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES;
-				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
@@ -1282,7 +1245,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES;
-				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -1320,8 +1283,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -1363,8 +1328,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
