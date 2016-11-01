@@ -10,28 +10,34 @@ struct FakeRequest {
         var evaluatedPath = path
         evaluatedPath.removeFirstLetterIfDash()
         evaluatedPath.removeLastLetterIfDash()
-        let evaluatedParts = evaluatedPath.components(separatedBy: "/")
+        let lookupPathParts = evaluatedPath.components(separatedBy: "/")
 
         for originalFakedPath in requests.keys {
             guard originalFakedPath.characters.count > 0 else { continue }
+            guard let response = requests[originalFakedPath]?.response else { return nil }
+
             var fakedPath = originalFakedPath
             fakedPath.removeFirstLetterIfDash()
             fakedPath.removeLastLetterIfDash()
-            let parts = fakedPath.components(separatedBy: "/")
-            guard evaluatedParts.count == parts.count else { continue }
-            guard evaluatedParts.first == parts.first else { continue }
+            let fakePathParts = fakedPath.components(separatedBy: "/")
+            guard lookupPathParts.count == fakePathParts.count else { continue }
+            guard lookupPathParts.first == fakePathParts.first else { continue }
+            guard lookupPathParts.count != 1 && fakePathParts.count != 1 else { return requests[originalFakedPath] }
 
-            if evaluatedParts.count == 1 && parts.count == 1 {
-                return requests[originalFakedPath]
-            } else {
-                let evaluatedPart2 = evaluatedParts[1]
-                let parts2 = parts[1]
-                if parts2.contains("{") {
-                    let request = requests[originalFakedPath]
-                    let response = request?.response
-                    
+
+            for (index, fakePathPart) in fakePathParts.enumerated() {
+                var replacedValues = [[String: String]]()
+                if fakePathPart.contains("{") {
+                    replacedValues[fakePathPart] = lookupPathParts[index]
                 }
             }
+
+            let responseString = String(data: try! JSONSerialization.data(withJSONObject: response, options: .prettyPrinted), encoding: .utf8)!
+            let mutatedString = responseString.replacingOccurrences(of: "{userID}", with: replacedValue)
+            let stringData = mutatedString.data(using: .utf8)
+            let finalJSON = try! JSONSerialization.jsonObject(with: stringData!, options: [])
+            return FakeRequest(response: finalJSON, responseType: .json, statusCode: 200)
+
 
             // take first element from requested path
             // search in list of faked paths
