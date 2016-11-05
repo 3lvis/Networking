@@ -17,6 +17,8 @@ public extension Int {
             return .clientError
         } else if self >= 500 && self < 600 {
             return .serverError
+        } else if self == URLError.cancelled.rawValue {
+            return .cancelled
         } else {
             return .unknown
         }
@@ -117,10 +119,11 @@ public class Networking {
      - `Redirection`: This class of status code indicates that further action needs to be taken by the user agent in order to fulfill the request.
      - `ClientError:` The 4xx class of status code is intended for cases in which the client seems to have erred.
      - `ServerError:` Response status codes beginning with the digit "5" indicate cases in which the server is aware that it has erred or is incapable of performing the request.
-     - `Unknown:` This response status code could be used by Foundation for other types of states, for example when a request gets cancelled you will receive status code -999.
+     - `Cancelled:` When a request gets cancelled
+     - `Unknown:` This response status code could be used by Foundation for other types of states.
      */
     public enum StatusCodeType {
-        case informational, successful, redirection, clientError, serverError, unknown
+        case informational, successful, redirection, clientError, serverError, cancelled, unknown
     }
 
     private let baseURL: String
@@ -627,7 +630,14 @@ extension Networking {
                             returnedData = data
                         }
                     } else {
-                        connectionError = NSError(domain: Networking.domain, code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode)])
+                        var errorCode = httpResponse.statusCode
+                        if let error = error as? NSError {
+                            if error.code == URLError.cancelled.rawValue {
+                                errorCode = error.code
+                            }
+                        }
+                        
+                        connectionError = NSError(domain: Networking.domain, code: errorCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode)])
                     }
                 }
 
@@ -689,7 +699,7 @@ extension Networking {
         print("========== Networking Error ==========")
         print(" ")
 
-        let isCancelled = error.code == -999
+        let isCancelled = error.code == NSURLErrorCancelled
         if isCancelled {
             if let request = request, let url = request.url {
                 print("Cancelled request: \(url.absoluteString)")

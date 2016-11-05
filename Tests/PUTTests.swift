@@ -92,7 +92,7 @@ class PUTTests: XCTestCase {
         var completed = false
         networking.PUT("/put", parameters: ["username": "jameson", "password": "secret"]) { JSON, error in
             XCTAssertTrue(completed)
-            XCTAssertEqual(error?.code, -999)
+            XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
             expectation.fulfill()
         }
 
@@ -111,7 +111,7 @@ class PUTTests: XCTestCase {
         var completed = false
         let requestID = networking.PUT("/put", parameters: ["username": "jameson", "password": "secret"]) { JSON, error in
             XCTAssertTrue(completed)
-            XCTAssertEqual(error?.code, -999)
+            XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
             expectation.fulfill()
         }
 

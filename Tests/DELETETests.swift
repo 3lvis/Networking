@@ -91,7 +91,7 @@ class DELETETests: XCTestCase {
         var completed = false
         networking.DELETE("/delete") { JSON, error in
             XCTAssertTrue(completed)
-            XCTAssertEqual(error?.code, -999)
+            XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
             expectation.fulfill()
         }
 
@@ -110,7 +110,7 @@ class DELETETests: XCTestCase {
         var completed = false
         let requestID = networking.DELETE("/delete") { JSON, error in
             XCTAssertTrue(completed)
-            XCTAssertEqual(error?.code, -999)
+            XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
             expectation.fulfill()
         }
 

@@ -116,7 +116,7 @@ class NetworkingTests: XCTestCase {
     }
 
     func testStatusCodeType() {
-        XCTAssertEqual((-999).statusCodeType(), Networking.StatusCodeType.unknown)
+        XCTAssertEqual((URLError.cancelled.rawValue).statusCodeType(), Networking.StatusCodeType.cancelled)
         XCTAssertEqual(99.statusCodeType(), Networking.StatusCodeType.unknown)
         XCTAssertEqual(101.statusCodeType(), Networking.StatusCodeType.informational)
         XCTAssertEqual(203.statusCodeType(), Networking.StatusCodeType.successful)
@@ -142,7 +142,7 @@ class NetworkingTests: XCTestCase {
         var cancelledGET = false
 
         let requestID = networking.GET("/get") { JSON, error in
-            cancelledGET = error?.code == -999
+            cancelledGET = error?.code == URLError.cancelled.rawValue
             XCTAssertTrue(cancelledGET)
 
             if cancelledGET {
@@ -163,7 +163,7 @@ class NetworkingTests: XCTestCase {
         var cancelledPOST = false
 
         networking.GET("/get") { JSON, error in
-            cancelledGET = error?.code == -999
+            cancelledGET = error?.code == URLError.cancelled.rawValue
             XCTAssertTrue(cancelledGET)
 
             if cancelledGET && cancelledPOST {
@@ -172,7 +172,7 @@ class NetworkingTests: XCTestCase {
         }
 
         networking.POST("/post") { JSON, error in
-            cancelledPOST = error?.code == -999
+            cancelledPOST = error?.code == URLError.cancelled.rawValue
             XCTAssertTrue(cancelledPOST)
 
             if cancelledGET && cancelledPOST {
@@ -191,7 +191,7 @@ class NetworkingTests: XCTestCase {
         networking.disableTestingMode = true
         networking.GET("/get") { JSON, error in
             XCTAssertTrue(Thread.isMainThread)
-            XCTAssertEqual(error?.code, -999)
+            XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
             expectation.fulfill()
         }
         networking.cancelAllRequests(with: nil)

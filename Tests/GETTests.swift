@@ -121,7 +121,7 @@ class GETTests: XCTestCase {
         var completed = false
         networking.GET("/get") { JSON, error in
             XCTAssertTrue(completed)
-            XCTAssertEqual(error?.code, -999)
+            XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
             expectation.fulfill()
         }
 
@@ -140,7 +140,7 @@ class GETTests: XCTestCase {
         var completed = false
         let requestID = networking.GET("/get") { JSON, error in
             XCTAssertTrue(completed)
-            XCTAssertEqual(error?.code, -999)
+            XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
             expectation.fulfill()
         }
 

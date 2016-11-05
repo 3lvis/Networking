@@ -51,7 +51,7 @@ public extension Networking {
     }
 
     /**
-     Cancels the GET request for the specified path. This causes the request to complete with error code -999.
+     Cancels the GET request for the specified path. This causes the request to complete with error code URLError.cancelled.
      - parameter path: The path for the cancelled GET request
      - parameter completion: A closure that gets called when the cancellation is completed.
      */
