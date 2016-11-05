@@ -249,12 +249,12 @@ networking.POST("/upload", parameterType: .Custom("application/octet-stream"), p
 
 ### Using path
 
-Cancelling any request for a specific path is really simple. Beware that cancelling a request will cause the request to return with an error with status code -999.
+Cancelling any request for a specific path is really simple. Beware that cancelling a request will cause the request to return with an error with status code URLError.cancelled.
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.GET("/get") { JSON, error in
-    // Cancelling a GET request returns an error with code -999 which means cancelled request
+    // Cancelling a GET request returns an error with code URLError.cancelled which means cancelled request
 }
 
 networking.cancelGET("/get")
@@ -335,7 +335,7 @@ networking.downloadImage("/image/png") { image, error in
 ```swift
 let networking = Networking(baseURL: baseURL)
 networking.downloadImage("/image/png") { image, error in
-    // Cancelling a image download returns an error with code -999 which means cancelled request
+    // Cancelling a image download returns an error with code URLError.cancelled which means cancelled request
 }
 
 networking.cancelImageDownload("/image/png")
