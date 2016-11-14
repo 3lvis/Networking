@@ -142,7 +142,7 @@ public class Networking {
     /**
      Flag used to disable error logging. Useful when want to disable log before release build.
      */
-    var disableErrorLogging = false
+    public var disableErrorLogging = false
 
     /**
      The boundary used for multipart requests.
