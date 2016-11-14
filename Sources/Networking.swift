@@ -138,6 +138,11 @@ public class Networking {
      Flag used to disable synchronous request when running automatic tests.
      */
     var disableTestingMode = false
+    
+    /**
+     Flag used to disable error logging. Useful when want to disable log before release build.
+     */
+    var disableErrorLogging = false
 
     /**
      The boundary used for multipart requests.
@@ -693,6 +698,7 @@ extension Networking {
     }
 
     func logError(parameterType: ParameterType?, parameters: Any? = nil, data: Data?, request: URLRequest?, response: URLResponse?, error: NSError?) {
+        if disableErrorLogging { return }
         guard let error = error else { return }
 
         print(" ")
