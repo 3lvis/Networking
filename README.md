@@ -456,7 +456,7 @@ pod 'Networking'
 it, simply add the following line to your Cartfile:
 
 ```ruby
-github "3lvis/Networking"
+github "3lvis/Networking" ~> 2.0
 ```
 
 ## Author
