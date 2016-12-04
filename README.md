@@ -150,6 +150,16 @@ networking.GET("/stories") { JSON, headers, error in
 }
 ```
 
+Similarly, adding parameters to a request (not necessarily a `GET`) is accomplished by using `addParameters`:
+
+```swift
+let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
+let path = networking.addParameters(["count": 25], toPath: "/stories")
+networking.GET(path) { JSON, error in
+    // Stories JSON: https://api-news.layervault.com/api/v2/stories?count=25
+}
+```
+
 **POST example**:
 
 ```swift
