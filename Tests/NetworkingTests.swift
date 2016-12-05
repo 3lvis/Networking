@@ -65,13 +65,6 @@ class NetworkingTests: XCTestCase {
         let url = networking.url(for: "/hello")
         XCTAssertEqual(url.absoluteString, "http://httpbin.org/hello")
     }
-    
-    func testURLForPathWithParameters() {
-        let networking = Networking(baseURL: baseURL)
-        let path = networking.addParameters(["count": 25], toPath: "/hello")
-        let url = networking.url(for: path)
-        XCTAssertEqual(url.absoluteString, "http://httpbin.org/hello?count=25")
-    }
 
     func testSkipTestMode() {
         let expectation = self.expectation(description: "testSkipTestMode")
@@ -244,60 +237,5 @@ class NetworkingTests: XCTestCase {
             Networking.deleteCachedFiles()
             XCTAssertFalse(FileManager.default.exists(at: folderURL))
         }
-    }
-    
-    func testAddingParametersToPathWithoutParameters() {
-        let networking = Networking(baseURL: self.baseURL)
-        let queryPath = "/profile"
-        let parameters = ["userId": 5]
-        
-        let path = networking.addParameters(parameters, toPath: queryPath)
-        
-        XCTAssertEqual(path, "/profile?userId=5")
-    }
-    
-    func testAddingParametersToPathWithoutExistingParameters() {
-        let networking = Networking(baseURL: self.baseURL)
-        let queryPath = "/profile?accountId=123"
-        let parameters = ["userId": 5]
-        
-        let path = networking.addParameters(parameters, toPath: queryPath)
-        
-        XCTAssertEqual(path, "/profile?accountId=123&userId=5")
-    }
-    
-    func testAddingParametersToPathWithExistingQuestion() {
-        let networking = Networking(baseURL: self.baseURL)
-        let queryPath = "/profile?"
-        let parameters = ["userId": 5]
-        
-        let path = networking.addParameters(parameters, toPath: queryPath)
-        
-        XCTAssertEqual(path, "/profile?userId=5")
-    }
-    
-    func testAddingParametersToPathWithPercentEncoding() {
-        let networking = Networking(baseURL: self.baseURL)
-        let queryPath = "/profile"
-        let parameters = ["name": "Elvis Nuñez"]
-        
-        let path = networking.addParameters(parameters, toPath: queryPath)
-        
-        XCTAssertEqual(path, "/profile?name=Elvis%20Nu%C3%B1ez")
-    }
-    
-    func testAddingMultipleParametersToPath() {
-        let networking = Networking(baseURL: self.baseURL)
-        let queryPath = "/profile"
-        let parameters: [String : Any] = ["userId": 5, "accountId": "ac3f"]
-        
-        let path = networking.addParameters(parameters, toPath: queryPath)
-        
-        XCTAssertTrue(path.contains("userId=5"))
-        XCTAssertTrue(path.contains("accountId=ac3f"))
-        XCTAssertTrue(path.contains("&"))
-        XCTAssertTrue(
-            path == "/profile?userId=5&accountId=ac3f" ||
-            path == "/profile?accountId=ac3f&userId=5")
     }
 }

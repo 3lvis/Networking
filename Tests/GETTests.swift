@@ -173,4 +173,97 @@ class GETTests: XCTestCase {
             XCTAssertEqual(error, connectionError)
         }
     }
+
+    func testGETWithURLEncodedParameters() {
+        let networking = Networking(baseURL: baseURL)
+        networking.GET("/get", parameters: ["count": 25]) { json, header, error in
+            let json = json as? [String: Any] ?? [String: Any]()
+            XCTAssertEqual(json["url"] as? String, "http://httpbin.org/get?count=25")
+        }
+    }
+
+    /*
+    func testURLForPathWithParameters() {
+        let networking = Networking(baseURL: baseURL)
+        let path = networking.addParameters(["count": 25], toPath: "/hello")
+        let url = networking.url(for: path)
+        XCTAssertEqual(url.absoluteString, "http://httpbin.org/hello?count=25")
+    }
+
+    func testAddingParametersToPathWithoutParameters() {
+        let networking = Networking(baseURL: self.baseURL)
+        let queryPath = "/profile"
+        let parameters = ["userId": 5]
+
+        let path = networking.addParameters(parameters, toPath: queryPath)
+
+        XCTAssertEqual(path, "/profile?userId=5")
+    }
+
+    func testAddingParametersToPathWithoutExistingParameters() {
+        let networking = Networking(baseURL: self.baseURL)
+        let queryPath = "/profile?accountId=123"
+        let parameters = ["userId": 5]
+
+        let path = networking.addParameters(parameters, toPath: queryPath)
+
+        XCTAssertEqual(path, "/profile?accountId=123&userId=5")
+    }
+
+    func testAddingParametersToPathWithExistingQuestion() {
+        let networking = Networking(baseURL: self.baseURL)
+        let queryPath = "/profile?"
+        let parameters = ["userId": 5]
+
+        let path = networking.addParameters(parameters, toPath: queryPath)
+
+        XCTAssertEqual(path, "/profile?userId=5")
+    }
+
+    func testAddingParametersToPathWithPercentEncoding() {
+        let networking = Networking(baseURL: self.baseURL)
+        let queryPath = "/profile"
+        let parameters = ["name": "Elvis Nuñez"]
+
+        let path = networking.addParameters(parameters, toPath: queryPath)
+
+        XCTAssertEqual(path, "/profile?name=Elvis%20Nu%C3%B1ez")
+    }
+
+    func testAddingMultipleParametersToPath() {
+        let networking = Networking(baseURL: self.baseURL)
+        let queryPath = "/profile"
+        let parameters: [String : Any] = ["userId": 5, "accountId": "ac3f"]
+
+        let path = networking.addParameters(parameters, toPath: queryPath)
+
+        XCTAssertTrue(path.contains("userId=5"))
+        XCTAssertTrue(path.contains("accountId=ac3f"))
+        XCTAssertTrue(path.contains("&"))
+        XCTAssertTrue(
+            path == "/profile?userId=5&accountId=ac3f" ||
+                path == "/profile?accountId=ac3f&userId=5")
+    }
+ */
+
+    /**
+     Returns a new path String by appending the provided parameters as URL encoded query parameters to the given path.
+     - parameter parameters: The parameters to append to the path. Assumed to be a dictionary of [String: Any] where Any is convertible to a string.
+     - parameter path: The path to append the parameters to. The path may be a simple bare path, or may already have parameters added to it.
+     - returns: A String generated after appending the URL encoded parameters to the given path.
+     */
+    /*
+    public func addParameters(_ parameters: [String: Any], toPath path: String) -> String {
+        let paramString = parameters.urlEncodedString()
+        if path.contains("?") {
+            if let lastChar = path.characters.last, lastChar == "?" {
+                return path + paramString
+            } else {
+                return path + "&" + paramString
+            }
+        } else {
+            return path + "?" + paramString
+        }
+    }
+    */
 }

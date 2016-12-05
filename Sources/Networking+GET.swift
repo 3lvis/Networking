@@ -9,8 +9,12 @@ public extension Networking {
      - returns: The request identifier.
      */
     @discardableResult
-    public func GET(_ path: String, parameterType: ParameterType = .none, completion: @escaping (_ JSON: Any?, _ error: NSError?) -> ()) -> String {
-        let requestID = self.request(.GET, path: path, parameterType: parameterType, parameters: nil, parts: nil, responseType: .json) { JSON, headers, error in
+    public func GET(_ path: String, parameters: Any? = nil, completion: @escaping (_ JSON: Any?, _ error: NSError?) -> ()) -> String {
+        var parameterType = ParameterType.none
+        if parameters != nil {
+            parameterType = .formURLEncoded
+        }
+        let requestID = self.request(.GET, path: path, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json) { JSON, headers, error in
             completion(JSON, error)
         }
 
@@ -24,8 +28,12 @@ public extension Networking {
      - returns: The request identifier.
      */
     @discardableResult
-    public func GET(_ path: String, parameterType: ParameterType = .none, completion: @escaping (_ JSON: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> ()) -> String {
-        let requestID = self.request(.GET, path: path, parameterType: parameterType, parameters: nil, parts: nil, responseType: .json, completion: completion)
+    public func GET(_ path: String, parameters: Any? = nil, completion: @escaping (_ JSON: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> ()) -> String {
+        var parameterType = ParameterType.none
+        if parameters != nil {
+            parameterType = .formURLEncoded
+        }
+        let requestID = self.request(.GET, path: path, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
 
         return requestID
     }
