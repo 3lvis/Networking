@@ -74,18 +74,20 @@ class POSTTests: XCTestCase {
     func testPOSTWithFormURLEncoded() {
         let networking = Networking(baseURL: baseURL)
         let parameters = [
-            "string": "valueA",
+            "string": "B&B",
             "int": 20,
             "double": 20.0,
             "bool": true,
+            "date": "2016-11-02T13:55:28+01:00"
         ] as [String: Any]
         networking.POST("/post", parameterType: .formURLEncoded, parameters: parameters) { JSON, error in
             guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
             guard let form = JSON["form"] as? [String: Any] else { XCTFail(); return }
-            XCTAssertEqual(form["string"] as? String, "valueA")
+            XCTAssertEqual(form["string"] as? String, "B&B")
             XCTAssertEqual(form["int"] as? String, "20")
             XCTAssertEqual(form["double"] as? String, "20.0")
             XCTAssertEqual(form["bool"] as? String, "true")
+            XCTAssertEqual(form["date"] as? String, "2016-11-02T13:55:28+01:00")
             XCTAssertNil(error)
         }
     }
