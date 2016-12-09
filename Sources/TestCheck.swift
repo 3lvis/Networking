@@ -29,7 +29,7 @@ struct TestCheck {
     /**
      If it's in a unit testing target then it will return in the current thread, otherwise it will return in the main thread.
      */
-    static func testBlock(_ disabled: Bool, block: @escaping (Void) -> Void) {
+    static func testBlock(_ disabled: Bool, block: @escaping () -> Void) {
         if TestCheck.isTesting && disabled == false {
             block()
         } else {

@@ -47,7 +47,7 @@ public extension Networking {
      - parameter path: The path for the cancelled image download request.
      - parameter completion: A closure that gets called when the cancellation is completed.
      */
-    public func cancelImageDownload(_ path: String, completion: ((Void) -> Void)? = nil) {
+    public func cancelImageDownload(_ path: String, completion: (() -> Void)? = nil) {
         let url = self.url(for: path)
         self.cancelRequest(.data, requestType: .GET, url: url, completion: completion)
     }

@@ -10,7 +10,7 @@ public extension Networking {
      - returns: The request identifier.
      */
     @discardableResult
-    public func PUT(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ JSON: Any?, _ error: NSError?) -> ()) -> String {
+    public func PUT(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ error: NSError?) -> Void) -> String {
         let requestID = self.request(.PUT, path: path, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json) { JSON, headers, error in
             completion(JSON, error)
         }
@@ -26,7 +26,7 @@ public extension Networking {
      - returns: The request identifier.
      */
     @discardableResult
-    public func PUT(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ JSON: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> ()) -> String {
+    public func PUT(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> Void) -> String {
         let requestID = self.request(.PUT, path: path, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
 
         return requestID
@@ -57,7 +57,7 @@ public extension Networking {
      - parameter path: The path for the cancelled PUT request.
      - parameter completion: A closure that gets called when the cancellation is completed.
      */
-    public func cancelPUT(_ path: String, completion: ((Void) -> Void)? = nil) {
+    public func cancelPUT(_ path: String, completion: (() -> Void)? = nil) {
         let url = self.url(for: path)
         self.cancelRequest(.data, requestType: .PUT, url: url, completion: completion)
     }

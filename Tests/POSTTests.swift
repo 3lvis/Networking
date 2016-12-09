@@ -78,7 +78,7 @@ class POSTTests: XCTestCase {
             "int": 20,
             "double": 20.0,
             "bool": true,
-            "date": "2016-11-02T13:55:28+01:00"
+            "date": "2016-11-02T13:55:28+01:00",
         ] as [String: Any]
         networking.POST("/post", parameterType: .formURLEncoded, parameters: parameters) { JSON, error in
             guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
