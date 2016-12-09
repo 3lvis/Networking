@@ -7,8 +7,14 @@ public extension Dictionary where Key: ExpressibleByStringLiteral {
      */
     public func urlEncodedString() -> String {
         let keys = self.map { key, value -> String in
-            var encodedValue = "\(value)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
-            encodedValue = encodedValue?.replacingOccurrences(of: "+", with: "%2B")
+            // Does not include "?" or "/" due to RFC 3986 - Section 3.4
+            let generalDelimitersToEncode = ":#[]@"
+            let subDelimitersToEncode = "!$&'()*+,;="
+
+            var allowedCharacterSet = CharacterSet.urlQueryAllowed
+            allowedCharacterSet.remove(charactersIn: "\(generalDelimitersToEncode)\(subDelimitersToEncode)")
+
+            let encodedValue = "\(value)".addingPercentEncoding(withAllowedCharacters: allowedCharacterSet)
             if let encodedValue = encodedValue {
                 return "\(key)=\(encodedValue)"
             } else {
