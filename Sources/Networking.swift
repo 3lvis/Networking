@@ -101,6 +101,7 @@ public class Networking {
         case json
         case data
         case image
+        case file
 
         var accept: String? {
             switch self {
@@ -508,26 +509,41 @@ extension Networking {
                         var returnedResponse: Any?
                         if let data = data, data.count > 0 {
                             guard let destinationURL = try? self.destinationURL(for: trimmedPath, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
+                            do {
+
+                            }
                             let _ = try? data.write(to: destinationURL, options: [.atomic])
                             switch responseType {
                             case .data:
                                 self.cache.setObject(data as AnyObject, forKey: destinationURL.absoluteString as AnyObject)
                                 returnedResponse = data
-                                break
                             case .image:
                                 if let image = NetworkingImage(data: data) {
                                     self.cache.setObject(image, forKey: destinationURL.absoluteString as AnyObject)
                                     returnedResponse = image
                                 }
-                                break
                             default:
                                 fatalError("Response Type is different than Data and Image")
-                                break
                             }
                         }
                         TestCheck.testBlock(self.disableTestingMode) {
                             completion(returnedResponse, [String: Any](), error)
                         }
+                    }
+                }
+            case .file:
+                let trimmedPath = path.components(separatedBy: "?").first!
+
+                requestID = self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, headers, error in
+
+                    var returnedResponse: Any?
+                    if let data = data, data.count > 0 {
+                        guard let destinationURL = try? self.destinationURL(for: trimmedPath, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
+                        let _ = try? data.write(to: destinationURL, options: [.atomic])
+                        returnedResponse = destinationURL
+                    }
+                    TestCheck.testBlock(self.disableTestingMode) {
+                        completion(returnedResponse, [String: Any](), error)
                     }
                 }
             }
