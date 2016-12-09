@@ -10,8 +10,8 @@ public extension Networking {
      */
     @discardableResult
     public func GET(_ path: String, parameterType: ParameterType = .none, completion: @escaping (_ json: Any?, _ error: NSError?) -> Void) -> String {
-        let requestID = self.request(.GET, path: path, parameterType: parameterType, parameters: nil, parts: nil, responseType: .json) { JSON, headers, error in
-            completion(JSON, error)
+        let requestID = self.request(.GET, path: path, parameterType: parameterType, parameters: nil, parts: nil, responseType: .json) { json, headers, error in
+            completion(json, error)
         }
 
         return requestID

@@ -10,8 +10,8 @@ public extension Networking {
      */
     @discardableResult
     public func DELETE(_ path: String, completion: @escaping (_ json: Any?, _ error: NSError?) -> Void) -> String {
-        let requestID = self.request(.DELETE, path: path, parameterType: .none, parameters: nil, parts: nil, responseType: .json) { JSON, headers, error in
-            completion(JSON, error)
+        let requestID = self.request(.DELETE, path: path, parameterType: .none, parameters: nil, parts: nil, responseType: .json) { json, headers, error in
+            completion(json, error)
         }
 
         return requestID
