@@ -57,6 +57,6 @@ public extension Networking {
      */
     public func cancelDELETE(_ path: String, completion: ((Void) -> Void)? = nil) {
         let url = self.url(for: path)
-        self.cancelRequest(.Data, requestType: .DELETE, url: url, completion: completion)
+        self.cancelRequest(.data, requestType: .DELETE, url: url, completion: completion)
     }
 }

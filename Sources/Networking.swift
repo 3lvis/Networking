@@ -49,7 +49,7 @@ public class Networking {
     }
 
     enum SessionTaskType: String {
-        case Data, Upload, Download
+        case data, upload, download
     }
 
     /**
@@ -675,13 +675,13 @@ extension Networking {
         self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
             var sessionTasks = [URLSessionTask]()
             switch sessionTaskType {
-            case .Data:
+            case .data:
                 sessionTasks = dataTasks
                 break
-            case .Download:
+            case .download:
                 sessionTasks = downloadTasks
                 break
-            case .Upload:
+            case .upload:
                 sessionTasks = uploadTasks
                 break
             }

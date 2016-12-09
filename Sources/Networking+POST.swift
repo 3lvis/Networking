@@ -91,6 +91,6 @@ public extension Networking {
      */
     public func cancelPOST(_ path: String, completion: ((Void) -> Void)? = nil) {
         let url = self.url(for: path)
-        self.cancelRequest(.Data, requestType: .POST, url: url, completion: completion)
+        self.cancelRequest(.data, requestType: .POST, url: url, completion: completion)
     }
 }
