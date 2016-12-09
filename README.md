@@ -77,7 +77,7 @@ Since **Networking** is basically a wrapper of `NSURLSession` we can take levera
 let networking = Networking(baseURL: "http://httpbin.org")
 
 // Ephemeral
-let networking = Networking(baseURL: "http://httpbin.org", configurationType: .Ephemeral)
+let networking = Networking(baseURL: "http://httpbin.org", configurationType: .ephemeral)
 ```
 
 ## Authenticating
