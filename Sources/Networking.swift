@@ -322,7 +322,7 @@ public class Networking {
      - parameter completion: A closure that gets called when the download request is completed, it contains  a `data` object and an `NSError`.
      */
     public func downloadData(for path: String, cacheName: String? = nil, completion: @escaping (_ data: Data?, _ error: NSError?) -> Void) {
-        self.request(.GET, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .data) { response, headers, error in
+        self.request(.GET, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .data) { response, headers, httpResponse, error in
             completion(response as? Data, error)
         }
     }
@@ -425,20 +425,20 @@ extension Networking {
     }
 
     @discardableResult
-    func request(_ requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> Void) -> String {
+    func request(_ requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Any?, _ headers: [AnyHashable: Any], _ httpResponse: HTTPURLResponse?, _ error: NSError?) -> Void) -> String {
         var requestID = UUID().uuidString
 
         if let fakeRequests = self.fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
             if fakeRequest.statusCode.statusCodeType() == .successful {
-                completion(fakeRequest.response, [String: Any](), nil)
+                completion(fakeRequest.response, [String: Any](), nil, nil)
             } else {
                 let error = NSError(domain: Networking.domain, code: fakeRequest.statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: fakeRequest.statusCode)])
-                completion(fakeRequest.response, [String: Any](), error)
+                completion(fakeRequest.response, [String: Any](), nil, error)
             }
         } else {
             switch responseType {
             case .json:
-                requestID = self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, headers, error in
+                requestID = self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, headers, httpResponse, error in
                     var returnedError = error
                     var returnedResponse: Any?
                     if let data = data, data.count > 0 {
@@ -451,7 +451,7 @@ extension Networking {
                         }
                     }
                     TestCheck.testBlock(self.disableTestingMode) {
-                        completion(returnedResponse, headers, returnedError)
+                        completion(returnedResponse, headers, nil, returnedError)
                     }
                 }
             case .data, .image:
@@ -460,10 +460,10 @@ extension Networking {
                 let object = self.objectFromCache(for: trimmedPath, cacheName: cacheName, responseType: responseType)
                 if let object = object {
                     TestCheck.testBlock(self.disableTestingMode) {
-                        completion(object, [String: Any](), nil)
+                        completion(object, [String: Any](), nil, nil)
                     }
                 } else {
-                    requestID = self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, headers, error in
+                    requestID = self.dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, headers, httpResponse, error in
 
                         var returnedResponse: Any?
                         if let data = data, data.count > 0 {
@@ -486,7 +486,7 @@ extension Networking {
                             }
                         }
                         TestCheck.testBlock(self.disableTestingMode) {
-                            completion(returnedResponse, [String: Any](), error)
+                            completion(returnedResponse, [String: Any](), nil, error)
                         }
                     }
                 }
@@ -497,7 +497,7 @@ extension Networking {
     }
 
     @discardableResult
-    func dataRequest(_ requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Data?, _ headers: [AnyHashable: Any], _ error: NSError?) -> Void) -> String {
+    func dataRequest(_ requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Data?, _ headers: [AnyHashable: Any], _ httpResponse: HTTPURLResponse?, _ error: NSError?) -> Void) -> String {
         let requestID = UUID().uuidString
         var request = URLRequest(url: self.url(for: path))
         request.httpMethod = requestType.rawValue
@@ -590,20 +590,20 @@ extension Networking {
         }
 
         if let serializingError = serializingError {
-            completion(nil, [String: Any](), serializingError)
+            completion(nil, [String: Any](), nil, serializingError)
         } else {
             var connectionError: Error?
             let semaphore = DispatchSemaphore(value: 0)
-            var returnedResponse: URLResponse?
+            var returnedResponse: HTTPURLResponse?
             var returnedData: Data?
             var returnedHeaders = [AnyHashable: Any]()
 
-            let session = self.session.dataTask(with: request) { data, response, error in
-                returnedResponse = response
+            let session = self.session.dataTask(with: request) { data, optionalHTTPResponse, error in
+                returnedResponse = optionalHTTPResponse as? HTTPURLResponse
                 connectionError = error
                 returnedData = data
 
-                if let httpResponse = response as? HTTPURLResponse {
+                if let httpResponse = optionalHTTPResponse as? HTTPURLResponse {
                     returnedHeaders = httpResponse.allHeaderFields
 
                     if httpResponse.statusCode >= 200 && httpResponse.statusCode < 300 {
@@ -630,7 +630,7 @@ extension Networking {
                     }
 
                     self.logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError as NSError?)
-                    completion(returnedData, returnedHeaders, connectionError as NSError?)
+                    completion(returnedData, returnedHeaders, returnedResponse, connectionError as NSError?)
                 }
             }
 
@@ -640,7 +640,7 @@ extension Networking {
             if TestCheck.isTesting && self.disableTestingMode == false {
                 let _ = semaphore.wait(timeout: DispatchTime.now() + 60.0)
                 self.logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request as URLRequest, response: returnedResponse, error: connectionError as NSError?)
-                completion(returnedData, returnedHeaders, connectionError as NSError?)
+                completion(returnedData, returnedHeaders, returnedResponse, connectionError as NSError?)
             }
         }
 

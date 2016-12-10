@@ -7,7 +7,7 @@ class NetworkingTests: XCTestCase {
     func testSetAuthorizationHeaderWithUsernameAndPassword() {
         let networking = Networking(baseURL: baseURL)
         networking.setAuthorizationHeader(username: "user", password: "passwd")
-        networking.GET("/basic-auth/user/passwd") { json, error in
+        networking.oldGET("/basic-auth/user/passwd") { json, error in
             guard let json = json as? [String: Any] else { XCTFail(); return }
             let user = json["user"] as? String
             let authenticated = json["authenticated"] as? Bool
@@ -73,7 +73,7 @@ class NetworkingTests: XCTestCase {
         networking.disableTestingMode = true
 
         var synchronous = false
-        networking.GET("/get") { json, error in
+        networking.oldGET("/get") { json, error in
             synchronous = true
 
             XCTAssertTrue(synchronous)
@@ -141,7 +141,7 @@ class NetworkingTests: XCTestCase {
         networking.disableTestingMode = true
         var cancelledGET = false
 
-        let requestID = networking.GET("/get") { json, error in
+        let requestID = networking.oldGET("/get") { json, error in
             cancelledGET = error?.code == URLError.cancelled.rawValue
             XCTAssertTrue(cancelledGET)
 
@@ -162,7 +162,7 @@ class NetworkingTests: XCTestCase {
         var cancelledGET = false
         var cancelledPOST = false
 
-        networking.GET("/get") { json, error in
+        networking.oldGET("/get") { json, error in
             cancelledGET = error?.code == URLError.cancelled.rawValue
             XCTAssertTrue(cancelledGET)
 
@@ -189,7 +189,7 @@ class NetworkingTests: XCTestCase {
         let expectation = self.expectation(description: "testCancelRequestsReturnInMainThread")
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
-        networking.GET("/get") { json, error in
+        networking.oldGET("/get") { json, error in
             XCTAssertTrue(Thread.isMainThread)
             XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
             expectation.fulfill()

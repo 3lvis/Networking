@@ -89,7 +89,7 @@ To authenticate using [basic authentication](http://www.w3.org/Protocols/HTTP/1.
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.setAuthorizationHeader(username: "aladdin", password: "opensesame")
-networking.GET("/basic-auth/aladdin/opensesame") { json, error in
+networking.oldGET("/basic-auth/aladdin/opensesame") { json, error in
     // Successfully logged in! Now do something with the JSON
 }
 ```
@@ -101,7 +101,7 @@ To authenticate using a [bearer token](https://tools.ietf.org/html/rfc6750) **"A
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.setAuthorizationHeader(token: "AAAFFAAAA3DAAAAAA")
-networking.GET("/get") { json, error in
+networking.oldGET("/get") { json, error in
     // Do something...
 }
 ```
@@ -113,7 +113,7 @@ To authenticate using a custom authentication header, for example **"Token token
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.setAuthorizationHeader(headerValue: "Token token=AAAFFAAAA3DAAAAAA")
-networking.GET("/get") { json, error in
+networking.oldGET("/get") { json, error in
     // Do something...
 }
 ```
@@ -123,7 +123,7 @@ Providing the following authentication header `Anonymous-Token: AAAFFAAAA3DAAAAA
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.setAuthorizationHeader(headerKey: "Anonymous-Token", headerValue: "AAAFFAAAA3DAAAAAA")
-networking.GET("/get") { json, error in
+networking.oldGET("/get") { json, error in
     // Do something
 }
 ```
@@ -136,7 +136,7 @@ Making a request is as simple as just calling `GET`, `POST`, `PUT`, or `DELETE`.
 
 ```swift
 let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
-networking.GET("/stories") { json, error in
+networking.oldGET("/stories") { json, error in
     // Stories JSON: https://api-news.layervault.com/api/v2/stories
 }
 ```
@@ -145,7 +145,7 @@ Just add headers to the completion block if you want headers, or remove it if yo
 
 ```swift
 let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
-networking.GET("/stories") { json, headers, error in
+networking.oldGET("/stories") { json, headers, error in
     // headers is a [String : Any] dictionary
 }
 ```
@@ -253,7 +253,7 @@ Cancelling any request for a specific path is really simple. Beware that cancell
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-networking.GET("/get") { json, error in
+networking.oldGET("/get") { json, error in
     // Cancelling a GET request returns an error with code URLError.cancelled which means cancelled request
 }
 
@@ -290,7 +290,7 @@ Faking a request means that after calling this method on a specific path, any ca
 ```swift
 let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
 networking.fakeGET("/stories", response: [["id" : 47333, "title" : "Site Design: Aquest"]])
-networking.GET("/stories") { json, error in
+networking.oldGET("/stories") { json, error in
     // JSON containing stories
 }
 ```
@@ -302,7 +302,7 @@ If your file is not located in the main bundle you have to specify using the bun
 ```swift
 let networking = Networking(baseURL: baseURL)
 networking.fakeGET("/entries", fileName: "entries.json")
-networking.GET("/entries") { json, error in
+networking.oldGET("/entries") { json, error in
     // JSON with the contents of entries.json
 }
 ```
@@ -314,7 +314,7 @@ If you do not provide a status code for this fake request, the default returned 
 ```swift
 let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
 networking.fakeGET("/stories", response: nil, statusCode: 500)
-networking.GET("/stories") { json, error in
+networking.oldGET("/stories") { json, error in
     // error with status code 500
 }
 ```

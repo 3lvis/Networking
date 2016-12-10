@@ -11,7 +11,7 @@ public extension Networking {
      */
     @discardableResult
     public func POST(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ error: NSError?) -> Void) -> String {
-        let requestID = self.request(.POST, path: path, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json) { json, headers, error in
+        let requestID = self.request(.POST, path: path, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json) { json, headers, httpResponse, error in
             completion(json, error)
         }
 
@@ -27,7 +27,9 @@ public extension Networking {
      */
     @discardableResult
     public func POST(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> Void) -> String {
-        let requestID = self.request(.POST, path: path, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
+        let requestID = self.request(.POST, path: path, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json) { json, headers, httpResponse, error in
+            completion(json, headers, error)
+        }
 
         return requestID
     }
@@ -57,7 +59,7 @@ public extension Networking {
      */
     @discardableResult
     public func POST(_ path: String, parameters: Any? = nil, parts: [FormDataPart], completion: @escaping (_ json: Any?, _ error: NSError?) -> Void) -> String {
-        let requestID = self.request(.POST, path: path, parameterType: .multipartFormData, parameters: parameters, parts: parts, responseType: .json) { json, headers, error in
+        let requestID = self.request(.POST, path: path, parameterType: .multipartFormData, parameters: parameters, parts: parts, responseType: .json) { json, headers, httpResponse, error in
             completion(json, error)
         }
 

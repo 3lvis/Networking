@@ -32,6 +32,20 @@
 		143DA71C1DFC696000D59F1F /* Deprecated.swift in Sources */ = {isa = PBXBuildFile; fileRef = 143DA7161DFC696000D59F1F /* Deprecated.swift */; };
 		143DA71D1DFC696000D59F1F /* Deprecated.swift in Sources */ = {isa = PBXBuildFile; fileRef = 143DA7161DFC696000D59F1F /* Deprecated.swift */; };
 		143DA71E1DFC696000D59F1F /* Deprecated.swift in Sources */ = {isa = PBXBuildFile; fileRef = 143DA7161DFC696000D59F1F /* Deprecated.swift */; };
+		143DA7201DFC6A2300D59F1F /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 143DA71F1DFC6A2300D59F1F /* Result.swift */; };
+		143DA7211DFC6A2300D59F1F /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 143DA71F1DFC6A2300D59F1F /* Result.swift */; };
+		143DA7221DFC6A2300D59F1F /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 143DA71F1DFC6A2300D59F1F /* Result.swift */; };
+		143DA7231DFC6A2300D59F1F /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 143DA71F1DFC6A2300D59F1F /* Result.swift */; };
+		143DA7241DFC6A2300D59F1F /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 143DA71F1DFC6A2300D59F1F /* Result.swift */; };
+		143DA7251DFC6A2300D59F1F /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 143DA71F1DFC6A2300D59F1F /* Result.swift */; };
+		143DA7261DFC6A2300D59F1F /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 143DA71F1DFC6A2300D59F1F /* Result.swift */; };
+		143DA7271DFC6A2300D59F1F /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 143DA71F1DFC6A2300D59F1F /* Result.swift */; };
+		143DA7291DFC6A4600D59F1F /* ResultTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 143DA7281DFC6A4600D59F1F /* ResultTests.swift */; };
+		143DA72A1DFC6A4600D59F1F /* ResultTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 143DA7281DFC6A4600D59F1F /* ResultTests.swift */; };
+		143DA72B1DFC6A4600D59F1F /* ResultTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 143DA7281DFC6A4600D59F1F /* ResultTests.swift */; };
+		143DA72D1DFC746A00D59F1F /* DeprecatedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 143DA72C1DFC746A00D59F1F /* DeprecatedTests.swift */; };
+		143DA72E1DFC746A00D59F1F /* DeprecatedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 143DA72C1DFC746A00D59F1F /* DeprecatedTests.swift */; };
+		143DA72F1DFC746A00D59F1F /* DeprecatedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 143DA72C1DFC746A00D59F1F /* DeprecatedTests.swift */; };
 		14638D041CC64620002B9433 /* Networking.h in Headers */ = {isa = PBXBuildFile; fileRef = 14638D031CC645D2002B9433 /* Networking.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		14638D051CC64629002B9433 /* Dictionary+FormURLEncoded.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1474C1BC1CA2988900E15D84 /* Dictionary+FormURLEncoded.swift */; };
 		14638D061CC64629002B9433 /* JSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1474C1BD1CA2988900E15D84 /* JSON.swift */; };
@@ -194,6 +208,9 @@
 		1413F4641CE7963700482096 /* NetworkingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkingTests.swift; sourceTree = "<group>"; };
 		1420A3721DBC00B8009258C3 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		143DA7161DFC696000D59F1F /* Deprecated.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Deprecated.swift; sourceTree = "<group>"; };
+		143DA71F1DFC6A2300D59F1F /* Result.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Result.swift; sourceTree = "<group>"; };
+		143DA7281DFC6A4600D59F1F /* ResultTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResultTests.swift; sourceTree = "<group>"; };
+		143DA72C1DFC746A00D59F1F /* DeprecatedTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeprecatedTests.swift; sourceTree = "<group>"; };
 		14638CFA1CC6459A002B9433 /* Networking.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Networking.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		14638D021CC645C1002B9433 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		14638D031CC645D2002B9433 /* Networking.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Networking.h; sourceTree = "<group>"; };
@@ -313,10 +330,12 @@
 				146EF90D1CEBCEA50059DDB1 /* DELETETests.swift */,
 				1413F4631CE7963700482096 /* ImageTests.swift */,
 				1413F45E1CE7963700482096 /* Dictionary+FormURLEncodedTests.swift */,
+				143DA7281DFC6A4600D59F1F /* ResultTests.swift */,
 				1413F4611CE7963700482096 /* Helpers.swift */,
 				1488E23D1CF138D700C6FBA3 /* SHA1.m */,
 				1488E23C1CF138D700C6FBA3 /* SHA1.h */,
 				4496E8E51DAFB27A0092254E /* String+UTF8Tests.swift */,
+				143DA72C1DFC746A00D59F1F /* DeprecatedTests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -369,6 +388,7 @@
 				1474C1C21CA2988900E15D84 /* TestCheck.swift */,
 				1474C1BE1CA2988900E15D84 /* NetworkActivityIndicator.swift */,
 				143DA7161DFC696000D59F1F /* Deprecated.swift */,
+				143DA71F1DFC6A2300D59F1F /* Result.swift */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -776,8 +796,11 @@
 				147B32F81CF9B1C500D5BAED /* Networking+GET.swift in Sources */,
 				1413F4761CE7968B00482096 /* Dictionary+FormURLEncoded.swift in Sources */,
 				146EF9181CEBCEA50059DDB1 /* PUTTests.swift in Sources */,
+				143DA72B1DFC6A4600D59F1F /* ResultTests.swift in Sources */,
 				143DA71A1DFC696000D59F1F /* Deprecated.swift in Sources */,
 				1413F47B1CE7969900482096 /* Networking+Download.swift in Sources */,
+				143DA7231DFC6A2300D59F1F /* Result.swift in Sources */,
+				143DA72F1DFC746A00D59F1F /* DeprecatedTests.swift in Sources */,
 				4496E8E81DAFB27A0092254E /* String+UTF8Tests.swift in Sources */,
 				14D144DF1CEED63B00048629 /* FormDataPart.swift in Sources */,
 				146EF9121CEBCEA50059DDB1 /* DELETETests.swift in Sources */,
@@ -802,6 +825,7 @@
 				147B32FF1CF9B1C500D5BAED /* Networking+POST.swift in Sources */,
 				14638D061CC64629002B9433 /* JSON.swift in Sources */,
 				147B33051CF9B1C500D5BAED /* Networking+PUT.swift in Sources */,
+				143DA7241DFC6A2300D59F1F /* Result.swift in Sources */,
 				14638D071CC64629002B9433 /* NetworkActivityIndicator.swift in Sources */,
 				14D144E01CEED63B00048629 /* FormDataPart.swift in Sources */,
 				14638D091CC64629002B9433 /* Networking+Download.swift in Sources */,
@@ -824,6 +848,7 @@
 				147B33001CF9B1C500D5BAED /* Networking+POST.swift in Sources */,
 				14638D1C1CC64733002B9433 /* JSON.swift in Sources */,
 				147B33061CF9B1C500D5BAED /* Networking+PUT.swift in Sources */,
+				143DA7251DFC6A2300D59F1F /* Result.swift in Sources */,
 				14638D1D1CC64733002B9433 /* NetworkActivityIndicator.swift in Sources */,
 				14D144E11CEED63B00048629 /* FormDataPart.swift in Sources */,
 				14638D1F1CC64733002B9433 /* Networking+Download.swift in Sources */,
@@ -846,6 +871,7 @@
 				147B33011CF9B1C500D5BAED /* Networking+POST.swift in Sources */,
 				14638D321CC647B8002B9433 /* JSON.swift in Sources */,
 				147B33071CF9B1C500D5BAED /* Networking+PUT.swift in Sources */,
+				143DA7261DFC6A2300D59F1F /* Result.swift in Sources */,
 				14638D331CC647B8002B9433 /* NetworkActivityIndicator.swift in Sources */,
 				14D144E21CEED63B00048629 /* FormDataPart.swift in Sources */,
 				14638D351CC647B8002B9433 /* Networking+Download.swift in Sources */,
@@ -868,6 +894,7 @@
 				147B33021CF9B1C500D5BAED /* Networking+POST.swift in Sources */,
 				14638D481CC64829002B9433 /* JSON.swift in Sources */,
 				147B33081CF9B1C500D5BAED /* Networking+PUT.swift in Sources */,
+				143DA7271DFC6A2300D59F1F /* Result.swift in Sources */,
 				14638D491CC64829002B9433 /* NetworkActivityIndicator.swift in Sources */,
 				14D144E31CEED63B00048629 /* FormDataPart.swift in Sources */,
 				14638D4B1CC64829002B9433 /* Networking+Download.swift in Sources */,
@@ -896,8 +923,11 @@
 				147B32F71CF9B1C500D5BAED /* Networking+GET.swift in Sources */,
 				1474C1C51CA2988900E15D84 /* NetworkActivityIndicator.swift in Sources */,
 				146EF9171CEBCEA50059DDB1 /* PUTTests.swift in Sources */,
+				143DA7291DFC6A4600D59F1F /* ResultTests.swift in Sources */,
 				143DA7181DFC696000D59F1F /* Deprecated.swift in Sources */,
 				1474C1C31CA2988900E15D84 /* Dictionary+FormURLEncoded.swift in Sources */,
+				143DA7211DFC6A2300D59F1F /* Result.swift in Sources */,
+				143DA72D1DFC746A00D59F1F /* DeprecatedTests.swift in Sources */,
 				4496E8E61DAFB27A0092254E /* String+UTF8Tests.swift in Sources */,
 				146EF9111CEBCEA50059DDB1 /* DELETETests.swift in Sources */,
 				14D144DE1CEED63B00048629 /* FormDataPart.swift in Sources */,
@@ -928,8 +958,11 @@
 				44B5D3931D19B9E5004378B9 /* Networking+GET.swift in Sources */,
 				44B5D3941D19B9E5004378B9 /* NetworkActivityIndicator.swift in Sources */,
 				44B5D3951D19B9E5004378B9 /* PUTTests.swift in Sources */,
+				143DA72A1DFC6A4600D59F1F /* ResultTests.swift in Sources */,
 				143DA7191DFC696000D59F1F /* Deprecated.swift in Sources */,
 				44B5D3961D19B9E5004378B9 /* Dictionary+FormURLEncoded.swift in Sources */,
+				143DA7221DFC6A2300D59F1F /* Result.swift in Sources */,
+				143DA72E1DFC746A00D59F1F /* DeprecatedTests.swift in Sources */,
 				4496E8E71DAFB27A0092254E /* String+UTF8Tests.swift in Sources */,
 				44B5D3971D19B9E5004378B9 /* DELETETests.swift in Sources */,
 				44B5D3981D19B9E5004378B9 /* FormDataPart.swift in Sources */,
@@ -954,6 +987,7 @@
 				44DFD3A71D9A34540014E9F2 /* Networking+Download.swift in Sources */,
 				44DFD3921D9A2D5A0014E9F2 /* OptionsController.swift in Sources */,
 				44DFD3AC1D9A34540014E9F2 /* NSFileManager+Helpers.swift in Sources */,
+				143DA7201DFC6A2300D59F1F /* Result.swift in Sources */,
 				44DFD3AA1D9A34540014E9F2 /* Networking+PUT.swift in Sources */,
 				44DFD3A91D9A34540014E9F2 /* Networking+POST.swift in Sources */,
 				44DFD3901D9A2D5A0014E9F2 /* AppDelegate.swift in Sources */,
