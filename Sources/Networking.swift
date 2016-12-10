@@ -662,7 +662,7 @@ extension Networking {
             session.resume()
 
             if TestCheck.isTesting && self.disableTestingMode == false {
-                let _ = semaphore.wait(timeout: DispatchTime.distantFuture)
+                let _ = semaphore.wait(timeout: DispatchTime.now() + 60.0)
                 self.logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request as URLRequest, response: returnedResponse, error: connectionError as NSError?)
                 completion(returnedData, returnedHeaders, connectionError as NSError?)
             }
