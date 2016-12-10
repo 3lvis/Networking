@@ -195,11 +195,11 @@ networking.POST("/post", parameters: ["name" : "jameson"]) { json, error in
 
 ### URL-encoding
 
- If you want to use `application/x-www-form-urlencoded` just use the `.FormURLEncoded` parameter type, internally **Networking** will format your parameters so they use [`Percent-encoding` or `URL-enconding`](https://en.wikipedia.org/wiki/Percent-encoding#The_application.2Fx-www-form-urlencoded_type).
+ If you want to use `application/x-www-form-urlencoded` just use the `.formURLEncoded` parameter type, internally **Networking** will format your parameters so they use [`Percent-encoding` or `URL-enconding`](https://en.wikipedia.org/wiki/Percent-encoding#The_application.2Fx-www-form-urlencoded_type).
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-networking.POST("/post", parameterType: .FormURLEncoded, parameters: ["name" : "jameson"]) { json, error in
+networking.POST("/post", parameterType: .formURLEncoded, parameters: ["name" : "jameson"]) { json, error in
    // Successfull post using `application/x-www-form-urlencoded` as `Content-Type`
 }
 ```
