@@ -344,7 +344,7 @@ public class Networking {
     /**
      Downloads data from a URL, caching the result.
      - parameter path: The path used to download the resource.
-     - parameter completion: A closure that gets called when the download request is completed, it contains  a `data` object and a `NSError`.
+     - parameter completion: A closure that gets called when the download request is completed, it contains  a `data` object and an `NSError`.
      */
     public func downloadData(for path: String, cacheName: String? = nil, completion: @escaping (_ data: Data?, _ error: NSError?) -> Void) {
         self.request(.GET, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .data) { response, headers, error in
@@ -581,7 +581,23 @@ extension Networking {
             case .formURLEncoded:
                 guard let parametersDictionary = parameters as? [String: Any] else { fatalError("Couldn't convert parameters to a dictionary: \(parameters)") }
                 let formattedParameters = parametersDictionary.urlEncodedString()
-                request.httpBody = formattedParameters.data(using: .utf8)
+                switch requestType {
+                case .GET, .DELETE:
+                    let urlEncodedPath: String
+                    if path.contains("?") {
+                        if let lastCharacter = path.characters.last, lastCharacter == "?" {
+                            urlEncodedPath = path + formattedParameters
+                        } else {
+                            urlEncodedPath = path + "&" + formattedParameters
+                        }
+                    } else {
+                        urlEncodedPath = path + "?" + formattedParameters
+                    }
+                    request.url = self.url(for: urlEncodedPath)
+                case .POST, .PUT:
+                    request.httpBody = formattedParameters.data(using: .utf8)
+                }
+
                 break
             case .multipartFormData:
                 var bodyData = Data()
@@ -662,7 +678,7 @@ extension Networking {
             session.resume()
 
             if TestCheck.isTesting && self.disableTestingMode == false {
-                let _ = semaphore.wait(timeout: DispatchTime.distantFuture)
+                let _ = semaphore.wait(timeout: DispatchTime.now() + 60.0)
                 self.logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request as URLRequest, response: returnedResponse, error: connectionError as NSError?)
                 completion(returnedData, returnedHeaders, connectionError as NSError?)
             }

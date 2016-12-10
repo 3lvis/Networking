@@ -120,4 +120,12 @@ class DELETETests: XCTestCase {
 
         self.waitForExpectations(timeout: 15.0, handler: nil)
     }
+
+    func testDELETEWithURLEncodedParameters() {
+        let networking = Networking(baseURL: baseURL)
+        networking.DELETE("/delete", parameters: ["userId": 25]) { json, error in
+            let json = json as? [String: Any] ?? [String: Any]()
+            XCTAssertEqual(json["url"] as? String, "http://httpbin.org/delete?userId=25")
+        }
+    }
 }

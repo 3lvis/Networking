@@ -5,13 +5,14 @@ public extension Networking {
     /**
      GET request to the specified path.
      - parameter path: The path for the GET request.
-     - parameter completion: A closure that gets called when the GET request is completed, it contains a `JSON` object and a `NSError`.
+     - parameter completion: A closure that gets called when the GET request is completed, it contains a `JSON` object and an `NSError`.
      - returns: The request identifier.
      */
     @discardableResult
-    public func GET(_ path: String, parameterType: ParameterType = .none, completion: @escaping (_ json: Any?, _ error: NSError?) -> Void) -> String {
-        let requestID = self.request(.GET, path: path, parameterType: parameterType, parameters: nil, parts: nil, responseType: .json) { json, headers, error in
-            completion(json, error)
+    public func GET(_ path: String, parameters: Any? = nil, completion: @escaping (_ JSON: Any?, _ error: NSError?) -> ()) -> String {
+        let parameterType = parameters != nil ? ParameterType.formURLEncoded : ParameterType.none
+        let requestID = self.request(.GET, path: path, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json) { JSON, headers, error in
+            completion(JSON, error)
         }
 
         return requestID
@@ -20,12 +21,13 @@ public extension Networking {
     /**
      GET request to the specified path.
      - parameter path: The path for the GET request.
-     - parameter completion: A closure that gets called when the GET request is completed, it contains a `JSON` object and a `NSError`.
+     - parameter completion: A closure that gets called when the GET request is completed, it contains a `JSON` object and an `NSError`.
      - returns: The request identifier.
      */
     @discardableResult
-    public func GET(_ path: String, parameterType: ParameterType = .none, completion: @escaping (_ json: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> Void) -> String {
-        let requestID = self.request(.GET, path: path, parameterType: parameterType, parameters: nil, parts: nil, responseType: .json, completion: completion)
+    public func GET(_ path: String, parameters: Any? = nil, completion: @escaping (_ JSON: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> ()) -> String {
+        let parameterType = parameters != nil ? ParameterType.formURLEncoded : ParameterType.none
+        let requestID = self.request(.GET, path: path, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
 
         return requestID
     }

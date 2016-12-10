@@ -173,4 +173,28 @@ class GETTests: XCTestCase {
             XCTAssertEqual(error, connectionError)
         }
     }
+
+    func testGETWithURLEncodedParameters() {
+        let networking = Networking(baseURL: baseURL)
+        networking.GET("/get", parameters: ["count": 25]) { json, error in
+            let json = json as? [String: Any] ?? [String: Any]()
+            XCTAssertEqual(json["url"] as? String, "http://httpbin.org/get?count=25")
+        }
+    }
+
+    func testGETWithURLEncodedParametersWithExistingQuery() {
+        let networking = Networking(baseURL: baseURL)
+        networking.GET("/get?accountId=123", parameters: ["userId": 5]) { json, error in
+            let json = json as? [String: Any] ?? [String: Any]()
+            XCTAssertEqual(json["url"] as? String, "http://httpbin.org/get?accountId=123&userId=5")
+        }
+    }
+
+    func testGETWithURLEncodedParametersWithPercentEncoding() {
+        let networking = Networking(baseURL: baseURL)
+        networking.GET("/get", parameters: ["name": "Elvis Nuñez"]) { json, error in
+            let json = json as? [String: Any] ?? [String: Any]()
+            XCTAssertEqual(json["url"] as? String, "http://httpbin.org/get?name=Elvis Nuñez")
+        }
+    }
 }
