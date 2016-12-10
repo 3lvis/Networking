@@ -194,28 +194,7 @@ class GETTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.GET("/get", parameters: ["name": "Elvis Nuñez"]) { json, error in
             let json = json as? [String: Any] ?? [String: Any]()
-            XCTAssertEqual(json["url"] as? String, "http://httpbin.org/get?name=Elvis%20Nu%C3%B1ez")
+            XCTAssertEqual(json["url"] as? String, "http://httpbin.org/get?name=Elvis Nuñez")
         }
     }
-
-    /**
-     Returns a new path String by appending the provided parameters as URL encoded query parameters to the given path.
-     - parameter parameters: The parameters to append to the path. Assumed to be a dictionary of [String: Any] where Any is convertible to a string.
-     - parameter path: The path to append the parameters to. The path may be a simple bare path, or may already have parameters added to it.
-     - returns: A String generated after appending the URL encoded parameters to the given path.
-     */
-    /*
-    public func addParameters(_ parameters: [String: Any], toPath path: String) -> String {
-        let paramString = parameters.urlEncodedString()
-        if path.contains("?") {
-            if let lastChar = path.characters.last, lastChar == "?" {
-                return path + paramString
-            } else {
-                return path + "&" + paramString
-            }
-        } else {
-            return path + "?" + paramString
-        }
-    }
-    */
 }

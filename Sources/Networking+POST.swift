@@ -6,7 +6,7 @@ public extension Networking {
      POST request to the specified path, using the provided parameters.
      - parameter path: The path for the POST request.
      - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by default this is JSON.
-     - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and a `NSError`.
+     - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and an `NSError`.
      - returns: The request identifier.
      */
     @discardableResult
@@ -22,7 +22,7 @@ public extension Networking {
      POST request to the specified path, using the provided parameters.
      - parameter path: The path for the POST request.
      - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by default this is JSON.
-     - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and a `NSError`.
+     - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and an `NSError`.
      - returns: The request identifier.
      */
     @discardableResult
@@ -37,7 +37,7 @@ public extension Networking {
      - parameter path: The path for the POST request.
      - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by default this is JSON.
      - parameter part: The form data that will be sent in the request.
-     - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and a `NSError`.
+     - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and an `NSError`.
      - returns: The request identifier.
      */
     @discardableResult
@@ -52,7 +52,7 @@ public extension Networking {
      - parameter path: The path for the POST request.
      - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by default this is JSON.
      - parameter parts: The list of form data parts that will be sent in the request.
-     - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and a `NSError`.
+     - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and an `NSError`.
      - returns: The request identifier.
      */
     @discardableResult

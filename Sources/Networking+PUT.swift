@@ -6,7 +6,7 @@ public extension Networking {
      PUT request to the specified path, using the provided parameters.
      - parameter path: The path for the PUT request.
      - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by default this is JSON.
-     - parameter completion: A closure that gets called when the PUT request is completed, it contains a `JSON` object and a `NSError`.
+     - parameter completion: A closure that gets called when the PUT request is completed, it contains a `JSON` object and an `NSError`.
      - returns: The request identifier.
      */
     @discardableResult
@@ -22,7 +22,7 @@ public extension Networking {
      PUT request to the specified path, using the provided parameters.
      - parameter path: The path for the PUT request.
      - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by default this is JSON.
-     - parameter completion: A closure that gets called when the PUT request is completed, it contains a `JSON` object and a `NSError`.
+     - parameter completion: A closure that gets called when the PUT request is completed, it contains a `JSON` object and an `NSError`.
      - returns: The request identifier.
      */
     @discardableResult

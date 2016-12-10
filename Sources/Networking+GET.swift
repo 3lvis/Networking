@@ -5,7 +5,7 @@ public extension Networking {
     /**
      GET request to the specified path.
      - parameter path: The path for the GET request.
-     - parameter completion: A closure that gets called when the GET request is completed, it contains a `JSON` object and a `NSError`.
+     - parameter completion: A closure that gets called when the GET request is completed, it contains a `JSON` object and an `NSError`.
      - returns: The request identifier.
      */
     @discardableResult
@@ -21,7 +21,7 @@ public extension Networking {
     /**
      GET request to the specified path.
      - parameter path: The path for the GET request.
-     - parameter completion: A closure that gets called when the GET request is completed, it contains a `JSON` object and a `NSError`.
+     - parameter completion: A closure that gets called when the GET request is completed, it contains a `JSON` object and an `NSError`.
      - returns: The request identifier.
      */
     @discardableResult
