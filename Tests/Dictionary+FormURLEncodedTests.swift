@@ -21,6 +21,12 @@ class Dictionary_FormURLEncodedTests: XCTestCase {
         XCTAssertEqual(formatted, "name=Elvis%20Nu%C3%B1ez")
     }
 
+    func testFormattingDate() {
+        let parameters = ["date": "2016-11-02T13:55:28+01:00"]
+        let formatted = parameters.urlEncodedString()
+        XCTAssertEqual(formatted, "date=2016-11-02T13%3A55%3A28%2B01%3A00")
+    }
+
     func testFormattingWithEmpty() {
         let parameters = [String: Any]()
         let formatted = parameters.urlEncodedString()

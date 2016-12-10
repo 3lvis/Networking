@@ -9,9 +9,9 @@ public extension Networking {
      - returns: The request identifier.
      */
     @discardableResult
-    public func DELETE(_ path: String, completion: @escaping (_ JSON: Any?, _ error: NSError?) -> ()) -> String {
-        let requestID = self.request(.DELETE, path: path, parameterType: .none, parameters: nil, parts: nil, responseType: .json) { JSON, headers, error in
-            completion(JSON, error)
+    public func DELETE(_ path: String, completion: @escaping (_ json: Any?, _ error: NSError?) -> Void) -> String {
+        let requestID = self.request(.DELETE, path: path, parameterType: .none, parameters: nil, parts: nil, responseType: .json) { json, headers, error in
+            completion(json, error)
         }
 
         return requestID
@@ -24,7 +24,7 @@ public extension Networking {
      - returns: The request identifier.
      */
     @discardableResult
-    public func DELETE(_ path: String, completion: @escaping (_ JSON: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> ()) -> String {
+    public func DELETE(_ path: String, completion: @escaping (_ json: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> Void) -> String {
         let requestID = self.request(.DELETE, path: path, parameterType: .none, parameters: nil, parts: nil, responseType: .json, completion: completion)
 
         return requestID
@@ -55,8 +55,8 @@ public extension Networking {
      - parameter path: The path for the cancelled DELETE request.
      - parameter completion: A closure that gets called when the cancellation is completed.
      */
-    public func cancelDELETE(_ path: String, completion: ((Void) -> Void)? = nil) {
+    public func cancelDELETE(_ path: String, completion: (() -> Void)? = nil) {
         let url = self.url(for: path)
-        self.cancelRequest(.Data, requestType: .DELETE, url: url, completion: completion)
+        self.cancelRequest(.data, requestType: .DELETE, url: url, completion: completion)
     }
 }

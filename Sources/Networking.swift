@@ -49,7 +49,7 @@ public class Networking {
     }
 
     enum SessionTaskType: String {
-        case Data, Upload, Download
+        case data, upload, download
     }
 
     /**
@@ -138,7 +138,7 @@ public class Networking {
      Flag used to disable synchronous request when running automatic tests.
      */
     var disableTestingMode = false
-    
+
     /**
      Flag used to disable error logging. Useful when want to disable log before release build.
      */
@@ -301,7 +301,7 @@ public class Networking {
      - parameter requestID: The ID of the request to be cancelled.
      - parameter completion: The completion block to be called when the request is cancelled.
      */
-    public func cancel(with requestID: String, completion: ((Void) -> Void)? = nil) {
+    public func cancel(with requestID: String, completion: (() -> Void)? = nil) {
         self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
             var tasks = [URLSessionTask]()
             tasks.append(contentsOf: dataTasks as [URLSessionTask])
@@ -323,7 +323,7 @@ public class Networking {
      Cancels all the current requests.
      - parameter completion: The completion block to be called when all the requests are cancelled.
      */
-    public func cancelAllRequests(with completion: ((Void) -> Void)?) {
+    public func cancelAllRequests(with completion: (() -> Void)?) {
         self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
             for sessionTask in dataTasks {
                 sessionTask.cancel()
@@ -465,7 +465,7 @@ extension Networking {
     }
 
     @discardableResult
-    func request(_ requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> ()) -> String {
+    func request(_ requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> Void) -> String {
         var requestID = UUID().uuidString
 
         if let fakeRequests = self.fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
@@ -537,7 +537,7 @@ extension Networking {
     }
 
     @discardableResult
-    func dataRequest(_ requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Data?, _ headers: [AnyHashable: Any], _ error: NSError?) -> ()) -> String {
+    func dataRequest(_ requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Data?, _ headers: [AnyHashable: Any], _ error: NSError?) -> Void) -> String {
         let requestID = UUID().uuidString
         var request = URLRequest(url: self.url(for: path))
         request.httpMethod = requestType.rawValue
@@ -641,7 +641,7 @@ extension Networking {
                                 errorCode = error.code
                             }
                         }
-                        
+
                         connectionError = NSError(domain: Networking.domain, code: errorCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode)])
                     }
                 }
@@ -671,17 +671,17 @@ extension Networking {
         return requestID
     }
 
-    func cancelRequest(_ sessionTaskType: SessionTaskType, requestType: RequestType, url: URL, completion: ((Void) -> Void)?) {
+    func cancelRequest(_ sessionTaskType: SessionTaskType, requestType: RequestType, url: URL, completion: (() -> Void)?) {
         self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
             var sessionTasks = [URLSessionTask]()
             switch sessionTaskType {
-            case .Data:
+            case .data:
                 sessionTasks = dataTasks
                 break
-            case .Download:
+            case .download:
                 sessionTasks = downloadTasks
                 break
-            case .Upload:
+            case .upload:
                 sessionTasks = uploadTasks
                 break
             }
