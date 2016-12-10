@@ -32,4 +32,19 @@ class Dictionary_FormURLEncodedTests: XCTestCase {
         let formatted = parameters.urlEncodedString()
         XCTAssertEqual(formatted, "")
     }
+
+    func testComplexParameters() {
+        let parameters = [
+            "foo": "bar",
+            "baz": ["a", 1],
+            "qux": [
+                "x": 1,
+                "y": 2,
+                "z": 3
+            ]
+        ] as [String : Any]
+
+        let formatted = parameters.urlEncodedString()
+        XCTAssertEqual(formatted, "foo=bar&baz[]=a&baz[]=1&qux[x]=1&qux[y]=2&qux[z]=3")
+    }
 }
