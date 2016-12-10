@@ -19,7 +19,7 @@ public extension Networking {
      - parameter completion: A closure that gets called when the image download request is completed, it contains a image and a error.
      */
     public func downloadImage(_ path: String, cacheName: String? = nil, completion: @escaping (_ image: NetworkingImage?, _ error: NSError?) -> Void) {
-        self.request(.GET, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .image) { response, _, error in
+        self.request(.GET, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .image) { response, _, httpResponse, error in
             TestCheck.testBlock(self.disableTestingMode) {
                 completion(response as? NetworkingImage, error)
             }
