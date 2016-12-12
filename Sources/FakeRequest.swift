@@ -1,3 +1,5 @@
+import Foundation
+
 struct FakeRequest {
     let response: Any?
     let responseType: Networking.ResponseType
@@ -24,7 +26,7 @@ struct FakeRequest {
             guard lookupPathParts.first == fakePathParts.first else { continue }
             guard lookupPathParts.count != 1 && fakePathParts.count != 1 else { return requests[originalFakedPath] }
 
-
+            /*
             for (index, fakePathPart) in fakePathParts.enumerated() {
                 var replacedValues = [[String: String]]()
                 if fakePathPart.contains("{") {
@@ -37,7 +39,7 @@ struct FakeRequest {
             let stringData = mutatedString.data(using: .utf8)
             let finalJSON = try! JSONSerialization.jsonObject(with: stringData!, options: [])
             return FakeRequest(response: finalJSON, responseType: .json, statusCode: 200)
-
+            */
 
             // take first element from requested path
             // search in list of faked paths
