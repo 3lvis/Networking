@@ -1,22 +1,6 @@
 import Foundation
 
 public extension Networking {
-
-    /**
-     Retrieves an image from the cache or from the filesystem.
-     - parameter path: The path where the image is located.
-     - parameter cacheName: The cache name used to identify the downloaded image, by default the path is used.
-     - parameter completion: A closure that returns the image from the cache, if no image is found it will return nil, it contains a image and a error.
-     */
-    @available(*, deprecated: 2.0.1, message: "Use `imageFromCache(path: String, cacheName: String?)` instead. The asynchronous version will be removed since it's synchronous now.")
-    public func imageFromCache(_ path: String, cacheName: String? = nil, completion: @escaping (_ image: NetworkingImage?) -> Void) {
-        let object = self.imageFromCache(path, cacheName: cacheName)
-
-        TestCheck.testBlock(self.disableTestingMode) {
-            completion(object)
-        }
-    }
-
     /**
      Retrieves an image from the cache or from the filesystem.
      - parameter path: The path where the image is located.
@@ -43,13 +27,13 @@ public extension Networking {
     }
 
     /**
-     Cancels the image download request for the specified path. This causes the request to complete with error code -999.
+     Cancels the image download request for the specified path. This causes the request to complete with error code URLError.cancelled.
      - parameter path: The path for the cancelled image download request.
      - parameter completion: A closure that gets called when the cancellation is completed.
      */
-    public func cancelImageDownload(_ path: String, completion: ((Void) -> Void)? = nil) {
+    public func cancelImageDownload(_ path: String, completion: (() -> Void)? = nil) {
         let url = self.url(for: path)
-        self.cancelRequest(.Data, requestType: .GET, url: url, completion: completion)
+        self.cancelRequest(.data, requestType: .GET, url: url, completion: completion)
     }
 
     /**

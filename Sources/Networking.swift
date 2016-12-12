@@ -17,6 +17,8 @@ public extension Int {
             return .clientError
         } else if self >= 500 && self < 600 {
             return .serverError
+        } else if self == URLError.cancelled.rawValue {
+            return .cancelled
         } else {
             return .unknown
         }
@@ -41,7 +43,7 @@ public class Networking {
     }
 
     enum SessionTaskType: String {
-        case Data, Upload, Download
+        case data, upload, download
     }
 
     /**
@@ -111,10 +113,11 @@ public class Networking {
      - `Redirection`: This class of status code indicates that further action needs to be taken by the user agent in order to fulfill the request.
      - `ClientError:` The 4xx class of status code is intended for cases in which the client seems to have erred.
      - `ServerError:` Response status codes beginning with the digit "5" indicate cases in which the server is aware that it has erred or is incapable of performing the request.
-     - `Unknown:` This response status code could be used by Foundation for other types of states, for example when a request gets cancelled you will receive status code -999.
+     - `Cancelled:` When a request gets cancelled
+     - `Unknown:` This response status code could be used by Foundation for other types of states.
      */
     public enum StatusCodeType {
-        case informational, successful, redirection, clientError, serverError, unknown
+        case informational, successful, redirection, clientError, serverError, cancelled, unknown
     }
 
     private let baseURL: String
@@ -129,6 +132,11 @@ public class Networking {
      Flag used to disable synchronous request when running automatic tests.
      */
     var disableTestingMode = false
+
+    /**
+     Flag used to disable error logging. Useful when want to disable log before release build.
+     */
+    public var disableErrorLogging = false
 
     /**
      The boundary used for multipart requests.
@@ -147,6 +155,10 @@ public class Networking {
         self.baseURL = baseURL
         self.configurationType = configurationType
         self.cache = cache ?? NSCache()
+    }
+
+    deinit {
+        self.session.invalidateAndCancel()
     }
 
     /**
@@ -187,35 +199,6 @@ public class Networking {
     public func setAuthorizationHeader(headerKey: String = "Authorization", headerValue: String) {
         self.authorizationHeaderKey = headerKey
         self.authorizationHeaderValue = headerValue
-    }
-
-    /**
-     Authenticates using Basic Authentication, it converts username:password to Base64 then sets the Authorization header to "Basic \(Base64(username:password))".
-     - parameter username: The username to be used.
-     - parameter password: The password to be used.
-     */
-    @available(*, deprecated: 2.2.0, message: "Use `setAuthorizationHeader(username:password:)` instead.")
-    public func authenticate(username: String, password: String) {
-        self.setAuthorizationHeader(username: username, password: password)
-    }
-
-    /**
-     Authenticates using a Bearer token, sets the Authorization header to "Bearer \(token)".
-     - parameter token: The token to be used.
-     */
-    @available(*, deprecated: 2.2.0, message: "Use `setAuthorizationHeader(token:)` instead")
-    public func authenticate(token: String) {
-        self.setAuthorizationHeader(token: token)
-    }
-
-    /**
-     Authenticates using a custom HTTP Authorization header.
-     - parameter authorizationHeaderKey: Sets this value as the key for the HTTP `Authorization` header
-     - parameter authorizationHeaderValue: Sets this value to the HTTP `Authorization` header or to the `headerKey` if you provided that.
-     */
-    @available(*, deprecated: 2.2.0, message: "Use `setAuthorizationHeader(headerKey:headerValue:)` instead.")
-    public func authenticate(headerKey: String = "Authorization", headerValue: String) {
-        self.setAuthorizationHeader(headerKey: headerKey, headerValue: headerValue)
     }
 
     /**
@@ -287,7 +270,7 @@ public class Networking {
      - parameter requestID: The ID of the request to be cancelled.
      - parameter completion: The completion block to be called when the request is cancelled.
      */
-    public func cancel(with requestID: String, completion: ((Void) -> Void)? = nil) {
+    public func cancel(with requestID: String, completion: (() -> Void)? = nil) {
         self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
             var tasks = [URLSessionTask]()
             tasks.append(contentsOf: dataTasks as [URLSessionTask])
@@ -309,7 +292,7 @@ public class Networking {
      Cancels all the current requests.
      - parameter completion: The completion block to be called when all the requests are cancelled.
      */
-    public func cancelAllRequests(with completion: ((Void) -> Void)?) {
+    public func cancelAllRequests(with completion: (() -> Void)?) {
         self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
             for sessionTask in dataTasks {
                 sessionTask.cancel()
@@ -330,26 +313,11 @@ public class Networking {
     /**
      Downloads data from a URL, caching the result.
      - parameter path: The path used to download the resource.
-     - parameter completion: A closure that gets called when the download request is completed, it contains  a `data` object and a `NSError`.
+     - parameter completion: A closure that gets called when the download request is completed, it contains  a `data` object and an `NSError`.
      */
     public func downloadData(for path: String, cacheName: String? = nil, completion: @escaping (_ data: Data?, _ error: NSError?) -> Void) {
         self.request(.GET, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .data) { response, headers, error in
             completion(response as? Data, error)
-        }
-    }
-
-    /**
-     Retrieves data from the cache or from the filesystem.
-     - parameter path: The path where the image is located.
-     - parameter cacheName: The cache name used to identify the downloaded data, by default the path is used.
-     - parameter completion: A closure that returns the data from the cache, if no data is found it will return nil.
-     */
-    @available(*, deprecated: 2.0.1, message: "Use `dataFromCache(path: String, cacheName: String?)` instead. The asynchronous version will be removed since it's synchronous now.")
-    public func dataFromCache(for path: String, cacheName: String? = nil, completion: @escaping (_ data: Data?) -> Void) {
-        let object = self.dataFromCache(for: path, cacheName: cacheName)
-
-        TestCheck.testBlock(self.disableTestingMode) {
-            completion(object)
         }
     }
 
@@ -451,7 +419,7 @@ extension Networking {
     }
 
     @discardableResult
-    func request(_ requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> ()) -> String {
+    func request(_ requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> Void) -> String {
         var requestID = UUID().uuidString
 
         if let fakeRequest = FakeRequest.find(ofType: requestType, forPath: path, in: self.fakeRequests) {
@@ -523,7 +491,7 @@ extension Networking {
     }
 
     @discardableResult
-    func dataRequest(_ requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Data?, _ headers: [AnyHashable: Any], _ error: NSError?) -> ()) -> String {
+    func dataRequest(_ requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Data?, _ headers: [AnyHashable: Any], _ error: NSError?) -> Void) -> String {
         let requestID = UUID().uuidString
         var request = URLRequest(url: self.url(for: path))
         request.httpMethod = requestType.rawValue
@@ -567,7 +535,23 @@ extension Networking {
             case .formURLEncoded:
                 guard let parametersDictionary = parameters as? [String: Any] else { fatalError("Couldn't convert parameters to a dictionary: \(parameters)") }
                 let formattedParameters = parametersDictionary.urlEncodedString()
-                request.httpBody = formattedParameters.data(using: .utf8)
+                switch requestType {
+                case .GET, .DELETE:
+                    let urlEncodedPath: String
+                    if path.contains("?") {
+                        if let lastCharacter = path.characters.last, lastCharacter == "?" {
+                            urlEncodedPath = path + formattedParameters
+                        } else {
+                            urlEncodedPath = path + "&" + formattedParameters
+                        }
+                    } else {
+                        urlEncodedPath = path + "?" + formattedParameters
+                    }
+                    request.url = self.url(for: urlEncodedPath)
+                case .POST, .PUT:
+                    request.httpBody = formattedParameters.data(using: .utf8)
+                }
+
                 break
             case .multipartFormData:
                 var bodyData = Data()
@@ -621,7 +605,14 @@ extension Networking {
                             returnedData = data
                         }
                     } else {
-                        connectionError = NSError(domain: Networking.domain, code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode)])
+                        var errorCode = httpResponse.statusCode
+                        if let error = error as? NSError {
+                            if error.code == URLError.cancelled.rawValue {
+                                errorCode = error.code
+                            }
+                        }
+
+                        connectionError = NSError(domain: Networking.domain, code: errorCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode)])
                     }
                 }
 
@@ -641,7 +632,7 @@ extension Networking {
             session.resume()
 
             if TestCheck.isTesting && self.disableTestingMode == false {
-                let _ = semaphore.wait(timeout: DispatchTime.distantFuture)
+                let _ = semaphore.wait(timeout: DispatchTime.now() + 60.0)
                 self.logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request as URLRequest, response: returnedResponse, error: connectionError as NSError?)
                 completion(returnedData, returnedHeaders, connectionError as NSError?)
             }
@@ -650,17 +641,17 @@ extension Networking {
         return requestID
     }
 
-    func cancelRequest(_ sessionTaskType: SessionTaskType, requestType: RequestType, url: URL, completion: ((Void) -> Void)?) {
+    func cancelRequest(_ sessionTaskType: SessionTaskType, requestType: RequestType, url: URL, completion: (() -> Void)?) {
         self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
             var sessionTasks = [URLSessionTask]()
             switch sessionTaskType {
-            case .Data:
+            case .data:
                 sessionTasks = dataTasks
                 break
-            case .Download:
+            case .download:
                 sessionTasks = downloadTasks
                 break
-            case .Upload:
+            case .upload:
                 sessionTasks = uploadTasks
                 break
             }
@@ -677,13 +668,14 @@ extension Networking {
     }
 
     func logError(parameterType: ParameterType?, parameters: Any? = nil, data: Data?, request: URLRequest?, response: URLResponse?, error: NSError?) {
+        if disableErrorLogging { return }
         guard let error = error else { return }
 
         print(" ")
         print("========== Networking Error ==========")
         print(" ")
 
-        let isCancelled = error.code == -999
+        let isCancelled = error.code == NSURLErrorCancelled
         if isCancelled {
             if let request = request, let url = request.url {
                 print("Cancelled request: \(url.absoluteString)")

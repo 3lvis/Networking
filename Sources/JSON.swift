@@ -14,14 +14,14 @@ class JSON {
      - returns: A JSON object, it can be either a Dictionary or an Array.
      */
     class func from(_ fileName: String, bundle: Bundle = Bundle.main) throws -> Any? {
-        var JSON: Any?
+        var json: Any?
 
         guard let url = URL(string: fileName), let filePath = bundle.path(forResource: url.deletingPathExtension().absoluteString, ofType: url.pathExtension) else { throw ParsingError.notFound }
         guard let data = try? Data(contentsOf: URL(fileURLWithPath: filePath)) else { throw ParsingError.failed }
 
-        JSON = try data.toJSON()
+        json = try data.toJSON()
 
-        return JSON
+        return json
     }
 }
 
@@ -32,13 +32,13 @@ extension Data {
      - returns: A JSON object, it can be either a Dictionary or an Array.
      */
     func toJSON() throws -> Any? {
-        var JSON: Any?
+        var json: Any?
         do {
-            JSON = try JSONSerialization.jsonObject(with: self, options: [])
+            json = try JSONSerialization.jsonObject(with: self, options: [])
         } catch {
             throw ParsingError.failed
         }
 
-        return JSON
+        return json
     }
 }

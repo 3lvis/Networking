@@ -6,13 +6,13 @@ public extension Networking {
      POST request to the specified path, using the provided parameters.
      - parameter path: The path for the POST request.
      - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by default this is JSON.
-     - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and a `NSError`.
+     - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and an `NSError`.
      - returns: The request identifier.
      */
     @discardableResult
-    public func POST(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ JSON: Any?, _ error: NSError?) -> ()) -> String {
-        let requestID = self.request(.POST, path: path, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json) { JSON, headers, error in
-            completion(JSON, error)
+    public func POST(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ error: NSError?) -> Void) -> String {
+        let requestID = self.request(.POST, path: path, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json) { json, headers, error in
+            completion(json, error)
         }
 
         return requestID
@@ -22,11 +22,11 @@ public extension Networking {
      POST request to the specified path, using the provided parameters.
      - parameter path: The path for the POST request.
      - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by default this is JSON.
-     - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and a `NSError`.
+     - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and an `NSError`.
      - returns: The request identifier.
      */
     @discardableResult
-    public func POST(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ JSON: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> ()) -> String {
+    public func POST(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> Void) -> String {
         let requestID = self.request(.POST, path: path, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
 
         return requestID
@@ -37,11 +37,11 @@ public extension Networking {
      - parameter path: The path for the POST request.
      - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by default this is JSON.
      - parameter part: The form data that will be sent in the request.
-     - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and a `NSError`.
+     - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and an `NSError`.
      - returns: The request identifier.
      */
     @discardableResult
-    public func POST(_ path: String, parameters: Any? = nil, part: FormDataPart, completion: @escaping (_ JSON: Any?, _ error: NSError?) -> ()) -> String {
+    public func POST(_ path: String, parameters: Any? = nil, part: FormDataPart, completion: @escaping (_ json: Any?, _ error: NSError?) -> Void) -> String {
         let requestID = self.POST(path, parameters: parameters, parts: [part], completion: completion)
 
         return requestID
@@ -52,13 +52,13 @@ public extension Networking {
      - parameter path: The path for the POST request.
      - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by default this is JSON.
      - parameter parts: The list of form data parts that will be sent in the request.
-     - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and a `NSError`.
+     - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and an `NSError`.
      - returns: The request identifier.
      */
     @discardableResult
-    public func POST(_ path: String, parameters: Any? = nil, parts: [FormDataPart], completion: @escaping (_ JSON: Any?, _ error: NSError?) -> ()) -> String {
-        let requestID = self.request(.POST, path: path, parameterType: .multipartFormData, parameters: parameters, parts: parts, responseType: .json) { JSON, headers, error in
-            completion(JSON, error)
+    public func POST(_ path: String, parameters: Any? = nil, parts: [FormDataPart], completion: @escaping (_ json: Any?, _ error: NSError?) -> Void) -> String {
+        let requestID = self.request(.POST, path: path, parameterType: .multipartFormData, parameters: parameters, parts: parts, responseType: .json) { json, headers, error in
+            completion(json, error)
         }
 
         return requestID
@@ -85,12 +85,12 @@ public extension Networking {
     }
 
     /**
-     Cancels the POST request for the specified path. This causes the request to complete with error code -999.
+     Cancels the POST request for the specified path. This causes the request to complete with error code URLError.cancelled.
      - parameter path: The path for the cancelled POST request.
      - parameter completion: A closure that gets called when the cancellation is completed.
      */
-    public func cancelPOST(_ path: String, completion: ((Void) -> Void)? = nil) {
+    public func cancelPOST(_ path: String, completion: (() -> Void)? = nil) {
         let url = self.url(for: path)
-        self.cancelRequest(.Data, requestType: .POST, url: url, completion: completion)
+        self.cancelRequest(.data, requestType: .POST, url: url, completion: completion)
     }
 }

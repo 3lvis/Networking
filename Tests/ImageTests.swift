@@ -23,7 +23,7 @@ class ImageTests: XCTestCase {
         let expectation = self.expectation(description: "testDownloadImageReturnBlockInMainThread")
         let networking = Networking(baseURL: self.baseURL)
         networking.disableTestingMode = true
-        networking.downloadImage("/image/png") { JSON, error in
+        networking.downloadImage("/image/png") { json, error in
             XCTAssertTrue(Thread.isMainThread)
             expectation.fulfill()
         }
@@ -134,7 +134,7 @@ class ImageTests: XCTestCase {
         Helper.removeFileIfNeeded(networking, path: path)
 
         networking.downloadImage(path) { image, error in
-            XCTAssertEqual(error?.code, -999)
+            XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
             expectation.fulfill()
         }
 

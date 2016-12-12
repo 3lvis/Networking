@@ -6,13 +6,13 @@ public extension Networking {
      PUT request to the specified path, using the provided parameters.
      - parameter path: The path for the PUT request.
      - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by default this is JSON.
-     - parameter completion: A closure that gets called when the PUT request is completed, it contains a `JSON` object and a `NSError`.
+     - parameter completion: A closure that gets called when the PUT request is completed, it contains a `JSON` object and an `NSError`.
      - returns: The request identifier.
      */
     @discardableResult
-    public func PUT(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ JSON: Any?, _ error: NSError?) -> ()) -> String {
-        let requestID = self.request(.PUT, path: path, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json) { JSON, headers, error in
-            completion(JSON, error)
+    public func PUT(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ error: NSError?) -> Void) -> String {
+        let requestID = self.request(.PUT, path: path, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json) { json, headers, error in
+            completion(json, error)
         }
 
         return requestID
@@ -22,11 +22,11 @@ public extension Networking {
      PUT request to the specified path, using the provided parameters.
      - parameter path: The path for the PUT request.
      - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by default this is JSON.
-     - parameter completion: A closure that gets called when the PUT request is completed, it contains a `JSON` object and a `NSError`.
+     - parameter completion: A closure that gets called when the PUT request is completed, it contains a `JSON` object and an `NSError`.
      - returns: The request identifier.
      */
     @discardableResult
-    public func PUT(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ JSON: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> ()) -> String {
+    public func PUT(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> Void) -> String {
         let requestID = self.request(.PUT, path: path, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
 
         return requestID
@@ -53,12 +53,12 @@ public extension Networking {
     }
 
     /**
-     Cancels the PUT request for the specified path. This causes the request to complete with error code -999.
+     Cancels the PUT request for the specified path. This causes the request to complete with error code URLError.cancelled.
      - parameter path: The path for the cancelled PUT request.
      - parameter completion: A closure that gets called when the cancellation is completed.
      */
-    public func cancelPUT(_ path: String, completion: ((Void) -> Void)? = nil) {
+    public func cancelPUT(_ path: String, completion: (() -> Void)? = nil) {
         let url = self.url(for: path)
-        self.cancelRequest(.Data, requestType: .PUT, url: url, completion: completion)
+        self.cancelRequest(.data, requestType: .PUT, url: url, completion: completion)
     }
 }

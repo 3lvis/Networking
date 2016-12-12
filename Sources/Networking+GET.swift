@@ -5,12 +5,13 @@ public extension Networking {
     /**
      GET request to the specified path.
      - parameter path: The path for the GET request.
-     - parameter completion: A closure that gets called when the GET request is completed, it contains a `JSON` object and a `NSError`.
+     - parameter completion: A closure that gets called when the GET request is completed, it contains a `JSON` object and an `NSError`.
      - returns: The request identifier.
      */
     @discardableResult
-    public func GET(_ path: String, parameterType: ParameterType = .none, completion: @escaping (_ JSON: Any?, _ error: NSError?) -> ()) -> String {
-        let requestID = self.request(.GET, path: path, parameterType: parameterType, parameters: nil, parts: nil, responseType: .json) { JSON, headers, error in
+    public func GET(_ path: String, parameters: Any? = nil, completion: @escaping (_ JSON: Any?, _ error: NSError?) -> Void) -> String {
+        let parameterType = parameters != nil ? ParameterType.formURLEncoded : ParameterType.none
+        let requestID = self.request(.GET, path: path, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json) { JSON, headers, error in
             completion(JSON, error)
         }
 
@@ -20,12 +21,13 @@ public extension Networking {
     /**
      GET request to the specified path.
      - parameter path: The path for the GET request.
-     - parameter completion: A closure that gets called when the GET request is completed, it contains a `JSON` object and a `NSError`.
+     - parameter completion: A closure that gets called when the GET request is completed, it contains a `JSON` object and an `NSError`.
      - returns: The request identifier.
      */
     @discardableResult
-    public func GET(_ path: String, parameterType: ParameterType = .none, completion: @escaping (_ JSON: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> ()) -> String {
-        let requestID = self.request(.GET, path: path, parameterType: parameterType, parameters: nil, parts: nil, responseType: .json, completion: completion)
+    public func GET(_ path: String, parameters: Any? = nil, completion: @escaping (_ JSON: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> Void) -> String {
+        let parameterType = parameters != nil ? ParameterType.formURLEncoded : ParameterType.none
+        let requestID = self.request(.GET, path: path, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
 
         return requestID
     }
@@ -51,12 +53,12 @@ public extension Networking {
     }
 
     /**
-     Cancels the GET request for the specified path. This causes the request to complete with error code -999.
+     Cancels the GET request for the specified path. This causes the request to complete with error code URLError.cancelled.
      - parameter path: The path for the cancelled GET request
      - parameter completion: A closure that gets called when the cancellation is completed.
      */
-    public func cancelGET(_ path: String, completion: ((Void) -> Void)? = nil) {
+    public func cancelGET(_ path: String, completion: (() -> Void)? = nil) {
         let url = self.url(for: path)
-        self.cancelRequest(.Data, requestType: .GET, url: url, completion: completion)
+        self.cancelRequest(.data, requestType: .GET, url: url, completion: completion)
     }
 }
