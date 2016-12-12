@@ -118,11 +118,17 @@ class NetworkingTests: XCTestCase {
     func testStatusCodeType() {
         XCTAssertEqual((URLError.cancelled.rawValue).statusCodeType(), Networking.StatusCodeType.cancelled)
         XCTAssertEqual(99.statusCodeType(), Networking.StatusCodeType.unknown)
-        XCTAssertEqual(101.statusCodeType(), Networking.StatusCodeType.informational)
-        XCTAssertEqual(203.statusCodeType(), Networking.StatusCodeType.successful)
-        XCTAssertEqual(303.statusCodeType(), Networking.StatusCodeType.redirection)
-        XCTAssertEqual(403.statusCodeType(), Networking.StatusCodeType.clientError)
-        XCTAssertEqual(550.statusCodeType(), Networking.StatusCodeType.serverError)
+        XCTAssertEqual(100.statusCodeType(), Networking.StatusCodeType.informational)
+        XCTAssertEqual(199.statusCodeType(), Networking.StatusCodeType.informational)
+        XCTAssertEqual(200.statusCodeType(), Networking.StatusCodeType.successful)
+        XCTAssertEqual(299.statusCodeType(), Networking.StatusCodeType.successful)
+        XCTAssertEqual(300.statusCodeType(), Networking.StatusCodeType.redirection)
+        XCTAssertEqual(399.statusCodeType(), Networking.StatusCodeType.redirection)
+        XCTAssertEqual(400.statusCodeType(), Networking.StatusCodeType.clientError)
+        XCTAssertEqual(499.statusCodeType(), Networking.StatusCodeType.clientError)
+        XCTAssertEqual(500.statusCodeType(), Networking.StatusCodeType.serverError)
+        XCTAssertEqual(599.statusCodeType(), Networking.StatusCodeType.serverError)
+        XCTAssertEqual(600.statusCodeType(), Networking.StatusCodeType.unknown)
     }
 
     func testSplitBaseURLAndRelativePath() {
