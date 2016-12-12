@@ -26,56 +26,27 @@ struct FakeRequest {
             guard lookupPathParts.first == fakePathParts.first else { continue }
             guard lookupPathParts.count != 1 && fakePathParts.count != 1 else { return requests[originalFakedPath] }
 
-            /*
+            var replacedValues = [String: String]()
             for (index, fakePathPart) in fakePathParts.enumerated() {
-                var replacedValues = [[String: String]]()
                 if fakePathPart.contains("{") {
                     replacedValues[fakePathPart] = lookupPathParts[index]
                 }
             }
 
-            let responseString = String(data: try! JSONSerialization.data(withJSONObject: response, options: .prettyPrinted), encoding: .utf8)!
-            let mutatedString = responseString.replacingOccurrences(of: "{userID}", with: replacedValue)
-            let stringData = mutatedString.data(using: .utf8)
+            var responseString = String(data: try! JSONSerialization.data(withJSONObject: response, options: .prettyPrinted), encoding: .utf8)!
+            for (key, value) in replacedValues {
+                responseString = responseString.replacingOccurrences(of: key, with: value)
+            }
+            let stringData = responseString.data(using: .utf8)
             let finalJSON = try! JSONSerialization.jsonObject(with: stringData!, options: [])
+
             return FakeRequest(response: finalJSON, responseType: .json, statusCode: 200)
-            */
-
-            // take first element from requested path
-            // search in list of faked paths
-            // Not found? Continue.
-            // Found?
-            // If that's all the components, use the path
-            // If there are more components, continue with next component
-            // Next component. Starts with {?
         }
-
-        // Before this was just a dictionary and you could use the path to get it. But now is more complex than that.
-        // Now you need to check for possible matches for an specific path.
-
-        // get all faked paths
-        // remove leading and tail '/'
-        // split using '/'
-        // filter using the number of elements
-        // take first element from requested path
-        // search in list of faked paths
-        // Not found? Continue.
-        // Found?
-        // If that's all the components, use the path
-        // If there are more components, continue with next component
-        // Next component. Starts with {?
 
         let result = requests[path]
 
         return result
     }
-
-    /*
-     NSMutableString *mutableString = [[NSMutableString alloc] initWithString:self];
-     NSString *firstLetter = [[mutableString substringToIndex:1] lowercaseString];
-     [mutableString replaceCharactersInRange:NSMakeRange(0,1) withString:firstLetter];
-
-    return [mutableString copy]; */
 }
 
 extension String {
