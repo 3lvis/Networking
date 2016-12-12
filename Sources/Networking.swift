@@ -7,19 +7,20 @@ public extension Int {
      - returns: The NetworkingStatusCodeType of the status code.
      */
     public func statusCodeType() -> Networking.StatusCodeType {
-        if self >= 100 && self < 200 {
-            return .informational
-        } else if self >= 200 && self < 300 {
-            return .successful
-        } else if self >= 300 && self < 400 {
-            return .redirection
-        } else if self >= 400 && self < 500 {
-            return .clientError
-        } else if self >= 500 && self < 600 {
-            return .serverError
-        } else if self == URLError.cancelled.rawValue {
+        switch self {
+        case URLError.cancelled.rawValue:
             return .cancelled
-        } else {
+        case 100 ..< 200:
+            return .informational
+        case 200 ..< 300:
+            return .successful
+        case 300 ..< 400:
+            return .redirection
+        case 400 ..< 500:
+            return .clientError
+        case 500 ..< 600:
+            return .serverError
+        default:
             return .unknown
         }
     }
