@@ -30,12 +30,14 @@ class FakeRequestTests: XCTestCase {
         XCTAssertEqual(evaluated, "/user")
     }
 
-    func testFailedFind() {
+    func testFind() {
         let request = FakeRequest(response: nil, responseType: .json, statusCode: 200)
         let existingRequests = [Networking.RequestType.GET: ["/companies": request]]
 
         XCTAssertNil(FakeRequest.find(ofType: .GET, forPath: "/users", in: existingRequests))
         XCTAssertNil(FakeRequest.find(ofType: .GET, forPath: "/users", in: [:]))
+
+
     }
 
     func testOneLevelFind() {
