@@ -164,10 +164,6 @@ public class Networking {
         self.cache = cache ?? NSCache()
     }
 
-    deinit {
-        self.session.invalidateAndCancel()
-    }
-
     /**
      Authenticates using Basic Authentication, it converts username:password to Base64 then sets the Authorization header to "Basic \(Base64(username:password))".
      - parameter username: The username to be used.
