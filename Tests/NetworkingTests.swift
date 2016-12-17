@@ -62,7 +62,7 @@ class NetworkingTests: XCTestCase {
 
     func testURLForPath() {
         let networking = Networking(baseURL: baseURL)
-        let url = networking.url(for: "/hello")
+        let url = try! networking.url(for: "/hello")
         XCTAssertEqual(url.absoluteString, "http://httpbin.org/hello")
     }
 

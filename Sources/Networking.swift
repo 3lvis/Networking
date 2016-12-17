@@ -209,9 +209,11 @@ public class Networking {
      - parameter path: The path to be appended to the base URL.
      - returns: A NSURL generated after appending the path to the base URL.
      */
-    public func url(for path: String) -> URL {
+    public func url(for path: String) throws -> URL {
         let encodedPath = path.encodeUTF8() ?? path
-        guard let url = URL(string: self.baseURL + encodedPath) else { fatalError("Couldn't create a url using baseURL: \(self.baseURL) and encodedPath: \(encodedPath)") }
+        guard let url = URL(string: self.baseURL + encodedPath) else {
+            throw NSError(domain: Networking.domain, code: 0, userInfo: [NSLocalizedDescriptionKey: "Couldn't create a url using baseURL: \(self.baseURL) and encodedPath: \(encodedPath)"])
+        }
         return url
     }
 
@@ -222,7 +224,14 @@ public class Networking {
      */
     public func destinationURL(for path: String, cacheName: String? = nil) throws -> URL {
         let normalizedCacheName = cacheName?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
-        let resourcesPath = normalizedCacheName ?? self.url(for: path).absoluteString
+        var resourcesPath: String
+        if let normalizedCacheName = normalizedCacheName {
+            resourcesPath = normalizedCacheName
+        } else {
+            let url = try self.url(for: path)
+            resourcesPath = url.absoluteString
+        }
+
         let normalizedResourcesPath = resourcesPath.replacingOccurrences(of: "/", with: "-")
         let folderPath = Networking.domain
         let finalPath = "\(folderPath)/\(normalizedResourcesPath)"
@@ -491,7 +500,7 @@ extension Networking {
     @discardableResult
     func dataRequest(_ requestType: RequestType, path: String, cacheName: String? = nil, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Data?, _ headers: [AnyHashable: Any], _ error: NSError?) -> Void) -> String {
         let requestID = UUID().uuidString
-        var request = URLRequest(url: self.url(for: path))
+        var request = URLRequest(url: try! self.url(for: path))
         request.httpMethod = requestType.rawValue
 
         if let parameterType = parameterType, let contentType = parameterType.contentType(self.boundary) {
@@ -544,7 +553,7 @@ extension Networking {
                         } else {
                             urlEncodedPath = path + "?" + formattedParameters
                         }
-                        request.url = self.url(for: urlEncodedPath)
+                        request.url = try! self.url(for: urlEncodedPath)
                     case .POST, .PUT:
                         request.httpBody = formattedParameters.data(using: .utf8)
                     }
