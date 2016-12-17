@@ -208,7 +208,7 @@ class NetworkingTests: XCTestCase {
         var synchronous = false
         let networking = Networking(baseURL: self.baseURL)
         let path = "/image/png"
-        Helper.removeFileIfNeeded(networking, path: path)
+        try! Helper.removeFileIfNeeded(networking, path: path)
         networking.downloadData(for: path) { data, error in
             synchronous = true
             XCTAssertTrue(Thread.isMainThread)

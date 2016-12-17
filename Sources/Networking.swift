@@ -335,9 +335,7 @@ public class Networking {
         return object as? Data
     }
 
-    /**
-     Deletes the downloaded/cached files.
-     */
+    /// Deletes the downloaded/cached files.
     public static func deleteCachedFiles() {
         #if os(tvOS)
             let directory = FileManager.SearchPathDirectory.cachesDirectory
@@ -348,7 +346,7 @@ public class Networking {
             let folderURL = cachesURL.appendingPathComponent(URL(string: Networking.domain)!.absoluteString)
 
             if FileManager.default.exists(at: folderURL) {
-                FileManager.default.remove(at: folderURL)
+                let _ = try? FileManager.default.remove(at: folderURL)
             }
         }
     }
