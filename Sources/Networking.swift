@@ -468,16 +468,13 @@ extension Networking {
                             case .data:
                                 self.cache.setObject(data as AnyObject, forKey: destinationURL.absoluteString as AnyObject)
                                 returnedResponse = data
-                                break
                             case .image:
                                 if let image = NetworkingImage(data: data) {
                                     self.cache.setObject(image, forKey: destinationURL.absoluteString as AnyObject)
                                     returnedResponse = image
                                 }
-                                break
                             default:
                                 fatalError("Response Type is different than Data and Image")
-                                break
                             }
                         }
                         TestCheck.testBlock(self.disableTestingMode) {
@@ -524,36 +521,36 @@ extension Networking {
         var serializingError: NSError?
         if let parameterType = parameterType, let parameters = parameters {
             switch parameterType {
-            case .none:
-                break
+            case .none: break
             case .json:
                 do {
                     request.httpBody = try JSONSerialization.data(withJSONObject: parameters, options: [])
                 } catch let error as NSError {
                     serializingError = error
                 }
-                break
             case .formURLEncoded:
                 guard let parametersDictionary = parameters as? [String: Any] else { fatalError("Couldn't convert parameters to a dictionary: \(parameters)") }
-                let formattedParameters = parametersDictionary.urlEncodedString()
-                switch requestType {
-                case .GET, .DELETE:
-                    let urlEncodedPath: String
-                    if path.contains("?") {
-                        if let lastCharacter = path.characters.last, lastCharacter == "?" {
-                            urlEncodedPath = path + formattedParameters
+                do {
+                    let formattedParameters = try parametersDictionary.urlEncodedString()
+                    switch requestType {
+                    case .GET, .DELETE:
+                        let urlEncodedPath: String
+                        if path.contains("?") {
+                            if let lastCharacter = path.characters.last, lastCharacter == "?" {
+                                urlEncodedPath = path + formattedParameters
+                            } else {
+                                urlEncodedPath = path + "&" + formattedParameters
+                            }
                         } else {
-                            urlEncodedPath = path + "&" + formattedParameters
+                            urlEncodedPath = path + "?" + formattedParameters
                         }
-                    } else {
-                        urlEncodedPath = path + "?" + formattedParameters
+                        request.url = self.url(for: urlEncodedPath)
+                    case .POST, .PUT:
+                        request.httpBody = formattedParameters.data(using: .utf8)
                     }
-                    request.url = self.url(for: urlEncodedPath)
-                case .POST, .PUT:
-                    request.httpBody = formattedParameters.data(using: .utf8)
+                } catch let error as NSError {
+                    serializingError = error
                 }
-
-                break
             case .multipartFormData:
                 var bodyData = Data()
 
@@ -577,10 +574,8 @@ extension Networking {
 
                 bodyData.append("--\(self.boundary)--\r\n".data(using: .utf8)!)
                 request.httpBody = bodyData as Data
-                break
             case .custom(_):
                 request.httpBody = parameters as? Data
-                break
             }
         }
 
@@ -648,13 +643,10 @@ extension Networking {
             switch sessionTaskType {
             case .data:
                 sessionTasks = dataTasks
-                break
             case .download:
                 sessionTasks = downloadTasks
-                break
             case .upload:
                 sessionTasks = uploadTasks
-                break
             }
 
             for sessionTask in sessionTasks {
@@ -713,13 +705,15 @@ extension Networking {
                         print("Failed pretty printing parameters: \(parameters), error: \(error)")
                         print(" ")
                     }
-                    break
                 case .formURLEncoded:
                     guard let parametersDictionary = parameters as? [String: Any] else { fatalError("Couldn't cast parameters as dictionary: \(parameters)") }
-                    let formattedParameters = parametersDictionary.urlEncodedString()
-                    print("Parameters: \(formattedParameters)")
+                    do {
+                        let formattedParameters = try parametersDictionary.urlEncodedString()
+                        print("Parameters: \(formattedParameters)")
+                    } catch let error as NSError {
+                        print("Failed parsing Parameters: \(parametersDictionary) — \(error)")
+                    }
                     print(" ")
-                    break
                 default: break
                 }
             }
