@@ -42,6 +42,7 @@
 ## Table of Contents
 
 * [Choosing a configuration type](#choosing-a-configuration-type)
+* [Changing request headers](#changin-request-headers)
 * [Authenticating](#authenticating)
     * [HTTP basic](#http-basic)
     * [Bearer token](#bearer-token)
@@ -78,6 +79,16 @@ let networking = Networking(baseURL: "http://httpbin.org")
 
 // Ephemeral
 let networking = Networking(baseURL: "http://httpbin.org", configurationType: .ephemeral)
+```
+
+## Changing request headers
+
+You can set the `headerFields` in any networking object.
+
+This will append (if not found) or overwrite (if found) what NSURLSession sends on each request.
+
+```swift
+self.networking.headerFields = ["User-Agent": "your new user agent"]
 ```
 
 ## Authenticating
