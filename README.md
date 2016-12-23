@@ -42,7 +42,7 @@
 ## Table of Contents
 
 * [Choosing a configuration type](#choosing-a-configuration-type)
-* [Changing request headers](#changin-request-headers)
+* [Changing request headers](#changing-request-headers)
 * [Authenticating](#authenticating)
     * [HTTP basic](#http-basic)
     * [Bearer token](#bearer-token)
