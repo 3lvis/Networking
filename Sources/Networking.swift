@@ -175,9 +175,8 @@ public class Networking {
             let base64Credentials = credentialsData.base64EncodedString(options: [])
             let authString = "Basic \(base64Credentials)"
 
-            let config = self.sessionConfiguration()
-            config.httpAdditionalHeaders = [self.authorizationHeaderKey as AnyHashable: authString]
-            self.session = URLSession(configuration: config)
+            self.authorizationHeaderKey = "Authorization"
+            self.authorizationHeaderValue = authString
         }
     }
 
@@ -358,6 +357,16 @@ public class Networking {
                 let _ = try? FileManager.default.remove(at: folderURL)
             }
         }
+    }
+
+    public func reset() {
+        self.cache.removeAllObjects()
+        Networking.deleteCachedFiles()
+        self.fakeRequests.removeAll()
+        self.token = nil
+        self.headerFields = nil
+        self.authorizationHeaderKey = "Authorization"
+        self.authorizationHeaderValue = nil
     }
 }
 
