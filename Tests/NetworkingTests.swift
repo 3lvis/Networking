@@ -244,4 +244,22 @@ class NetworkingTests: XCTestCase {
             XCTAssertFalse(FileManager.default.exists(at: folderURL))
         }
     }
+
+    func testReset() {
+        let networking = Networking(baseURL: self.baseURL)
+
+        networking.setAuthorizationHeader(username: "user", password: "passwd")
+        networking.setAuthorizationHeader(token: "token")
+        networking.headerFields = ["HeaderKey": "HeaderValue"]
+
+        XCTAssertEqual(networking.token, "token")
+        XCTAssertEqual(networking.authorizationHeaderKey, "Authorization")
+        XCTAssertEqual(networking.authorizationHeaderValue, "Basic dXNlcjpwYXNzd2Q=")
+
+        networking.reset()
+
+        XCTAssertNil(networking.token)
+        XCTAssertEqual(networking.authorizationHeaderKey, "Authorization")
+        XCTAssertNil(networking.authorizationHeaderValue)
+    }
 }

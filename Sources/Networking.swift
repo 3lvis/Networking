@@ -151,7 +151,11 @@ public class Networking {
     let boundary = String(format: "net.3lvis.networking.%08x%08x", arc4random(), arc4random())
 
     lazy var session: URLSession = {
-        return URLSession(configuration: self.sessionConfiguration())
+        var configuration = self.sessionConfiguration()
+        configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
+        configuration.urlCache = nil
+
+        return URLSession(configuration: configuration)
     }()
 
     /**
@@ -175,9 +179,8 @@ public class Networking {
             let base64Credentials = credentialsData.base64EncodedString(options: [])
             let authString = "Basic \(base64Credentials)"
 
-            let config = self.sessionConfiguration()
-            config.httpAdditionalHeaders = [self.authorizationHeaderKey as AnyHashable: authString]
-            self.session = URLSession(configuration: config)
+            self.authorizationHeaderKey = "Authorization"
+            self.authorizationHeaderValue = authString
         }
     }
 
@@ -358,6 +361,18 @@ public class Networking {
                 let _ = try? FileManager.default.remove(at: folderURL)
             }
         }
+    }
+
+    /// Removes the stored credentials and cached data.
+    public func reset() {
+        self.cache.removeAllObjects()
+        self.fakeRequests.removeAll()
+        self.token = nil
+        self.headerFields = nil
+        self.authorizationHeaderKey = "Authorization"
+        self.authorizationHeaderValue = nil
+
+        Networking.deleteCachedFiles()
     }
 }
 
