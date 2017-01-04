@@ -359,14 +359,16 @@ public class Networking {
         }
     }
 
+    /// Removes the stored credentials and cached data.
     public func reset() {
         self.cache.removeAllObjects()
-        Networking.deleteCachedFiles()
         self.fakeRequests.removeAll()
         self.token = nil
         self.headerFields = nil
         self.authorizationHeaderKey = "Authorization"
         self.authorizationHeaderValue = nil
+
+        Networking.deleteCachedFiles()
     }
 }
 
