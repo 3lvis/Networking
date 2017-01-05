@@ -474,9 +474,7 @@ extension Networking {
                     }
                 }
             case .data, .image:
-                let trimmedPath = path.components(separatedBy: "?").first!
-
-                let object = self.objectFromCache(for: trimmedPath, cacheName: cacheName, responseType: responseType)
+                let object = self.objectFromCache(for: path, cacheName: cacheName, responseType: responseType)
                 if let object = object {
                     TestCheck.testBlock(self.disableTestingMode) {
                         completion(object, [String: Any](), nil)
@@ -486,7 +484,7 @@ extension Networking {
 
                         var returnedResponse: Any?
                         if let data = data, data.count > 0 {
-                            guard let destinationURL = try? self.destinationURL(for: trimmedPath, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
+                            guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
                             let _ = try? data.write(to: destinationURL, options: [.atomic])
                             switch responseType {
                             case .data:
