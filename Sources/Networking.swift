@@ -308,6 +308,7 @@ public class Networking {
      - parameter completion: The completion block to be called when all the requests are cancelled.
      */
     public func cancelAllRequests(with completion: (() -> Void)?) {
+        let semaphore = DispatchSemaphore(value: 0)
         self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
             for sessionTask in dataTasks {
                 sessionTask.cancel()
@@ -321,8 +322,12 @@ public class Networking {
 
             TestCheck.testBlock(self.disableTestingMode) {
                 completion?()
+
+                semaphore.signal()
             }
         }
+
+        let _ = semaphore.wait(timeout: DispatchTime.now() + 60.0)
     }
 
     /**
