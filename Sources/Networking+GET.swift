@@ -55,10 +55,9 @@ public extension Networking {
     /**
      Cancels the GET request for the specified path. This causes the request to complete with error code URLError.cancelled.
      - parameter path: The path for the cancelled GET request
-     - parameter completion: A closure that gets called when the cancellation is completed.
      */
-    public func cancelGET(_ path: String, completion: (() -> Void)? = nil) {
+    public func cancelGET(_ path: String) {
         let url = try! self.url(for: path)
-        self.cancelRequest(.data, requestType: .GET, url: url, completion: completion)
+        self.cancelRequest(.data, requestType: .GET, url: url)
     }
 }

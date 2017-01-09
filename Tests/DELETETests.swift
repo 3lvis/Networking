@@ -95,9 +95,8 @@ class DELETETests: XCTestCase {
             expectation.fulfill()
         }
 
-        networking.cancelDELETE("/delete") {
-            completed = true
-        }
+        networking.cancelDELETE("/delete")
+        completed = true
 
         self.waitForExpectations(timeout: 15.0, handler: nil)
     }

@@ -305,7 +305,6 @@ public class Networking {
 
     /**
      Cancels all the current requests.
-     - parameter completion: The completion block to be called when all the requests are cancelled.
      */
     public func cancelAllRequests() {
         let semaphore = DispatchSemaphore(value: 0)
@@ -660,7 +659,8 @@ extension Networking {
         return requestID
     }
 
-    func cancelRequest(_ sessionTaskType: SessionTaskType, requestType: RequestType, url: URL, completion: (() -> Void)?) {
+    func cancelRequest(_ sessionTaskType: SessionTaskType, requestType: RequestType, url: URL) {
+        let semaphore = DispatchSemaphore(value: 0)
         self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
             var sessionTasks = [URLSessionTask]()
             switch sessionTaskType {
@@ -679,8 +679,10 @@ extension Networking {
                 }
             }
 
-            completion?()
+            semaphore.signal()
         }
+
+        let _ = semaphore.wait(timeout: DispatchTime.now() + 60.0)
     }
 
     func logError(parameterType: ParameterType?, parameters: Any? = nil, data: Data?, request: URLRequest?, response: URLResponse?, error: NSError?) {

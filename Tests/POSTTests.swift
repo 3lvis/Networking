@@ -212,9 +212,8 @@ class POSTTests: XCTestCase {
             expectation.fulfill()
         }
 
-        networking.cancelPOST("/post") {
-            completed = true
-        }
+        networking.cancelPOST("/post")
+        completed = true
 
         self.waitForExpectations(timeout: 15.0, handler: nil)
     }

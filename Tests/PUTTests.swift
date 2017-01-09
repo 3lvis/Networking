@@ -96,9 +96,9 @@ class PUTTests: XCTestCase {
             expectation.fulfill()
         }
 
-        networking.cancelPUT("/put") {
-            completed = true
-        }
+        networking.cancelPUT("/put")
+        completed = true
+
 
         self.waitForExpectations(timeout: 150.0, handler: nil)
     }
