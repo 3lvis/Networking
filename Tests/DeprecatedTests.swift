@@ -4,6 +4,56 @@ import XCTest
 class DeprecatedTests: XCTestCase {
     let baseURL = "http://httpbin.org"
 
+    func testCancelWithRequestID() {
+        let expectation = self.expectation(description: "testCancelAllRequests")
+        let networking = Networking(baseURL: baseURL)
+        networking.disableTestingMode = true
+        var cancelledGET = false
+
+        let requestID = networking.GET("/get") { json, error in
+            cancelledGET = error?.code == URLError.cancelled.rawValue
+            XCTAssertTrue(cancelledGET)
+
+            if cancelledGET {
+                expectation.fulfill()
+            }
+        }
+
+        networking.cancel(with: requestID) {}
+
+        self.waitForExpectations(timeout: 15.0, handler: nil)
+    }
+
+    func testCancelAllRequests() {
+        let expectation = self.expectation(description: "testCancelAllRequests")
+        let networking = Networking(baseURL: baseURL)
+        networking.disableTestingMode = true
+        var cancelledGET = false
+        var cancelledPOST = false
+
+        networking.GET("/get") { json, error in
+            cancelledGET = error?.code == URLError.cancelled.rawValue
+            XCTAssertTrue(cancelledGET)
+
+            if cancelledGET && cancelledPOST {
+                expectation.fulfill()
+            }
+        }
+
+        networking.POST("/post") { json, error in
+            cancelledPOST = error?.code == URLError.cancelled.rawValue
+            XCTAssertTrue(cancelledPOST)
+
+            if cancelledGET && cancelledPOST {
+                expectation.fulfill()
+            }
+        }
+
+        networking.cancelAllRequests() {}
+        
+        self.waitForExpectations(timeout: 15.0, handler: nil)
+    }
+
     func testCancelGETWithPath() {
         let expectation = self.expectation(description: "testCancelGET")
 
