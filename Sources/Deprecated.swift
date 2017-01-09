@@ -3,16 +3,6 @@ import Foundation
 public extension Networking {
 
     /**
-     Cancels all the current requests.
-     - parameter completion: The completion block to be called when all the requests are cancelled.
-     */
-    @available(*, deprecated: 2.6.2, message: "Use `cancelAllRequests()` instead. The asynchronous version will be removed since it's synchronous now.")
-    public func cancelAllRequests(with completion: @escaping (() -> Void)) {
-        self.cancelAllRequests()
-        completion()
-    }
-
-    /**
      Retrieves an image from the cache or from the filesystem.
      - parameter path: The path where the image is located.
      - parameter cacheName: The cache name used to identify the downloaded image, by default the path is used.
@@ -69,5 +59,81 @@ public extension Networking {
         TestCheck.testBlock(self.disableTestingMode) {
             completion(object)
         }
+    }
+
+    /**
+     Cancels all the current requests.
+     - parameter completion: The completion block to be called when all the requests are cancelled.
+     */
+    @available(*, deprecated: 2.6.2, message: "Use `cancelAllRequests()` instead. The asynchronous version will be removed since it's synchronous now.")
+    public func cancelAllRequests(with completion: @escaping (() -> Void)) {
+        self.cancelAllRequests()
+        completion()
+    }
+
+    /**
+     Cancels the GET request for the specified path. This causes the request to complete with error code URLError.cancelled.
+     - parameter path: The path for the cancelled GET request
+     - parameter completion: A closure that gets called when the cancellation is completed.
+     */
+    @available(*, deprecated: 2.6.2, message: "Use `cancelGET(path)` instead. The asynchronous version will be removed since it's synchronous now.")
+    public func cancelGET(_ path: String, completion: (() -> Void)) {
+        self.cancelGET(path)
+        completion()
+    }
+
+    /**
+     Cancels the PUT request for the specified path. This causes the request to complete with error code URLError.cancelled.
+     - parameter path: The path for the cancelled PUT request.
+     - parameter completion: A closure that gets called when the cancellation is completed.
+     */
+    @available(*, deprecated: 2.6.2, message: "Use `cancelPUT(path)` instead. The asynchronous version will be removed since it's synchronous now.")
+    public func cancelPUT(_ path: String, completion: (() -> Void)) {
+        self.cancelPUT(path)
+        completion()
+    }
+
+    /**
+     Cancels the POST request for the specified path. This causes the request to complete with error code URLError.cancelled.
+     - parameter path: The path for the cancelled POST request.
+     - parameter completion: A closure that gets called when the cancellation is completed.
+     */
+    @available(*, deprecated: 2.6.2, message: "Use `cancelPOST(path)` instead. The asynchronous version will be removed since it's synchronous now.")
+    public func cancelPOST(_ path: String, completion: (() -> Void)) {
+        self.cancelPOST(path)
+        completion()
+    }
+
+    /**
+     Cancels the DELETE request for the specified path. This causes the request to complete with error code URLError.cancelled.
+     - parameter path: The path for the cancelled DELETE request.
+     - parameter completion: A closure that gets called when the cancellation is completed.
+     */
+    @available(*, deprecated: 2.6.2, message: "Use `cancelDELETE(path)` instead. The asynchronous version will be removed since it's synchronous now.")
+    public func cancelDELETE(_ path: String, completion: (() -> Void)) {
+        self.cancelDELETE(path)
+        completion()
+    }
+
+    /**
+     Cancels the image download request for the specified path. This causes the request to complete with error code URLError.cancelled.
+     - parameter path: The path for the cancelled image download request.
+     - parameter completion: A closure that gets called when the cancellation is completed.
+     */
+    @available(*, deprecated: 2.6.2, message: "Use `cancelImageDownload(path)` instead. The asynchronous version will be removed since it's synchronous now.")
+    public func cancelImageDownload(_ path: String, completion: (() -> Void)) {
+        self.cancelImageDownload(path)
+        completion()
+    }
+
+    /**
+     Cancels the request that matches the requestID.
+     - parameter requestID: The ID of the request to be cancelled.
+     - parameter completion: The completion block to be called when the request is cancelled.
+     */
+    @available(*, deprecated: 2.6.2, message: "Use `cancel(with:)` instead. The asynchronous version will be removed since it's synchronous now.")
+    public func cancel(with requestID: String, completion: (() -> Void)) {
+        self.cancel(with: requestID)
+        completion()
     }
 }

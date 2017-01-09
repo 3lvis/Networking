@@ -156,7 +156,7 @@ class NetworkingTests: XCTestCase {
             }
         }
 
-        networking.cancel(with: requestID, completion: nil)
+        networking.cancel(with: requestID)
 
         self.waitForExpectations(timeout: 15.0, handler: nil)
     }

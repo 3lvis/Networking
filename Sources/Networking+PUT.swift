@@ -55,10 +55,9 @@ public extension Networking {
     /**
      Cancels the PUT request for the specified path. This causes the request to complete with error code URLError.cancelled.
      - parameter path: The path for the cancelled PUT request.
-     - parameter completion: A closure that gets called when the cancellation is completed.
      */
-    public func cancelPUT(_ path: String, completion: (() -> Void)? = nil) {
+    public func cancelPUT(_ path: String) {
         let url = try! self.url(for: path)
-        self.cancelRequest(.data, requestType: .PUT, url: url, completion: completion)
+        self.cancelRequest(.data, requestType: .PUT, url: url)
     }
 }

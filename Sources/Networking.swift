@@ -283,9 +283,9 @@ public class Networking {
     /**
      Cancels the request that matches the requestID.
      - parameter requestID: The ID of the request to be cancelled.
-     - parameter completion: The completion block to be called when the request is cancelled.
      */
-    public func cancel(with requestID: String, completion: (() -> Void)? = nil) {
+    public func cancel(with requestID: String) {
+        let semaphore = DispatchSemaphore(value: 0)
         self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
             var tasks = [URLSessionTask]()
             tasks.append(contentsOf: dataTasks as [URLSessionTask])
@@ -299,13 +299,14 @@ public class Networking {
                 }
             }
 
-            completion?()
+            semaphore.signal()
         }
+
+        let _ = semaphore.wait(timeout: DispatchTime.now() + 60.0)
     }
 
     /**
      Cancels all the current requests.
-     - parameter completion: The completion block to be called when all the requests are cancelled.
      */
     public func cancelAllRequests() {
         let semaphore = DispatchSemaphore(value: 0)
@@ -660,7 +661,8 @@ extension Networking {
         return requestID
     }
 
-    func cancelRequest(_ sessionTaskType: SessionTaskType, requestType: RequestType, url: URL, completion: (() -> Void)?) {
+    func cancelRequest(_ sessionTaskType: SessionTaskType, requestType: RequestType, url: URL) {
+        let semaphore = DispatchSemaphore(value: 0)
         self.session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
             var sessionTasks = [URLSessionTask]()
             switch sessionTaskType {
@@ -679,8 +681,10 @@ extension Networking {
                 }
             }
 
-            completion?()
+            semaphore.signal()
         }
+
+        let _ = semaphore.wait(timeout: DispatchTime.now() + 60.0)
     }
 
     func logError(parameterType: ParameterType?, parameters: Any? = nil, data: Data?, request: URLRequest?, response: URLResponse?, error: NSError?) {

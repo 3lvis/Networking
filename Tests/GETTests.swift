@@ -125,9 +125,9 @@ class GETTests: XCTestCase {
             expectation.fulfill()
         }
 
-        networking.cancelGET("/get") {
-            completed = true
-        }
+        networking.cancelGET("/get")
+        completed = true
+
 
         self.waitForExpectations(timeout: 15.0, handler: nil)
     }
