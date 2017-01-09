@@ -186,20 +186,9 @@ class NetworkingTests: XCTestCase {
             }
         }
 
-        networking.cancelAllRequests(with: nil)
+        networking.cancelAllRequests()
 
         self.waitForExpectations(timeout: 15.0, handler: nil)
-    }
-
-    func testCancelAllRequestsSynchonously() {
-        let networking = Networking(baseURL: baseURL)
-
-        var isSynchronous = false
-        networking.cancelAllRequests { 
-            isSynchronous = true
-        }
-
-        XCTAssertEqual(isSynchronous, true)
     }
 
     func testCancelRequestsReturnInMainThread() {
@@ -211,7 +200,7 @@ class NetworkingTests: XCTestCase {
             XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
             expectation.fulfill()
         }
-        networking.cancelAllRequests(with: nil)
+        networking.cancelAllRequests()
         self.waitForExpectations(timeout: 15.0, handler: nil)
     }
 
