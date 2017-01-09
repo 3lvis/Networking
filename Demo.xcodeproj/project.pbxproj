@@ -124,6 +124,9 @@
 		14B0CEEC1CF1D0D700049AD6 /* pig.png in Resources */ = {isa = PBXBuildFile; fileRef = 14B0CEE31CF1D0D700049AD6 /* pig.png */; };
 		14B0CEED1CF1D0D700049AD6 /* sample.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 14B0CEE41CF1D0D700049AD6 /* sample.jpg */; };
 		14B0CEEE1CF1D0D700049AD6 /* sample.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 14B0CEE41CF1D0D700049AD6 /* sample.jpg */; };
+		14C438FC1E23D24600FE1469 /* DeprecatedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C438FB1E23D24600FE1469 /* DeprecatedTests.swift */; };
+		14C438FD1E23D24600FE1469 /* DeprecatedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C438FB1E23D24600FE1469 /* DeprecatedTests.swift */; };
+		14C438FE1E23D24600FE1469 /* DeprecatedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C438FB1E23D24600FE1469 /* DeprecatedTests.swift */; };
 		14D144DE1CEED63B00048629 /* FormDataPart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D144DD1CEED63B00048629 /* FormDataPart.swift */; };
 		14D144DF1CEED63B00048629 /* FormDataPart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D144DD1CEED63B00048629 /* FormDataPart.swift */; };
 		14D144E01CEED63B00048629 /* FormDataPart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D144DD1CEED63B00048629 /* FormDataPart.swift */; };
@@ -237,6 +240,7 @@
 		14C0AF811BD6D4230009ECBE /* CHANGELOG.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CHANGELOG.md; sourceTree = "<group>"; };
 		14C0AF821BD6D4230009ECBE /* CONTRIBUTING.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CONTRIBUTING.md; sourceTree = "<group>"; };
 		14C0AF831BD6D4230009ECBE /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		14C438FB1E23D24600FE1469 /* DeprecatedTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeprecatedTests.swift; sourceTree = "<group>"; };
 		14D144DD1CEED63B00048629 /* FormDataPart.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FormDataPart.swift; sourceTree = "<group>"; };
 		446C24621DFEE964006FA6CC /* CharacterSet+Encoding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CharacterSet+Encoding.swift"; sourceTree = "<group>"; };
 		4496E8E51DAFB27A0092254E /* String+UTF8Tests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+UTF8Tests.swift"; sourceTree = "<group>"; };
@@ -326,6 +330,7 @@
 				1488E23D1CF138D700C6FBA3 /* SHA1.m */,
 				1488E23C1CF138D700C6FBA3 /* SHA1.h */,
 				4496E8E51DAFB27A0092254E /* String+UTF8Tests.swift */,
+				14C438FB1E23D24600FE1469 /* DeprecatedTests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -789,6 +794,7 @@
 				143DA71A1DFC696000D59F1F /* Deprecated.swift in Sources */,
 				1413F47B1CE7969900482096 /* Networking+Download.swift in Sources */,
 				4496E8E81DAFB27A0092254E /* String+UTF8Tests.swift in Sources */,
+				14C438FE1E23D24600FE1469 /* DeprecatedTests.swift in Sources */,
 				446C24661DFEE964006FA6CC /* CharacterSet+Encoding.swift in Sources */,
 				14D144DF1CEED63B00048629 /* FormDataPart.swift in Sources */,
 				146EF9121CEBCEA50059DDB1 /* DELETETests.swift in Sources */,
@@ -914,6 +920,7 @@
 				143DA7181DFC696000D59F1F /* Deprecated.swift in Sources */,
 				1474C1C31CA2988900E15D84 /* Dictionary+FormURLEncoded.swift in Sources */,
 				4496E8E61DAFB27A0092254E /* String+UTF8Tests.swift in Sources */,
+				14C438FC1E23D24600FE1469 /* DeprecatedTests.swift in Sources */,
 				446C24641DFEE964006FA6CC /* CharacterSet+Encoding.swift in Sources */,
 				146EF9111CEBCEA50059DDB1 /* DELETETests.swift in Sources */,
 				14D144DE1CEED63B00048629 /* FormDataPart.swift in Sources */,
@@ -947,6 +954,7 @@
 				143DA7191DFC696000D59F1F /* Deprecated.swift in Sources */,
 				44B5D3961D19B9E5004378B9 /* Dictionary+FormURLEncoded.swift in Sources */,
 				4496E8E71DAFB27A0092254E /* String+UTF8Tests.swift in Sources */,
+				14C438FD1E23D24600FE1469 /* DeprecatedTests.swift in Sources */,
 				446C24651DFEE964006FA6CC /* CharacterSet+Encoding.swift in Sources */,
 				44B5D3971D19B9E5004378B9 /* DELETETests.swift in Sources */,
 				44B5D3981D19B9E5004378B9 /* FormDataPart.swift in Sources */,
