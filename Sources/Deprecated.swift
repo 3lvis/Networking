@@ -79,6 +79,7 @@ public extension Networking {
     @available(*, deprecated: 2.6.2, message: "Use `cancelGET(path)` instead. The asynchronous version will be removed since it's synchronous now.")
     public func cancelGET(_ path: String, completion: (() -> Void)) {
         self.cancelGET(path)
+        completion()
     }
 
     /**
@@ -89,6 +90,7 @@ public extension Networking {
     @available(*, deprecated: 2.6.2, message: "Use `cancelPUT(path)` instead. The asynchronous version will be removed since it's synchronous now.")
     public func cancelPUT(_ path: String, completion: (() -> Void)) {
         self.cancelPUT(path)
+        completion()
     }
 
     /**
@@ -99,6 +101,7 @@ public extension Networking {
     @available(*, deprecated: 2.6.2, message: "Use `cancelPOST(path)` instead. The asynchronous version will be removed since it's synchronous now.")
     public func cancelPOST(_ path: String, completion: (() -> Void)) {
         self.cancelPOST(path)
+        completion()
     }
 
     /**
@@ -109,6 +112,7 @@ public extension Networking {
     @available(*, deprecated: 2.6.2, message: "Use `cancelDELETE(path)` instead. The asynchronous version will be removed since it's synchronous now.")
     public func cancelDELETE(_ path: String, completion: (() -> Void)) {
         self.cancelDELETE(path)
+        completion()
     }
 
     /**
@@ -119,5 +123,17 @@ public extension Networking {
     @available(*, deprecated: 2.6.2, message: "Use `cancelImageDownload(path)` instead. The asynchronous version will be removed since it's synchronous now.")
     public func cancelImageDownload(_ path: String, completion: (() -> Void)) {
         self.cancelImageDownload(path)
+        completion()
+    }
+
+    /**
+     Cancels the request that matches the requestID.
+     - parameter requestID: The ID of the request to be cancelled.
+     - parameter completion: The completion block to be called when the request is cancelled.
+     */
+    @available(*, deprecated: 2.6.2, message: "Use `cancel(with:)` instead. The asynchronous version will be removed since it's synchronous now.")
+    public func cancel(with requestID: String, completion: (() -> Void)) {
+        self.cancel(with: requestID)
+        completion()
     }
 }
