@@ -3,6 +3,15 @@ import Foundation
 public extension Networking {
 
     /**
+     Cancels all the current requests.
+     - parameter completion: The completion block to be called when all the requests are cancelled.
+     */
+    @available(*, deprecated: 2.6.2, message: "Use `cancelAllRequests()` instead. The asynchronous version will be removed since it's synchronous now.")
+    public func cancelAllRequests(with completion: @escaping (() -> Void)) {
+        self.cancelAllRequests()
+    }
+
+    /**
      Retrieves an image from the cache or from the filesystem.
      - parameter path: The path where the image is located.
      - parameter cacheName: The cache name used to identify the downloaded image, by default the path is used.

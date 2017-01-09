@@ -186,7 +186,7 @@ class NetworkingTests: XCTestCase {
             }
         }
 
-        networking.cancelAllRequests(with: nil)
+        networking.cancelAllRequests()
 
         self.waitForExpectations(timeout: 15.0, handler: nil)
     }
@@ -200,7 +200,7 @@ class NetworkingTests: XCTestCase {
             XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
             expectation.fulfill()
         }
-        networking.cancelAllRequests(with: nil)
+        networking.cancelAllRequests()
         self.waitForExpectations(timeout: 15.0, handler: nil)
     }
 
