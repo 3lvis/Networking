@@ -9,6 +9,7 @@ public extension Networking {
     @available(*, deprecated: 2.6.2, message: "Use `cancelAllRequests()` instead. The asynchronous version will be removed since it's synchronous now.")
     public func cancelAllRequests(with completion: @escaping (() -> Void)) {
         self.cancelAllRequests()
+        completion()
     }
 
     /**
