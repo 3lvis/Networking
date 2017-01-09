@@ -88,7 +88,7 @@ class PUTTests: XCTestCase {
         let expectation = self.expectation(description: "testCancelPUT")
 
         let networking = Networking(baseURL: baseURL)
-        networking.disableTestingMode = true
+        networking.isSynchronous = true
         var completed = false
         networking.PUT("/put", parameters: ["username": "jameson", "password": "secret"]) { json, error in
             XCTAssertTrue(completed)
@@ -107,7 +107,7 @@ class PUTTests: XCTestCase {
         let expectation = self.expectation(description: "testCancelPUT")
 
         let networking = Networking(baseURL: baseURL)
-        networking.disableTestingMode = true
+        networking.isSynchronous = true
         var completed = false
         let requestID = networking.PUT("/put", parameters: ["username": "jameson", "password": "secret"]) { json, error in
             XCTAssertTrue(completed)

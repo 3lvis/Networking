@@ -204,7 +204,7 @@ class POSTTests: XCTestCase {
         let expectation = self.expectation(description: "testCancelPOST")
 
         let networking = Networking(baseURL: baseURL)
-        networking.disableTestingMode = true
+        networking.isSynchronous = true
         var completed = false
         networking.POST("/post", parameters: ["username": "jameson", "password": "secret"]) { json, error in
             XCTAssertTrue(completed)
@@ -222,7 +222,7 @@ class POSTTests: XCTestCase {
         let expectation = self.expectation(description: "testCancelPOST")
 
         let networking = Networking(baseURL: baseURL)
-        networking.disableTestingMode = true
+        networking.isSynchronous = true
         var completed = false
         let requestID = networking.POST("/post", parameters: ["username": "jameson", "password": "secret"]) { json, error in
             XCTAssertTrue(completed)

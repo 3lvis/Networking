@@ -7,7 +7,7 @@ class DeprecatedTests: XCTestCase {
     func testCancelWithRequestID() {
         let expectation = self.expectation(description: "testCancelAllRequests")
         let networking = Networking(baseURL: baseURL)
-        networking.disableTestingMode = true
+        networking.isSynchronous = true
         var cancelledGET = false
 
         let requestID = networking.GET("/get") { json, error in
@@ -27,7 +27,7 @@ class DeprecatedTests: XCTestCase {
     func testCancelAllRequests() {
         let expectation = self.expectation(description: "testCancelAllRequests")
         let networking = Networking(baseURL: baseURL)
-        networking.disableTestingMode = true
+        networking.isSynchronous = true
         var cancelledGET = false
         var cancelledPOST = false
 
@@ -58,7 +58,7 @@ class DeprecatedTests: XCTestCase {
         let expectation = self.expectation(description: "testCancelGET")
 
         let networking = Networking(baseURL: baseURL)
-        networking.disableTestingMode = true
+        networking.isSynchronous = true
         var completed = false
         networking.GET("/get") { json, error in
             XCTAssertTrue(completed)
@@ -77,7 +77,7 @@ class DeprecatedTests: XCTestCase {
         let expectation = self.expectation(description: "testCancelGET")
 
         let networking = Networking(baseURL: baseURL)
-        networking.disableTestingMode = true
+        networking.isSynchronous = true
         var completed = false
         let requestID = networking.GET("/get") { json, error in
             XCTAssertTrue(completed)
@@ -96,7 +96,7 @@ class DeprecatedTests: XCTestCase {
         let expectation = self.expectation(description: "testCancelPOST")
 
         let networking = Networking(baseURL: baseURL)
-        networking.disableTestingMode = true
+        networking.isSynchronous = true
         var completed = false
         networking.POST("/post", parameters: ["username": "jameson", "password": "secret"]) { json, error in
             XCTAssertTrue(completed)
@@ -115,7 +115,7 @@ class DeprecatedTests: XCTestCase {
         let expectation = self.expectation(description: "testCancelPOST")
 
         let networking = Networking(baseURL: baseURL)
-        networking.disableTestingMode = true
+        networking.isSynchronous = true
         var completed = false
         let requestID = networking.POST("/post", parameters: ["username": "jameson", "password": "secret"]) { json, error in
             XCTAssertTrue(completed)
@@ -134,7 +134,7 @@ class DeprecatedTests: XCTestCase {
         let expectation = self.expectation(description: "testCancelPUT")
 
         let networking = Networking(baseURL: baseURL)
-        networking.disableTestingMode = true
+        networking.isSynchronous = true
         var completed = false
         networking.PUT("/put", parameters: ["username": "jameson", "password": "secret"]) { json, error in
             XCTAssertTrue(completed)
@@ -153,7 +153,7 @@ class DeprecatedTests: XCTestCase {
         let expectation = self.expectation(description: "testCancelPUT")
 
         let networking = Networking(baseURL: baseURL)
-        networking.disableTestingMode = true
+        networking.isSynchronous = true
         var completed = false
         let requestID = networking.PUT("/put", parameters: ["username": "jameson", "password": "secret"]) { json, error in
             XCTAssertTrue(completed)
@@ -172,7 +172,7 @@ class DeprecatedTests: XCTestCase {
         let expectation = self.expectation(description: "testCancelDELETE")
 
         let networking = Networking(baseURL: baseURL)
-        networking.disableTestingMode = true
+        networking.isSynchronous = true
         var completed = false
         networking.DELETE("/delete") { json, error in
             XCTAssertTrue(completed)
@@ -191,7 +191,7 @@ class DeprecatedTests: XCTestCase {
         let expectation = self.expectation(description: "testCancelDELETE")
 
         let networking = Networking(baseURL: baseURL)
-        networking.disableTestingMode = true
+        networking.isSynchronous = true
         var completed = false
         let requestID = networking.DELETE("/delete") { json, error in
             XCTAssertTrue(completed)

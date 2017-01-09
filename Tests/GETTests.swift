@@ -17,7 +17,7 @@ class GETTests: XCTestCase {
     func testRequestReturnBlockInMainThread() {
         let expectation = self.expectation(description: "testRequestReturnBlockInMainThread")
         let networking = Networking(baseURL: baseURL)
-        networking.disableTestingMode = true
+        networking.isSynchronous = true
         networking.GET("/get") { json, error in
             XCTAssertTrue(Thread.isMainThread)
             expectation.fulfill()
@@ -117,7 +117,7 @@ class GETTests: XCTestCase {
         let expectation = self.expectation(description: "testCancelGET")
 
         let networking = Networking(baseURL: baseURL)
-        networking.disableTestingMode = true
+        networking.isSynchronous = true
         var completed = false
         networking.GET("/get") { json, error in
             XCTAssertTrue(completed)
@@ -136,7 +136,7 @@ class GETTests: XCTestCase {
         let expectation = self.expectation(description: "testCancelGET")
 
         let networking = Networking(baseURL: baseURL)
-        networking.disableTestingMode = true
+        networking.isSynchronous = true
         var completed = false
         let requestID = networking.GET("/get") { json, error in
             XCTAssertTrue(completed)
