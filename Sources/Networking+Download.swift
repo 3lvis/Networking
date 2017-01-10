@@ -16,7 +16,7 @@ public extension Networking {
      Downloads an image using the specified path.
      - parameter path: The path where the image is located.
      - parameter cacheName: The cache name used to identify the downloaded image, by default the path is used.
-     - parameter completion: A closure that gets called when the image download request is completed, it contains a image and a error.
+     - parameter completion: A closure that gets called when the image download request is completed, it contains an image and an error.
      */
     public func downloadImage(_ path: String, cacheName: String? = nil, completion: @escaping (_ image: NetworkingImage?, _ error: NSError?) -> Void) {
         self.request(.GET, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .image) { response, _, error in
@@ -36,7 +36,7 @@ public extension Networking {
     }
 
     /**
-     Registers a fake download image request with a image. After registering this, every download request to the path, will return the registered image.
+     Registers a fake download image request with an image. After registering this, every download request to the path, will return the registered image.
      - parameter path: The path for the faked image download request.
      - parameter image: An image that will be returned when there's a request to the registered path.
      */

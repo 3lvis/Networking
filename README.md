@@ -346,7 +346,7 @@ networking.downloadImage("/image/png") { image, error in
 ```swift
 let networking = Networking(baseURL: baseURL)
 networking.downloadImage("/image/png") { image, error in
-    // Cancelling a image download returns an error with code URLError.cancelled which means cancelled request
+    // Cancelling an image download returns an error with code URLError.cancelled which means cancelled request
 }
 
 networking.cancelImageDownload("/image/png")
