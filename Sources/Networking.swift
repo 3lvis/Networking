@@ -134,6 +134,7 @@ public class Networking {
     var authorizationHeaderKey = "Authorization"
     var cache: NSCache<AnyObject, AnyObject>
     var configurationType: ConfigurationType
+    var unauthorizedRequestCompletion: (() -> Void)?
 
     /**
      Flag used to disable synchronous request when running automatic tests.
@@ -643,7 +644,7 @@ extension Networking {
                         NetworkActivityIndicator.sharedIndicator.visible = false
                     }
 
-                    self.logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError as NSError?)
+                    self.handleError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError as NSError?)
                     completion(returnedData, returnedHeaders, connectionError as NSError?)
                 }
             }
@@ -653,7 +654,7 @@ extension Networking {
 
             if TestCheck.isTesting && self.disableTestingMode == false {
                 let _ = semaphore.wait(timeout: DispatchTime.now() + 60.0)
-                self.logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request as URLRequest, response: returnedResponse, error: connectionError as NSError?)
+                self.handleError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request as URLRequest, response: returnedResponse, error: connectionError as NSError?)
                 completion(returnedData, returnedHeaders, connectionError as NSError?)
             }
         }
@@ -685,6 +686,17 @@ extension Networking {
         }
 
         let _ = semaphore.wait(timeout: DispatchTime.now() + 60.0)
+    }
+
+
+
+    func handleError(parameterType: ParameterType?, parameters: Any? = nil, data: Data?, request: URLRequest?, response: URLResponse?, error: NSError?) {
+        if let error = error, error.code == 403 {
+            self.unauthorizedRequestCompletion?()
+        }
+
+        self.logError(parameterType: parameterType, parameters: parameters, data: data, request: request, response: response, error: error)
+
     }
 
     func logError(parameterType: ParameterType?, parameters: Any? = nil, data: Data?, request: URLRequest?, response: URLResponse?, error: NSError?) {
