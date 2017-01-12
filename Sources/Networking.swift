@@ -127,6 +127,8 @@ public class Networking {
         case informational, successful, redirection, clientError, serverError, cancelled, unknown
     }
 
+    public var unauthorizedRequestCompletion: (() -> Void)?
+
     private let baseURL: String
     var fakeRequests = [RequestType: [String: FakeRequest]]()
     var token: String?
@@ -134,7 +136,6 @@ public class Networking {
     var authorizationHeaderKey = "Authorization"
     var cache: NSCache<AnyObject, AnyObject>
     var configurationType: ConfigurationType
-    var unauthorizedRequestCompletion: (() -> Void)?
 
     /**
      Flag used to disable synchronous request when running automatic tests.
