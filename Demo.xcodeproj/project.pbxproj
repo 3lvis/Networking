@@ -175,6 +175,9 @@
 		44DFD3B01D9A34540014E9F2 /* NetworkingImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 148341701CF1CF0500E91F01 /* NetworkingImage.swift */; };
 		44DFD3B11D9A3FC80014E9F2 /* pig.png in Resources */ = {isa = PBXBuildFile; fileRef = 14B0CEE31CF1D0D700049AD6 /* pig.png */; };
 		44DFD3B21D9A3FC90014E9F2 /* pig.png in Resources */ = {isa = PBXBuildFile; fileRef = 14B0CEE31CF1D0D700049AD6 /* pig.png */; };
+		D197B08D6DC4DF06CAB03553 /* UnauthorizedCompletionBlockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D197BBDB93E787484534B425 /* UnauthorizedCompletionBlockTests.swift */; };
+		D197B46D3771AD1F87E52F30 /* UnauthorizedCompletionBlockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D197BBDB93E787484534B425 /* UnauthorizedCompletionBlockTests.swift */; };
+		D197B9B9EE277C0482D35C57 /* UnauthorizedCompletionBlockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D197BBDB93E787484534B425 /* UnauthorizedCompletionBlockTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -233,6 +236,7 @@
 		44DFD39B1D9A2D5A0014E9F2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		44DFD39F1D9A2EA70014E9F2 /* CellData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CellData.swift; sourceTree = "<group>"; };
 		44DFD3A11D9A33610014E9F2 /* FakeImageController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FakeImageController.swift; sourceTree = "<group>"; };
+		D197BBDB93E787484534B425 /* UnauthorizedCompletionBlockTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnauthorizedCompletionBlockTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -310,6 +314,7 @@
 				1488E23D1CF138D700C6FBA3 /* SHA1.m */,
 				1488E23C1CF138D700C6FBA3 /* SHA1.h */,
 				4496E8E51DAFB27A0092254E /* String+UTF8Tests.swift */,
+				D197BBDB93E787484534B425 /* UnauthorizedCompletionBlockTests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -807,6 +812,7 @@
 				1413F47C1CE7969C00482096 /* NSFileManager+Helpers.swift in Sources */,
 				1488E23F1CF138D700C6FBA3 /* SHA1.m in Sources */,
 				1413F4771CE7968E00482096 /* JSON.swift in Sources */,
+				D197B08D6DC4DF06CAB03553 /* UnauthorizedCompletionBlockTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -922,6 +928,7 @@
 				1413F4721CE7963700482096 /* NetworkingTests.swift in Sources */,
 				1488E23E1CF138D700C6FBA3 /* SHA1.m in Sources */,
 				1474C1C81CA2988900E15D84 /* Networking.swift in Sources */,
+				D197B46D3771AD1F87E52F30 /* UnauthorizedCompletionBlockTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -953,6 +960,7 @@
 				44B5D39E1D19B9E5004378B9 /* NetworkingTests.swift in Sources */,
 				44B5D39F1D19B9E5004378B9 /* SHA1.m in Sources */,
 				44B5D3A01D19B9E5004378B9 /* Networking.swift in Sources */,
+				D197B9B9EE277C0482D35C57 /* UnauthorizedCompletionBlockTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
