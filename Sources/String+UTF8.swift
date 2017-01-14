@@ -1,8 +1,8 @@
 import Foundation
 
-public extension String {
+extension String {
 
-    public func encodeUTF8() -> String? {
+    func encodeUTF8() -> String? {
         if let _ = URL(string: self) {
             return self
         }
