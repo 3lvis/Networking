@@ -327,28 +327,6 @@ public class Networking {
         let _ = semaphore.wait(timeout: DispatchTime.now() + 60.0)
     }
 
-    /**
-     Downloads data from a URL, caching the result.
-     - parameter path: The path used to download the resource.
-     - parameter completion: A closure that gets called when the download request is completed, it contains  a `data` object and an `NSError`.
-     */
-    public func downloadData(for path: String, cacheName: String? = nil, completion: @escaping (_ data: Data?, _ error: NSError?) -> Void) {
-        self.request(.GET, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .data) { response, headers, error in
-            completion(response as? Data, error)
-        }
-    }
-
-    /**
-     Retrieves data from the cache or from the filesystem.
-     - parameter path: The path where the image is located.
-     - parameter cacheName: The cache name used to identify the downloaded data, by default the path is used.
-     */
-    public func dataFromCache(for path: String, cacheName: String? = nil) -> Data? {
-        let object = self.objectFromCache(for: path, cacheName: cacheName, responseType: .data)
-
-        return object as? Data
-    }
-
     /// Deletes the downloaded/cached files.
     public static func deleteCachedFiles() {
         #if os(tvOS)

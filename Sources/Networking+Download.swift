@@ -48,4 +48,31 @@ public extension Networking {
     public func fakeImageDownload(_ path: String, image: NetworkingImage?, statusCode: Int = 200) {
         self.fake(.GET, path: path, response: image, responseType: .image, statusCode: statusCode)
     }
+
+    /// Downloads data from a URL, caching the result.
+    ///
+    /// - Parameters:
+    ///   - path: The path used to download the resource.
+    ///   - cacheName: The cache name used to identify the downloaded data, by default the path is used.
+    ///   - completion: A closure that gets called when the download request is completed, it contains  a `data` object and an `NSError`.
+    @discardableResult
+    public func downloadData(for path: String, cacheName: String? = nil, completion: @escaping (_ data: Data?, _ error: NSError?) -> Void) -> String {
+        let requestIdentifier = self.request(.GET, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .data) { response, headers, error in
+            completion(response as? Data, error)
+        }
+
+        return requestIdentifier
+    }
+
+    /// Retrieves data from the cache or from the filesystem.
+    ///
+    /// - Parameters:
+    ///   - path: The path where the image is located.
+    ///   - cacheName: The cache name used to identify the downloaded data, by default the path is used.
+    /// - Returns: The cached data.
+    public func dataFromCache(for path: String, cacheName: String? = nil) -> Data? {
+        let object = self.objectFromCache(for: path, cacheName: cacheName, responseType: .data)
+
+        return object as? Data
+    }
 }
