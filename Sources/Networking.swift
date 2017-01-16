@@ -434,8 +434,12 @@ extension Networking {
             if fakeRequest.statusCode.statusCodeType() == .successful {
                 completion(fakeRequest.response, [String: Any](), nil)
             } else {
-                let error = NSError(domain: Networking.domain, code: fakeRequest.statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: fakeRequest.statusCode)])
-                completion(fakeRequest.response, [String: Any](), error)
+                if let unauthorizedRequestCallback = self.unauthorizedRequestCallback, fakeRequest.statusCode == 403 || fakeRequest.statusCode == 401 {
+                    unauthorizedRequestCallback()
+                } else {
+                    let error = NSError(domain: Networking.domain, code: fakeRequest.statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: fakeRequest.statusCode)])
+                    completion(fakeRequest.response, [String: Any](), error)
+                }
             }
         } else {
             switch responseType {
