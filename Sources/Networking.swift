@@ -127,8 +127,6 @@ public class Networking {
         case informational, successful, redirection, clientError, serverError, cancelled, unknown
     }
 
-    public var unauthorizedRequestCompletion: (() -> Void)?
-
     private let baseURL: String
     var fakeRequests = [RequestType: [String: FakeRequest]]()
     var token: String?
@@ -208,6 +206,9 @@ public class Networking {
         self.authorizationHeaderKey = headerKey
         self.authorizationHeaderValue = headerValue
     }
+
+    /// Callback used to intercept requests that return with a 403 or 401 status code.
+    public var unauthorizedRequestCallback: (() -> Void)?
 
     /**
      Returns a NSURL by appending the provided path to the Networking's base URL.
@@ -623,8 +624,12 @@ extension Networking {
                         NetworkActivityIndicator.sharedIndicator.visible = false
                     }
 
-                    self.handleError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError as NSError?)
-                    completion(returnedData, returnedHeaders, connectionError as NSError?)
+                    self.logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError as NSError?)
+                    if let unauthorizedRequestCallback = self.unauthorizedRequestCallback, let error = connectionError as NSError?, error.code == 403 || error.code == 401 {
+                        unauthorizedRequestCallback()
+                    } else {
+                        completion(returnedData, returnedHeaders, connectionError as NSError?)
+                    }
                 }
             }
 
@@ -633,8 +638,12 @@ extension Networking {
 
             if TestCheck.isTesting && self.disableTestingMode == false {
                 let _ = semaphore.wait(timeout: DispatchTime.now() + 60.0)
-                self.handleError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request as URLRequest, response: returnedResponse, error: connectionError as NSError?)
-                completion(returnedData, returnedHeaders, connectionError as NSError?)
+                self.logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request as URLRequest, response: returnedResponse, error: connectionError as NSError?)
+                if let unauthorizedRequestCallback = self.unauthorizedRequestCallback, let error = connectionError as NSError?, error.code == 403 || error.code == 401 {
+                    unauthorizedRequestCallback()
+                } else {
+                    completion(returnedData, returnedHeaders, connectionError as NSError?)
+                }
             }
         }
 
@@ -667,19 +676,8 @@ extension Networking {
         let _ = semaphore.wait(timeout: DispatchTime.now() + 60.0)
     }
 
-
-
-    func handleError(parameterType: ParameterType?, parameters: Any? = nil, data: Data?, request: URLRequest?, response: URLResponse?, error: NSError?) {
-        if let error = error, error.code == 403 || error.code == 401 {
-            self.unauthorizedRequestCompletion?()
-        }
-
-        self.logError(parameterType: parameterType, parameters: parameters, data: data, request: request, response: response, error: error)
-
-    }
-
     func logError(parameterType: ParameterType?, parameters: Any? = nil, data: Data?, request: URLRequest?, response: URLResponse?, error: NSError?) {
-        if disableErrorLogging { return }
+        if self.disableErrorLogging { return }
         guard let error = error else { return }
 
         print(" ")
