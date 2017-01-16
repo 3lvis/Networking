@@ -194,6 +194,9 @@
 		44DFD3B01D9A34540014E9F2 /* NetworkingImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 148341701CF1CF0500E91F01 /* NetworkingImage.swift */; };
 		44DFD3B11D9A3FC80014E9F2 /* pig.png in Resources */ = {isa = PBXBuildFile; fileRef = 14B0CEE31CF1D0D700049AD6 /* pig.png */; };
 		44DFD3B21D9A3FC90014E9F2 /* pig.png in Resources */ = {isa = PBXBuildFile; fileRef = 14B0CEE31CF1D0D700049AD6 /* pig.png */; };
+		E6ED61311E27CD630058ACE9 /* UnauthorizedCompletionBlockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6ED61301E27CD630058ACE9 /* UnauthorizedCompletionBlockTests.swift */; };
+		E6ED61321E27CD630058ACE9 /* UnauthorizedCompletionBlockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6ED61301E27CD630058ACE9 /* UnauthorizedCompletionBlockTests.swift */; };
+		E6ED61331E27CD630058ACE9 /* UnauthorizedCompletionBlockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6ED61301E27CD630058ACE9 /* UnauthorizedCompletionBlockTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -253,6 +256,7 @@
 		44DFD39B1D9A2D5A0014E9F2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		44DFD39F1D9A2EA70014E9F2 /* CellData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CellData.swift; sourceTree = "<group>"; };
 		44DFD3A11D9A33610014E9F2 /* FakeImageController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FakeImageController.swift; sourceTree = "<group>"; };
+		E6ED61301E27CD630058ACE9 /* UnauthorizedCompletionBlockTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnauthorizedCompletionBlockTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -328,6 +332,7 @@
 				1413F45E1CE7963700482096 /* Dictionary+FormURLEncodedTests.swift */,
 				1413F4611CE7963700482096 /* Helpers.swift */,
 				1488E23D1CF138D700C6FBA3 /* SHA1.m */,
+				E6ED61301E27CD630058ACE9 /* UnauthorizedCompletionBlockTests.swift */,
 				1488E23C1CF138D700C6FBA3 /* SHA1.h */,
 				4496E8E51DAFB27A0092254E /* String+UTF8Tests.swift */,
 				14C438FB1E23D24600FE1469 /* DeprecatedTests.swift */,
@@ -786,6 +791,7 @@
 				148341721CF1CF0500E91F01 /* NetworkingImage.swift in Sources */,
 				1413F4781CE7969100482096 /* NetworkActivityIndicator.swift in Sources */,
 				1413F4731CE7963700482096 /* NetworkingTests.swift in Sources */,
+				E6ED61331E27CD630058ACE9 /* UnauthorizedCompletionBlockTests.swift in Sources */,
 				146EF9161CEBCEA50059DDB1 /* POSTTests.swift in Sources */,
 				1413F4671CE7963700482096 /* Dictionary+FormURLEncodedTests.swift in Sources */,
 				147B32F81CF9B1C500D5BAED /* Networking+GET.swift in Sources */,
@@ -912,6 +918,7 @@
 				148341711CF1CF0500E91F01 /* NetworkingImage.swift in Sources */,
 				1474C1C41CA2988900E15D84 /* JSON.swift in Sources */,
 				1474C1C71CA2988900E15D84 /* Networking+Download.swift in Sources */,
+				E6ED61311E27CD630058ACE9 /* UnauthorizedCompletionBlockTests.swift in Sources */,
 				146EF9151CEBCEA50059DDB1 /* POSTTests.swift in Sources */,
 				1413C1D61CBD1784000AF90F /* String+UTF8.swift in Sources */,
 				147B32F71CF9B1C500D5BAED /* Networking+GET.swift in Sources */,
@@ -946,6 +953,7 @@
 				44B5D38E1D19B9E5004378B9 /* NetworkingImage.swift in Sources */,
 				44B5D38F1D19B9E5004378B9 /* JSON.swift in Sources */,
 				44B5D3901D19B9E5004378B9 /* Networking+Download.swift in Sources */,
+				E6ED61321E27CD630058ACE9 /* UnauthorizedCompletionBlockTests.swift in Sources */,
 				44B5D3911D19B9E5004378B9 /* POSTTests.swift in Sources */,
 				44B5D3921D19B9E5004378B9 /* String+UTF8.swift in Sources */,
 				44B5D3931D19B9E5004378B9 /* Networking+GET.swift in Sources */,
