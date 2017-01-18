@@ -8,8 +8,10 @@ class UnauthorizedCallbackTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         var callbackExecuted = false
 
-        networking.unauthorizedRequestCallback = {
+        networking.authorizationChallengeBlock = { path, error, completion in
             callbackExecuted = true
+
+            completion(true)
         }
 
         var ignoredCompletionBlock = true
@@ -25,8 +27,10 @@ class UnauthorizedCallbackTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         var callbackExecuted = false
 
-        networking.unauthorizedRequestCallback = {
+        networking.authorizationChallengeBlock = { path, error, completion in
             callbackExecuted = true
+
+            completion(true)
         }
 
         var ignoredCompletionBlock = true

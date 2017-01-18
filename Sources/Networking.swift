@@ -208,7 +208,8 @@ public class Networking {
     }
 
     /// Callback used to intercept requests that return with a 403 or 401 status code.
-    public var unauthorizedRequestCallback: (() -> Void)?
+    //public var authorizationChallengeBlock: ((_ path: String, _ error: NSError?, _ completion: () -> Void) -> Void))?
+    public var authorizationChallengeBlock: ((_ path: String, _ error: NSError?, _ completion: (_ shouldRetry: Bool) -> Void) -> Void)?
 
     /**
      Returns a NSURL by appending the provided path to the Networking's base URL.
@@ -434,8 +435,15 @@ extension Networking {
             if fakeRequest.statusCode.statusCodeType() == .successful {
                 completion(fakeRequest.response, [String: Any](), nil)
             } else {
-                if let unauthorizedRequestCallback = self.unauthorizedRequestCallback, fakeRequest.statusCode == 403 || fakeRequest.statusCode == 401 {
-                    unauthorizedRequestCallback()
+                if let authorizationChallengeBlock = self.authorizationChallengeBlock, fakeRequest.statusCode == 403 || fakeRequest.statusCode == 401 {
+                    let error = NSError(domain: Networking.domain, code: fakeRequest.statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: fakeRequest.statusCode)])
+                    authorizationChallengeBlock(path, error) { shouldRetry in
+                        if shouldRetry {
+                            self.request(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType, completion: completion)
+                        } else {
+                            completion(fakeRequest.response, [String: Any](), error)
+                        }
+                    }
                 } else {
                     let error = NSError(domain: Networking.domain, code: fakeRequest.statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: fakeRequest.statusCode)])
                     completion(fakeRequest.response, [String: Any](), error)
@@ -629,11 +637,11 @@ extension Networking {
                     }
 
                     self.logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError as NSError?)
-                    if let unauthorizedRequestCallback = self.unauthorizedRequestCallback, let error = connectionError as NSError?, error.code == 403 || error.code == 401 {
+                    /*if let unauthorizedRequestCallback = self.unauthorizedRequestCallback, let error = connectionError as NSError?, error.code == 403 || error.code == 401 {
                         unauthorizedRequestCallback()
                     } else {
                         completion(returnedData, returnedHeaders, connectionError as NSError?)
-                    }
+                    }*/
                 }
             }
 
@@ -643,11 +651,11 @@ extension Networking {
             if TestCheck.isTesting && self.disableTestingMode == false {
                 let _ = semaphore.wait(timeout: DispatchTime.now() + 60.0)
                 self.logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request as URLRequest, response: returnedResponse, error: connectionError as NSError?)
-                if let unauthorizedRequestCallback = self.unauthorizedRequestCallback, let error = connectionError as NSError?, error.code == 403 || error.code == 401 {
+                /*if let unauthorizedRequestCallback = self.unauthorizedRequestCallback, let error = connectionError as NSError?, error.code == 403 || error.code == 401 {
                     unauthorizedRequestCallback()
                 } else {
                     completion(returnedData, returnedHeaders, connectionError as NSError?)
-                }
+                }*/
             }
         }
 
