@@ -528,14 +528,16 @@ extension Networking {
         }
 
         var serializingError: NSError?
-        if let parameterType = parameterType, let parameters = parameters {
+        if let parameterType = parameterType {
             switch parameterType {
             case .none: break
             case .json:
-                do {
-                    request.httpBody = try JSONSerialization.data(withJSONObject: parameters, options: [])
-                } catch let error as NSError {
-                    serializingError = error
+                if let parameters = parameters {
+                    do {
+                        request.httpBody = try JSONSerialization.data(withJSONObject: parameters, options: [])
+                    } catch let error as NSError {
+                        serializingError = error
+                    }
                 }
             case .formURLEncoded:
                 guard let parametersDictionary = parameters as? [String: Any] else { fatalError("Couldn't convert parameters to a dictionary: \(parameters)") }
