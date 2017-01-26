@@ -106,16 +106,12 @@ class DELETETests: XCTestCase {
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
-        var completed = false
         let requestID = networking.DELETE("/delete") { json, error in
-            XCTAssertTrue(completed)
             XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
             expectation.fulfill()
         }
 
-        networking.cancel(with: requestID) {
-            completed = true
-        }
+        networking.cancel(with: requestID)
 
         self.waitForExpectations(timeout: 15.0, handler: nil)
     }

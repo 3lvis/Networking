@@ -7,18 +7,12 @@ extension String {
             return self
         }
 
-        let optionalLastComponent = self.characters.split { $0 == "/" }.last
-        if let lastComponent = optionalLastComponent {
-            let lastComponentAsString = lastComponent.map { String($0) }.reduce("", +)
-            if let rangeOfLastComponent = self.range(of: lastComponentAsString) {
-                let stringWithoutLastComponent = self.substring(to: rangeOfLastComponent.lowerBound)
-                if let lastComponentEncoded = lastComponentAsString.addingPercentEncoding(withAllowedCharacters: .urlQueryParametersAllowed) {
-                    let encodedString = stringWithoutLastComponent + lastComponentEncoded
-                    return encodedString
-                }
-            }
-        }
-
-        return nil
+		var components = self.components(separatedBy: "/")
+		guard let lastComponent = components.popLast(),
+			  let endcodedLastComponent = lastComponent.addingPercentEncoding(withAllowedCharacters: .urlQueryParametersAllowed) else {
+				return nil
+		}
+		
+		return (components + [endcodedLastComponent]).joined(separator: "/")
     }
 }
