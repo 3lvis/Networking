@@ -10,7 +10,7 @@ class DeprecatedTests: XCTestCase {
         networking.disableTestingMode = true
         var cancelledGET = false
 
-        let requestID = networking.GET("/get") { json, error in
+        let requestID = networking.GET("/get") { _, error in
             cancelledGET = error?.code == URLError.cancelled.rawValue
             XCTAssertTrue(cancelledGET)
 
@@ -19,7 +19,7 @@ class DeprecatedTests: XCTestCase {
             }
         }
 
-        networking.cancel(with: requestID)
+        networking.cancel(with: requestID) {}
 
         self.waitForExpectations(timeout: 15.0, handler: nil)
     }
@@ -31,7 +31,7 @@ class DeprecatedTests: XCTestCase {
         var cancelledGET = false
         var cancelledPOST = false
 
-        networking.GET("/get") { json, error in
+        networking.GET("/get") { _, error in
             cancelledGET = error?.code == URLError.cancelled.rawValue
             XCTAssertTrue(cancelledGET)
 
@@ -40,7 +40,7 @@ class DeprecatedTests: XCTestCase {
             }
         }
 
-        networking.POST("/post") { json, error in
+        networking.POST("/post") { _, error in
             cancelledPOST = error?.code == URLError.cancelled.rawValue
             XCTAssertTrue(cancelledPOST)
 
@@ -49,8 +49,8 @@ class DeprecatedTests: XCTestCase {
             }
         }
 
-        networking.cancelAllRequests()
-        
+        networking.cancelAllRequests {}
+
         self.waitForExpectations(timeout: 15.0, handler: nil)
     }
 
@@ -59,12 +59,16 @@ class DeprecatedTests: XCTestCase {
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
-        networking.GET("/get") { json, error in
+        var completed = false
+        networking.GET("/get") { _, error in
+            XCTAssertTrue(completed)
             XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
             expectation.fulfill()
         }
 
-        networking.cancelGET("/get")
+        networking.cancelGET("/get") {
+            completed = true
+        }
 
         self.waitForExpectations(timeout: 15.0, handler: nil)
     }
@@ -74,12 +78,16 @@ class DeprecatedTests: XCTestCase {
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
-        let requestID = networking.GET("/get") { json, error in
+        var completed = false
+        let requestID = networking.GET("/get") { _, error in
+            XCTAssertTrue(completed)
             XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
             expectation.fulfill()
         }
 
-        networking.cancel(with: requestID)
+        networking.cancel(with: requestID) {
+            completed = true
+        }
 
         self.waitForExpectations(timeout: 15.0, handler: nil)
     }
@@ -89,12 +97,16 @@ class DeprecatedTests: XCTestCase {
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
-        networking.POST("/post", parameters: ["username": "jameson", "password": "secret"]) { json, error in
+        var completed = false
+        networking.POST("/post", parameters: ["username": "jameson", "password": "secret"]) { _, error in
+            XCTAssertTrue(completed)
             XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
             expectation.fulfill()
         }
 
-        networking.cancelPOST("/post")
+        networking.cancelPOST("/post") {
+            completed = true
+        }
 
         self.waitForExpectations(timeout: 15.0, handler: nil)
     }
@@ -104,12 +116,16 @@ class DeprecatedTests: XCTestCase {
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
-        let requestID = networking.POST("/post", parameters: ["username": "jameson", "password": "secret"]) { json, error in
+        var completed = false
+        let requestID = networking.POST("/post", parameters: ["username": "jameson", "password": "secret"]) { _, error in
+            XCTAssertTrue(completed)
             XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
             expectation.fulfill()
         }
 
-        networking.cancel(with: requestID)
+        networking.cancel(with: requestID) {
+            completed = true
+        }
 
         self.waitForExpectations(timeout: 15.0, handler: nil)
     }
@@ -119,12 +135,16 @@ class DeprecatedTests: XCTestCase {
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
-        networking.PUT("/put", parameters: ["username": "jameson", "password": "secret"]) { json, error in
+        var completed = false
+        networking.PUT("/put", parameters: ["username": "jameson", "password": "secret"]) { _, error in
+            XCTAssertTrue(completed)
             XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
             expectation.fulfill()
         }
 
-        networking.cancelPUT("/put")
+        networking.cancelPUT("/put") {
+            completed = true
+        }
 
         self.waitForExpectations(timeout: 150.0, handler: nil)
     }
@@ -134,12 +154,16 @@ class DeprecatedTests: XCTestCase {
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
-        let requestID = networking.PUT("/put", parameters: ["username": "jameson", "password": "secret"]) { json, error in
+        var completed = false
+        let requestID = networking.PUT("/put", parameters: ["username": "jameson", "password": "secret"]) { _, error in
+            XCTAssertTrue(completed)
             XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
             expectation.fulfill()
         }
 
-		networking.cancel(with: requestID)
+        networking.cancel(with: requestID) {
+            completed = true
+        }
 
         self.waitForExpectations(timeout: 150.0, handler: nil)
     }
@@ -149,12 +173,16 @@ class DeprecatedTests: XCTestCase {
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
-        networking.DELETE("/delete") { json, error in
+        var completed = false
+        networking.DELETE("/delete") { _, error in
+            XCTAssertTrue(completed)
             XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
             expectation.fulfill()
         }
 
-        networking.cancelDELETE("/delete")
+        networking.cancelDELETE("/delete") {
+            completed = true
+        }
 
         self.waitForExpectations(timeout: 15.0, handler: nil)
     }
@@ -164,12 +192,16 @@ class DeprecatedTests: XCTestCase {
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
-        let requestID = networking.DELETE("/delete") { json, error in
+        var completed = false
+        let requestID = networking.DELETE("/delete") { _, error in
+            XCTAssertTrue(completed)
             XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
             expectation.fulfill()
         }
 
-        networking.cancel(with: requestID)
+        networking.cancel(with: requestID) {
+            completed = true
+        }
 
         self.waitForExpectations(timeout: 15.0, handler: nil)
     }

@@ -13,7 +13,7 @@ class UnauthorizedCallbackTests: XCTestCase {
         }
 
         var ignoredCompletionBlock = true
-        networking.GET("/basic-auth/user/passwd") { JSON, error in
+        networking.GET("/basic-auth/user/passwd") { _, _ in
             ignoredCompletionBlock = false
         }
 
@@ -31,7 +31,7 @@ class UnauthorizedCallbackTests: XCTestCase {
 
         var ignoredCompletionBlock = true
         networking.fakeGET("/hi-mom", response: nil, statusCode: 401)
-        networking.GET("/hi-mom") { JSON, error in
+        networking.GET("/hi-mom") { _, _ in
             ignoredCompletionBlock = false
         }
 
