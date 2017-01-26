@@ -57,7 +57,7 @@ public extension Networking {
     ///   - completion: A closure that gets called when the download request is completed, it contains  a `data` object and an `NSError`.
     @discardableResult
     public func downloadData(for path: String, cacheName: String? = nil, completion: @escaping (_ data: Data?, _ error: NSError?) -> Void) -> String {
-        let requestIdentifier = self.request(.GET, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .data) { response, headers, error in
+        let requestIdentifier = self.request(.GET, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .data) { response, _, error in
             completion(response as? Data, error)
         }
 

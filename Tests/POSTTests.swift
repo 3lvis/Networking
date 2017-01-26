@@ -7,7 +7,7 @@ class POSTTests: XCTestCase {
     func testSynchronousPOST() {
         var synchronous = false
         let networking = Networking(baseURL: baseURL)
-        networking.POST("/post", parameters: nil) { json, error in
+        networking.POST("/post", parameters: nil) { _, _ in
             synchronous = true
         }
 
@@ -51,7 +51,7 @@ class POSTTests: XCTestCase {
 
     func testPOSTWithHeaders() {
         let networking = Networking(baseURL: baseURL)
-        networking.POST("/post") { json, headers, error in
+        networking.POST("/post") { json, headers, _ in
             guard let json = json as? [String: Any] else { XCTFail(); return }
             guard let url = json["url"] as? String else { XCTFail(); return }
             XCTAssertEqual(url, "http://httpbin.org/post")
@@ -170,7 +170,7 @@ class POSTTests: XCTestCase {
 
         networking.fakePOST("/story", response: [["name": "Elvis"]])
 
-        networking.POST("/story", parameters: ["username": "jameson", "password": "secret"]) { json, error in
+        networking.POST("/story", parameters: ["username": "jameson", "password": "secret"]) { json, _ in
             let json = json as? [[String: String]]
             let value = json?[0]["name"]
             XCTAssertEqual(value, "Elvis")
@@ -182,7 +182,7 @@ class POSTTests: XCTestCase {
 
         networking.fakePOST("/story", response: nil, statusCode: 401)
 
-        networking.POST("/story") { json, error in
+        networking.POST("/story") { _, error in
             XCTAssertEqual(error?.code, 401)
         }
     }
@@ -192,7 +192,7 @@ class POSTTests: XCTestCase {
 
         networking.fakePOST("/entries", fileName: "entries.json", bundle: Bundle(for: POSTTests.self))
 
-        networking.POST("/entries") { json, error in
+        networking.POST("/entries") { json, _ in
             guard let json = json as? [[String: Any]] else { XCTFail(); return }
             let entry = json[0]
             let value = entry["title"] as? String
@@ -206,7 +206,7 @@ class POSTTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
         var completed = false
-        networking.POST("/post", parameters: ["username": "jameson", "password": "secret"]) { json, error in
+        networking.POST("/post", parameters: ["username": "jameson", "password": "secret"]) { _, error in
             XCTAssertTrue(completed)
             XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
             expectation.fulfill()
@@ -223,22 +223,18 @@ class POSTTests: XCTestCase {
 
         let networking = Networking(baseURL: baseURL)
         networking.disableTestingMode = true
-        var completed = false
-        let requestID = networking.POST("/post", parameters: ["username": "jameson", "password": "secret"]) { json, error in
-            XCTAssertTrue(completed)
+        let requestID = networking.POST("/post", parameters: ["username": "jameson", "password": "secret"]) { _, error in
             XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
             expectation.fulfill()
         }
 
-        networking.cancel(with: requestID) {
-            completed = true
-        }
+        networking.cancel(with: requestID)
 
         self.waitForExpectations(timeout: 15.0, handler: nil)
     }
 
     func deleteAllCloudinaryPhotos(networking: Networking, cloudName: String, secret: String, APIKey: String) {
         networking.setAuthorizationHeader(username: APIKey, password: secret)
-        networking.DELETE("/v1_1/\(cloudName)/resources/image/upload?all=true") { json, error in }
+        networking.DELETE("/v1_1/\(cloudName)/resources/image/upload?all=true") { _, _ in }
     }
 }
