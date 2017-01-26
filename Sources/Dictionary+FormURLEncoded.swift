@@ -7,11 +7,11 @@ public extension Dictionary where Key: ExpressibleByStringLiteral {
      */
     public func urlEncodedString() throws -> String {
 
-        let pairs = try self.reduce([]) { current, kvPair -> [String] in
-            if let encodedValue = "\(kvPair.value)".addingPercentEncoding(withAllowedCharacters: .urlQueryParametersAllowed) {
-                return current + ["\(kvPair.key)=\(encodedValue)"]
+        let pairs = try self.reduce([]) { current, keyValuePair -> [String] in
+            if let encodedValue = "\(keyValuePair.value)".addingPercentEncoding(withAllowedCharacters: .urlQueryParametersAllowed) {
+                return current + ["\(keyValuePair.key)=\(encodedValue)"]
             } else {
-                throw NSError(domain: Networking.domain, code: 0, userInfo: [NSLocalizedDescriptionKey: "Couldn't encode \(kvPair.value)"])
+                throw NSError(domain: Networking.domain, code: 0, userInfo: [NSLocalizedDescriptionKey: "Couldn't encode \(keyValuePair.value)"])
             }
         }
 
