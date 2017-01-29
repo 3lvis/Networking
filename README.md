@@ -242,7 +242,7 @@ networking.get("/recipes") { result in
 
         // If we need headers or response status code we can use the HTTPURLResponse for this.
         let headers = response.headers // [String: Any]
-    case .failure(let json, let response, let error):
+    case .failure(let error, let response):
         // Our backend developer told us that they will send a json with some
         // additional information on why the request failed, this will be a dictionary.
         let json = response.dictionaryBody // BOOM, no optionals here [String: Any]
