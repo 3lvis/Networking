@@ -185,6 +185,14 @@ networking.post("/post", parameters: ["username" : "jameson", "password" : "secr
     }
     */
 }
+
+By default all the requests are asynchronous, you can make an instance of **Networking** to do all its request as synchronous by using `isSynchronous`.
+
+```swift
+let networking = Networking(baseURL: "http://httpbin.org")
+networking.isSynchronous = true
+```
+
 ```
 
 ## Choosing a Content or Parameter Type
