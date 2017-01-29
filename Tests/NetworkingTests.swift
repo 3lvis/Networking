@@ -7,7 +7,7 @@ class NetworkingTests: XCTestCase {
     func testSetAuthorizationHeaderWithUsernameAndPassword() {
         let networking = Networking(baseURL: baseURL)
         networking.setAuthorizationHeader(username: "user", password: "passwd")
-        networking.GET("/basic-auth/user/passwd") { json, error in
+        networking.GET("/basic-auth/user/passwd") { json, _ in
             guard let json = json as? [String: Any] else { XCTFail(); return }
             let user = json["user"] as? String
             let authenticated = json["authenticated"] as? Bool
@@ -20,7 +20,7 @@ class NetworkingTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         let token = "hi-mom"
         networking.setAuthorizationHeader(token: token)
-        networking.POST("/post") { json, error in
+        networking.POST("/post") { json, _ in
             guard let json = json as? [String: Any] else { XCTFail(); return }
             let headers = json["headers"] as? [String: Any]
             XCTAssertEqual("Bearer \(token)", headers?["Authorization"] as? String)
@@ -31,7 +31,7 @@ class NetworkingTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         let value = "hi-mom"
         networking.setAuthorizationHeader(headerValue: value)
-        networking.POST("/post") { json, error in
+        networking.POST("/post") { json, _ in
             guard let json = json as? [String: Any] else { XCTFail(); return }
             let headers = json["headers"] as? [String: Any]
             XCTAssertEqual(value, headers?["Authorization"] as? String)
@@ -43,7 +43,7 @@ class NetworkingTests: XCTestCase {
         let key = "Anonymous-Token"
         let value = "hi-mom"
         networking.setAuthorizationHeader(headerKey: key, headerValue: value)
-        networking.POST("/post") { json, error in
+        networking.POST("/post") { json, _ in
             guard let json = json as? [String: Any] else { XCTFail(); return }
             let headers = json["headers"] as? [String: Any]
             XCTAssertEqual(value, headers?[key] as? String)
@@ -53,7 +53,7 @@ class NetworkingTests: XCTestCase {
     func testHeaderField() {
         let networking = Networking(baseURL: baseURL)
         networking.headerFields = ["HeaderKey": "HeaderValue"]
-        networking.POST("/post") { json, error in
+        networking.POST("/post") { json, _ in
             guard let json = json as? [String: Any] else { XCTFail(); return }
             let headers = json["headers"] as? [String: Any]
             XCTAssertEqual("HeaderValue", headers?["Headerkey"] as? String)
@@ -73,7 +73,7 @@ class NetworkingTests: XCTestCase {
         networking.isSynchronous = true
 
         var synchronous = false
-        networking.GET("/get") { json, error in
+        networking.GET("/get") { _, _ in
             synchronous = true
 
             XCTAssertTrue(synchronous)
@@ -147,7 +147,7 @@ class NetworkingTests: XCTestCase {
         networking.isSynchronous = true
         var cancelledGET = false
 
-        let requestID = networking.GET("/get") { json, error in
+        let requestID = networking.GET("/get") { _, error in
             cancelledGET = error?.code == URLError.cancelled.rawValue
             XCTAssertTrue(cancelledGET)
 
@@ -168,7 +168,7 @@ class NetworkingTests: XCTestCase {
         var cancelledGET = false
         var cancelledPOST = false
 
-        networking.GET("/get") { json, error in
+        networking.GET("/get") { _, error in
             cancelledGET = error?.code == URLError.cancelled.rawValue
             XCTAssertTrue(cancelledGET)
 
@@ -177,7 +177,7 @@ class NetworkingTests: XCTestCase {
             }
         }
 
-        networking.POST("/post") { json, error in
+        networking.POST("/post") { _, error in
             cancelledPOST = error?.code == URLError.cancelled.rawValue
             XCTAssertTrue(cancelledPOST)
 
@@ -195,7 +195,7 @@ class NetworkingTests: XCTestCase {
         let expectation = self.expectation(description: "testCancelRequestsReturnInMainThread")
         let networking = Networking(baseURL: baseURL)
         networking.isSynchronous = true
-        networking.GET("/get") { json, error in
+        networking.GET("/get") { _, error in
             XCTAssertTrue(Thread.isMainThread)
             XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
             expectation.fulfill()
@@ -209,7 +209,7 @@ class NetworkingTests: XCTestCase {
         let networking = Networking(baseURL: self.baseURL)
         let path = "/image/png"
         try! Helper.removeFileIfNeeded(networking, path: path)
-        networking.downloadData(for: path) { data, error in
+        networking.downloadData(for: path) { data, _ in
             synchronous = true
             XCTAssertTrue(Thread.isMainThread)
             XCTAssertEqual(data?.count, 8090)
@@ -222,7 +222,7 @@ class NetworkingTests: XCTestCase {
         let networking = Networking(baseURL: "http://store.storeimages.cdn-apple.com", cache: cache)
         let path = "/4973/as-images.apple.com/is/image/AppleInc/aos/published/images/i/pa/ipad/pro/ipad-pro-201603-gallery3?wid=4000&amp%3Bhei=1536&amp%3Bfmt=jpeg&amp%3Bqlt=95&amp%3Bop_sharpen=0&amp%3BresMode=bicub&amp%3Bop_usm=0.5%2C0.5%2C0%2C0&amp%3BiccEmbed=0&amp%3Blayer=comp&amp%3B.v=Y7wkx0&hei=3072"
 
-        networking.downloadData(for: path) { downloadData, error in
+        networking.downloadData(for: path) { downloadData, _ in
             let cacheData = networking.dataFromCache(for: path)
             XCTAssert(downloadData == cacheData!)
         }
@@ -230,7 +230,7 @@ class NetworkingTests: XCTestCase {
 
     func testDeleteDownloadedFiles() {
         let networking = Networking(baseURL: self.baseURL)
-        networking.downloadImage("/image/png") { image, error in
+        networking.downloadImage("/image/png") { _, _ in
             #if os(tvOS)
                 let directory = FileManager.SearchPathDirectory.cachesDirectory
             #else

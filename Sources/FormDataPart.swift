@@ -23,7 +23,7 @@ public enum FormDataPartType {
 public struct FormDataPart {
     private let data: Data
     private let parameterName: String
-    private let filename: String
+    private let filename: String?
     private let type: FormDataPartType
     var boundary: String = ""
 
@@ -31,8 +31,11 @@ public struct FormDataPart {
         var body = ""
         body += "--\(boundary)\r\n"
         body += "Content-Disposition: form-data; "
-        body += "name=\"\(self.parameterName)\"; "
-        body += "filename=\"\(self.filename)\"\r\n"
+        body += "name=\"\(self.parameterName)\""
+        if let filename = self.filename {
+            body += "; filename=\"\(filename)\""
+        }
+        body += "\r\n"
         body += "Content-Type: \(self.type.contentType)\r\n\r\n"
 
         var bodyData = Data()
@@ -43,7 +46,7 @@ public struct FormDataPart {
         return bodyData as Data
     }
 
-    public init(type: FormDataPartType = .data, data: Data, parameterName: String, filename: String) {
+    public init(type: FormDataPartType = .data, data: Data, parameterName: String, filename: String? = nil) {
         self.type = type
         self.data = data
         self.parameterName = parameterName

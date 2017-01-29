@@ -35,7 +35,7 @@
 - Minimal implementation
 - Simple request cancellation
 - Fake requests easily (mocking/stubbing)
-- Runs synchronously in automatic testing environments
+- Runs synchronously in automatic testing environments (less XCTestExpectation)
 - Image downloading and caching
 - Free
 
@@ -346,7 +346,7 @@ networking.downloadImage("/image/png") { image, error in
 ```swift
 let networking = Networking(baseURL: baseURL)
 networking.downloadImage("/image/png") { image, error in
-    // Cancelling a image download returns an error with code URLError.cancelled which means cancelled request
+    // Cancelling an image download returns an error with code URLError.cancelled which means cancelled request
 }
 
 networking.cancelImageDownload("/image/png")

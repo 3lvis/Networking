@@ -7,7 +7,7 @@ class PUTTests: XCTestCase {
     func testSynchronousPUT() {
         var synchronous = false
         let networking = Networking(baseURL: baseURL)
-        networking.PUT("/put", parameters: nil) { json, error in
+        networking.PUT("/put", parameters: nil) { _, _ in
             synchronous = true
         }
 
@@ -30,7 +30,7 @@ class PUTTests: XCTestCase {
 
     func testPUTWithHeaders() {
         let networking = Networking(baseURL: baseURL)
-        networking.PUT("/put") { json, headers, error in
+        networking.PUT("/put") { json, headers, _ in
             guard let json = json as? [String: Any] else { XCTFail(); return }
             guard let url = json["url"] as? String else { XCTFail(); return }
             XCTAssertEqual(url, "http://httpbin.org/put")
@@ -54,7 +54,7 @@ class PUTTests: XCTestCase {
 
         networking.fakePUT("/story", response: [["name": "Elvis"]])
 
-        networking.PUT("/story", parameters: ["username": "jameson", "password": "secret"]) { json, error in
+        networking.PUT("/story", parameters: ["username": "jameson", "password": "secret"]) { json, _ in
             let json = json as? [[String: String]]
             let value = json?[0]["name"]
             XCTAssertEqual(value, "Elvis")
@@ -66,7 +66,7 @@ class PUTTests: XCTestCase {
 
         networking.fakePUT("/story", response: nil, statusCode: 401)
 
-        networking.PUT("/story", parameters: nil) { json, error in
+        networking.PUT("/story", parameters: nil) { _, error in
             XCTAssertEqual(error?.code, 401)
         }
     }
@@ -76,7 +76,7 @@ class PUTTests: XCTestCase {
 
         networking.fakePUT("/entries", fileName: "entries.json", bundle: Bundle(for: PUTTests.self))
 
-        networking.PUT("/entries", parameters: nil) { json, error in
+        networking.PUT("/entries", parameters: nil) { json, _ in
             guard let json = json as? [[String: Any]] else { XCTFail(); return }
             let entry = json[0]
             let value = entry["title"] as? String
@@ -90,7 +90,7 @@ class PUTTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.isSynchronous = true
         var completed = false
-        networking.PUT("/put", parameters: ["username": "jameson", "password": "secret"]) { json, error in
+        networking.PUT("/put", parameters: ["username": "jameson", "password": "secret"]) { _, error in
             XCTAssertTrue(completed)
             XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
             expectation.fulfill()
@@ -98,7 +98,6 @@ class PUTTests: XCTestCase {
 
         networking.cancelPUT("/put")
         completed = true
-
 
         self.waitForExpectations(timeout: 150.0, handler: nil)
     }
@@ -108,16 +107,12 @@ class PUTTests: XCTestCase {
 
         let networking = Networking(baseURL: baseURL)
         networking.isSynchronous = true
-        var completed = false
-        let requestID = networking.PUT("/put", parameters: ["username": "jameson", "password": "secret"]) { json, error in
-            XCTAssertTrue(completed)
+        let requestID = networking.PUT("/put", parameters: ["username": "jameson", "password": "secret"]) { _, error in
             XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
             expectation.fulfill()
         }
 
-        networking.cancel(with: requestID) {
-            completed = true
-        }
+        networking.cancel(with: requestID)
 
         self.waitForExpectations(timeout: 150.0, handler: nil)
     }

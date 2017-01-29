@@ -12,7 +12,7 @@ class ImageTests: XCTestCase {
 
         try! Helper.removeFileIfNeeded(networking, path: path)
 
-        networking.downloadImage(path) { image, error in
+        networking.downloadImage(path) { _, _ in
             synchronous = true
         }
 
@@ -23,7 +23,7 @@ class ImageTests: XCTestCase {
         let expectation = self.expectation(description: "testDownloadImageReturnBlockInMainThread")
         let networking = Networking(baseURL: self.baseURL)
         networking.isSynchronous = true
-        networking.downloadImage("/image/png") { json, error in
+        networking.downloadImage("/image/png") { _, _ in
             XCTAssertTrue(Thread.isMainThread)
             expectation.fulfill()
         }
@@ -36,7 +36,7 @@ class ImageTests: XCTestCase {
 
         try! Helper.removeFileIfNeeded(networking, path: path)
 
-        networking.downloadImage(path) { image, error in
+        networking.downloadImage(path) { image, _ in
             let pigImage = NetworkingImage.find(named: "pig.png", inBundle: Bundle(for: ImageTests.self))
             let pigImageData = pigImage.pngData()
             let imageData = image?.pngData()
@@ -50,7 +50,7 @@ class ImageTests: XCTestCase {
 
         try! Helper.removeFileIfNeeded(networking, path: path)
 
-        networking.downloadImage(path) { image, error in
+        networking.downloadImage(path) { image, _ in
             let pigImage = NetworkingImage.find(named: "døgnvillburgere.jpg", inBundle: Bundle(for: ImageTests.self))
             let pigImageData = pigImage.pngData()
             let imageData = image?.pngData()
@@ -64,7 +64,7 @@ class ImageTests: XCTestCase {
 
         try! Helper.removeFileIfNeeded(networking, path: path)
 
-        networking.downloadImage(path) { image, error in
+        networking.downloadImage(path) { _, _ in
             guard let destinationURL = try? networking.destinationURL(for: path) else { XCTFail(); return }
             XCTAssertTrue(FileManager.default.exists(at: destinationURL))
             let path = destinationURL.path
@@ -80,7 +80,7 @@ class ImageTests: XCTestCase {
 
         try! Helper.removeFileIfNeeded(networking, path: path, cacheName: cacheName)
 
-        networking.downloadImage(path, cacheName: cacheName) { image, error in
+        networking.downloadImage(path, cacheName: cacheName) { _, _ in
             guard let destinationURL = try? networking.destinationURL(for: path, cacheName: cacheName) else { XCTFail(); return }
             XCTAssertTrue(FileManager.default.exists(at: destinationURL))
             let path = destinationURL.path
@@ -95,7 +95,7 @@ class ImageTests: XCTestCase {
 
         try! Helper.removeFileIfNeeded(networking, path: path)
 
-        networking.downloadImage(path) { image, error in
+        networking.downloadImage(path) { image, _ in
             guard let destinationURL = try? networking.destinationURL(for: path) else { XCTFail(); return }
             let absoluteString = destinationURL.absoluteString
             let image = networking.cache.object(forKey: absoluteString as AnyObject) as? NetworkingImage
@@ -113,7 +113,7 @@ class ImageTests: XCTestCase {
 
         try! Helper.removeFileIfNeeded(networking, path: path, cacheName: cacheName)
 
-        networking.downloadImage(path, cacheName: cacheName) { image, error in
+        networking.downloadImage(path, cacheName: cacheName) { image, _ in
             guard let destinationURL = try? networking.destinationURL(for: path, cacheName: cacheName) else { XCTFail(); return }
             let absoluteString = destinationURL.absoluteString
             let image = networking.cache.object(forKey: absoluteString as AnyObject) as? NetworkingImage
@@ -133,7 +133,7 @@ class ImageTests: XCTestCase {
 
         try! Helper.removeFileIfNeeded(networking, path: path)
 
-        networking.downloadImage(path) { image, error in
+        networking.downloadImage(path) { _, error in
             XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
             expectation.fulfill()
         }
@@ -147,7 +147,7 @@ class ImageTests: XCTestCase {
         let networking = Networking(baseURL: self.baseURL)
         let pigImage = NetworkingImage.find(named: "pig.png", inBundle: Bundle(for: ImageTests.self))
         networking.fakeImageDownload("/image/png", image: pigImage)
-        networking.downloadImage("/image/png") { image, error in
+        networking.downloadImage("/image/png") { image, _ in
             let pigImageData = pigImage.pngData()
             let imageData = image?.pngData()
             XCTAssertEqual(pigImageData, imageData)
@@ -157,7 +157,7 @@ class ImageTests: XCTestCase {
     func testFakeImageDownloadWithInvalidStatusCode() {
         let networking = Networking(baseURL: self.baseURL)
         networking.fakeImageDownload("/image/png", image: nil, statusCode: 401)
-        networking.downloadImage("/image/png") { image, error in
+        networking.downloadImage("/image/png") { _, error in
             XCTAssertEqual(error?.code, 401)
         }
     }
@@ -167,7 +167,7 @@ class ImageTests: XCTestCase {
         let networking = Networking(baseURL: self.baseURL)
         let path = "/image/png"
         Networking.deleteCachedFiles()
-        networking.downloadImage(path) { image, error in
+        networking.downloadImage(path) { image, _ in
             let image = networking.imageFromCache(path)
             let pigImage = NetworkingImage.find(named: "pig.png", inBundle: Bundle(for: ImageTests.self))
             let pigImageData = pigImage.pngData()
@@ -197,7 +197,7 @@ class ImageTests: XCTestCase {
         let networking = Networking(baseURL: self.baseURL, cache: cache)
         let path = "/image/png"
         try! Helper.removeFileIfNeeded(networking, path: path)
-        networking.downloadImage(path) { image, error in
+        networking.downloadImage(path) { image, _ in
             guard let destinationURL = try? networking.destinationURL(for: path) else { XCTFail(); return }
             let absoluteString = destinationURL.absoluteString
             cache.removeObject(forKey: absoluteString as AnyObject)
@@ -216,7 +216,7 @@ class ImageTests: XCTestCase {
         let path = "/image/png"
         let cacheName = "hello"
         try! Helper.removeFileIfNeeded(networking, path: path, cacheName: cacheName)
-        networking.downloadImage(path, cacheName: cacheName) { image, error in
+        networking.downloadImage(path, cacheName: cacheName) { image, _ in
             guard let destinationURL = try? networking.destinationURL(for: path, cacheName: cacheName) else { XCTFail(); return }
             let absoluteString = destinationURL.absoluteString
             cache.removeObject(forKey: absoluteString as AnyObject)
@@ -234,7 +234,7 @@ class ImageTests: XCTestCase {
         let networking = Networking(baseURL: self.baseURL, cache: cache)
         let path = "/image/png"
         try! Helper.removeFileIfNeeded(networking, path: path)
-        networking.downloadImage(path) { image, error in
+        networking.downloadImage(path) { image, _ in
             guard let destinationURL = try? networking.destinationURL(for: path) else { XCTFail(); return }
             let absoluteString = destinationURL.absoluteString
             cache.removeObject(forKey: absoluteString as AnyObject)
