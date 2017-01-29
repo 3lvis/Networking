@@ -154,7 +154,7 @@ let networking = Networking(baseURL: "http://httpbin.org")
 networking.get("/get") { result in
     switch result {
     case .success(let response):
-        let json = response.body.dictionary
+        let json = response.dictionaryBody
         // Do something with JSON, you can also cast to array (json.array)
     case .failure(let error, _):
         // Handle error
@@ -243,7 +243,7 @@ networking.get("/recipes") { result in
     case .failure(let json, let response, let error):
         // Our backend developer told us that they will send a json with some
         // additional information on why the request failed, this will be a dictionary.
-        let json = response.body.dictionary // BOOM, no optionals here [String: Any]
+        let json = response.dictionaryBody // BOOM, no optionals here [String: Any]
 
         // We want to know the headers of the failed response.
         let headers = response.allHeaderFields // [String: Any]
