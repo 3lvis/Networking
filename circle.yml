@@ -1,0 +1,13 @@
+machine:
+  xcode:
+    version: "8.1"
+
+test:
+  override:
+    - xcodebuild
+        -workspace Project.xcworkspace
+        -scheme "iOSTests"
+        -destination 'platform=iOS Simulator,name=iPhone 6'
+        test |
+      tee $CIRCLE_ARTIFACTS/xcode_raw.log |
+      xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results.xml && exit ${PIPESTATUS[0]}
