@@ -61,8 +61,7 @@ class GETTests: XCTestCase {
         }
     }
 
-    // TODO: I'm not sure how it implement this, since I need a service that returns a faulty
-    // status code, meaning not 2XX, and at the same time it returns a JSON response.
+    // I'm not sure how it implement this, since I need a service that returns a faulty status code, meaning not 2XX, and at the same time it returns a JSON response.
     func testGETWithInvalidPathAndJSONError() {
     }
 
