@@ -127,13 +127,13 @@ open class Networking {
         case informational, successful, redirection, clientError, serverError, cancelled, unknown
     }
 
-    private let baseURL: String
-    var fakeRequests = [RequestType: [String: FakeRequest]]()
+    fileprivate let baseURL: String
+    fileprivate var fakeRequests = [RequestType: [String: FakeRequest]]()
     var token: String?
     var authorizationHeaderValue: String?
     var authorizationHeaderKey = "Authorization"
+    fileprivate var configurationType: ConfigurationType
     var cache: NSCache<AnyObject, AnyObject>
-    var configurationType: ConfigurationType
 
     /**
      Flag used to indicate synchronous request.
