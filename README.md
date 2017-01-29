@@ -182,7 +182,8 @@ networking.post("/post", parameters: ["username" : "jameson", "password" : "secr
     */
 }
 ```
-You can get the headers from the response.
+
+You can get the response headers inside the success.
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
