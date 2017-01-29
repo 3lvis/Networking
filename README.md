@@ -155,7 +155,7 @@ networking.get("/get") { result in
     switch result {
     case .success(let response):
         let json = response.dictionaryBody
-        // Do something with JSON, you can also cast to array (json.array)
+        // Do something with JSON, you can also get arrayBody
     case .failure(let error, _):
         // Handle error
     }
