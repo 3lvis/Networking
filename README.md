@@ -112,7 +112,7 @@ To authenticate using a [bearer token](https://tools.ietf.org/html/rfc6750) **"A
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.setAuthorizationHeader(token: "AAAFFAAAA3DAAAAAA")
-networking.GET("/get") { json, error in
+networking.get("/get") { json, error in
     // Do something...
 }
 ```
@@ -124,7 +124,7 @@ To authenticate using a custom authentication header, for example **"Token token
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.setAuthorizationHeader(headerValue: "Token token=AAAFFAAAA3DAAAAAA")
-networking.GET("/get") { json, error in
+networking.get("/get") { json, error in
     // Do something...
 }
 ```
@@ -134,20 +134,20 @@ Providing the following authentication header `Anonymous-Token: AAAFFAAAA3DAAAAA
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.setAuthorizationHeader(headerKey: "Anonymous-Token", headerValue: "AAAFFAAAA3DAAAAAA")
-networking.GET("/get") { json, error in
+networking.get("/get") { json, error in
     // Do something
 }
 ```
 
 ## Making a request
 
-Making a request is as simple as just calling `GET`, `POST`, `PUT`, or `DELETE`.
+Making a request is as simple as just calling `get`, `post`, `put`, or `delete`.
 
 **GET example**:
 
 ```swift
 let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
-networking.GET("/stories") { json, error in
+networking.get("/stories") { json, error in
     // Stories JSON: https://api-news.layervault.com/api/v2/stories
 }
 ```
@@ -156,7 +156,7 @@ Just add headers to the completion block if you want headers, or remove it if yo
 
 ```swift
 let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
-networking.GET("/stories") { json, headers, error in
+networking.get("/stories") { json, headers, error in
     // headers is a [String : Any] dictionary
 }
 ```
@@ -165,7 +165,7 @@ networking.GET("/stories") { json, headers, error in
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-networking.POST("/post", parameters: ["username" : "jameson", "password" : "secret"]) { json, error in
+networking.post("/post", parameters: ["username" : "jameson", "password" : "secret"]) { json, error in
     /*
     JSON Pretty Print:
     {
@@ -210,7 +210,7 @@ networking.POST("/post", parameters: ["name" : "jameson"]) { json, error in
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-networking.POST("/post", parameterType: .formURLEncoded, parameters: ["name" : "jameson"]) { json, error in
+networking.post("/post", parameterType: .formURLEncoded, parameters: ["name" : "jameson"]) { json, error in
    // Successfull post using `application/x-www-form-urlencoded` as `Content-Type`
 }
 ```
@@ -223,7 +223,7 @@ networking.POST("/post", parameterType: .formURLEncoded, parameters: ["name" : "
 let networking = Networking(baseURL: "https://example.com")
 let imageData = UIImagePNGRepresentation(imageToUpload)!
 let part = FormDataPart(data: imageData, parameterName: "file", filename: "selfie.png")
-networking.POST("/image/upload", part: part) { json, error in
+networking.post("/image/upload", part: part) { json, error in
   // Successfull upload using `multipart/form-data` as `Content-Type`
 }
 ```
@@ -235,7 +235,7 @@ let networking = Networking(baseURL: "https://example.com")
 let part1 = FormDataPart(data: imageData1, parameterName: "file1", filename: "selfie1.png")
 let part2 = FormDataPart(data: imageData2, parameterName: "file2", filename: "selfie2.png")
 let parameters = ["username" : "3lvis"]
-networking.POST("/image/upload", parts: [part1, part2], parameters: parameters) { json, error in
+networking.post("/image/upload", parts: [part1, part2], parameters: parameters) { json, error in
     // Do something
 }
 ```
@@ -251,7 +251,7 @@ At the moment **Networking** supports four types of `ParameterType`s out of the 
 For example:
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-networking.POST("/upload", parameterType: .Custom("application/octet-stream"), parameters: imageData) { json, error in
+networking.post("/upload", parameterType: .Custom("application/octet-stream"), parameters: imageData) { json, error in
    // Successfull upload using `application/octet-stream` as `Content-Type`
 }
 ```
@@ -264,7 +264,7 @@ Cancelling any request for a specific path is really simple. Beware that cancell
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-networking.GET("/get") { json, error in
+networking.get("/get") { json, error in
     // Cancelling a GET request returns an error with code URLError.cancelled which means cancelled request
 }
 
@@ -301,7 +301,7 @@ Faking a request means that after calling this method on a specific path, any ca
 ```swift
 let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
 networking.fakeGET("/stories", response: [["id" : 47333, "title" : "Site Design: Aquest"]])
-networking.GET("/stories") { json, error in
+networking.get("/stories") { json, error in
     // JSON containing stories
 }
 ```
@@ -313,7 +313,7 @@ If your file is not located in the main bundle you have to specify using the bun
 ```swift
 let networking = Networking(baseURL: baseURL)
 networking.fakeGET("/entries", fileName: "entries.json")
-networking.GET("/entries") { json, error in
+networking.get("/entries") { json, error in
     // JSON with the contents of entries.json
 }
 ```
@@ -325,7 +325,7 @@ If you do not provide a status code for this fake request, the default returned 
 ```swift
 let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
 networking.fakeGET("/stories", response: nil, statusCode: 500)
-networking.GET("/stories") { json, error in
+networking.get("/stories") { json, error in
     // error with status code 500
 }
 ```
