@@ -10,7 +10,7 @@ public extension Networking {
      - returns: The request identifier.
      */
     @discardableResult
-    public func POST(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ error: NSError?) -> Void) -> String {
+    public func post(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ error: NSError?) -> Void) -> String {
         let requestID = self.request(.post, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json) { json, _, error in
             completion(json, error)
         }
@@ -26,7 +26,7 @@ public extension Networking {
      - returns: The request identifier.
      */
     @discardableResult
-    public func POST(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> Void) -> String {
+    public func post(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> Void) -> String {
         let requestID = self.request(.post, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
 
         return requestID
@@ -41,8 +41,8 @@ public extension Networking {
      - returns: The request identifier.
      */
     @discardableResult
-    public func POST(_ path: String, parameters: Any? = nil, part: FormDataPart, completion: @escaping (_ json: Any?, _ error: NSError?) -> Void) -> String {
-        let requestID = self.POST(path, parameters: parameters, parts: [part], completion: completion)
+    public func post(_ path: String, parameters: Any? = nil, part: FormDataPart, completion: @escaping (_ json: Any?, _ error: NSError?) -> Void) -> String {
+        let requestID = self.post(path, parameters: parameters, parts: [part], completion: completion)
 
         return requestID
     }
@@ -56,7 +56,7 @@ public extension Networking {
      - returns: The request identifier.
      */
     @discardableResult
-    public func POST(_ path: String, parameters: Any? = nil, parts: [FormDataPart], completion: @escaping (_ json: Any?, _ error: NSError?) -> Void) -> String {
+    public func post(_ path: String, parameters: Any? = nil, parts: [FormDataPart], completion: @escaping (_ json: Any?, _ error: NSError?) -> Void) -> String {
         let requestID = self.request(.post, path: path, cacheName: nil, parameterType: .multipartFormData, parameters: parameters, parts: parts, responseType: .json) { json, _, error in
             completion(json, error)
         }

@@ -9,7 +9,7 @@ public extension Networking {
      - returns: The request identifier.
      */
     @discardableResult
-    public func DELETE(_ path: String, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ error: NSError?) -> Void) -> String {
+    public func delete(_ path: String, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ error: NSError?) -> Void) -> String {
         let parameterType = parameters != nil ? ParameterType.formURLEncoded : ParameterType.none
         let requestID = self.request(.delete, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json) { json, _, error in
             completion(json, error)
@@ -25,7 +25,7 @@ public extension Networking {
      - returns: The request identifier.
      */
     @discardableResult
-    public func DELETE(_ path: String, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> Void) -> String {
+    public func delete(_ path: String, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> Void) -> String {
         let parameterType = parameters != nil ? ParameterType.formURLEncoded : ParameterType.none
         let requestID = self.request(.delete, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
 

@@ -136,4 +136,166 @@ public extension Networking {
         self.cancel(with: requestID)
         completion()
     }
+
+    /**
+     GET request to the specified path.
+     - parameter path: The path for the GET request.
+     - parameter completion: A closure that gets called when the GET request is completed, it contains a `JSON` object and an `NSError`.
+     - returns: The request identifier.
+     */
+    @discardableResult
+    @available(*, unavailable, renamed: "get")
+    public func GET(_ path: String, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ error: NSError?) -> Void) -> String {
+        let parameterType = parameters != nil ? ParameterType.formURLEncoded : ParameterType.none
+        let requestID = self.request(.get, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json) { json, _, error in
+            completion(json, error)
+        }
+
+        return requestID
+    }
+
+    /**
+     GET request to the specified path.
+     - parameter path: The path for the GET request.
+     - parameter completion: A closure that gets called when the GET request is completed, it contains a `JSON` object and an `NSError`.
+     - returns: The request identifier.
+     */
+    @discardableResult
+    @available(*, unavailable, renamed: "get")
+    public func GET(_ path: String, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> Void) -> String {
+        let parameterType = parameters != nil ? ParameterType.formURLEncoded : ParameterType.none
+        let requestID = self.request(.get, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
+
+        return requestID
+    }
+
+    /**
+     PUT request to the specified path, using the provided parameters.
+     - parameter path: The path for the PUT request.
+     - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by default this is JSON.
+     - parameter completion: A closure that gets called when the PUT request is completed, it contains a `JSON` object and an `NSError`.
+     - returns: The request identifier.
+     */
+    @discardableResult
+    @available(*, unavailable, renamed: "put")
+    public func PUT(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ error: NSError?) -> Void) -> String {
+        let requestID = self.request(.put, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json) { json, _, error in
+            completion(json, error)
+        }
+
+        return requestID
+    }
+
+    /**
+     PUT request to the specified path, using the provided parameters.
+     - parameter path: The path for the PUT request.
+     - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by default this is JSON.
+     - parameter completion: A closure that gets called when the PUT request is completed, it contains a `JSON` object and an `NSError`.
+     - returns: The request identifier.
+     */
+    @discardableResult
+    @available(*, unavailable, renamed: "put")
+    public func PUT(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> Void) -> String {
+        let requestID = self.request(.put, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
+
+        return requestID
+    }
+
+    /**
+     POST request to the specified path, using the provided parameters.
+     - parameter path: The path for the POST request.
+     - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by default this is JSON.
+     - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and an `NSError`.
+     - returns: The request identifier.
+     */
+    @discardableResult
+    @available(*, unavailable, renamed: "post")
+    public func POST(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ error: NSError?) -> Void) -> String {
+        let requestID = self.request(.post, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json) { json, _, error in
+            completion(json, error)
+        }
+
+        return requestID
+    }
+
+    /**
+     POST request to the specified path, using the provided parameters.
+     - parameter path: The path for the POST request.
+     - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by default this is JSON.
+     - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and an `NSError`.
+     - returns: The request identifier.
+     */
+    @discardableResult
+    @available(*, unavailable, renamed: "post")
+    public func POST(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> Void) -> String {
+        let requestID = self.request(.post, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
+
+        return requestID
+    }
+
+    /**
+     POST request to the specified path, using the provided parameters.
+     - parameter path: The path for the POST request.
+     - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by default this is JSON.
+     - parameter part: The form data that will be sent in the request.
+     - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and an `NSError`.
+     - returns: The request identifier.
+     */
+    @discardableResult
+    @available(*, unavailable, renamed: "post")
+    public func POST(_ path: String, parameters: Any? = nil, part: FormDataPart, completion: @escaping (_ json: Any?, _ error: NSError?) -> Void) -> String {
+        let requestID = self.post(path, parameters: parameters, parts: [part], completion: completion)
+
+        return requestID
+    }
+
+    /**
+     POST request to the specified path, using the provided parameters.
+     - parameter path: The path for the POST request.
+     - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by default this is JSON.
+     - parameter parts: The list of form data parts that will be sent in the request.
+     - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and an `NSError`.
+     - returns: The request identifier.
+     */
+    @discardableResult
+    @available(*, unavailable, renamed: "post")
+    public func POST(_ path: String, parameters: Any? = nil, parts: [FormDataPart], completion: @escaping (_ json: Any?, _ error: NSError?) -> Void) -> String {
+        let requestID = self.request(.post, path: path, cacheName: nil, parameterType: .multipartFormData, parameters: parameters, parts: parts, responseType: .json) { json, _, error in
+            completion(json, error)
+        }
+        
+        return requestID
+    }
+
+    /**
+     DELETE request to the specified path, using the provided parameters.
+     - parameter path: The path for the DELETE request.
+     - parameter completion: A closure that gets called when the DELETE request is completed, it contains a `JSON` object and an `NSError`.
+     - returns: The request identifier.
+     */
+    @discardableResult
+    @available(*, unavailable, renamed: "delete")
+    public func DELETE(_ path: String, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ error: NSError?) -> Void) -> String {
+        let parameterType = parameters != nil ? ParameterType.formURLEncoded : ParameterType.none
+        let requestID = self.request(.delete, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json) { json, _, error in
+            completion(json, error)
+        }
+
+        return requestID
+    }
+
+    /**
+     DELETE request to the specified path, using the provided parameters.
+     - parameter path: The path for the DELETE request.
+     - parameter completion: A closure that gets called when the DELETE request is completed, it contains a `JSON` object and an `NSError`.
+     - returns: The request identifier.
+     */
+    @discardableResult
+    @available(*, unavailable, renamed: "delete")
+    public func DELETE(_ path: String, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> Void) -> String {
+        let parameterType = parameters != nil ? ParameterType.formURLEncoded : ParameterType.none
+        let requestID = self.request(.delete, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
+
+        return requestID
+    }
 }
