@@ -487,7 +487,7 @@ extension Networking {
                             }
                         }
                         TestCheck.testBlock(self.isSynchronous) {
-                            completion(returnedResponse, [String: Any](), error)
+                            completion(returnedResponse, headers, error)
                         }
                     }
                 }
@@ -643,7 +643,7 @@ extension Networking {
             session.resume()
 
             if TestCheck.isTesting && self.isSynchronous == false {
-                let _ = semaphore.wait(timeout: DispatchTime.now() + 60.0)
+                _ = semaphore.wait(timeout: DispatchTime.now() + 60.0)
                 self.logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request as URLRequest, response: returnedResponse, error: connectionError as NSError?)
                 if let unauthorizedRequestCallback = self.unauthorizedRequestCallback, let error = connectionError as NSError?, error.code == 403 || error.code == 401 {
                     unauthorizedRequestCallback()
