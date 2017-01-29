@@ -238,17 +238,17 @@ networking.get("/recipes") { result in
     switch result {
     case .success(let response):
         // We know we'll be receiving an array with the best recipes, so we can just do:
-        let recipes = json.array // BOOM, no optionals
+        let recipes = json.arrayBody // BOOM, no optionals
 
         // If we need headers or response status code we can use the HTTPURLResponse for this.
-        let headers = response.allHeaderFields // [String: Any]
+        let headers = response.headers // [String: Any]
     case .failure(let json, let response, let error):
         // Our backend developer told us that they will send a json with some
         // additional information on why the request failed, this will be a dictionary.
         let json = response.dictionaryBody // BOOM, no optionals here [String: Any]
 
         // We want to know the headers of the failed response.
-        let headers = response.allHeaderFields // [String: Any]
+        let headers = response.headers // [String: Any]
 
         // And we can do whatever we do to handle the (non-optional) error
         let errorCode = error.code
