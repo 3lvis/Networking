@@ -1,15 +1,15 @@
 import Foundation
 
 public enum JSONResult {
-    case success(JSON, HTTPURLResponse)
+    case success(JSONResponse)
 
-    case failure(NSError, JSON, HTTPURLResponse)
+    case failure(NSError, JSONResponse)
 
-    public init(json: JSON, response: HTTPURLResponse, error: NSError?) {
+    public init(response: JSONResponse, error: NSError?) {
         if let error = error {
-            self = .failure(error, json, response)
+            self = .failure(error, response)
         } else {
-            self = .success(json, response)
+            self = .success(response)
         }
     }
 }
@@ -17,11 +17,11 @@ public enum JSONResult {
 public enum ImageResult {
     case success(NetworkingImage, HTTPURLResponse)
 
-    case failure(HTTPURLResponse, NSError)
+    case failure(NSError, HTTPURLResponse)
 
     public init(image: NetworkingImage?, response: HTTPURLResponse, error: NSError?) {
         if let error = error {
-            self = .failure(response, error)
+            self = .failure(error, response)
         } else if let image = image {
             self = .success(image, response)
         } else {
@@ -33,11 +33,11 @@ public enum ImageResult {
 public enum DataResult {
     case success(Data, HTTPURLResponse)
 
-    case failure(HTTPURLResponse, NSError)
+    case failure(NSError, HTTPURLResponse)
 
     public init(data: Data?, response: HTTPURLResponse, error: NSError?) {
         if let error = error {
-            self = .failure(response, error)
+            self = .failure(error, response)
         } else if let data = data {
             self = .success(data, response)
         } else {

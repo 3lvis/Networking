@@ -12,8 +12,8 @@
 		1413F4671CE7963700482096 /* Dictionary+FormURLEncodedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1413F45E1CE7963700482096 /* Dictionary+FormURLEncodedTests.swift */; };
 		1413F46C1CE7963700482096 /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1413F4611CE7963700482096 /* Helpers.swift */; };
 		1413F46D1CE7963700482096 /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1413F4611CE7963700482096 /* Helpers.swift */; };
-		1413F4701CE7963700482096 /* ImageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1413F4631CE7963700482096 /* ImageTests.swift */; };
-		1413F4711CE7963700482096 /* ImageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1413F4631CE7963700482096 /* ImageTests.swift */; };
+		1413F4701CE7963700482096 /* DownloadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1413F4631CE7963700482096 /* DownloadTests.swift */; };
+		1413F4711CE7963700482096 /* DownloadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1413F4631CE7963700482096 /* DownloadTests.swift */; };
 		1413F4721CE7963700482096 /* NetworkingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1413F4641CE7963700482096 /* NetworkingTests.swift */; };
 		1413F4731CE7963700482096 /* NetworkingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1413F4641CE7963700482096 /* NetworkingTests.swift */; };
 		1413F4761CE7968B00482096 /* Dictionary+FormURLEncoded.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1474C1BC1CA2988900E15D84 /* Dictionary+FormURLEncoded.swift */; };
@@ -24,6 +24,14 @@
 		1413F47C1CE7969C00482096 /* NSFileManager+Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14676B951CCB490C00FFDC92 /* NSFileManager+Helpers.swift */; };
 		1413F47D1CE7969F00482096 /* String+UTF8.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1413C1D51CBD1784000AF90F /* String+UTF8.swift */; };
 		1413F47E1CE796A300482096 /* TestCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1474C1C21CA2988900E15D84 /* TestCheck.swift */; };
+		145F16501E3E89E200597D7B /* Response.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145F164F1E3E89E200597D7B /* Response.swift */; };
+		145F16511E3E89E200597D7B /* Response.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145F164F1E3E89E200597D7B /* Response.swift */; };
+		145F16521E3E89E200597D7B /* Response.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145F164F1E3E89E200597D7B /* Response.swift */; };
+		145F16531E3E89E200597D7B /* Response.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145F164F1E3E89E200597D7B /* Response.swift */; };
+		145F16541E3E89E200597D7B /* Response.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145F164F1E3E89E200597D7B /* Response.swift */; };
+		145F16551E3E89E200597D7B /* Response.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145F164F1E3E89E200597D7B /* Response.swift */; };
+		145F16561E3E89E200597D7B /* Response.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145F164F1E3E89E200597D7B /* Response.swift */; };
+		145F16571E3E89E200597D7B /* Response.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145F164F1E3E89E200597D7B /* Response.swift */; };
 		14638D041CC64620002B9433 /* Networking.h in Headers */ = {isa = PBXBuildFile; fileRef = 14638D031CC645D2002B9433 /* Networking.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		14638D051CC64629002B9433 /* Dictionary+FormURLEncoded.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1474C1BC1CA2988900E15D84 /* Dictionary+FormURLEncoded.swift */; };
 		14638D061CC64629002B9433 /* JSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1474C1BD1CA2988900E15D84 /* JSON.swift */; };
@@ -142,7 +150,7 @@
 		44A571961E3E394900F29064 /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44A5718F1E3E394900F29064 /* Result.swift */; };
 		44A571971E3E394900F29064 /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44A5718F1E3E394900F29064 /* Result.swift */; };
 		44B5D38A1D19B9E5004378B9 /* TestCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1474C1C21CA2988900E15D84 /* TestCheck.swift */; };
-		44B5D38B1D19B9E5004378B9 /* ImageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1413F4631CE7963700482096 /* ImageTests.swift */; };
+		44B5D38B1D19B9E5004378B9 /* DownloadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1413F4631CE7963700482096 /* DownloadTests.swift */; };
 		44B5D38C1D19B9E5004378B9 /* Dictionary+FormURLEncodedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1413F45E1CE7963700482096 /* Dictionary+FormURLEncodedTests.swift */; };
 		44B5D38D1D19B9E5004378B9 /* Networking+POST.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147B32EF1CF9B1C500D5BAED /* Networking+POST.swift */; };
 		44B5D38E1D19B9E5004378B9 /* NetworkingImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 148341701CF1CF0500E91F01 /* NetworkingImage.swift */; };
@@ -201,9 +209,10 @@
 		1413F4551CE795DC00482096 /* macOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = macOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1413F45E1CE7963700482096 /* Dictionary+FormURLEncodedTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Dictionary+FormURLEncodedTests.swift"; sourceTree = "<group>"; };
 		1413F4611CE7963700482096 /* Helpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
-		1413F4631CE7963700482096 /* ImageTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageTests.swift; sourceTree = "<group>"; };
+		1413F4631CE7963700482096 /* DownloadTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DownloadTests.swift; sourceTree = "<group>"; };
 		1413F4641CE7963700482096 /* NetworkingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkingTests.swift; sourceTree = "<group>"; };
 		1420A3721DBC00B8009258C3 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		145F164F1E3E89E200597D7B /* Response.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Response.swift; sourceTree = "<group>"; };
 		14638CFA1CC6459A002B9433 /* Networking.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Networking.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		14638D021CC645C1002B9433 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		14638D031CC645D2002B9433 /* Networking.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Networking.h; sourceTree = "<group>"; };
@@ -324,7 +333,7 @@
 				146EF90F1CEBCEA50059DDB1 /* POSTTests.swift */,
 				146EF9101CEBCEA50059DDB1 /* PUTTests.swift */,
 				146EF90D1CEBCEA50059DDB1 /* DELETETests.swift */,
-				1413F4631CE7963700482096 /* ImageTests.swift */,
+				1413F4631CE7963700482096 /* DownloadTests.swift */,
 				1413F45E1CE7963700482096 /* Dictionary+FormURLEncodedTests.swift */,
 				1413F4611CE7963700482096 /* Helpers.swift */,
 				1488E23D1CF138D700C6FBA3 /* SHA1.m */,
@@ -384,6 +393,7 @@
 				1413C1D51CBD1784000AF90F /* String+UTF8.swift */,
 				1474C1C21CA2988900E15D84 /* TestCheck.swift */,
 				44A5718F1E3E394900F29064 /* Result.swift */,
+				145F164F1E3E89E200597D7B /* Response.swift */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -781,7 +791,7 @@
 			files = (
 				44A571931E3E394900F29064 /* Result.swift in Sources */,
 				1413F47E1CE796A300482096 /* TestCheck.swift in Sources */,
-				1413F4711CE7963700482096 /* ImageTests.swift in Sources */,
+				1413F4711CE7963700482096 /* DownloadTests.swift in Sources */,
 				1413F4791CE7969400482096 /* Networking.swift in Sources */,
 				147B32FE1CF9B1C500D5BAED /* Networking+POST.swift in Sources */,
 				148341721CF1CF0500E91F01 /* NetworkingImage.swift in Sources */,
@@ -799,6 +809,7 @@
 				14D144DF1CEED63B00048629 /* FormDataPart.swift in Sources */,
 				146EF9121CEBCEA50059DDB1 /* DELETETests.swift in Sources */,
 				1413F46D1CE7963700482096 /* Helpers.swift in Sources */,
+				145F16531E3E89E200597D7B /* Response.swift in Sources */,
 				147B33041CF9B1C500D5BAED /* Networking+PUT.swift in Sources */,
 				146EF9141CEBCEA50059DDB1 /* GETTests.swift in Sources */,
 				1413F47D1CE7969F00482096 /* String+UTF8.swift in Sources */,
@@ -816,6 +827,7 @@
 				148341731CF1CF0500E91F01 /* NetworkingImage.swift in Sources */,
 				14638D051CC64629002B9433 /* Dictionary+FormURLEncoded.swift in Sources */,
 				147B32F91CF9B1C500D5BAED /* Networking+GET.swift in Sources */,
+				145F16541E3E89E200597D7B /* Response.swift in Sources */,
 				147B32FF1CF9B1C500D5BAED /* Networking+POST.swift in Sources */,
 				14638D061CC64629002B9433 /* JSON.swift in Sources */,
 				446C24671DFEE964006FA6CC /* CharacterSet+Encoding.swift in Sources */,
@@ -839,6 +851,7 @@
 				148341741CF1CF0500E91F01 /* NetworkingImage.swift in Sources */,
 				14638D1B1CC64733002B9433 /* Dictionary+FormURLEncoded.swift in Sources */,
 				147B32FA1CF9B1C500D5BAED /* Networking+GET.swift in Sources */,
+				145F16551E3E89E200597D7B /* Response.swift in Sources */,
 				147B33001CF9B1C500D5BAED /* Networking+POST.swift in Sources */,
 				14638D1C1CC64733002B9433 /* JSON.swift in Sources */,
 				446C24681DFEE964006FA6CC /* CharacterSet+Encoding.swift in Sources */,
@@ -862,6 +875,7 @@
 				148341751CF1CF0500E91F01 /* NetworkingImage.swift in Sources */,
 				14638D311CC647B8002B9433 /* Dictionary+FormURLEncoded.swift in Sources */,
 				147B32FB1CF9B1C500D5BAED /* Networking+GET.swift in Sources */,
+				145F16561E3E89E200597D7B /* Response.swift in Sources */,
 				147B33011CF9B1C500D5BAED /* Networking+POST.swift in Sources */,
 				14638D321CC647B8002B9433 /* JSON.swift in Sources */,
 				446C24691DFEE964006FA6CC /* CharacterSet+Encoding.swift in Sources */,
@@ -885,6 +899,7 @@
 				148341761CF1CF0500E91F01 /* NetworkingImage.swift in Sources */,
 				14638D471CC64829002B9433 /* Dictionary+FormURLEncoded.swift in Sources */,
 				147B32FC1CF9B1C500D5BAED /* Networking+GET.swift in Sources */,
+				145F16571E3E89E200597D7B /* Response.swift in Sources */,
 				147B33021CF9B1C500D5BAED /* Networking+POST.swift in Sources */,
 				14638D481CC64829002B9433 /* JSON.swift in Sources */,
 				446C246A1DFEE964006FA6CC /* CharacterSet+Encoding.swift in Sources */,
@@ -907,7 +922,7 @@
 			files = (
 				44A571911E3E394900F29064 /* Result.swift in Sources */,
 				1474C1C91CA2988900E15D84 /* TestCheck.swift in Sources */,
-				1413F4701CE7963700482096 /* ImageTests.swift in Sources */,
+				1413F4701CE7963700482096 /* DownloadTests.swift in Sources */,
 				1413F4661CE7963700482096 /* Dictionary+FormURLEncodedTests.swift in Sources */,
 				147B32FD1CF9B1C500D5BAED /* Networking+POST.swift in Sources */,
 				148341711CF1CF0500E91F01 /* NetworkingImage.swift in Sources */,
@@ -925,6 +940,7 @@
 				146EF9111CEBCEA50059DDB1 /* DELETETests.swift in Sources */,
 				14D144DE1CEED63B00048629 /* FormDataPart.swift in Sources */,
 				1413F46C1CE7963700482096 /* Helpers.swift in Sources */,
+				145F16511E3E89E200597D7B /* Response.swift in Sources */,
 				147B33031CF9B1C500D5BAED /* Networking+PUT.swift in Sources */,
 				146EF9131CEBCEA50059DDB1 /* GETTests.swift in Sources */,
 				14676B961CCB490C00FFDC92 /* NSFileManager+Helpers.swift in Sources */,
@@ -941,7 +957,7 @@
 			files = (
 				44A571921E3E394900F29064 /* Result.swift in Sources */,
 				44B5D38A1D19B9E5004378B9 /* TestCheck.swift in Sources */,
-				44B5D38B1D19B9E5004378B9 /* ImageTests.swift in Sources */,
+				44B5D38B1D19B9E5004378B9 /* DownloadTests.swift in Sources */,
 				44B5D38C1D19B9E5004378B9 /* Dictionary+FormURLEncodedTests.swift in Sources */,
 				44B5D38D1D19B9E5004378B9 /* Networking+POST.swift in Sources */,
 				44B5D38E1D19B9E5004378B9 /* NetworkingImage.swift in Sources */,
@@ -959,6 +975,7 @@
 				44B5D3971D19B9E5004378B9 /* DELETETests.swift in Sources */,
 				44B5D3981D19B9E5004378B9 /* FormDataPart.swift in Sources */,
 				44B5D3991D19B9E5004378B9 /* Helpers.swift in Sources */,
+				145F16521E3E89E200597D7B /* Response.swift in Sources */,
 				44B5D39A1D19B9E5004378B9 /* Networking+PUT.swift in Sources */,
 				44B5D39B1D19B9E5004378B9 /* GETTests.swift in Sources */,
 				44B5D39C1D19B9E5004378B9 /* NSFileManager+Helpers.swift in Sources */,
@@ -986,6 +1003,7 @@
 				44DFD3AE1D9A34540014E9F2 /* TestCheck.swift in Sources */,
 				44DFD3A61D9A34540014E9F2 /* Networking.swift in Sources */,
 				44DFD3A21D9A33610014E9F2 /* FakeImageController.swift in Sources */,
+				145F16501E3E89E200597D7B /* Response.swift in Sources */,
 				44DFD3A81D9A34540014E9F2 /* Networking+GET.swift in Sources */,
 				44DFD3AD1D9A34540014E9F2 /* String+UTF8.swift in Sources */,
 				44DFD3A41D9A344D0014E9F2 /* JSON.swift in Sources */,

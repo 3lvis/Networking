@@ -9,8 +9,8 @@ class NetworkingTests: XCTestCase {
         networking.setAuthorizationHeader(username: "user", password: "passwd")
         networking.get("/basic-auth/user/passwd") { result in
             switch result {
-            case .success(let json, _):
-                let json = json.dictionary
+            case .success(let response):
+                let json = response.dictionaryBody
                 let user = json["user"] as? String
                 let authenticated = json["authenticated"] as? Bool
                 XCTAssertEqual(user, "user")
@@ -27,8 +27,8 @@ class NetworkingTests: XCTestCase {
         networking.setAuthorizationHeader(token: token)
         networking.post("/post") { result in
             switch result {
-            case .success(let json, _):
-                let json = json.dictionary
+            case .success(let response):
+                let json = response.dictionaryBody
                 let headers = json["headers"] as? [String: Any]
                 XCTAssertEqual("Bearer \(token)", headers?["Authorization"] as? String)
             case .failure:
@@ -43,8 +43,8 @@ class NetworkingTests: XCTestCase {
         networking.setAuthorizationHeader(headerValue: value)
         networking.post("/post") { result in
             switch result {
-            case .success(let json, _):
-                let json = json.dictionary
+            case .success(let response):
+                let json = response.dictionaryBody
                 let headers = json["headers"] as? [String: Any]
                 XCTAssertEqual(value, headers?["Authorization"] as? String)
             case .failure:
@@ -60,8 +60,8 @@ class NetworkingTests: XCTestCase {
         networking.setAuthorizationHeader(headerKey: key, headerValue: value)
         networking.post("/post") { result in
             switch result {
-            case .success(let json, _):
-                let json = json.dictionary
+            case .success(let response):
+                let json = response.dictionaryBody
                 let headers = json["headers"] as? [String: Any]
                 XCTAssertEqual(value, headers?[key] as? String)
             case .failure:
@@ -75,8 +75,8 @@ class NetworkingTests: XCTestCase {
         networking.headerFields = ["HeaderKey": "HeaderValue"]
         networking.post("/post") { result in
             switch result {
-            case .success(let json, _):
-                let json = json.dictionary
+            case .success(let response):
+                let json = response.dictionaryBody
                 let headers = json["headers"] as? [String: Any]
                 XCTAssertEqual("HeaderValue", headers?["Headerkey"] as? String)
             case .failure:
@@ -176,7 +176,7 @@ class NetworkingTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let error, _, _):
+            case .failure(let error, _):
                 cancelledGET = error.code == URLError.cancelled.rawValue
                 XCTAssertTrue(cancelledGET)
 
@@ -202,7 +202,7 @@ class NetworkingTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let error, _, _):
+            case .failure(let error, _):
                 cancelledGET = error.code == URLError.cancelled.rawValue
                 XCTAssertTrue(cancelledGET)
 
@@ -216,7 +216,7 @@ class NetworkingTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let error, _, _):
+            case .failure(let error, _):
                 cancelledPOST = error.code == URLError.cancelled.rawValue
                 XCTAssertTrue(cancelledPOST)
 
@@ -239,7 +239,7 @@ class NetworkingTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let error, _, _):
+            case .failure(let error, _):
                 XCTAssertTrue(Thread.isMainThread)
                 XCTAssertEqual(error.code, URLError.cancelled.rawValue)
                 expectation.fulfill()
@@ -247,56 +247,6 @@ class NetworkingTests: XCTestCase {
         }
         networking.cancelAllRequests()
         waitForExpectations(timeout: 15.0, handler: nil)
-    }
-
-    func testDownloadData() {
-        var synchronous = false
-        let networking = Networking(baseURL: baseURL)
-        let path = "/image/png"
-        try! Helper.removeFileIfNeeded(networking, path: path)
-        networking.downloadData(for: path) { result in
-            switch result {
-            case .success(let data, _):
-                synchronous = true
-                XCTAssertTrue(Thread.isMainThread)
-                XCTAssertEqual(data.count, 8090)
-            case .failure:
-                XCTFail()
-            }
-        }
-        XCTAssertTrue(synchronous)
-    }
-
-    func testDataFromCache() {
-        let cache = NSCache<AnyObject, AnyObject>()
-        let networking = Networking(baseURL: "http://store.storeimages.cdn-apple.com", cache: cache)
-        let path = "/4973/as-images.apple.com/is/image/AppleInc/aos/published/images/i/pa/ipad/pro/ipad-pro-201603-gallery3?wid=4000&amp%3Bhei=1536&amp%3Bfmt=jpeg&amp%3Bqlt=95&amp%3Bop_sharpen=0&amp%3BresMode=bicub&amp%3Bop_usm=0.5%2C0.5%2C0%2C0&amp%3BiccEmbed=0&amp%3Blayer=comp&amp%3B.v=Y7wkx0&hei=3072"
-
-        networking.downloadData(for: path) { result in
-            switch result {
-            case .success(let data, _):
-                let cacheData = networking.dataFromCache(for: path)
-                XCTAssert(data == cacheData!)
-            case .failure:
-                XCTFail()
-            }
-        }
-    }
-
-    func testDeleteDownloadedFiles() {
-        let networking = Networking(baseURL: baseURL)
-        networking.downloadImage("/image/png") { _ in
-            #if os(tvOS)
-                let directory = FileManager.SearchPathDirectory.cachesDirectory
-            #else
-                let directory = TestCheck.isTesting ? FileManager.SearchPathDirectory.cachesDirectory : FileManager.SearchPathDirectory.documentDirectory
-            #endif
-            let cachesURL = FileManager.default.urls(for: directory, in: .userDomainMask).first!
-            let folderURL = cachesURL.appendingPathComponent(URL(string: Networking.domain)!.absoluteString)
-            XCTAssertTrue(FileManager.default.exists(at: folderURL))
-            Networking.deleteCachedFiles()
-            XCTAssertFalse(FileManager.default.exists(at: folderURL))
-        }
     }
 
     func testReset() {

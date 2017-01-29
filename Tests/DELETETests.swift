@@ -18,8 +18,8 @@ class DELETETests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.delete("/delete") { result in
             switch result {
-            case .success(let json, _):
-                let json = json.dictionary
+            case .success(let response):
+                let json = response.dictionaryBody
                 guard let url = json["url"] as? String else { XCTFail(); return }
                 XCTAssertEqual(url, "http://httpbin.org/delete")
 
@@ -36,12 +36,12 @@ class DELETETests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.delete("/delete") { result in
             switch result {
-            case .success(let json, let response):
-                let json = json.dictionary
+            case .success(let response):
+                let json = response.dictionaryBody
                 guard let url = json["url"] as? String else { XCTFail(); return }
                 XCTAssertEqual(url, "http://httpbin.org/delete")
 
-                let headers = response.allHeaderFields
+                let headers = response.headers
                 guard let connection = headers["Connection"] as? String else { XCTFail(); return }
                 XCTAssertEqual(connection, "keep-alive")
                 XCTAssertEqual(headers["Content-Type"] as? String, "application/json")
@@ -57,7 +57,7 @@ class DELETETests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let error, _, _):
+            case .failure(let error, _):
                 XCTAssertEqual(error.code, 404)
             }
         }
@@ -70,8 +70,8 @@ class DELETETests: XCTestCase {
 
         networking.delete("/stories") { result in
             switch result {
-            case .success(let json, _):
-                let json = json.dictionary
+            case .success(let response):
+                let json = response.dictionaryBody
                 let value = json["name"] as? String
                 XCTAssertEqual(value, "Elvis")
             case .failure:
@@ -89,7 +89,7 @@ class DELETETests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let error, _, _):
+            case .failure(let error, _):
                 XCTAssertEqual(error.code, 401)
             }
         }
@@ -102,8 +102,8 @@ class DELETETests: XCTestCase {
 
         networking.delete("/entries") { result in
             switch result {
-            case .success(let json, _):
-                let json = json.array
+            case .success(let response):
+                let json = response.arrayBody
                 let entry = json[0]
                 let value = entry["title"] as? String
                 XCTAssertEqual(value, "Entry 1")
@@ -123,7 +123,7 @@ class DELETETests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let error, _, _):
+            case .failure(let error, _):
                 XCTAssertTrue(completed)
                 XCTAssertEqual(error.code, URLError.cancelled.rawValue)
                 expectation.fulfill()
@@ -145,7 +145,7 @@ class DELETETests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let error, _, _):
+            case .failure(let error, _):
                 XCTAssertEqual(error.code, URLError.cancelled.rawValue)
                 expectation.fulfill()
             }
@@ -160,8 +160,8 @@ class DELETETests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.delete("/delete", parameters: ["userId": 25]) { result in
             switch result {
-            case .success(let json, _):
-                let json = json.dictionary
+            case .success(let response):
+                let json = response.dictionaryBody
                 XCTAssertEqual(json["url"] as? String, "http://httpbin.org/delete?userId=25")
             case .failure:
                 XCTFail()

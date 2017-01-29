@@ -18,8 +18,8 @@ class PUTTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.put("/put", parameters: ["username": "jameson", "password": "secret"]) { result in
             switch result {
-            case .success(let json, _):
-                let json = json.dictionary
+            case .success(let response):
+                let json = response.dictionaryBody
                 let JSONResponse = json["json"] as? [String: String]
                 XCTAssertEqual("jameson", JSONResponse?["username"])
                 XCTAssertEqual("secret", JSONResponse?["password"])
@@ -36,12 +36,12 @@ class PUTTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.put("/put") { result in
             switch result {
-            case .success(let json, let response):
-                let json = json.dictionary
+            case .success(let response):
+                let json = response.dictionaryBody
                 guard let url = json["url"] as? String else { XCTFail(); return }
                 XCTAssertEqual(url, "http://httpbin.org/put")
 
-                let headers = response.allHeaderFields
+                let headers = response.headers
                 guard let connection = headers["Connection"] as? String else { XCTFail(); return }
                 XCTAssertEqual(connection, "keep-alive")
                 XCTAssertEqual(headers["Content-Type"] as? String, "application/json")
@@ -57,7 +57,7 @@ class PUTTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let error, _, _):
+            case .failure(let error, _):
                 XCTAssertEqual(error.code, 404)
             }
         }
@@ -70,8 +70,8 @@ class PUTTests: XCTestCase {
 
         networking.put("/story", parameters: ["username": "jameson", "password": "secret"]) { result in
             switch result {
-            case .success(let json, _):
-                let json = json.array
+            case .success(let response):
+                let json = response.arrayBody
                 let value = json[0]["name"] as? String
                 XCTAssertEqual(value, "Elvis")
             case .failure:
@@ -89,7 +89,7 @@ class PUTTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let error, _, _):
+            case .failure(let error, _):
                 XCTAssertEqual(error.code, 401)
             }
         }
@@ -102,8 +102,8 @@ class PUTTests: XCTestCase {
 
         networking.put("/entries", parameters: nil) { result in
             switch result {
-            case .success(let json, _):
-                let json = json.array
+            case .success(let response):
+                let json = response.arrayBody
                 let entry = json[0]
                 let value = entry["title"] as? String
                 XCTAssertEqual(value, "Entry 1")
@@ -123,7 +123,7 @@ class PUTTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let error, _, _):
+            case .failure(let error, _):
                 XCTAssertTrue(completed)
                 XCTAssertEqual(error.code, URLError.cancelled.rawValue)
                 expectation.fulfill()
@@ -145,7 +145,7 @@ class PUTTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let error, _, _):
+            case .failure(let error, _):
                 XCTAssertEqual(error.code, URLError.cancelled.rawValue)
                 expectation.fulfill()
             }
