@@ -10,41 +10,8 @@ public extension Networking {
      - returns: The request identifier.
      */
     @discardableResult
-    public func post(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ error: NSError?) -> Void) -> String {
-        let requestID = request(.post, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json) { json, _, error in
-            completion(json, error)
-        }
-
-        return requestID
-    }
-
-    /**
-     POST request to the specified path, using the provided parameters.
-     - parameter path: The path for the POST request.
-     - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by default this is JSON.
-     - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and an `NSError`.
-     - returns: The request identifier.
-     */
-    @discardableResult
-    public func post(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> Void) -> String {
-        let requestID = request(.post, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
-
-        return requestID
-    }
-
-    /**
-     POST request to the specified path, using the provided parameters.
-     - parameter path: The path for the POST request.
-     - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by default this is JSON.
-     - parameter part: The form data that will be sent in the request.
-     - parameter completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and an `NSError`.
-     - returns: The request identifier.
-     */
-    @discardableResult
-    public func post(_ path: String, parameters: Any? = nil, part: FormDataPart, completion: @escaping (_ json: Any?, _ error: NSError?) -> Void) -> String {
-        let requestID = post(path, parameters: parameters, parts: [part], completion: completion)
-
-        return requestID
+    public func post(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
+        return jsonRequest(.post, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
     }
 
     /**
@@ -56,12 +23,8 @@ public extension Networking {
      - returns: The request identifier.
      */
     @discardableResult
-    public func post(_ path: String, parameters: Any? = nil, parts: [FormDataPart], completion: @escaping (_ json: Any?, _ error: NSError?) -> Void) -> String {
-        let requestID = request(.post, path: path, cacheName: nil, parameterType: .multipartFormData, parameters: parameters, parts: parts, responseType: .json) { json, _, error in
-            completion(json, error)
-        }
-
-        return requestID
+    public func post(_ path: String, parameters: Any? = nil, parts: [FormDataPart], completion: @escaping (_ result: JSONResult) -> Void) -> String {
+        return jsonRequest(.post, path: path, cacheName: nil, parameterType: .multipartFormData, parameters: parameters, parts: parts, responseType: .json, completion: completion)
     }
 
     /**

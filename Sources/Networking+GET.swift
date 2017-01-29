@@ -2,34 +2,18 @@ import Foundation
 
 public extension Networking {
 
-    /**
-     GET request to the specified path.
-     - parameter path: The path for the GET request.
-     - parameter completion: A closure that gets called when the GET request is completed, it contains a `JSON` object and an `NSError`.
-     - returns: The request identifier.
-     */
+    /// GET request to the specified path.
+    ///
+    /// - Parameters:
+    ///   - path: The path for the GET request.
+    ///   - parameters: The parameters to be used, they will be serialized using Percent-encoding.
+    ///   - completion: The result of the operation, it's an enum with two cases: success and failure.
+    /// - Returns: The request identifier.
     @discardableResult
-    public func get(_ path: String, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ error: NSError?) -> Void) -> String {
+    public func get(_ path: String, parameters: Any? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
         let parameterType = parameters != nil ? ParameterType.formURLEncoded : ParameterType.none
-        let requestID = request(.get, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json) { json, _, error in
-            completion(json, error)
-        }
 
-        return requestID
-    }
-
-    /**
-     GET request to the specified path.
-     - parameter path: The path for the GET request.
-     - parameter completion: A closure that gets called when the GET request is completed, it contains a `JSON` object and an `NSError`.
-     - returns: The request identifier.
-     */
-    @discardableResult
-    public func get(_ path: String, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> Void) -> String {
-        let parameterType = parameters != nil ? ParameterType.formURLEncoded : ParameterType.none
-        let requestID = request(.get, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
-
-        return requestID
+        return jsonRequest(.get, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
     }
 
     /**

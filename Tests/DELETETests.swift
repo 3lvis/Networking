@@ -7,7 +7,7 @@ class DELETETests: XCTestCase {
     func testSynchronousDELETE() {
         var synchronous = false
         let networking = Networking(baseURL: baseURL)
-        networking.delete("/delete") { _, _ in
+        networking.delete("/delete") { _ in
             synchronous = true
         }
 
@@ -16,35 +16,50 @@ class DELETETests: XCTestCase {
 
     func testDELETE() {
         let networking = Networking(baseURL: baseURL)
-        networking.delete("/delete") { json, _ in
-            guard let json = json as? [String: Any] else { XCTFail(); return }
-            guard let url = json["url"] as? String else { XCTFail(); return }
-            XCTAssertEqual(url, "http://httpbin.org/delete")
+        networking.delete("/delete") { result in
+            switch result {
+            case .success(let json, _):
+                let json = json.dictionary
+                guard let url = json["url"] as? String else { XCTFail(); return }
+                XCTAssertEqual(url, "http://httpbin.org/delete")
 
-            guard let headers = json["headers"] as? [String: String] else { XCTFail(); return }
-            let contentType = headers["Content-Type"]
-            XCTAssertNil(contentType)
+                guard let headers = json["headers"] as? [String: String] else { XCTFail(); return }
+                let contentType = headers["Content-Type"]
+                XCTAssertNil(contentType)
+            case .failure:
+                XCTFail()
+            }
         }
     }
 
     func testDELETEWithHeaders() {
         let networking = Networking(baseURL: baseURL)
-        networking.delete("/delete") { json, headers, _ in
-            guard let json = json as? [String: Any] else { XCTFail(); return }
-            guard let url = json["url"] as? String else { XCTFail(); return }
-            XCTAssertEqual(url, "http://httpbin.org/delete")
+        networking.delete("/delete") { result in
+            switch result {
+            case .success(let json, let response):
+                let json = json.dictionary
+                guard let url = json["url"] as? String else { XCTFail(); return }
+                XCTAssertEqual(url, "http://httpbin.org/delete")
 
-            guard let connection = headers["Connection"] as? String else { XCTFail(); return }
-            XCTAssertEqual(connection, "keep-alive")
-            XCTAssertEqual(headers["Content-Type"] as? String, "application/json")
+                let headers = response.allHeaderFields
+                guard let connection = headers["Connection"] as? String else { XCTFail(); return }
+                XCTAssertEqual(connection, "keep-alive")
+                XCTAssertEqual(headers["Content-Type"] as? String, "application/json")
+            case .failure:
+                XCTFail()
+            }
         }
     }
 
     func testDELETEWithInvalidPath() {
         let networking = Networking(baseURL: baseURL)
-        networking.delete("/invalidpath") { json, error in
-            XCTAssertNil(json)
-            XCTAssertEqual(error?.code, 404)
+        networking.delete("/invalidpath") { result in
+            switch result {
+            case .success:
+                XCTFail()
+            case .failure(_, _, let error):
+                XCTAssertEqual(error.code, 404)
+            }
         }
     }
 
@@ -53,10 +68,15 @@ class DELETETests: XCTestCase {
 
         networking.fakeDELETE("/stories", response: ["name": "Elvis"])
 
-        networking.delete("/stories") { json, _ in
-            guard let json = json as? [String: String] else { XCTFail(); return }
-            let value = json["name"]
-            XCTAssertEqual(value, "Elvis")
+        networking.delete("/stories") { result in
+            switch result {
+            case .success(let json, _):
+                let json = json.dictionary
+                let value = json["name"] as? String
+                XCTAssertEqual(value, "Elvis")
+            case .failure:
+                XCTFail()
+            }
         }
     }
 
@@ -65,8 +85,13 @@ class DELETETests: XCTestCase {
 
         networking.fakeDELETE("/story", response: nil, statusCode: 401)
 
-        networking.delete("/story") { _, error in
-            XCTAssertEqual(error?.code, 401)
+        networking.delete("/story") { result in
+            switch result {
+            case .success:
+                XCTFail()
+            case .failure(_, _, let error):
+                XCTAssertEqual(error.code, 401)
+            }
         }
     }
 
@@ -75,11 +100,16 @@ class DELETETests: XCTestCase {
 
         networking.fakeDELETE("/entries", fileName: "entries.json", bundle: Bundle(for: DELETETests.self))
 
-        networking.delete("/entries") { json, _ in
-            guard let json = json as? [[String: Any]] else { XCTFail(); return }
-            let entry = json[0]
-            let value = entry["title"] as? String
-            XCTAssertEqual(value, "Entry 1")
+        networking.delete("/entries") { result in
+            switch result {
+            case .success(let json, _):
+                let json = json.array
+                let entry = json[0]
+                let value = entry["title"] as? String
+                XCTAssertEqual(value, "Entry 1")
+            case .failure:
+                XCTFail()
+            }
         }
     }
 
@@ -89,10 +119,15 @@ class DELETETests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.isSynchronous = true
         var completed = false
-        networking.delete("/delete") { _, error in
-            XCTAssertTrue(completed)
-            XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
-            expectation.fulfill()
+        networking.delete("/delete") { result in
+            switch result {
+            case .success:
+                XCTFail()
+            case .failure(_, _, let error):
+                XCTAssertTrue(completed)
+                XCTAssertEqual(error.code, URLError.cancelled.rawValue)
+                expectation.fulfill()
+            }
         }
 
         networking.cancelDELETE("/delete")
@@ -106,9 +141,14 @@ class DELETETests: XCTestCase {
 
         let networking = Networking(baseURL: baseURL)
         networking.isSynchronous = true
-        let requestID = networking.delete("/delete") { _, error in
-            XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
-            expectation.fulfill()
+        let requestID = networking.delete("/delete") { result in
+            switch result {
+            case .success:
+                XCTFail()
+            case .failure(_, _, let error):
+                XCTAssertEqual(error.code, URLError.cancelled.rawValue)
+                expectation.fulfill()
+            }
         }
 
         networking.cancel(with: requestID)
@@ -118,9 +158,14 @@ class DELETETests: XCTestCase {
 
     func testDELETEWithURLEncodedParameters() {
         let networking = Networking(baseURL: baseURL)
-        networking.delete("/delete", parameters: ["userId": 25]) { json, _ in
-            let json = json as? [String: Any] ?? [String: Any]()
-            XCTAssertEqual(json["url"] as? String, "http://httpbin.org/delete?userId=25")
+        networking.delete("/delete", parameters: ["userId": 25]) { result in
+            switch result {
+            case .success(let json, _):
+                let json = json.dictionary
+                XCTAssertEqual(json["url"] as? String, "http://httpbin.org/delete?userId=25")
+            case .failure:
+                XCTFail()
+            }
         }
     }
 }

@@ -21,11 +21,10 @@ public extension Networking {
     ///   - completion: A closure that gets called when the image download request is completed, it contains an image and an error.
     /// - Returns: The request identifier.
     @discardableResult
-    public func downloadImage(_ path: String, cacheName: String? = nil, completion: @escaping (_ image: NetworkingImage?, _ error: NSError?) -> Void) -> String {
-        let requestIdentifier = request(.get, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .image) { response, _, error in
-            TestCheck.testBlock(self.isSynchronous) {
-                completion(response as? NetworkingImage, error)
-            }
+    public func downloadImage(_ path: String, cacheName: String? = nil, completion: @escaping (_ result: ImageResult) -> Void) -> String {
+        let requestIdentifier = request(.get, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .image) { deserialized, response, error in
+            let image = deserialized as? NetworkingImage
+            completion(ImageResult(image: image, response: response, error: error))
         }
 
         return requestIdentifier
@@ -56,9 +55,10 @@ public extension Networking {
     ///   - cacheName: The cache name used to identify the downloaded data, by default the path is used.
     ///   - completion: A closure that gets called when the download request is completed, it contains  a `data` object and an `NSError`.
     @discardableResult
-    public func downloadData(for path: String, cacheName: String? = nil, completion: @escaping (_ data: Data?, _ error: NSError?) -> Void) -> String {
-        let requestIdentifier = request(.get, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .data) { response, _, error in
-            completion(response as? Data, error)
+    public func downloadData(for path: String, cacheName: String? = nil, completion: @escaping (_ result: DataResult) -> Void) -> String {
+        let requestIdentifier = request(.get, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .data) { deserialized, response, error in
+            let data = deserialized as? Data
+            completion(DataResult(data: data, response: response, error: error))
         }
 
         return requestIdentifier
