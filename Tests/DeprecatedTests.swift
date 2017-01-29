@@ -10,7 +10,7 @@ class DeprecatedTests: XCTestCase {
         networking.isSynchronous = true
         var cancelledGET = false
 
-        let requestID = networking.GET("/get") { _, error in
+        let requestID = networking.get("/get") { _, error in
             cancelledGET = error?.code == URLError.cancelled.rawValue
             XCTAssertTrue(cancelledGET)
 
@@ -31,7 +31,7 @@ class DeprecatedTests: XCTestCase {
         var cancelledGET = false
         var cancelledPOST = false
 
-        networking.GET("/get") { _, error in
+        networking.get("/get") { _, error in
             cancelledGET = error?.code == URLError.cancelled.rawValue
             XCTAssertTrue(cancelledGET)
 
@@ -40,7 +40,7 @@ class DeprecatedTests: XCTestCase {
             }
         }
 
-        networking.POST("/post") { _, error in
+        networking.post("/post") { _, error in
             cancelledPOST = error?.code == URLError.cancelled.rawValue
             XCTAssertTrue(cancelledPOST)
 
@@ -60,7 +60,7 @@ class DeprecatedTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.isSynchronous = true
         var completed = false
-        networking.GET("/get") { _, error in
+        networking.get("/get") { _, error in
             XCTAssertTrue(completed)
             XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
             expectation.fulfill()
@@ -79,7 +79,7 @@ class DeprecatedTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.isSynchronous = true
         var completed = false
-        let requestID = networking.GET("/get") { _, error in
+        let requestID = networking.get("/get") { _, error in
             XCTAssertTrue(completed)
             XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
             expectation.fulfill()
@@ -98,7 +98,7 @@ class DeprecatedTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.isSynchronous = true
         var completed = false
-        networking.POST("/post", parameters: ["username": "jameson", "password": "secret"]) { _, error in
+        networking.post("/post", parameters: ["username": "jameson", "password": "secret"]) { _, error in
             XCTAssertTrue(completed)
             XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
             expectation.fulfill()
@@ -117,7 +117,7 @@ class DeprecatedTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.isSynchronous = true
         var completed = false
-        let requestID = networking.POST("/post", parameters: ["username": "jameson", "password": "secret"]) { _, error in
+        let requestID = networking.post("/post", parameters: ["username": "jameson", "password": "secret"]) { _, error in
             XCTAssertTrue(completed)
             XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
             expectation.fulfill()
@@ -136,7 +136,7 @@ class DeprecatedTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.isSynchronous = true
         var completed = false
-        networking.PUT("/put", parameters: ["username": "jameson", "password": "secret"]) { _, error in
+        networking.put("/put", parameters: ["username": "jameson", "password": "secret"]) { _, error in
             XCTAssertTrue(completed)
             XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
             expectation.fulfill()
@@ -155,7 +155,7 @@ class DeprecatedTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.isSynchronous = true
         var completed = false
-        let requestID = networking.PUT("/put", parameters: ["username": "jameson", "password": "secret"]) { _, error in
+        let requestID = networking.put("/put", parameters: ["username": "jameson", "password": "secret"]) { _, error in
             XCTAssertTrue(completed)
             XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
             expectation.fulfill()
@@ -174,7 +174,7 @@ class DeprecatedTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.isSynchronous = true
         var completed = false
-        networking.DELETE("/delete") { _, error in
+        networking.delete("/delete") { _, error in
             XCTAssertTrue(completed)
             XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
             expectation.fulfill()
@@ -193,7 +193,7 @@ class DeprecatedTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.isSynchronous = true
         var completed = false
-        let requestID = networking.DELETE("/delete") { _, error in
+        let requestID = networking.delete("/delete") { _, error in
             XCTAssertTrue(completed)
             XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
             expectation.fulfill()

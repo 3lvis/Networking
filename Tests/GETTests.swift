@@ -7,7 +7,7 @@ class GETTests: XCTestCase {
     func testSynchronousGET() {
         var synchronous = false
         let networking = Networking(baseURL: baseURL)
-        networking.GET("/get") { _, _ in
+        networking.get("/get") { _, _ in
             synchronous = true
         }
 
@@ -18,7 +18,7 @@ class GETTests: XCTestCase {
         let expectation = self.expectation(description: "testRequestReturnBlockInMainThread")
         let networking = Networking(baseURL: baseURL)
         networking.isSynchronous = true
-        networking.GET("/get") { _, _ in
+        networking.get("/get") { _, _ in
             XCTAssertTrue(Thread.isMainThread)
             expectation.fulfill()
         }
@@ -27,7 +27,7 @@ class GETTests: XCTestCase {
 
     func testGET() {
         let networking = Networking(baseURL: baseURL)
-        networking.GET("/get") { json, _ in
+        networking.get("/get") { json, _ in
             print(String(data: try! JSONSerialization.data(withJSONObject: json!, options: .prettyPrinted), encoding: .utf8)!)
             guard let json = json as? [String: Any] else { XCTFail(); return }
 
@@ -42,7 +42,7 @@ class GETTests: XCTestCase {
 
     func testGETWithHeaders() {
         let networking = Networking(baseURL: baseURL)
-        networking.GET("/get") { json, headers, _ in
+        networking.get("/get") { json, headers, _ in
             guard let json = json as? [String: Any] else { XCTFail(); return }
             guard let url = json["url"] as? String else { XCTFail(); return }
             XCTAssertEqual(url, "http://httpbin.org/get")
@@ -55,7 +55,7 @@ class GETTests: XCTestCase {
 
     func testGETWithInvalidPath() {
         let networking = Networking(baseURL: baseURL)
-        networking.GET("/invalidpath") { json, error in
+        networking.get("/invalidpath") { json, error in
             XCTAssertNil(json)
             XCTAssertEqual(error?.code, 404)
         }
@@ -71,7 +71,7 @@ class GETTests: XCTestCase {
 
         networking.fakeGET("/stories", response: ["name": "Elvis"])
 
-        networking.GET("/stories") { json, _ in
+        networking.get("/stories") { json, _ in
             guard let json = json as? [String: String] else { XCTFail(); return }
             let value = json["name"]
             XCTAssertEqual(value, "Elvis")
@@ -83,7 +83,7 @@ class GETTests: XCTestCase {
 
         networking.fakeGET("/stories", response: nil, statusCode: 401)
 
-        networking.GET("/stories") { _, error in
+        networking.get("/stories") { _, error in
             XCTAssertEqual(error?.code, 401)
         }
     }
@@ -94,7 +94,7 @@ class GETTests: XCTestCase {
         let response = ["error_message": "Shit went down"]
         networking.fakeGET("/stories", response: response, statusCode: 401)
 
-        networking.GET("/stories") { json, error in
+        networking.get("/stories") { json, error in
             XCTAssertEqual(json as! [String: String], response)
             XCTAssertEqual(error?.code, 401)
         }
@@ -105,7 +105,7 @@ class GETTests: XCTestCase {
 
         networking.fakeGET("/entries", fileName: "entries.json", bundle: Bundle(for: GETTests.self))
 
-        networking.GET("/entries") { json, _ in
+        networking.get("/entries") { json, _ in
             guard let json = json as? [[String: Any]] else { XCTFail(); return }
             let entry = json[0]
             let value = entry["title"] as? String
@@ -119,7 +119,7 @@ class GETTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.isSynchronous = true
         var completed = false
-        networking.GET("/get") { _, error in
+        networking.get("/get") { _, error in
             XCTAssertTrue(completed)
             XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
             expectation.fulfill()
@@ -136,7 +136,7 @@ class GETTests: XCTestCase {
 
         let networking = Networking(baseURL: baseURL)
         networking.isSynchronous = true
-        let requestID = networking.GET("/get") { _, error in
+        let requestID = networking.get("/get") { _, error in
             XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
             expectation.fulfill()
         }
@@ -149,20 +149,20 @@ class GETTests: XCTestCase {
     func testStatusCodes() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.GET("/status/200") { json, error in
+        networking.get("/status/200") { json, error in
             XCTAssertNil(json)
             XCTAssertNil(error)
         }
 
         var statusCode = 300
-        networking.GET("/status/\(statusCode)") { json, error in
+        networking.get("/status/\(statusCode)") { json, error in
             XCTAssertNil(json)
             let connectionError = NSError(domain: Networking.domain, code: statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: statusCode)])
             XCTAssertEqual(error, connectionError)
         }
 
         statusCode = 400
-        networking.GET("/status/\(statusCode)") { json, error in
+        networking.get("/status/\(statusCode)") { json, error in
             XCTAssertNil(json)
             let connectionError = NSError(domain: Networking.domain, code: statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: statusCode)])
             XCTAssertEqual(error, connectionError)
@@ -171,7 +171,7 @@ class GETTests: XCTestCase {
 
     func testGETWithURLEncodedParameters() {
         let networking = Networking(baseURL: baseURL)
-        networking.GET("/get", parameters: ["count": 25]) { json, _ in
+        networking.get("/get", parameters: ["count": 25]) { json, _ in
             let json = json as? [String: Any] ?? [String: Any]()
             XCTAssertEqual(json["url"] as? String, "http://httpbin.org/get?count=25")
         }
@@ -179,7 +179,7 @@ class GETTests: XCTestCase {
 
     func testGETWithURLEncodedParametersWithExistingQuery() {
         let networking = Networking(baseURL: baseURL)
-        networking.GET("/get?accountId=123", parameters: ["userId": 5]) { json, _ in
+        networking.get("/get?accountId=123", parameters: ["userId": 5]) { json, _ in
             let json = json as? [String: Any] ?? [String: Any]()
             XCTAssertEqual(json["url"] as? String, "http://httpbin.org/get?accountId=123&userId=5")
         }
@@ -187,7 +187,7 @@ class GETTests: XCTestCase {
 
     func testGETWithURLEncodedParametersWithPercentEncoding() {
         let networking = Networking(baseURL: baseURL)
-        networking.GET("/get", parameters: ["name": "Elvis Nuñez"]) { json, _ in
+        networking.get("/get", parameters: ["name": "Elvis Nuñez"]) { json, _ in
             let json = json as? [String: Any] ?? [String: Any]()
             XCTAssertEqual(json["url"] as? String, "http://httpbin.org/get?name=Elvis Nuñez")
         }
