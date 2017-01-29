@@ -26,7 +26,7 @@ public extension Int {
     }
 }
 
-public class Networking {
+open class Networking {
     static let domain = "com.3lvis.networking"
 
     struct FakeRequest {
@@ -544,7 +544,7 @@ extension Networking {
                 do {
                     let formattedParameters = try parametersDictionary.urlEncodedString()
                     switch requestType {
-                    case .GET, .DELETE:
+                    case .get, .delete:
                         let urlEncodedPath: String
                         if path.contains("?") {
                             if let lastCharacter = path.characters.last, lastCharacter == "?" {
@@ -556,7 +556,7 @@ extension Networking {
                             urlEncodedPath = path + "?" + formattedParameters
                         }
                         request.url = try! self.url(for: urlEncodedPath)
-                    case .POST, .PUT:
+                    case .post, .put:
                         request.httpBody = formattedParameters.data(using: .utf8)
                     }
                 } catch let error as NSError {
