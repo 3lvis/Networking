@@ -27,8 +27,13 @@ class FakeImageController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
-        networking.downloadImage("/pig") { image, _ in
-            self.imageView.image = image
+        networking.downloadImage("/pig") { result in
+            switch result {
+            case .success(let image, _):
+                self.imageView.image = image
+            case .failure:
+                break
+            }
         }
     }
 }
