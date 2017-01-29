@@ -31,16 +31,16 @@ public struct FormDataPart {
         var body = ""
         body += "--\(boundary)\r\n"
         body += "Content-Disposition: form-data; "
-        body += "name=\"\(self.parameterName)\""
-        if let filename = self.filename {
+        body += "name=\"\(parameterName)\""
+        if let filename = filename {
             body += "; filename=\"\(filename)\""
         }
         body += "\r\n"
-        body += "Content-Type: \(self.type.contentType)\r\n\r\n"
+        body += "Content-Type: \(type.contentType)\r\n\r\n"
 
         var bodyData = Data()
         bodyData.append(body.data(using: .utf8)!)
-        bodyData.append(self.data)
+        bodyData.append(data)
         bodyData.append("\r\n".data(using: .utf8)!)
 
         return bodyData as Data

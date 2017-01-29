@@ -23,28 +23,28 @@ class OptionsController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: self.cellIdentifier)
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: cellIdentifier)
     }
 
     func object(at indexPath: IndexPath) -> CellData {
-        let section = self.data[indexPath.section]
+        let section = data[indexPath.section]
         let object = section[indexPath.row]
 
         return object
     }
 
     override func numberOfSections(in _: UITableView) -> Int {
-        return self.data.count
+        return data.count
     }
 
     override func tableView(_: UITableView, numberOfRowsInSection section: Int) -> Int {
-        let section = self.data[section]
+        let section = data[section]
 
         return section.count
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: self.cellIdentifier, for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier, for: indexPath)
 
         let object = self.object(at: indexPath)
         cell.textLabel?.text = object.title

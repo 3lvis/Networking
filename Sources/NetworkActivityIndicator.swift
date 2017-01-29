@@ -24,13 +24,13 @@ class NetworkActivityIndicator: NSObject {
     var visible: Bool = false {
         didSet {
             if visible {
-                self.activitiesCount += 1
+                activitiesCount += 1
             } else {
-                self.activitiesCount -= 1
+                activitiesCount -= 1
             }
 
-            if self.activitiesCount < 0 {
-                self.activitiesCount = 0
+            if activitiesCount < 0 {
+                activitiesCount = 0
             }
 
             #if os(iOS)

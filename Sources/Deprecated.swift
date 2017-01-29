@@ -10,9 +10,9 @@ public extension Networking {
      */
     @available(*, deprecated: 2.0.1, message: "Use `imageFromCache(path: String, cacheName: String?)` instead. The asynchronous version will be removed since it's synchronous now.")
     public func imageFromCache(_ path: String, cacheName: String? = nil, completion: @escaping (_ image: NetworkingImage?) -> Void) {
-        let object = self.imageFromCache(path, cacheName: cacheName)
+        let object = imageFromCache(path, cacheName: cacheName)
 
-        TestCheck.testBlock(self.isSynchronous) {
+        TestCheck.testBlock(isSynchronous) {
             completion(object)
         }
     }
@@ -24,7 +24,7 @@ public extension Networking {
      */
     @available(*, deprecated: 2.2.0, message: "Use `setAuthorizationHeader(username:password:)` instead.")
     public func authenticate(username: String, password: String) {
-        self.setAuthorizationHeader(username: username, password: password)
+        setAuthorizationHeader(username: username, password: password)
     }
 
     /**
@@ -33,7 +33,7 @@ public extension Networking {
      */
     @available(*, deprecated: 2.2.0, message: "Use `setAuthorizationHeader(token:)` instead")
     public func authenticate(token: String) {
-        self.setAuthorizationHeader(token: token)
+        setAuthorizationHeader(token: token)
     }
 
     /**
@@ -43,7 +43,7 @@ public extension Networking {
      */
     @available(*, deprecated: 2.2.0, message: "Use `setAuthorizationHeader(headerKey:headerValue:)` instead.")
     public func authenticate(headerKey: String = "Authorization", headerValue: String) {
-        self.setAuthorizationHeader(headerKey: headerKey, headerValue: headerValue)
+        setAuthorizationHeader(headerKey: headerKey, headerValue: headerValue)
     }
 
     /**
@@ -54,9 +54,9 @@ public extension Networking {
      */
     @available(*, deprecated: 2.0.1, message: "Use `dataFromCache(path: String, cacheName: String?)` instead. The asynchronous version will be removed since it's synchronous now.")
     public func dataFromCache(for path: String, cacheName: String? = nil, completion: @escaping (_ data: Data?) -> Void) {
-        let object = self.dataFromCache(for: path, cacheName: cacheName)
+        let object = dataFromCache(for: path, cacheName: cacheName)
 
-        TestCheck.testBlock(self.isSynchronous) {
+        TestCheck.testBlock(isSynchronous) {
             completion(object)
         }
     }
@@ -67,7 +67,7 @@ public extension Networking {
      */
     @available(*, deprecated: 2.6.2, message: "Use `cancelAllRequests()` instead. The asynchronous version will be removed since it's synchronous now.")
     public func cancelAllRequests(with completion: @escaping (() -> Void)) {
-        self.cancelAllRequests()
+        cancelAllRequests()
         completion()
     }
 
@@ -78,7 +78,7 @@ public extension Networking {
      */
     @available(*, deprecated: 2.6.2, message: "Use `cancelGET(path)` instead. The asynchronous version will be removed since it's synchronous now.")
     public func cancelGET(_ path: String, completion: (() -> Void)) {
-        self.cancelGET(path)
+        cancelGET(path)
         completion()
     }
 
@@ -89,7 +89,7 @@ public extension Networking {
      */
     @available(*, deprecated: 2.6.2, message: "Use `cancelPUT(path)` instead. The asynchronous version will be removed since it's synchronous now.")
     public func cancelPUT(_ path: String, completion: (() -> Void)) {
-        self.cancelPUT(path)
+        cancelPUT(path)
         completion()
     }
 
@@ -100,7 +100,7 @@ public extension Networking {
      */
     @available(*, deprecated: 2.6.2, message: "Use `cancelPOST(path)` instead. The asynchronous version will be removed since it's synchronous now.")
     public func cancelPOST(_ path: String, completion: (() -> Void)) {
-        self.cancelPOST(path)
+        cancelPOST(path)
         completion()
     }
 
@@ -111,7 +111,7 @@ public extension Networking {
      */
     @available(*, deprecated: 2.6.2, message: "Use `cancelDELETE(path)` instead. The asynchronous version will be removed since it's synchronous now.")
     public func cancelDELETE(_ path: String, completion: (() -> Void)) {
-        self.cancelDELETE(path)
+        cancelDELETE(path)
         completion()
     }
 
@@ -122,7 +122,7 @@ public extension Networking {
      */
     @available(*, deprecated: 2.6.2, message: "Use `cancelImageDownload(path)` instead. The asynchronous version will be removed since it's synchronous now.")
     public func cancelImageDownload(_ path: String, completion: (() -> Void)) {
-        self.cancelImageDownload(path)
+        cancelImageDownload(path)
         completion()
     }
 
@@ -133,7 +133,7 @@ public extension Networking {
      */
     @available(*, deprecated: 2.6.2, message: "Use `cancel(with:)` instead. The asynchronous version will be removed since it's synchronous now.")
     public func cancel(with requestID: String, completion: (() -> Void)) {
-        self.cancel(with: requestID)
+        cancel(with: requestID)
         completion()
     }
 
@@ -147,7 +147,7 @@ public extension Networking {
     @available(*, unavailable, renamed: "get")
     public func GET(_ path: String, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ error: NSError?) -> Void) -> String {
         let parameterType = parameters != nil ? ParameterType.formURLEncoded : ParameterType.none
-        let requestID = self.request(.get, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json) { json, _, error in
+        let requestID = request(.get, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json) { json, _, error in
             completion(json, error)
         }
 
@@ -164,7 +164,7 @@ public extension Networking {
     @available(*, unavailable, renamed: "get")
     public func GET(_ path: String, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> Void) -> String {
         let parameterType = parameters != nil ? ParameterType.formURLEncoded : ParameterType.none
-        let requestID = self.request(.get, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
+        let requestID = request(.get, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
 
         return requestID
     }
@@ -179,7 +179,7 @@ public extension Networking {
     @discardableResult
     @available(*, unavailable, renamed: "put")
     public func PUT(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ error: NSError?) -> Void) -> String {
-        let requestID = self.request(.put, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json) { json, _, error in
+        let requestID = request(.put, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json) { json, _, error in
             completion(json, error)
         }
 
@@ -196,7 +196,7 @@ public extension Networking {
     @discardableResult
     @available(*, unavailable, renamed: "put")
     public func PUT(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> Void) -> String {
-        let requestID = self.request(.put, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
+        let requestID = request(.put, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
 
         return requestID
     }
@@ -211,7 +211,7 @@ public extension Networking {
     @discardableResult
     @available(*, unavailable, renamed: "post")
     public func POST(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ error: NSError?) -> Void) -> String {
-        let requestID = self.request(.post, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json) { json, _, error in
+        let requestID = request(.post, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json) { json, _, error in
             completion(json, error)
         }
 
@@ -228,7 +228,7 @@ public extension Networking {
     @discardableResult
     @available(*, unavailable, renamed: "post")
     public func POST(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> Void) -> String {
-        let requestID = self.request(.post, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
+        let requestID = request(.post, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
 
         return requestID
     }
@@ -244,7 +244,7 @@ public extension Networking {
     @discardableResult
     @available(*, unavailable, renamed: "post")
     public func POST(_ path: String, parameters: Any? = nil, part: FormDataPart, completion: @escaping (_ json: Any?, _ error: NSError?) -> Void) -> String {
-        let requestID = self.post(path, parameters: parameters, parts: [part], completion: completion)
+        let requestID = post(path, parameters: parameters, parts: [part], completion: completion)
 
         return requestID
     }
@@ -260,7 +260,7 @@ public extension Networking {
     @discardableResult
     @available(*, unavailable, renamed: "post")
     public func POST(_ path: String, parameters: Any? = nil, parts: [FormDataPart], completion: @escaping (_ json: Any?, _ error: NSError?) -> Void) -> String {
-        let requestID = self.request(.post, path: path, cacheName: nil, parameterType: .multipartFormData, parameters: parameters, parts: parts, responseType: .json) { json, _, error in
+        let requestID = request(.post, path: path, cacheName: nil, parameterType: .multipartFormData, parameters: parameters, parts: parts, responseType: .json) { json, _, error in
             completion(json, error)
         }
         
@@ -277,7 +277,7 @@ public extension Networking {
     @available(*, unavailable, renamed: "delete")
     public func DELETE(_ path: String, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ error: NSError?) -> Void) -> String {
         let parameterType = parameters != nil ? ParameterType.formURLEncoded : ParameterType.none
-        let requestID = self.request(.delete, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json) { json, _, error in
+        let requestID = request(.delete, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json) { json, _, error in
             completion(json, error)
         }
 
@@ -294,7 +294,7 @@ public extension Networking {
     @available(*, unavailable, renamed: "delete")
     public func DELETE(_ path: String, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> Void) -> String {
         let parameterType = parameters != nil ? ParameterType.formURLEncoded : ParameterType.none
-        let requestID = self.request(.delete, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
+        let requestID = request(.delete, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
 
         return requestID
     }

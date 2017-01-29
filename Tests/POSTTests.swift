@@ -215,7 +215,7 @@ class POSTTests: XCTestCase {
         networking.cancelPOST("/post")
         completed = true
 
-        self.waitForExpectations(timeout: 15.0, handler: nil)
+        waitForExpectations(timeout: 15.0, handler: nil)
     }
 
     func testCancelPOSTWithID() {
@@ -230,7 +230,7 @@ class POSTTests: XCTestCase {
 
         networking.cancel(with: requestID)
 
-        self.waitForExpectations(timeout: 15.0, handler: nil)
+        waitForExpectations(timeout: 15.0, handler: nil)
     }
 
     func deleteAllCloudinaryPhotos(networking: Networking, cloudName: String, secret: String, APIKey: String) {
