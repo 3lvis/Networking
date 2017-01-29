@@ -434,6 +434,13 @@ Status code: 404 — not found
 ================= ~ ==================
 ```
 
+To disable error logging use the flag `disableErrorLogging`.
+
+```swift
+let networking = Networking(baseURL: "http://httpbin.org")
+networking.disableErrorLogging = true
+```
+
 ## Updating the Network Activity Indicator
 
 **Networking** balances how the network activity indicator is displayed.
