@@ -214,6 +214,7 @@ networking.isSynchronous = true
 If you aren't familiar with the [Result](https://github.com/3lvis/Networking/blob/master/Sources/Result.swift) type, is what most networking libraries are using these days to deal with the awful amount of optional and unwrappings that we have to deal when doing networking. Before the [Result](https://github.com/3lvis/Networking/blob/master/Sources/Result.swift) type we had this problem:
 
 ```swift
+// The old day
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.get("/get") { json, headers, error in // Both are optional
     if let error = error {
@@ -226,11 +227,12 @@ networking.get("/get") { json, headers, error in // Both are optional
 }
 ```
 
-Now, we don't have to do it like that, leveraging in the Result type fixes this problem, the [Result](https://github.com/3lvis/Networking/blob/master/Sources/Result.swift) type is an enum that has two cases: `success` and `failure`. The `success` case has a `JSON` and a `HTTPURLResponse`, the `failure` case has a `JSON`, a `HTTPURLResponse` and a `NSError` none of these ones are optionals, no more unwrapping!
+Now, we don't have to do it like that, leveraging in the Result type fixes this problem, the [Result](https://github.com/3lvis/Networking/blob/master/Sources/Result.swift) type is an enum that has two cases: `success` and `failure`. The `success` case has a response, the `failure` case has an error and a response, none of these ones are optionals, no more unwrapping!
 
 Here's how to use it:
 
 ```swift
+// The best way
 let networking = Networking(baseURL: "http://fakerecipes.com")
 networking.get("/recipes") { result in
     switch result {
