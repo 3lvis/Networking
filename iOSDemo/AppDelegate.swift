@@ -8,13 +8,13 @@ class AppDelegate: UIResponder {
 extension AppDelegate: UIApplicationDelegate {
 
     func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-        self.window = UIWindow(frame: UIScreen.main.bounds)
+        window = UIWindow(frame: UIScreen.main.bounds)
 
         let controller = OptionsController(nibName: nil, bundle: nil)
         let navigationController = UINavigationController(rootViewController: controller)
-        self.window?.rootViewController = navigationController
+        window?.rootViewController = navigationController
 
-        self.window?.makeKeyAndVisible()
+        window?.makeKeyAndVisible()
 
         return true
     }

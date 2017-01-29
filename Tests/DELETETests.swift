@@ -98,7 +98,7 @@ class DELETETests: XCTestCase {
         networking.cancelDELETE("/delete")
         completed = true
 
-        self.waitForExpectations(timeout: 15.0, handler: nil)
+        waitForExpectations(timeout: 15.0, handler: nil)
     }
 
     func testCancelDELETEWithID() {
@@ -113,7 +113,7 @@ class DELETETests: XCTestCase {
 
         networking.cancel(with: requestID)
 
-        self.waitForExpectations(timeout: 15.0, handler: nil)
+        waitForExpectations(timeout: 15.0, handler: nil)
     }
 
     func testDELETEWithURLEncodedParameters() {

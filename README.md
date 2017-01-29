@@ -88,7 +88,7 @@ You can set the `headerFields` in any networking object.
 This will append (if not found) or overwrite (if found) what NSURLSession sends on each request.
 
 ```swift
-self.networking.headerFields = ["User-Agent": "your new user agent"]
+networking.headerFields = ["User-Agent": "your new user agent"]
 ```
 
 ## Authenticating

@@ -83,7 +83,7 @@ class NetworkingTests: XCTestCase {
 
         XCTAssertFalse(synchronous)
 
-        self.waitForExpectations(timeout: 15.0, handler: nil)
+        waitForExpectations(timeout: 15.0, handler: nil)
     }
 
     func testDestinationURL() {
@@ -158,7 +158,7 @@ class NetworkingTests: XCTestCase {
 
         networking.cancel(with: requestID)
 
-        self.waitForExpectations(timeout: 15.0, handler: nil)
+        waitForExpectations(timeout: 15.0, handler: nil)
     }
 
     func testCancelAllRequests() {
@@ -188,7 +188,7 @@ class NetworkingTests: XCTestCase {
 
         networking.cancelAllRequests()
 
-        self.waitForExpectations(timeout: 15.0, handler: nil)
+        waitForExpectations(timeout: 15.0, handler: nil)
     }
 
     func testCancelRequestsReturnInMainThread() {
@@ -201,12 +201,12 @@ class NetworkingTests: XCTestCase {
             expectation.fulfill()
         }
         networking.cancelAllRequests()
-        self.waitForExpectations(timeout: 15.0, handler: nil)
+        waitForExpectations(timeout: 15.0, handler: nil)
     }
 
     func testDownloadData() {
         var synchronous = false
-        let networking = Networking(baseURL: self.baseURL)
+        let networking = Networking(baseURL: baseURL)
         let path = "/image/png"
         try! Helper.removeFileIfNeeded(networking, path: path)
         networking.downloadData(for: path) { data, _ in
@@ -229,7 +229,7 @@ class NetworkingTests: XCTestCase {
     }
 
     func testDeleteDownloadedFiles() {
-        let networking = Networking(baseURL: self.baseURL)
+        let networking = Networking(baseURL: baseURL)
         networking.downloadImage("/image/png") { _, _ in
             #if os(tvOS)
                 let directory = FileManager.SearchPathDirectory.cachesDirectory
@@ -245,7 +245,7 @@ class NetworkingTests: XCTestCase {
     }
 
     func testReset() {
-        let networking = Networking(baseURL: self.baseURL)
+        let networking = Networking(baseURL: baseURL)
 
         networking.setAuthorizationHeader(username: "user", password: "passwd")
         networking.setAuthorizationHeader(token: "token")

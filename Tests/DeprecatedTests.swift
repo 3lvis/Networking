@@ -21,7 +21,7 @@ class DeprecatedTests: XCTestCase {
 
         networking.cancel(with: requestID) {}
 
-        self.waitForExpectations(timeout: 15.0, handler: nil)
+        waitForExpectations(timeout: 15.0, handler: nil)
     }
 
     func testCancelAllRequests() {
@@ -51,7 +51,7 @@ class DeprecatedTests: XCTestCase {
 
         networking.cancelAllRequests {}
 
-        self.waitForExpectations(timeout: 15.0, handler: nil)
+        waitForExpectations(timeout: 15.0, handler: nil)
     }
 
     func testCancelGETWithPath() {
@@ -70,7 +70,7 @@ class DeprecatedTests: XCTestCase {
             completed = true
         }
 
-        self.waitForExpectations(timeout: 15.0, handler: nil)
+        waitForExpectations(timeout: 15.0, handler: nil)
     }
 
     func testCancelGETWithID() {
@@ -89,7 +89,7 @@ class DeprecatedTests: XCTestCase {
             completed = true
         }
 
-        self.waitForExpectations(timeout: 15.0, handler: nil)
+        waitForExpectations(timeout: 15.0, handler: nil)
     }
 
     func testCancelPOSTWithPath() {
@@ -108,7 +108,7 @@ class DeprecatedTests: XCTestCase {
             completed = true
         }
 
-        self.waitForExpectations(timeout: 15.0, handler: nil)
+        waitForExpectations(timeout: 15.0, handler: nil)
     }
 
     func testCancelPOSTWithID() {
@@ -127,7 +127,7 @@ class DeprecatedTests: XCTestCase {
             completed = true
         }
 
-        self.waitForExpectations(timeout: 15.0, handler: nil)
+        waitForExpectations(timeout: 15.0, handler: nil)
     }
 
     func testCancelPUTWithPath() {
@@ -146,7 +146,7 @@ class DeprecatedTests: XCTestCase {
             completed = true
         }
 
-        self.waitForExpectations(timeout: 150.0, handler: nil)
+        waitForExpectations(timeout: 150.0, handler: nil)
     }
 
     func testCancelPUTWithID() {
@@ -165,7 +165,7 @@ class DeprecatedTests: XCTestCase {
             completed = true
         }
 
-        self.waitForExpectations(timeout: 150.0, handler: nil)
+        waitForExpectations(timeout: 150.0, handler: nil)
     }
 
     func testCancelDELETEWithPath() {
@@ -184,7 +184,7 @@ class DeprecatedTests: XCTestCase {
             completed = true
         }
 
-        self.waitForExpectations(timeout: 15.0, handler: nil)
+        waitForExpectations(timeout: 15.0, handler: nil)
     }
 
     func testCancelDELETEWithID() {
@@ -203,6 +203,6 @@ class DeprecatedTests: XCTestCase {
             completed = true
         }
 
-        self.waitForExpectations(timeout: 15.0, handler: nil)
+        waitForExpectations(timeout: 15.0, handler: nil)
     }
 }

@@ -99,7 +99,7 @@ class PUTTests: XCTestCase {
         networking.cancelPUT("/put")
         completed = true
 
-        self.waitForExpectations(timeout: 150.0, handler: nil)
+        waitForExpectations(timeout: 150.0, handler: nil)
     }
 
     func testCancelPUTWithID() {
@@ -114,6 +114,6 @@ class PUTTests: XCTestCase {
 
         networking.cancel(with: requestID)
 
-        self.waitForExpectations(timeout: 150.0, handler: nil)
+        waitForExpectations(timeout: 150.0, handler: nil)
     }
 }
