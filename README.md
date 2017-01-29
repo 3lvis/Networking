@@ -100,7 +100,7 @@ To authenticate using [basic authentication](http://www.w3.org/Protocols/HTTP/1.
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.setAuthorizationHeader(username: "aladdin", password: "opensesame")
-networking.GET("/basic-auth/aladdin/opensesame") { json, error in
+networking.get("/basic-auth/aladdin/opensesame") { json, error in
     // Successfully logged in! Now do something with the JSON
 }
 ```
@@ -199,7 +199,7 @@ When sending JSON your parameters will be serialized to data using `NSJSONSerial
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-networking.POST("/post", parameters: ["name" : "jameson"]) { json, error in
+networking.post("/post", parameters: ["name" : "jameson"]) { json, error in
    // Successfull post using `application/json` as `Content-Type`
 }
 ```
@@ -279,12 +279,12 @@ Using `cancelPOST("/upload")` would cancel all POST request for the specific pat
 let networking = Networking(baseURL: "http://httpbin.org")
 
 // Start first upload
-let firstRequestID = networking.POST("/upload", parts: ...) { json, error in
+let firstRequestID = networking.post("/upload", parts: ...) { json, error in
     //...
 }
 
 // Start second upload
-let secondRequestID = networking.POST("/upload", parts: ...) { json, error in
+let secondRequestID = networking.post("/upload", parts: ...) { json, error in
     //...
 }
 
