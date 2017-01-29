@@ -1,6 +1,7 @@
 import Foundation
 
 public extension Networking {
+
     /// Retrieves an image from the cache or from the filesystem.
     ///
     /// - Parameters:
@@ -18,7 +19,7 @@ public extension Networking {
     /// - Parameters:
     ///   - path: The path where the image is located.
     ///   - cacheName: The cache name used to identify the downloaded image, by default the path is used.
-    ///   - completion: A closure that gets called when the image download request is completed, it contains an image and an error.
+    ///   - completion: The result of the operation, it's an enum with two cases: success and failure.
     /// - Returns: The request identifier.
     @discardableResult
     public func downloadImage(_ path: String, cacheName: String? = nil, completion: @escaping (_ result: ImageResult) -> Void) -> String {

@@ -46,12 +46,13 @@ public enum JSON {
         self = .none
     }
 
-    /**
-     Returns a JSON object from a file.
-     - parameter fileName: The name of the file, the expected extension is `.json`.
-     - parameter bundle:  The Bundle where the file is located, by default is the main bundle.
-     - returns: A JSON object, it can be either a Dictionary or an Array.
-     */
+    /// Returns a JSON object from a file.
+    ///
+    /// - Parameters:
+    ///   - fileName: The name of the file, the expected extension is `.json`.
+    ///   - bundle: The Bundle where the file is located, by default is the main bundle.
+    /// - Returns: A JSON object, it can be either a Dictionary or an Array.
+    /// - Throws: An error if it wasn't able to process the file.
     static func from(_ fileName: String, bundle: Bundle = Bundle.main) throws -> Any? {
         var json: Any?
 
@@ -66,10 +67,10 @@ public enum JSON {
 
 extension Data {
 
-    /**
-     Converts Data to a JSON object.
-     - returns: A JSON object, it can be either a Dictionary or an Array.
-     */
+    /// Serializes Data into a JSON object.
+    ///
+    /// - Returns: A JSON object, it can be either a Dictionary or an Array.
+    /// - Throws: An error if it couldn't serialize the data into json.
     func toJSON() throws -> Any? {
         var json: Any?
         do {
