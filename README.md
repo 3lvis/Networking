@@ -101,7 +101,7 @@ To authenticate using [basic authentication](http://www.w3.org/Protocols/HTTP/1.
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.setAuthorizationHeader(username: "aladdin", password: "opensesame")
 networking.get("/basic-auth/aladdin/opensesame") { result in
-    // Successfully logged in! Now do something with the JSON
+    // Successfully authenticated!
 }
 ```
 
@@ -113,7 +113,7 @@ To authenticate using a [bearer token](https://tools.ietf.org/html/rfc6750) **"A
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.setAuthorizationHeader(token: "AAAFFAAAA3DAAAAAA")
 networking.get("/get") { result in
-    // Do something...
+    // Successfully authenticated!
 }
 ```
 
@@ -125,7 +125,7 @@ To authenticate using a custom authentication header, for example **"Token token
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.setAuthorizationHeader(headerValue: "Token token=AAAFFAAAA3DAAAAAA")
 networking.get("/get") { result in
-    // Do something...
+    // Successfully authenticated!
 }
 ```
 
@@ -135,7 +135,7 @@ Providing the following authentication header `Anonymous-Token: AAAFFAAAA3DAAAAA
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.setAuthorizationHeader(headerKey: "Anonymous-Token", headerValue: "AAAFFAAAA3DAAAAAA")
 networking.get("/get") { result in
-    // Do something
+    // Successfully authenticated!
 }
 ```
 
@@ -146,9 +146,15 @@ Making a request is as simple as just calling `get`, `post`, `put`, or `delete`.
 **GET example**:
 
 ```swift
-let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
-networking.get("/stories") { result in
-    // Stories JSON: https://api-news.layervault.com/api/v2/stories
+let networking = Networking(baseURL: "http://httpbin.org")
+networking.get("/get") { result in
+    switch result {
+    case .success(let json, _):
+        let json = json.dictionary
+        // Do something with JSON, you can also cast to array (json.array)
+    case .failure(_, _, let error):
+        // Handle error
+    }
 }
 ```
 
@@ -158,7 +164,6 @@ networking.get("/stories") { result in
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.post("/post", parameters: ["username" : "jameson", "password" : "secret"]) { result in
     /*
-    JSON Pretty Print:
     {
         "json" : {
             "username" : "jameson",
@@ -175,6 +180,20 @@ networking.post("/post", parameters: ["username" : "jameson", "password" : "secr
         }
     }
     */
+}
+```
+You can get the headers from the response.
+
+```swift
+let networking = Networking(baseURL: "http://httpbin.org")
+networking.get("/get") { result in
+    switch result {
+    case .success(_, let response):
+        let headers = response.allHeaderFields
+        // Do something with headers
+    case .failure(_, _, let error):
+        // Handle error
+    }
 }
 ```
 
