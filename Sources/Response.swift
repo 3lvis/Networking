@@ -26,3 +26,9 @@ public class JSONResponse {
         self.fullResponse = response
     }
 }
+
+public extension HTTPURLResponse {
+    public var headers: [AnyHashable: Any] {
+        return allHeaderFields
+    }
+}
