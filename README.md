@@ -215,13 +215,13 @@ If you aren't familiar with the [Result](https://github.com/3lvis/Networking/blo
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-networking.get("/get") { json, error in // Both are optional
+networking.get("/get") { json, headers, error in // Both are optional
     if let error = error {
-
+        // OK, now we can handle the error
     } else if let jsonArray = json as? [[String: Any]] {
-
+        // A valid JSON! Yay!
     } else {
-      // Not error, not JSON, this is weird.
+      // Oh god, this shouldn't be happening, what do we do?!
     }
 }
 ```
