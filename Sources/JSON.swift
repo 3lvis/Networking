@@ -5,7 +5,40 @@ enum ParsingError: Error {
     case notFound, failed
 }
 
-enum JSON {
+public enum JSON {
+    case dictionary([String: Any])
+
+    case array([[String: Any]])
+
+    public var dictionary: ([String: Any]) {
+        get {
+            switch self {
+            case .dictionary(let value):
+                return value
+            default:
+                return [String: Any]()
+            }
+        }
+    }
+
+    public var array: ([[String: Any]]) {
+        get {
+            switch self {
+            case .array(let value):
+                return value
+            default:
+                return [[String: Any]]()
+            }
+        }
+    }
+
+    public init(_ dictionary: [String: Any]) {
+        self = .dictionary(dictionary)
+    }
+
+    public init(_ array: [[String: Any]]) {
+        self = .array(array)
+    }
 
     /**
      Returns a JSON object from a file.

@@ -10,24 +10,10 @@ public extension Networking {
      - returns: The request identifier.
      */
     @discardableResult
-    public func put(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ error: NSError?) -> Void) -> String {
+    public func put(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ result: Result) -> Void) -> String {
         let requestID = request(.put, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json) { json, _, error in
-            completion(json, error)
+            //completion(json, error)
         }
-
-        return requestID
-    }
-
-    /**
-     PUT request to the specified path, using the provided parameters.
-     - parameter path: The path for the PUT request.
-     - parameter parameters: The parameters to be used, they will be serialized using the ParameterType, by default this is JSON.
-     - parameter completion: A closure that gets called when the PUT request is completed, it contains a `JSON` object and an `NSError`.
-     - returns: The request identifier.
-     */
-    @discardableResult
-    public func put(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> Void) -> String {
-        let requestID = request(.put, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
 
         return requestID
     }

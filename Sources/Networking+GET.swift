@@ -9,25 +9,11 @@ public extension Networking {
      - returns: The request identifier.
      */
     @discardableResult
-    public func get(_ path: String, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ error: NSError?) -> Void) -> String {
+    public func get(_ path: String, parameters: Any? = nil, completion: @escaping (_ result: Result) -> Void) -> String {
         let parameterType = parameters != nil ? ParameterType.formURLEncoded : ParameterType.none
         let requestID = request(.get, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json) { json, _, error in
-            completion(json, error)
+            //completion(json, error)
         }
-
-        return requestID
-    }
-
-    /**
-     GET request to the specified path.
-     - parameter path: The path for the GET request.
-     - parameter completion: A closure that gets called when the GET request is completed, it contains a `JSON` object and an `NSError`.
-     - returns: The request identifier.
-     */
-    @discardableResult
-    public func get(_ path: String, parameters: Any? = nil, completion: @escaping (_ json: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> Void) -> String {
-        let parameterType = parameters != nil ? ParameterType.formURLEncoded : ParameterType.none
-        let requestID = request(.get, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
 
         return requestID
     }
