@@ -5,7 +5,7 @@ enum ParsingError: Error {
     case notFound, failed
 }
 
-class JSON {
+enum JSON {
 
     /**
      Returns a JSON object from a file.
@@ -13,7 +13,7 @@ class JSON {
      - parameter bundle:  The Bundle where the file is located, by default is the main bundle.
      - returns: A JSON object, it can be either a Dictionary or an Array.
      */
-    class func from(_ fileName: String, bundle: Bundle = Bundle.main) throws -> Any? {
+    static func from(_ fileName: String, bundle: Bundle = Bundle.main) throws -> Any? {
         var json: Any?
 
         guard let url = URL(string: fileName), let filePath = bundle.path(forResource: url.deletingPathExtension().absoluteString, ofType: url.pathExtension) else { throw ParsingError.notFound }
