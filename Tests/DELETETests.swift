@@ -72,7 +72,7 @@ class DELETETests: XCTestCase {
             switch result {
             case .success(let json, _):
                 let json = json.dictionary
-                let value = json["name"]
+                let value = json["name"] as? String
                 XCTAssertEqual(value, "Elvis")
             case .failure:
                 XCTFail()
