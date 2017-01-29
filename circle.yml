@@ -5,7 +5,7 @@ machine:
 test:
   override:
     - xcodebuild
-        -project Project.xcodeproj
+        -project Demo.xcodeproj
         -scheme "iOSTests"
         -destination 'platform=iOS Simulator,name=iPhone 6'
         test |
