@@ -46,7 +46,7 @@ open class Networking {
     }
 
     enum RequestType: String {
-        case GET, POST, PUT, DELETE
+        case get, post, put, delete
     }
 
     enum SessionTaskType: String {

@@ -22,7 +22,7 @@ public extension Networking {
     /// - Returns: The request identifier.
     @discardableResult
     public func downloadImage(_ path: String, cacheName: String? = nil, completion: @escaping (_ image: NetworkingImage?, _ error: NSError?) -> Void) -> String {
-        let requestIdentifier = self.request(.GET, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .image) { response, _, error in
+        let requestIdentifier = self.request(.get, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .image) { response, _, error in
             TestCheck.testBlock(self.isSynchronous) {
                 completion(response as? NetworkingImage, error)
             }
@@ -36,7 +36,7 @@ public extension Networking {
     /// - Parameter path: The path for the cancelled image download request.
     public func cancelImageDownload(_ path: String) {
         let url = try! self.url(for: path)
-        self.cancelRequest(.data, requestType: .GET, url: url)
+        self.cancelRequest(.data, requestType: .get, url: url)
     }
 
     /// Registers a fake download image request with an image. After registering this, every download request to the path, will return the registered image.
@@ -46,7 +46,7 @@ public extension Networking {
     ///   - image: An image that will be returned when there's a request to the registered path.
     ///   - statusCode: The status code to be used when faking the request.
     public func fakeImageDownload(_ path: String, image: NetworkingImage?, statusCode: Int = 200) {
-        self.fake(.GET, path: path, response: image, responseType: .image, statusCode: statusCode)
+        self.fake(.get, path: path, response: image, responseType: .image, statusCode: statusCode)
     }
 
     /// Downloads data from a URL, caching the result.
@@ -57,7 +57,7 @@ public extension Networking {
     ///   - completion: A closure that gets called when the download request is completed, it contains  a `data` object and an `NSError`.
     @discardableResult
     public func downloadData(for path: String, cacheName: String? = nil, completion: @escaping (_ data: Data?, _ error: NSError?) -> Void) -> String {
-        let requestIdentifier = self.request(.GET, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .data) { response, _, error in
+        let requestIdentifier = self.request(.get, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .data) { response, _, error in
             completion(response as? Data, error)
         }
 
