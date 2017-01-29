@@ -57,7 +57,7 @@ class PUTTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(_, _, let error):
+            case .failure(let error, _, _):
                 XCTAssertEqual(error.code, 404)
             }
         }
@@ -89,7 +89,7 @@ class PUTTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(_, _, let error):
+            case .failure(let error, _, _):
                 XCTAssertEqual(error.code, 401)
             }
         }
@@ -123,7 +123,7 @@ class PUTTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(_, _, let error):
+            case .failure(let error, _, _):
                 XCTAssertTrue(completed)
                 XCTAssertEqual(error.code, URLError.cancelled.rawValue)
                 expectation.fulfill()
@@ -145,7 +145,7 @@ class PUTTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(_, _, let error):
+            case .failure(let error, _, _):
                 XCTAssertEqual(error.code, URLError.cancelled.rawValue)
                 expectation.fulfill()
             }

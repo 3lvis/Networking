@@ -3,11 +3,11 @@ import Foundation
 public enum JSONResult {
     case success(JSON, HTTPURLResponse)
 
-    case failure(JSON, HTTPURLResponse, NSError)
+    case failure(NSError, JSON, HTTPURLResponse)
 
     public init(json: JSON, response: HTTPURLResponse, error: NSError?) {
         if let error = error {
-            self = .failure(json, response, error)
+            self = .failure(error, json, response)
         } else {
             self = .success(json, response)
         }

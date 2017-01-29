@@ -156,7 +156,7 @@ networking.get("/get") { result in
     case .success(let json, _):
         let json = json.dictionary
         // Do something with JSON, you can also cast to array (json.array)
-    case .failure(_, _, let error):
+    case .failure(let error, _, _):
         // Handle error
     }
 }
@@ -196,7 +196,7 @@ networking.get("/get") { result in
     case .success(_, let response):
         let headers = response.allHeaderFields
         // Do something with headers
-    case .failure(_, _, let error):
+    case .failure(let error, _, _):
         // Handle error
     }
 }

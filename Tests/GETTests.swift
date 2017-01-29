@@ -69,7 +69,7 @@ class GETTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(_, _, let error):
+            case .failure(let error, _, _):
                 XCTAssertEqual(error.code, 404)
             }
         }
@@ -105,7 +105,7 @@ class GETTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(_, _, let error):
+            case .failure(let error, _, _):
                 XCTAssertEqual(error.code, 401)
             }
         }
@@ -121,7 +121,7 @@ class GETTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let json, _, let error):
+            case .failure(let error, let json, _):
                 let json = json.dictionary
                 XCTAssertEqual(json as! [String: String], response)
                 XCTAssertEqual(error.code, 401)
@@ -157,7 +157,7 @@ class GETTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(_, _, let error):
+            case .failure(let error, _, _):
                 XCTAssertTrue(completed)
                 XCTAssertEqual(error.code, URLError.cancelled.rawValue)
                 expectation.fulfill()
@@ -179,7 +179,7 @@ class GETTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(_, _, let error):
+            case .failure(let error, _, _):
                 XCTAssertEqual(error.code, URLError.cancelled.rawValue)
                 expectation.fulfill()
             }
@@ -207,7 +207,7 @@ class GETTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(_, _, let error):
+            case .failure(let error, _, _):
                 let connectionError = NSError(domain: Networking.domain, code: statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: statusCode)])
                 XCTAssertEqual(error, connectionError)
             }
@@ -218,7 +218,7 @@ class GETTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(_, _, let error):
+            case .failure(let error, _, _):
                 let connectionError = NSError(domain: Networking.domain, code: statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: statusCode)])
                 XCTAssertEqual(error, connectionError)
             }
