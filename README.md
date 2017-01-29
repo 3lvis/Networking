@@ -35,7 +35,7 @@
 - Minimal implementation
 - Simple request cancellation
 - Fake requests easily (mocking/stubbing)
-- Runs synchronously in automatic testing environments (less XCTestExpectation)
+- Runs synchronously in automatic testing environments (less XCTestExpectations)
 - Image downloading and caching
 - Free
 
