@@ -153,10 +153,10 @@ Making a request is as simple as just calling `get`, `post`, `put`, or `delete`.
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.get("/get") { result in
     switch result {
-    case .success(let json, _):
-        let json = json.dictionary
+    case .success(let response):
+        let json = response.body.dictionary
         // Do something with JSON, you can also cast to array (json.array)
-    case .failure(let error, _, _):
+    case .failure(let error, _):
         // Handle error
     }
 }
@@ -193,10 +193,10 @@ You can get the response headers inside the success.
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.get("/get") { result in
     switch result {
-    case .success(_, let response):
+    case .success(let response):
         let headers = response.allHeaderFields
         // Do something with headers
-    case .failure(let error, _, _):
+    case .failure(let error, _):
         // Handle error
     }
 }
@@ -234,7 +234,7 @@ Here's how to use it:
 let networking = Networking(baseURL: "http://fakerecipes.com")
 networking.get("/recipes") { result in
     switch result {
-    case .success(let json, let response):
+    case .success(let response):
         // We know we'll be receiving an array with the best recipes, so we can just do:
         let recipes = json.array // BOOM, no optionals
 
@@ -243,7 +243,7 @@ networking.get("/recipes") { result in
     case .failure(let json, let response, let error):
         // Our backend developer told us that they will send a json with some
         // additional information on why the request failed, this will be a dictionary.
-        let json = json.dictionary // BOOM, no optionals here [String: Any]
+        let json = response.body.dictionary // BOOM, no optionals here [String: Any]
 
         // We want to know the headers of the failed response.
         let headers = response.allHeaderFields // [String: Any]

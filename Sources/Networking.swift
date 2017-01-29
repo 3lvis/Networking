@@ -405,7 +405,8 @@ extension Networking {
                 json = JSON.none
             }
 
-            completion(JSONResult(json: json, response: response, error: error))
+            let jsonResponse = JSONResponse(body: json, response: response)
+            completion(JSONResult(response: jsonResponse, error: error))
         }
 
         return requestID

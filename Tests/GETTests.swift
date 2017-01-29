@@ -29,8 +29,8 @@ class GETTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.get("/get") { result in
             switch result {
-            case .success(let json, _):
-                let json = json.dictionary
+            case .success(let response):
+                let json = response.body.dictionary
 
                 guard let url = json["url"] as? String else { XCTFail(); return }
                 XCTAssertEqual(url, "http://httpbin.org/get")
@@ -48,12 +48,12 @@ class GETTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.get("/get") { result in
             switch result {
-            case .success(let json, let response):
-                let json = json.dictionary
+            case .success(let response):
+                let json = response.body.dictionary
                 guard let url = json["url"] as? String else { XCTFail(); return }
                 XCTAssertEqual(url, "http://httpbin.org/get")
 
-                let headers = response.allHeaderFields
+                let headers = response.headers
                 guard let connection = headers["Connection"] as? String else { XCTFail(); return }
                 XCTAssertEqual(connection, "keep-alive")
                 XCTAssertEqual(headers["Content-Type"] as? String, "application/json")
@@ -69,7 +69,7 @@ class GETTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let error, _, _):
+            case .failure(let error, _):
                 XCTAssertEqual(error.code, 404)
             }
         }
@@ -86,8 +86,8 @@ class GETTests: XCTestCase {
 
         networking.get("/stories") { result in
             switch result {
-            case .success(let json, _):
-                let json = json.dictionary
+            case .success(let response):
+                let json = response.body.dictionary
                 let value = json["name"] as? String
                 XCTAssertEqual(value, "Elvis")
             case .failure:
@@ -105,7 +105,7 @@ class GETTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let error, _, _):
+            case .failure(let error, _):
                 XCTAssertEqual(error.code, 401)
             }
         }
@@ -114,16 +114,16 @@ class GETTests: XCTestCase {
     func testFakeGETWithInvalidPathAndJSONError() {
         let networking = Networking(baseURL: baseURL)
 
-        let response = ["error_message": "Shit went down"]
-        networking.fakeGET("/stories", response: response, statusCode: 401)
+        let expectedResponse = ["error_message": "Shit went down"]
+        networking.fakeGET("/stories", response: expectedResponse, statusCode: 401)
 
         networking.get("/stories") { result in
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let error, let json, _):
-                let json = json.dictionary
-                XCTAssertEqual(json as! [String: String], response)
+            case .failure(let error, let response):
+                let json = response.body.dictionary
+                XCTAssertEqual(json as! [String: String], expectedResponse)
                 XCTAssertEqual(error.code, 401)
             }
         }
@@ -136,8 +136,8 @@ class GETTests: XCTestCase {
 
         networking.get("/entries") { result in
             switch result {
-            case .success(let json, _):
-                let json = json.array
+            case .success(let response):
+                let json = response.body.array
                 let entry = json[0]
                 let value = entry["title"] as? String
                 XCTAssertEqual(value, "Entry 1")
@@ -157,7 +157,7 @@ class GETTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let error, _, _):
+            case .failure(let error, _):
                 XCTAssertTrue(completed)
                 XCTAssertEqual(error.code, URLError.cancelled.rawValue)
                 expectation.fulfill()
@@ -179,7 +179,7 @@ class GETTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let error, _, _):
+            case .failure(let error, _):
                 XCTAssertEqual(error.code, URLError.cancelled.rawValue)
                 expectation.fulfill()
             }
@@ -195,7 +195,7 @@ class GETTests: XCTestCase {
 
         networking.get("/status/200") { result in
             switch result {
-            case .success(_, let response):
+            case .success(let response):
                 XCTAssertEqual(response.statusCode, 200)
             case .failure:
                 XCTFail()
@@ -207,7 +207,7 @@ class GETTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let error, _, _):
+            case .failure(let error, _):
                 let connectionError = NSError(domain: Networking.domain, code: statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: statusCode)])
                 XCTAssertEqual(error, connectionError)
             }
@@ -218,7 +218,7 @@ class GETTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let error, _, _):
+            case .failure(let error, _):
                 let connectionError = NSError(domain: Networking.domain, code: statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: statusCode)])
                 XCTAssertEqual(error, connectionError)
             }
@@ -229,8 +229,8 @@ class GETTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.get("/get", parameters: ["count": 25]) { result in
             switch result {
-            case .success(let json, _):
-                let json = json.dictionary
+            case .success(let response):
+                let json = response.body.dictionary
                 XCTAssertEqual(json["url"] as? String, "http://httpbin.org/get?count=25")
             case .failure:
                 XCTFail()
@@ -242,8 +242,8 @@ class GETTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.get("/get?accountId=123", parameters: ["userId": 5]) { result in
             switch result {
-            case .success(let json, _):
-                let json = json.dictionary
+            case .success(let response):
+                let json = response.body.dictionary
                 XCTAssertEqual(json["url"] as? String, "http://httpbin.org/get?accountId=123&userId=5")
             case .failure:
                 XCTFail()
@@ -255,8 +255,8 @@ class GETTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.get("/get", parameters: ["name": "Elvis Nuñez"]) { result in
             switch result {
-            case .success(let json, _):
-                let json = json.dictionary
+            case .success(let response):
+                let json = response.body.dictionary
                 XCTAssertEqual(json["url"] as? String, "http://httpbin.org/get?name=Elvis Nuñez")
             case .failure:
                 XCTFail()
