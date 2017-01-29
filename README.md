@@ -238,7 +238,7 @@ networking.get("/recipes") { result in
     switch result {
     case .success(let response):
         // We know we'll be receiving an array with the best recipes, so we can just do:
-        let recipes = json.arrayBody // BOOM, no optionals
+        let recipes = response.arrayBody // BOOM, no optionals. [[String: Any]]
 
         // If we need headers or response status code we can use the HTTPURLResponse for this.
         let headers = response.headers // [String: Any]
