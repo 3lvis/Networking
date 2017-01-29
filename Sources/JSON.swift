@@ -12,7 +12,7 @@ public enum JSON {
 
     case array([[String: Any]])
 
-    public var dictionary: ([String: Any]) {
+    public var dictionary: [String: Any] {
         get {
             switch self {
             case .dictionary(let value):
@@ -23,7 +23,7 @@ public enum JSON {
         }
     }
 
-    public var array: ([[String: Any]]) {
+    public var array: [[String: Any]] {
         get {
             switch self {
             case .array(let value):

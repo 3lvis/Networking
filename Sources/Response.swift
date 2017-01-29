@@ -11,11 +11,11 @@ public class JSONResponse {
         return fullResponse.statusCode
     }
 
-    public var dictionaryBody: ([String: Any]) {
+    public var dictionaryBody: [String: Any] {
         return body.dictionary
     }
 
-    public var arrayBody: ([[String: Any]]) {
+    public var arrayBody: [[String: Any]] {
         return body.array
     }
 
