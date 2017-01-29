@@ -48,6 +48,8 @@
     * [Bearer token](#bearer-token)
     * [Custom authentication header](#custom-authentication-header)
 * [Making a request](#making-a-request)
+  * [The basics](#the-basics)
+  * [The Result type](#the-result-type)
 * [Choosing a content or parameter type](#choosing-a-content-or-parameter-type)
     * [JSON](#json)
     * [URL-encoding](#url-encoding)
@@ -141,6 +143,8 @@ networking.get("/get") { result in
 
 ## Making a request
 
+### The basics
+
 Making a request is as simple as just calling `get`, `post`, `put`, or `delete`.
 
 **GET example**:
@@ -204,6 +208,53 @@ By default all the requests are asynchronous, you can make an instance of **Netw
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.isSynchronous = true
 ```
+
+### The Result type
+
+If you aren't familiar with the [Result](https://github.com/3lvis/Networking/blob/master/Sources/Result.swift) type, is what most networking libraries are using these days to deal with the awful amount of optional and unwrappings that we have to deal when doing networking. Before the [Result](https://github.com/3lvis/Networking/blob/master/Sources/Result.swift) type we had this problem:
+
+```swift
+let networking = Networking(baseURL: "http://httpbin.org")
+networking.get("/get") { json, error in // Both are optional
+    if let error = error {
+
+    } else if let jsonArray = json as? [[String: Any]] {
+
+    } else {
+      // Not error, not JSON, this is weird.
+    }
+}
+```
+
+Now, we don't have to do it like that, leveraging in the Result type fixes this problem, the [Result](https://github.com/3lvis/Networking/blob/master/Sources/Result.swift) type is an enum that has two cases: `success` and `failure`. The `success` case has a `JSON` and a `HTTPURLResponse`, the `failure` case has a `JSON`, a `HTTPURLResponse` and a `NSError` none of these ones are optionals, no more unwrapping!
+
+Here's how to use it:
+
+```swift
+let networking = Networking(baseURL: "http://fakerecipes.com")
+networking.get("/recipes") { result in
+    switch result {
+    case .success(let json, let response):
+        // We know we'll be receiving an array with the best recipes, so we can just do:
+        let recipes = json.array // BOOM, no optionals
+
+        // If we need headers or response status code we can use the HTTPURLResponse for this.
+        let headers = response.allHeaderFields // [String: Any]
+    case .failure(let json, let response, let error):
+        // Our backend developer told us that they will send a json with some
+        // additional information on why the request failed, this will be a dictionary.
+        let json = json.dictionary // BOOM, no optionals here [String: Any]
+
+        // We want to know the headers of the failed response.
+        let headers = response.allHeaderFields // [String: Any]
+
+        // And we can do whatever we do to handle the (non-optional) error
+        let errorCode = error.code
+    }
+}
+```
+
+And that's how we do things in **Networking** without optionals.
 
 ## Choosing a Content or Parameter Type
 
