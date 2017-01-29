@@ -6,6 +6,8 @@ enum ParsingError: Error {
 }
 
 public enum JSON {
+    case none
+
     case dictionary([String: Any])
 
     case array([[String: Any]])
@@ -38,6 +40,10 @@ public enum JSON {
 
     public init(_ array: [[String: Any]]) {
         self = .array(array)
+    }
+
+    public init() {
+        self = .none
     }
 
     /**

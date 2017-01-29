@@ -2,17 +2,27 @@ import Foundation
 
 public extension Networking {
 
-    /**
-     GET request to the specified path.
-     - parameter path: The path for the GET request.
-     - parameter completion: A closure that gets called when the GET request is completed, it contains a `JSON` object and an `NSError`.
-     - returns: The request identifier.
-     */
+    /// GET request to the specified path.
+    ///
+    /// - Parameters:
+    ///   - path: The path for the GET request.
+    ///   - parameters: The parameters to be used, they will be serialized using Percent-encoding.
+    ///   - completion: The result of the operation, it's an enum with two cases: success and failure.
+    /// - Returns: The request identifier.
     @discardableResult
     public func get(_ path: String, parameters: Any? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
         let parameterType = parameters != nil ? ParameterType.formURLEncoded : ParameterType.none
-        let requestID = request(.get, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json) { json, _, error in
-            //completion(json, error)
+        let requestID = request(.get, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json) { deserialized, response, error in
+            var json: JSON
+            if let dictionary = deserialized as? [String: Any] {
+                json = JSON(dictionary)
+            } else if let array = deserialized as? [[String: Any]] {
+                json = JSON(array)
+            } else {
+                json = JSON.none
+            }
+
+            completion(JSONResult(json: json, response: response, error: error))
         }
 
         return requestID

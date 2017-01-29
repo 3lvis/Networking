@@ -5,7 +5,7 @@ public enum JSONResult {
 
     case failure(JSON, HTTPURLResponse, NSError)
 
-    public init(_ json: JSON, _ response: HTTPURLResponse, _ error: NSError?) {
+    public init(json: JSON, response: HTTPURLResponse, error: NSError?) {
         if let error = error {
             self = .failure(json, response, error)
         } else {
@@ -19,11 +19,13 @@ public enum ImageResult {
 
     case failure(HTTPURLResponse, NSError)
 
-    public init(_ image: NetworkingImage, _ response: HTTPURLResponse, _ error: NSError?) {
+    public init(image: NetworkingImage?, response: HTTPURLResponse, error: NSError?) {
         if let error = error {
             self = .failure(response, error)
-        } else {
+        } else if let image = image {
             self = .success(image, response)
+        } else {
+            fatalError("No error, no image")
         }
     }
 }
@@ -33,11 +35,13 @@ public enum DataResult {
 
     case failure(HTTPURLResponse, NSError)
 
-    public init(_ data: Data, _ response: HTTPURLResponse, _ error: NSError?) {
+    public init(data: Data?, response: HTTPURLResponse, error: NSError?) {
         if let error = error {
             self = .failure(response, error)
-        } else {
+        } else if let data = data {
             self = .success(data, response)
+        } else {
+            fatalError("No data, no error")
         }
     }
 }

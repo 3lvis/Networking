@@ -427,24 +427,34 @@ extension Networking {
     }
 
     @discardableResult
-    func request(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Any?, _ headers: [AnyHashable: Any], _ error: NSError?) -> Void) -> String {
+    func request(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Any?, _ response: HTTPURLResponse, _ error: NSError?) -> Void) -> String {
         var requestID = UUID().uuidString
 
         if let fakeRequests = fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
             if fakeRequest.statusCode.statusCodeType() == .successful {
-                completion(fakeRequest.response, [String: Any](), nil)
+                let url = try! self.url(for: path)
+                let response = HTTPURLResponse(url: url, statusCode: fakeRequest.statusCode, httpVersion: nil, headerFields: nil)!
+                TestCheck.testBlock(self.isSynchronous) {
+                    completion(fakeRequest.response, response, nil)
+                }
             } else {
                 if let unauthorizedRequestCallback = unauthorizedRequestCallback, fakeRequest.statusCode == 403 || fakeRequest.statusCode == 401 {
-                    unauthorizedRequestCallback()
+                    TestCheck.testBlock(self.isSynchronous) {
+                        unauthorizedRequestCallback()
+                    }
                 } else {
+                    let url = try! self.url(for: path)
                     let error = NSError(domain: Networking.domain, code: fakeRequest.statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: fakeRequest.statusCode)])
-                    completion(fakeRequest.response, [String: Any](), error)
+                    let response = HTTPURLResponse(url: url, statusCode: fakeRequest.statusCode, httpVersion: nil, headerFields: nil)!
+                    TestCheck.testBlock(self.isSynchronous) {
+                        completion(fakeRequest.response, response, error)
+                    }
                 }
             }
         } else {
             switch responseType {
             case .json:
-                requestID = dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, headers, error in
+                requestID = dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, response, error in
                     var returnedError = error
                     var returnedResponse: Any?
                     if let data = data, data.count > 0 {
@@ -457,17 +467,19 @@ extension Networking {
                         }
                     }
                     TestCheck.testBlock(self.isSynchronous) {
-                        completion(returnedResponse, headers, returnedError)
+                        completion(returnedResponse, response, returnedError)
                     }
                 }
             case .data, .image:
                 let object = objectFromCache(for: path, cacheName: cacheName, responseType: responseType)
                 if let object = object {
                     TestCheck.testBlock(isSynchronous) {
-                        completion(object, [String: Any](), nil)
+                        let url = try! self.url(for: path)
+                        let response = HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!
+                        completion(object, response, nil)
                     }
                 } else {
-                    requestID = dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, headers, error in
+                    requestID = dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, response, error in
 
                         var returnedResponse: Any?
                         if let data = data, data.count > 0 {
@@ -487,7 +499,7 @@ extension Networking {
                             }
                         }
                         TestCheck.testBlock(self.isSynchronous) {
-                            completion(returnedResponse, headers, error)
+                            completion(returnedResponse, response, error)
                         }
                     }
                 }
@@ -498,7 +510,7 @@ extension Networking {
     }
 
     @discardableResult
-    func dataRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Data?, _ headers: [AnyHashable: Any], _ error: NSError?) -> Void) -> String {
+    func dataRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Data?, _ response: HTTPURLResponse, _ error: NSError?) -> Void) -> String {
         let requestID = UUID().uuidString
         var request = URLRequest(url: try! url(for: path))
         request.httpMethod = requestType.rawValue
@@ -591,13 +603,14 @@ extension Networking {
         }
 
         if let serializingError = serializingError {
-            completion(nil, [String: Any](), serializingError)
+            let url = try! self.url(for: path)
+            let response = HTTPURLResponse(url: url, statusCode: serializingError.code, httpVersion: nil, headerFields: nil)!
+            completion(nil, response, serializingError)
         } else {
             var connectionError: Error?
             let semaphore = DispatchSemaphore(value: 0)
             var returnedResponse: URLResponse?
             var returnedData: Data?
-            var returnedHeaders = [AnyHashable: Any]()
 
             let session = self.session.dataTask(with: request) { data, response, error in
                 returnedResponse = response
@@ -605,8 +618,6 @@ extension Networking {
                 returnedData = data
 
                 if let httpResponse = response as? HTTPURLResponse {
-                    returnedHeaders = httpResponse.allHeaderFields
-
                     if httpResponse.statusCode >= 200 && httpResponse.statusCode < 300 {
                         if let data = data, data.count > 0 {
                             returnedData = data
@@ -634,7 +645,14 @@ extension Networking {
                     if let unauthorizedRequestCallback = self.unauthorizedRequestCallback, let error = connectionError as NSError?, error.code == 403 || error.code == 401 {
                         unauthorizedRequestCallback()
                     } else {
-                        completion(returnedData, returnedHeaders, connectionError as NSError?)
+                        if let response = returnedResponse as? HTTPURLResponse {
+                            completion(returnedData, response, connectionError as NSError?)
+                        } else {
+                            let url = try! self.url(for: path)
+                            let errorCode = (connectionError as? NSError)?.code ?? 200
+                            let response = HTTPURLResponse(url: url, statusCode: errorCode, httpVersion: nil, headerFields: nil)!
+                            completion(returnedData, response, connectionError as NSError?)
+                        }
                     }
                 }
             }
@@ -648,7 +666,14 @@ extension Networking {
                 if let unauthorizedRequestCallback = unauthorizedRequestCallback, let error = connectionError as NSError?, error.code == 403 || error.code == 401 {
                     unauthorizedRequestCallback()
                 } else {
-                    completion(returnedData, returnedHeaders, connectionError as NSError?)
+                    if let response = returnedResponse as? HTTPURLResponse {
+                        completion(returnedData, response, connectionError as NSError?)
+                    } else {
+                        let url = try! self.url(for: path)
+                        let errorCode = (connectionError as? NSError)?.code ?? 200
+                        let response = HTTPURLResponse(url: url, statusCode: errorCode, httpVersion: nil, headerFields: nil)!
+                        completion(returnedData, response, connectionError as NSError?)
+                    }
                 }
             }
         }
