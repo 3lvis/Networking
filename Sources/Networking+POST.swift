@@ -11,20 +11,7 @@ public extension Networking {
      */
     @discardableResult
     public func post(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
-        let requestID = request(.post, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json) { deserialized, response, error in
-            var json: JSON
-            if let dictionary = deserialized as? [String: Any] {
-                json = JSON(dictionary)
-            } else if let array = deserialized as? [[String: Any]] {
-                json = JSON(array)
-            } else {
-                json = JSON.none
-            }
-
-            completion(JSONResult(json: json, response: response, error: error))
-        }
-
-        return requestID
+        return jsonRequest(.post, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
     }
 
     /**
@@ -37,11 +24,7 @@ public extension Networking {
      */
     @discardableResult
     public func post(_ path: String, parameters: Any? = nil, parts: [FormDataPart], completion: @escaping (_ result: JSONResult) -> Void) -> String {
-        let requestID = request(.post, path: path, cacheName: nil, parameterType: .multipartFormData, parameters: parameters, parts: parts, responseType: .json) { json, _, error in
-            //completion(json, error)
-        }
-
-        return requestID
+        return jsonRequest(.post, path: path, cacheName: nil, parameterType: .multipartFormData, parameters: parameters, parts: parts, responseType: .json, completion: completion)
     }
 
     /**

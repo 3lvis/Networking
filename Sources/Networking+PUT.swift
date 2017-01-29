@@ -11,20 +11,7 @@ public extension Networking {
      */
     @discardableResult
     public func put(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
-        let requestID = request(.put, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json) { deserialized, response, error in
-            var json: JSON
-            if let dictionary = deserialized as? [String: Any] {
-                json = JSON(dictionary)
-            } else if let array = deserialized as? [[String: Any]] {
-                json = JSON(array)
-            } else {
-                json = JSON.none
-            }
-
-            completion(JSONResult(json: json, response: response, error: error))
-        }
-
-        return requestID
+        return jsonRequest(.put, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
     }
 
     /**
