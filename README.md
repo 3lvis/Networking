@@ -214,7 +214,7 @@ networking.isSynchronous = true
 If you aren't familiar with the [Result](https://github.com/3lvis/Networking/blob/master/Sources/Result.swift) type, is what most networking libraries are using these days to deal with the awful amount of optional and unwrappings that we have to deal when doing networking. Before the [Result](https://github.com/3lvis/Networking/blob/master/Sources/Result.swift) type we had this problem:
 
 ```swift
-// The old day
+// The old way
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.get("/get") { json, headers, error in // Both are optional
     if let error = error {
