@@ -70,7 +70,7 @@ class NetworkingTests: XCTestCase {
         let expectation = self.expectation(description: "testSkipTestMode")
 
         let networking = Networking(baseURL: baseURL)
-        networking.disableTestingMode = true
+        networking.isSynchronous = true
 
         var synchronous = false
         networking.GET("/get") { _, _ in
@@ -144,7 +144,7 @@ class NetworkingTests: XCTestCase {
     func testCancelWithRequestID() {
         let expectation = self.expectation(description: "testCancelAllRequests")
         let networking = Networking(baseURL: baseURL)
-        networking.disableTestingMode = true
+        networking.isSynchronous = true
         var cancelledGET = false
 
         let requestID = networking.GET("/get") { _, error in
@@ -164,7 +164,7 @@ class NetworkingTests: XCTestCase {
     func testCancelAllRequests() {
         let expectation = self.expectation(description: "testCancelAllRequests")
         let networking = Networking(baseURL: baseURL)
-        networking.disableTestingMode = true
+        networking.isSynchronous = true
         var cancelledGET = false
         var cancelledPOST = false
 
@@ -194,7 +194,7 @@ class NetworkingTests: XCTestCase {
     func testCancelRequestsReturnInMainThread() {
         let expectation = self.expectation(description: "testCancelRequestsReturnInMainThread")
         let networking = Networking(baseURL: baseURL)
-        networking.disableTestingMode = true
+        networking.isSynchronous = true
         networking.GET("/get") { _, error in
             XCTAssertTrue(Thread.isMainThread)
             XCTAssertEqual(error?.code, URLError.cancelled.rawValue)

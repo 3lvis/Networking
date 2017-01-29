@@ -136,9 +136,9 @@ public class Networking {
     var configurationType: ConfigurationType
 
     /**
-     Flag used to disable synchronous request when running automatic tests.
+     Flag used to indicate synchronous request.
      */
-    var disableTestingMode = false
+    public var isSynchronous = false
 
     /**
      Flag used to disable error logging. Useful when want to disable log before release build.
@@ -456,14 +456,14 @@ extension Networking {
                             }
                         }
                     }
-                    TestCheck.testBlock(self.disableTestingMode) {
+                    TestCheck.testBlock(self.isSynchronous) {
                         completion(returnedResponse, headers, returnedError)
                     }
                 }
             case .data, .image:
                 let object = self.objectFromCache(for: path, cacheName: cacheName, responseType: responseType)
                 if let object = object {
-                    TestCheck.testBlock(self.disableTestingMode) {
+                    TestCheck.testBlock(self.isSynchronous) {
                         completion(object, [String: Any](), nil)
                     }
                 } else {
@@ -486,7 +486,7 @@ extension Networking {
                                 fatalError("Response Type is different than Data and Image")
                             }
                         }
-                        TestCheck.testBlock(self.disableTestingMode) {
+                        TestCheck.testBlock(self.isSynchronous) {
                             completion(returnedResponse, headers, error)
                         }
                     }
@@ -623,7 +623,7 @@ extension Networking {
                     }
                 }
 
-                if TestCheck.isTesting && self.disableTestingMode == false {
+                if TestCheck.isTesting && self.isSynchronous == false {
                     semaphore.signal()
                 } else {
                     DispatchQueue.main.async {
@@ -642,7 +642,7 @@ extension Networking {
             session.taskDescription = requestID
             session.resume()
 
-            if TestCheck.isTesting && self.disableTestingMode == false {
+            if TestCheck.isTesting && self.isSynchronous == false {
                 _ = semaphore.wait(timeout: DispatchTime.now() + 60.0)
                 self.logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request as URLRequest, response: returnedResponse, error: connectionError as NSError?)
                 if let unauthorizedRequestCallback = self.unauthorizedRequestCallback, let error = connectionError as NSError?, error.code == 403 || error.code == 401 {

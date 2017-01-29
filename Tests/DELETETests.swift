@@ -87,7 +87,7 @@ class DELETETests: XCTestCase {
         let expectation = self.expectation(description: "testCancelDELETE")
 
         let networking = Networking(baseURL: baseURL)
-        networking.disableTestingMode = true
+        networking.isSynchronous = true
         var completed = false
         networking.DELETE("/delete") { _, error in
             XCTAssertTrue(completed)
@@ -105,7 +105,7 @@ class DELETETests: XCTestCase {
         let expectation = self.expectation(description: "testCancelDELETE")
 
         let networking = Networking(baseURL: baseURL)
-        networking.disableTestingMode = true
+        networking.isSynchronous = true
         let requestID = networking.DELETE("/delete") { _, error in
             XCTAssertEqual(error?.code, URLError.cancelled.rawValue)
             expectation.fulfill()

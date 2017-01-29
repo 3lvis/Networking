@@ -23,7 +23,7 @@ public extension Networking {
     @discardableResult
     public func downloadImage(_ path: String, cacheName: String? = nil, completion: @escaping (_ image: NetworkingImage?, _ error: NSError?) -> Void) -> String {
         let requestIdentifier = self.request(.GET, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .image) { response, _, error in
-            TestCheck.testBlock(self.disableTestingMode) {
+            TestCheck.testBlock(self.isSynchronous) {
                 completion(response as? NetworkingImage, error)
             }
         }

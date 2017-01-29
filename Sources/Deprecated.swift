@@ -12,7 +12,7 @@ public extension Networking {
     public func imageFromCache(_ path: String, cacheName: String? = nil, completion: @escaping (_ image: NetworkingImage?) -> Void) {
         let object = self.imageFromCache(path, cacheName: cacheName)
 
-        TestCheck.testBlock(self.disableTestingMode) {
+        TestCheck.testBlock(self.isSynchronous) {
             completion(object)
         }
     }
@@ -56,7 +56,7 @@ public extension Networking {
     public func dataFromCache(for path: String, cacheName: String? = nil, completion: @escaping (_ data: Data?) -> Void) {
         let object = self.dataFromCache(for: path, cacheName: cacheName)
 
-        TestCheck.testBlock(self.disableTestingMode) {
+        TestCheck.testBlock(self.isSynchronous) {
             completion(object)
         }
     }
