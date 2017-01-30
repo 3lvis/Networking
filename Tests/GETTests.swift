@@ -69,8 +69,8 @@ class GETTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let error, _):
-                XCTAssertEqual(error.code, 404)
+            case .failure(let response):
+                XCTAssertEqual(response.error.code, 404)
             }
         }
     }
@@ -105,8 +105,8 @@ class GETTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let error, _):
-                XCTAssertEqual(error.code, 401)
+            case .failure(let response):
+                XCTAssertEqual(response.error.code, 401)
             }
         }
     }
@@ -121,10 +121,10 @@ class GETTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let error, let response):
+            case .failure(let response):
                 let json = response.dictionaryBody
                 XCTAssertEqual(json as! [String: String], expectedResponse)
-                XCTAssertEqual(error.code, 401)
+                XCTAssertEqual(response.error.code, 401)
             }
         }
     }
@@ -157,9 +157,9 @@ class GETTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let error, _):
+            case .failure(let response):
                 XCTAssertTrue(completed)
-                XCTAssertEqual(error.code, URLError.cancelled.rawValue)
+                XCTAssertEqual(response.error.code, URLError.cancelled.rawValue)
                 expectation.fulfill()
             }
         }
@@ -179,8 +179,8 @@ class GETTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let error, _):
-                XCTAssertEqual(error.code, URLError.cancelled.rawValue)
+            case .failure(let response):
+                XCTAssertEqual(response.error.code, URLError.cancelled.rawValue)
                 expectation.fulfill()
             }
         }
@@ -207,9 +207,9 @@ class GETTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let error, _):
+            case .failure(let response):
                 let connectionError = NSError(domain: Networking.domain, code: statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: statusCode)])
-                XCTAssertEqual(error, connectionError)
+                XCTAssertEqual(response.error, connectionError)
             }
         }
 
@@ -218,9 +218,9 @@ class GETTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let error, _):
+            case .failure(let response):
                 let connectionError = NSError(domain: Networking.domain, code: statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: statusCode)])
-                XCTAssertEqual(error, connectionError)
+                XCTAssertEqual(response.error, connectionError)
             }
         }
     }

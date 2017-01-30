@@ -1,15 +1,17 @@
 import Foundation
 
 public enum JSONResult {
-    case success(JSONResponse)
+    case success(SuccessJSONResponse)
 
-    case failure(NSError, JSONResponse)
+    case failure(FailureJSONResponse)
 
-    public init(response: JSONResponse, error: NSError?) {
-        if let error = error {
-            self = .failure(error, response)
+    public init(response: JSONResponse) {
+        if let failureResponse = response as? FailureJSONResponse {
+            self = .failure(failureResponse)
+        } else if let successResponse = response as? SuccessJSONResponse {
+            self = .success(successResponse)
         } else {
-            self = .success(response)
+            fatalError()
         }
     }
 }

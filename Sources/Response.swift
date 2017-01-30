@@ -27,6 +27,18 @@ public class JSONResponse {
     }
 }
 
+public class SuccessJSONResponse: JSONResponse { }
+
+public class FailureJSONResponse: JSONResponse {
+    public let error: NSError
+
+    init(body: JSON, response: HTTPURLResponse, error: NSError) {
+        self.error = error
+
+        super.init(body: body, response: response)
+    }
+}
+
 public extension HTTPURLResponse {
     public var headers: [AnyHashable: Any] {
         return allHeaderFields

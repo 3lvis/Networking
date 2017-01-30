@@ -176,8 +176,8 @@ class NetworkingTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let error, _):
-                cancelledGET = error.code == URLError.cancelled.rawValue
+            case .failure(let response):
+                cancelledGET = response.error.code == URLError.cancelled.rawValue
                 XCTAssertTrue(cancelledGET)
 
                 if cancelledGET {
@@ -202,8 +202,8 @@ class NetworkingTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let error, _):
-                cancelledGET = error.code == URLError.cancelled.rawValue
+            case .failure(let response):
+                cancelledGET = response.error.code == URLError.cancelled.rawValue
                 XCTAssertTrue(cancelledGET)
 
                 if cancelledGET && cancelledPOST {
@@ -216,8 +216,8 @@ class NetworkingTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let error, _):
-                cancelledPOST = error.code == URLError.cancelled.rawValue
+            case .failure(let response):
+                cancelledPOST = response.error.code == URLError.cancelled.rawValue
                 XCTAssertTrue(cancelledPOST)
 
                 if cancelledGET && cancelledPOST {
@@ -239,9 +239,9 @@ class NetworkingTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let error, _):
+            case .failure(let response):
                 XCTAssertTrue(Thread.isMainThread)
-                XCTAssertEqual(error.code, URLError.cancelled.rawValue)
+                XCTAssertEqual(response.error.code, URLError.cancelled.rawValue)
                 expectation.fulfill()
             }
         }
