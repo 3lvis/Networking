@@ -30,7 +30,7 @@ class FakeImageController: UIViewController {
         networking.downloadImage("/pig") { result in
             switch result {
             case .success(let response):
-                self.imageView.image = image
+                self.imageView.image = response.image
             case .failure:
                 break
             }
