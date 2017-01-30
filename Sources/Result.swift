@@ -5,13 +5,20 @@ public enum JSONResult {
 
     case failure(FailureJSONResponse)
 
-    public init(response: JSONResponse) {
-        if let failureResponse = response as? FailureJSONResponse {
-            self = .failure(failureResponse)
-        } else if let successResponse = response as? SuccessJSONResponse {
-            self = .success(successResponse)
+    public init(body: Any?, response: HTTPURLResponse, error: NSError?) {
+        var json: JSON
+        if let dictionary = body as? [String: Any] {
+            json = JSON(dictionary)
+        } else if let array = body as? [[String: Any]] {
+            json = JSON(array)
         } else {
-            fatalError()
+            json = JSON.none
+        }
+
+        if let error = error {
+            self = .failure(FailureJSONResponse(body: json, response: response, error: error))
+        } else {
+            self = .success(SuccessJSONResponse(body: json, response: response))
         }
     }
 }
