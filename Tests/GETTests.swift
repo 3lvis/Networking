@@ -8,7 +8,7 @@ class GETTests: XCTestCase {
         var synchronous = false
         let networking = Networking(baseURL: baseURL)
         networking.get("/get") { _ in
-            synchronous = true
+            //synchronous = true
         }
 
         XCTAssertTrue(synchronous)
