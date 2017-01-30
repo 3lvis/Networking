@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
 s.name             = "Networking"
-s.version          = "3.0.0-beta1"
+s.version          = "3.0.0-beta2"
 s.summary          = "Simple HTTP Networking in Swift a NSURLSession wrapper with image caching support"
 s.description  = <<-EOS
 Simple NSURLSession wrapper with support for image caching and faking network requests
