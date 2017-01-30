@@ -28,7 +28,8 @@ public enum ImageResult {
 
     case failure(NSError, HTTPURLResponse)
 
-    public init(image: NetworkingImage?, response: HTTPURLResponse, error: NSError?) {
+    public init(body: Any?, response: HTTPURLResponse, error: NSError?) {
+        let image = body as? NetworkingImage
         if let error = error {
             self = .failure(error, response)
         } else if let image = image {
@@ -44,7 +45,8 @@ public enum DataResult {
 
     case failure(NSError, HTTPURLResponse)
 
-    public init(data: Data?, response: HTTPURLResponse, error: NSError?) {
+    public init(body: Any?, response: HTTPURLResponse, error: NSError?) {
+        let data = body as? Data
         if let error = error {
             self = .failure(error, response)
         } else if let data = data {
