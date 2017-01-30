@@ -1,29 +1,39 @@
 import Foundation
 
 public enum JSONResult {
-    case success(JSONResponse)
+    case success(SuccessJSONResponse)
 
-    case failure(NSError, JSONResponse)
+    case failure(FailureJSONResponse)
 
-    public init(response: JSONResponse, error: NSError?) {
-        if let error = error {
-            self = .failure(error, response)
+    public init(body: Any?, response: HTTPURLResponse, error: NSError?) {
+        var json: JSON
+        if let dictionary = body as? [String: Any] {
+            json = JSON(dictionary)
+        } else if let array = body as? [[String: Any]] {
+            json = JSON(array)
         } else {
-            self = .success(response)
+            json = JSON.none
+        }
+
+        if let error = error {
+            self = .failure(FailureJSONResponse(body: json, response: response, error: error))
+        } else {
+            self = .success(SuccessJSONResponse(body: json, response: response))
         }
     }
 }
 
 public enum ImageResult {
-    case success(NetworkingImage, HTTPURLResponse)
+    case success(SuccessImageResponse)
 
-    case failure(NSError, HTTPURLResponse)
+    case failure(FailureResponse)
 
-    public init(image: NetworkingImage?, response: HTTPURLResponse, error: NSError?) {
+    public init(body: Any?, response: HTTPURLResponse, error: NSError?) {
+        let image = body as? NetworkingImage
         if let error = error {
-            self = .failure(error, response)
+            self = .failure(FailureResponse(response: response, error: error))
         } else if let image = image {
-            self = .success(image, response)
+            self = .success(SuccessImageResponse(image: image, response: response))
         } else {
             fatalError("No error, no image")
         }
@@ -31,15 +41,16 @@ public enum ImageResult {
 }
 
 public enum DataResult {
-    case success(Data, HTTPURLResponse)
+    case success(SuccessDataResponse)
 
-    case failure(NSError, HTTPURLResponse)
+    case failure(FailureResponse)
 
-    public init(data: Data?, response: HTTPURLResponse, error: NSError?) {
+    public init(body: Any?, response: HTTPURLResponse, error: NSError?) {
+        let data = body as? Data
         if let error = error {
-            self = .failure(error, response)
+            self = .failure(FailureResponse(response: response, error: error))
         } else if let data = data {
-            self = .success(data, response)
+            self = .success(SuccessDataResponse(data: data, response: response))
         } else {
             fatalError("No data, no error")
         }

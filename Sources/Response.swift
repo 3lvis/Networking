@@ -1,8 +1,6 @@
 import Foundation
 
-public class JSONResponse {
-    public let body: JSON
-
+public class Response {
     public var headers: [AnyHashable: Any] {
         return fullResponse.allHeaderFields
     }
@@ -10,6 +8,26 @@ public class JSONResponse {
     public var statusCode: Int {
         return fullResponse.statusCode
     }
+
+    public let fullResponse: HTTPURLResponse
+
+    init(response: HTTPURLResponse) {
+        self.fullResponse = response
+    }
+}
+
+public class FailureResponse: Response {
+    public let error: NSError
+
+    init(response: HTTPURLResponse, error: NSError) {
+        self.error = error
+
+        super.init(response: response)
+    }
+}
+
+public class JSONResponse: Response {
+    public let body: JSON
 
     public var dictionaryBody: [String: Any] {
         return body.dictionary
@@ -19,11 +37,42 @@ public class JSONResponse {
         return body.array
     }
 
-    public let fullResponse: HTTPURLResponse
-
     init(body: JSON, response: HTTPURLResponse) {
         self.body = body
-        self.fullResponse = response
+
+        super.init(response: response)
+    }
+}
+
+public class SuccessJSONResponse: JSONResponse { }
+
+public class FailureJSONResponse: JSONResponse {
+    public let error: NSError
+
+    init(body: JSON, response: HTTPURLResponse, error: NSError) {
+        self.error = error
+
+        super.init(body: body, response: response)
+    }
+}
+
+public class SuccessImageResponse: Response {
+    public let image: NetworkingImage
+
+    init(image: NetworkingImage, response: HTTPURLResponse) {
+        self.image = image
+
+        super.init(response: response)
+    }
+}
+
+public class SuccessDataResponse: Response {
+    public let data: Data
+
+    init(data: Data, response: HTTPURLResponse) {
+        self.data = data
+
+        super.init(response: response)
     }
 }
 

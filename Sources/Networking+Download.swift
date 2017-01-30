@@ -24,8 +24,7 @@ public extension Networking {
     @discardableResult
     public func downloadImage(_ path: String, cacheName: String? = nil, completion: @escaping (_ result: ImageResult) -> Void) -> String {
         let requestIdentifier = request(.get, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .image) { deserialized, response, error in
-            let image = deserialized as? NetworkingImage
-            completion(ImageResult(image: image, response: response, error: error))
+            completion(ImageResult(body: deserialized, response: response, error: error))
         }
 
         return requestIdentifier
@@ -58,8 +57,7 @@ public extension Networking {
     @discardableResult
     public func downloadData(for path: String, cacheName: String? = nil, completion: @escaping (_ result: DataResult) -> Void) -> String {
         let requestIdentifier = request(.get, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .data) { deserialized, response, error in
-            let data = deserialized as? Data
-            completion(DataResult(data: data, response: response, error: error))
+            completion(DataResult(body: deserialized, response: response, error: error))
         }
 
         return requestIdentifier

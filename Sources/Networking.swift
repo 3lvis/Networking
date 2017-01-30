@@ -396,17 +396,7 @@ extension Networking {
     @discardableResult
     func jsonRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ result: JSONResult) -> Void) -> String {
         let requestID = request(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { deserialized, response, error in
-            var json: JSON
-            if let dictionary = deserialized as? [String: Any] {
-                json = JSON(dictionary)
-            } else if let array = deserialized as? [[String: Any]] {
-                json = JSON(array)
-            } else {
-                json = JSON.none
-            }
-
-            let jsonResponse = JSONResponse(body: json, response: response)
-            completion(JSONResult(response: jsonResponse, error: error))
+            completion(JSONResult(body: deserialized, response: response, error: error))
         }
 
         return requestID

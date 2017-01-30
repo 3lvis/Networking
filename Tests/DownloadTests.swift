@@ -38,10 +38,10 @@ class DownloadTests: XCTestCase {
 
         networking.downloadImage(path) { result in
             switch result {
-            case .success(let image, _):
+            case .success(let response):
                 let pigImage = NetworkingImage.find(named: "pig.png", inBundle: Bundle(for: DownloadTests.self))
                 let pigImageData = pigImage.pngData()
-                let imageData = image.pngData()
+                let imageData = response.image.pngData()
                 XCTAssertEqual(pigImageData, imageData)
             case .failure:
                 XCTFail()
@@ -57,10 +57,10 @@ class DownloadTests: XCTestCase {
 
         networking.downloadImage(path) { result in
             switch result {
-            case .success(let image, _):
+            case .success(let response):
                 let pigImage = NetworkingImage.find(named: "døgnvillburgere.jpg", inBundle: Bundle(for: DownloadTests.self))
                 let pigImageData = pigImage.pngData()
-                let imageData = image.pngData()
+                let imageData = response.image.pngData()
                 XCTAssertEqual(pigImageData, imageData)
             case .failure:
                 XCTFail()
@@ -157,8 +157,8 @@ class DownloadTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let error, _):
-                XCTAssertEqual(error.code, URLError.cancelled.rawValue)
+            case .failure(let response):
+                XCTAssertEqual(response.error.code, URLError.cancelled.rawValue)
                 expectation.fulfill()
             }
         }
@@ -174,9 +174,9 @@ class DownloadTests: XCTestCase {
         networking.fakeImageDownload("/image/png", image: pigImage)
         networking.downloadImage("/image/png") { result in
             switch result {
-            case .success(let image, _):
+            case .success(let response):
                 let pigImageData = pigImage.pngData()
-                let imageData = image.pngData()
+                let imageData = response.image.pngData()
                 XCTAssertEqual(pigImageData, imageData)
             case .failure:
                 XCTFail()
@@ -191,8 +191,8 @@ class DownloadTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let error, _):
-                XCTAssertEqual(error.code, 401)
+            case .failure(let response):
+                XCTAssertEqual(response.error.code, 401)
             }
         }
     }
@@ -306,10 +306,10 @@ class DownloadTests: XCTestCase {
         try! Helper.removeFileIfNeeded(networking, path: path)
         networking.downloadData(for: path) { result in
             switch result {
-            case .success(let data, _):
+            case .success(let response):
                 synchronous = true
                 XCTAssertTrue(Thread.isMainThread)
-                XCTAssertEqual(data.count, 8090)
+                XCTAssertEqual(response.data.count, 8090)
             case .failure:
                 XCTFail()
             }
@@ -324,9 +324,9 @@ class DownloadTests: XCTestCase {
 
         networking.downloadData(for: path) { result in
             switch result {
-            case .success(let data, _):
+            case .success(let response):
                 let cacheData = networking.dataFromCache(for: path)
-                XCTAssert(data == cacheData!)
+                XCTAssert(response.data == cacheData!)
             case .failure:
                 XCTFail()
             }
