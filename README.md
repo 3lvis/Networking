@@ -156,7 +156,7 @@ networking.get("/get") { result in
     case .success(let response):
         let json = response.dictionaryBody
         // Do something with JSON, you can also get arrayBody
-    case .failure(let error, _):
+    case .failure(let response):
         // Handle error
     }
 }
@@ -196,7 +196,7 @@ networking.get("/get") { result in
     case .success(let response):
         let headers = response.allHeaderFields
         // Do something with headers
-    case .failure(let error, _):
+    case .failure(let response):
         // Handle error
     }
 }
@@ -242,9 +242,9 @@ networking.get("/recipes") { result in
 
         // If we need headers or response status code we can use the HTTPURLResponse for this.
         let headers = response.headers // [String: Any]
-    case .failure(let error, let response):
+    case .failure(let response):
         // Non-optional error ✨
-        let errorCode = error.code
+        let errorCode = response.error.code
 
         // Our backend developer told us that they will send a json with some
         // additional information on why the request failed, this will be a dictionary.
