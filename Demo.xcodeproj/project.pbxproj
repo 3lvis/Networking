@@ -149,6 +149,14 @@
 		44A571951E3E394900F29064 /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44A5718F1E3E394900F29064 /* Result.swift */; };
 		44A571961E3E394900F29064 /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44A5718F1E3E394900F29064 /* Result.swift */; };
 		44A571971E3E394900F29064 /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44A5718F1E3E394900F29064 /* Result.swift */; };
+		44A6D5481E4122DE00405A7E /* Networking+Private.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44A6D5471E4122DE00405A7E /* Networking+Private.swift */; };
+		44A6D5491E4122DE00405A7E /* Networking+Private.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44A6D5471E4122DE00405A7E /* Networking+Private.swift */; };
+		44A6D54A1E4122DE00405A7E /* Networking+Private.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44A6D5471E4122DE00405A7E /* Networking+Private.swift */; };
+		44A6D54B1E4122DE00405A7E /* Networking+Private.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44A6D5471E4122DE00405A7E /* Networking+Private.swift */; };
+		44A6D54C1E4122DE00405A7E /* Networking+Private.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44A6D5471E4122DE00405A7E /* Networking+Private.swift */; };
+		44A6D54D1E4122DE00405A7E /* Networking+Private.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44A6D5471E4122DE00405A7E /* Networking+Private.swift */; };
+		44A6D54E1E4122DE00405A7E /* Networking+Private.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44A6D5471E4122DE00405A7E /* Networking+Private.swift */; };
+		44A6D54F1E4122DE00405A7E /* Networking+Private.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44A6D5471E4122DE00405A7E /* Networking+Private.swift */; };
 		44B5D38A1D19B9E5004378B9 /* TestCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1474C1C21CA2988900E15D84 /* TestCheck.swift */; };
 		44B5D38B1D19B9E5004378B9 /* DownloadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1413F4631CE7963700482096 /* DownloadTests.swift */; };
 		44B5D38C1D19B9E5004378B9 /* Dictionary+FormURLEncodedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1413F45E1CE7963700482096 /* Dictionary+FormURLEncodedTests.swift */; };
@@ -252,6 +260,7 @@
 		446C24621DFEE964006FA6CC /* CharacterSet+Encoding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CharacterSet+Encoding.swift"; sourceTree = "<group>"; };
 		4496E8E51DAFB27A0092254E /* String+UTF8Tests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+UTF8Tests.swift"; sourceTree = "<group>"; };
 		44A5718F1E3E394900F29064 /* Result.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Result.swift; sourceTree = "<group>"; };
+		44A6D5471E4122DE00405A7E /* Networking+Private.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Networking+Private.swift"; sourceTree = "<group>"; };
 		44B5D3AB1D19B9E5004378B9 /* tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = tvOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		44DFD38D1D9A2D5A0014E9F2 /* iOSDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iOSDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		44DFD38F1D9A2D5A0014E9F2 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -378,6 +387,7 @@
 			children = (
 				14638D031CC645D2002B9433 /* Networking.h */,
 				1474C1C11CA2988900E15D84 /* Networking.swift */,
+				44A6D5471E4122DE00405A7E /* Networking+Private.swift */,
 				147B32EE1CF9B1C500D5BAED /* Networking+GET.swift */,
 				147B32F01CF9B1C500D5BAED /* Networking+PUT.swift */,
 				147B32EF1CF9B1C500D5BAED /* Networking+POST.swift */,
@@ -794,6 +804,7 @@
 				1413F4711CE7963700482096 /* DownloadTests.swift in Sources */,
 				1413F4791CE7969400482096 /* Networking.swift in Sources */,
 				147B32FE1CF9B1C500D5BAED /* Networking+POST.swift in Sources */,
+				44A6D54B1E4122DE00405A7E /* Networking+Private.swift in Sources */,
 				148341721CF1CF0500E91F01 /* NetworkingImage.swift in Sources */,
 				1413F4781CE7969100482096 /* NetworkActivityIndicator.swift in Sources */,
 				1413F4731CE7963700482096 /* NetworkingTests.swift in Sources */,
@@ -827,6 +838,7 @@
 				148341731CF1CF0500E91F01 /* NetworkingImage.swift in Sources */,
 				14638D051CC64629002B9433 /* Dictionary+FormURLEncoded.swift in Sources */,
 				147B32F91CF9B1C500D5BAED /* Networking+GET.swift in Sources */,
+				44A6D54C1E4122DE00405A7E /* Networking+Private.swift in Sources */,
 				145F16541E3E89E200597D7B /* Response.swift in Sources */,
 				147B32FF1CF9B1C500D5BAED /* Networking+POST.swift in Sources */,
 				14638D061CC64629002B9433 /* JSON.swift in Sources */,
@@ -851,6 +863,7 @@
 				148341741CF1CF0500E91F01 /* NetworkingImage.swift in Sources */,
 				14638D1B1CC64733002B9433 /* Dictionary+FormURLEncoded.swift in Sources */,
 				147B32FA1CF9B1C500D5BAED /* Networking+GET.swift in Sources */,
+				44A6D54D1E4122DE00405A7E /* Networking+Private.swift in Sources */,
 				145F16551E3E89E200597D7B /* Response.swift in Sources */,
 				147B33001CF9B1C500D5BAED /* Networking+POST.swift in Sources */,
 				14638D1C1CC64733002B9433 /* JSON.swift in Sources */,
@@ -875,6 +888,7 @@
 				148341751CF1CF0500E91F01 /* NetworkingImage.swift in Sources */,
 				14638D311CC647B8002B9433 /* Dictionary+FormURLEncoded.swift in Sources */,
 				147B32FB1CF9B1C500D5BAED /* Networking+GET.swift in Sources */,
+				44A6D54E1E4122DE00405A7E /* Networking+Private.swift in Sources */,
 				145F16561E3E89E200597D7B /* Response.swift in Sources */,
 				147B33011CF9B1C500D5BAED /* Networking+POST.swift in Sources */,
 				14638D321CC647B8002B9433 /* JSON.swift in Sources */,
@@ -899,6 +913,7 @@
 				148341761CF1CF0500E91F01 /* NetworkingImage.swift in Sources */,
 				14638D471CC64829002B9433 /* Dictionary+FormURLEncoded.swift in Sources */,
 				147B32FC1CF9B1C500D5BAED /* Networking+GET.swift in Sources */,
+				44A6D54F1E4122DE00405A7E /* Networking+Private.swift in Sources */,
 				145F16571E3E89E200597D7B /* Response.swift in Sources */,
 				147B33021CF9B1C500D5BAED /* Networking+POST.swift in Sources */,
 				14638D481CC64829002B9433 /* JSON.swift in Sources */,
@@ -925,6 +940,7 @@
 				1413F4701CE7963700482096 /* DownloadTests.swift in Sources */,
 				1413F4661CE7963700482096 /* Dictionary+FormURLEncodedTests.swift in Sources */,
 				147B32FD1CF9B1C500D5BAED /* Networking+POST.swift in Sources */,
+				44A6D5491E4122DE00405A7E /* Networking+Private.swift in Sources */,
 				148341711CF1CF0500E91F01 /* NetworkingImage.swift in Sources */,
 				1474C1C41CA2988900E15D84 /* JSON.swift in Sources */,
 				1474C1C71CA2988900E15D84 /* Networking+Download.swift in Sources */,
@@ -960,6 +976,7 @@
 				44B5D38B1D19B9E5004378B9 /* DownloadTests.swift in Sources */,
 				44B5D38C1D19B9E5004378B9 /* Dictionary+FormURLEncodedTests.swift in Sources */,
 				44B5D38D1D19B9E5004378B9 /* Networking+POST.swift in Sources */,
+				44A6D54A1E4122DE00405A7E /* Networking+Private.swift in Sources */,
 				44B5D38E1D19B9E5004378B9 /* NetworkingImage.swift in Sources */,
 				44B5D38F1D19B9E5004378B9 /* JSON.swift in Sources */,
 				44B5D3901D19B9E5004378B9 /* Networking+Download.swift in Sources */,
@@ -1011,6 +1028,7 @@
 				446C24631DFEE964006FA6CC /* CharacterSet+Encoding.swift in Sources */,
 				44DFD3A01D9A2EA70014E9F2 /* CellData.swift in Sources */,
 				44DFD3A31D9A344B0014E9F2 /* Dictionary+FormURLEncoded.swift in Sources */,
+				44A6D5481E4122DE00405A7E /* Networking+Private.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
