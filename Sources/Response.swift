@@ -75,9 +75,3 @@ public class SuccessDataResponse: Response {
         super.init(response: response)
     }
 }
-
-public extension HTTPURLResponse {
-    public var headers: [AnyHashable: Any] {
-        return allHeaderFields
-    }
-}

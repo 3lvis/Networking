@@ -13,7 +13,7 @@ extension Networking {
         } else if FileManager.default.exists(at: destinationURL) {
             var returnedObject: Any?
 
-            let object = Networking.data(for: destinationURL)
+            let object = destinationURL.getData()
             if responseType == .image {
                 returnedObject = Image(data: object)
             } else {
@@ -27,13 +27,6 @@ extension Networking {
         } else {
             return nil
         }
-    }
-
-    class func data(for destinationURL: URL) -> Data {
-        let path = destinationURL.path
-        guard let data = FileManager.default.contents(atPath: path) else { fatalError("Couldn't get image in destination url: \(url)") }
-
-        return data
     }
 
     func registerFake(requestType: RequestType, path: String, fileName: String, bundle: Bundle) {
@@ -90,7 +83,7 @@ extension Networking {
 
         if fakeRequest.statusCode.statusCodeType() == .successful {
             let url = try! self.url(for: path)
-            let response = HTTPURLResponse(url: url, statusCode: fakeRequest.statusCode, httpVersion: nil, headerFields: nil)!
+            let response = HTTPURLResponse(url: url, statusCode: fakeRequest.statusCode)
             TestCheck.testBlock(self.isSynchronous) {
                 completion(fakeRequest.response, response, nil)
             }
@@ -102,7 +95,7 @@ extension Networking {
             } else {
                 let url = try! self.url(for: path)
                 let error = NSError(domain: Networking.domain, code: fakeRequest.statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: fakeRequest.statusCode)])
-                let response = HTTPURLResponse(url: url, statusCode: fakeRequest.statusCode, httpVersion: nil, headerFields: nil)!
+                let response = HTTPURLResponse(url: url, statusCode: fakeRequest.statusCode)
                 TestCheck.testBlock(self.isSynchronous) {
                     completion(fakeRequest.response, response, error)
                 }
@@ -138,7 +131,7 @@ extension Networking {
 
             TestCheck.testBlock(isSynchronous) {
                 let url = try! self.url(for: path)
-                let response = HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!
+                let response = HTTPURLResponse(url: url, statusCode: 200)
                 completion(object, response, nil)
             }
 
@@ -243,7 +236,7 @@ extension Networking {
 
         if let serializingError = serializingError {
             let url = try! self.url(for: path)
-            let response = HTTPURLResponse(url: url, statusCode: serializingError.code, httpVersion: nil, headerFields: nil)!
+            let response = HTTPURLResponse(url: url, statusCode: serializingError.code)
             completion(nil, response, serializingError)
         } else {
             var connectionError: Error?
@@ -289,7 +282,7 @@ extension Networking {
                         } else {
                             let url = try! self.url(for: path)
                             let errorCode = (connectionError as? NSError)?.code ?? 200
-                            let response = HTTPURLResponse(url: url, statusCode: errorCode, httpVersion: nil, headerFields: nil)!
+                            let response = HTTPURLResponse(url: url, statusCode: errorCode)
                             completion(returnedData, response, connectionError as NSError?)
                         }
                     }
@@ -310,7 +303,7 @@ extension Networking {
                     } else {
                         let url = try! self.url(for: path)
                         let errorCode = (connectionError as? NSError)?.code ?? 200
-                        let response = HTTPURLResponse(url: url, statusCode: errorCode, httpVersion: nil, headerFields: nil)!
+                        let response = HTTPURLResponse(url: url, statusCode: errorCode)
                         completion(returnedData, response, connectionError as NSError?)
                     }
                 }
