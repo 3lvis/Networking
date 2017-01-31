@@ -151,7 +151,7 @@ class PUTTests: XCTestCase {
             }
         }
 
-        networking.cancel(with: requestID)
+        networking.cancel(requestID)
 
         waitForExpectations(timeout: 150.0, handler: nil)
     }

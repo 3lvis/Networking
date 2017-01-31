@@ -30,7 +30,7 @@ public extension Networking {
     ///
     /// - Parameter path: The path for the cancelled image download request.
     public func cancelImageDownload(_ path: String) {
-        let url = try! self.url(for: path)
+        let url = try! self.composedURL(with: path)
         cancelRequest(.data, requestType: .get, url: url)
     }
 

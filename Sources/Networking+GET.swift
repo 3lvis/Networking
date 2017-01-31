@@ -40,7 +40,7 @@ public extension Networking {
     ///
     /// - Parameter path: The path for the cancelled GET request
     public func cancelGET(_ path: String) {
-        let url = try! self.url(for: path)
+        let url = try! self.composedURL(with: path)
         cancelRequest(.data, requestType: .get, url: url)
     }
 }

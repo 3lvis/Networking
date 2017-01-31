@@ -82,7 +82,7 @@ extension Networking {
         let requestID = UUID().uuidString
 
         if fakeRequest.statusCode.statusCodeType == .successful {
-            let url = try! self.url(for: path)
+            let url = try! self.composedURL(with: path)
             let response = HTTPURLResponse(url: url, statusCode: fakeRequest.statusCode)
             TestCheck.testBlock(self.isSynchronous) {
                 completion(fakeRequest.response, response, nil)
@@ -93,8 +93,8 @@ extension Networking {
                     unauthorizedRequestCallback()
                 }
             } else {
-                let url = try! self.url(for: path)
-                let error = NSError(domain: Networking.domain, code: fakeRequest.statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: fakeRequest.statusCode)])
+                let url = try! self.composedURL(with: path)
+                let error = NSError(fakeRequest: fakeRequest)
                 let response = HTTPURLResponse(url: url, statusCode: fakeRequest.statusCode)
                 TestCheck.testBlock(self.isSynchronous) {
                     completion(fakeRequest.response, response, error)
@@ -130,7 +130,7 @@ extension Networking {
             let requestID = UUID().uuidString
 
             TestCheck.testBlock(isSynchronous) {
-                let url = try! self.url(for: path)
+                let url = try! self.composedURL(with: path)
                 let response = HTTPURLResponse(url: url, statusCode: 200)
                 completion(object, response, nil)
             }
@@ -165,7 +165,7 @@ extension Networking {
 
     func dataRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Data?, _ response: HTTPURLResponse, _ error: NSError?) -> Void) -> String {
         let requestID = UUID().uuidString
-        var request = URLRequest(url: try! url(for: path), requestType: requestType, path: path, parameterType: parameterType, responseType: responseType, boundary: boundary, authorizationHeaderValue: authorizationHeaderValue, token: token, authorizationHeaderKey: authorizationHeaderKey, headerFields: headerFields)
+        var request = URLRequest(url: try! composedURL(with: path), requestType: requestType, path: path, parameterType: parameterType, responseType: responseType, boundary: boundary, authorizationHeaderValue: authorizationHeaderValue, token: token, authorizationHeaderKey: authorizationHeaderKey, headerFields: headerFields)
 
         DispatchQueue.main.async {
             NetworkActivityIndicator.sharedIndicator.visible = true
@@ -199,7 +199,7 @@ extension Networking {
                         } else {
                             urlEncodedPath = path + "?" + formattedParameters
                         }
-                        request.url = try! url(for: urlEncodedPath)
+                        request.url = try! composedURL(with: urlEncodedPath)
                     case .post, .put:
                         request.httpBody = formattedParameters.data(using: .utf8)
                     }
@@ -235,7 +235,7 @@ extension Networking {
         }
 
         if let serializingError = serializingError {
-            let url = try! self.url(for: path)
+            let url = try! self.composedURL(with: path)
             let response = HTTPURLResponse(url: url, statusCode: serializingError.code)
             completion(nil, response, serializingError)
         } else {
@@ -280,7 +280,7 @@ extension Networking {
                         if let response = returnedResponse as? HTTPURLResponse {
                             completion(returnedData, response, connectionError as NSError?)
                         } else {
-                            let url = try! self.url(for: path)
+                            let url = try! self.composedURL(with: path)
                             let errorCode = (connectionError as? NSError)?.code ?? 200
                             let response = HTTPURLResponse(url: url, statusCode: errorCode)
                             completion(returnedData, response, connectionError as NSError?)
@@ -301,7 +301,7 @@ extension Networking {
                     if let response = returnedResponse as? HTTPURLResponse {
                         completion(returnedData, response, connectionError as NSError?)
                     } else {
-                        let url = try! self.url(for: path)
+                        let url = try! self.composedURL(with: path)
                         let errorCode = (connectionError as? NSError)?.code ?? 200
                         let response = HTTPURLResponse(url: url, statusCode: errorCode)
                         completion(returnedData, response, connectionError as NSError?)

@@ -87,7 +87,7 @@ class NetworkingTests: XCTestCase {
 
     func testURLForPath() {
         let networking = Networking(baseURL: baseURL)
-        let url = try! networking.url(for: "/hello")
+        let url = try! networking.composedURL(with: "/hello")
         XCTAssertEqual(url.absoluteString, "http://httpbin.org/hello")
     }
 
@@ -186,7 +186,7 @@ class NetworkingTests: XCTestCase {
             }
         }
 
-        networking.cancel(with: requestID)
+        networking.cancel(requestID)
 
         waitForExpectations(timeout: 15.0, handler: nil)
     }

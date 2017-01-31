@@ -52,7 +52,7 @@ public extension Networking {
     ///
     /// - Parameter path: The path for the cancelled POST request.
     public func cancelPOST(_ path: String) {
-        let url = try! self.url(for: path)
+        let url = try! self.composedURL(with: path)
         cancelRequest(.data, requestType: .post, url: url)
     }
 }

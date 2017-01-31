@@ -197,7 +197,7 @@ open class Networking {
     /// - Parameter path: The path to be appended to the base URL.
     /// - Returns: A URL generated after appending the path to the base URL.
     /// - Throws: An error if the URL couldn't be created.
-    public func url(for path: String) throws -> URL {
+    public func composedURL(with path: String) throws -> URL {
         let encodedPath = path.encodeUTF8() ?? path
         guard let url = URL(string: baseURL + encodedPath) else {
             throw NSError(domain: Networking.domain, code: 0, userInfo: [NSLocalizedDescriptionKey: "Couldn't create a url using baseURL: \(baseURL) and encodedPath: \(encodedPath)"])
@@ -218,7 +218,7 @@ open class Networking {
         if let normalizedCacheName = normalizedCacheName {
             resourcesPath = normalizedCacheName
         } else {
-            let url = try self.url(for: path)
+            let url = try self.composedURL(with: path)
             resourcesPath = url.absoluteString
         }
 
@@ -269,7 +269,7 @@ open class Networking {
     /// Cancels the request that matches the requestID.
     ///
     /// - Parameter requestID: The ID of the request to be cancelled.
-    public func cancel(with requestID: String) {
+    public func cancel(_ requestID: String) {
         let semaphore = DispatchSemaphore(value: 0)
         session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
             var tasks = [URLSessionTask]()

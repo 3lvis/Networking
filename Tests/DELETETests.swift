@@ -151,7 +151,7 @@ class DELETETests: XCTestCase {
             }
         }
 
-        networking.cancel(with: requestID)
+        networking.cancel(requestID)
 
         waitForExpectations(timeout: 15.0, handler: nil)
     }
