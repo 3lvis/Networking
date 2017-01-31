@@ -8,10 +8,10 @@ public extension Networking {
     ///   - path: The path where the image is located.
     ///   - cacheName: The cache name used to identify the downloaded image, by default the path is used.
     /// - Returns: The cached image.
-    public func imageFromCache(_ path: String, cacheName: String? = nil) -> NetworkingImage? {
+    public func imageFromCache(_ path: String, cacheName: String? = nil) -> Image? {
         let object = objectFromCache(for: path, cacheName: cacheName, responseType: .image)
 
-        return object as? NetworkingImage
+        return object as? Image
     }
 
     /// Downloads an image using the specified path.
@@ -40,7 +40,7 @@ public extension Networking {
     ///   - path: The path for the faked image download request.
     ///   - image: An image that will be returned when there's a request to the registered path.
     ///   - statusCode: The status code to be used when faking the request.
-    public func fakeImageDownload(_ path: String, image: NetworkingImage?, statusCode: Int = 200) {
+    public func fakeImageDownload(_ path: String, image: Image?, statusCode: Int = 200) {
         registerFake(requestType: .get, path: path, response: image, responseType: .image, statusCode: statusCode)
     }
 

@@ -1,14 +1,14 @@
 #if os(OSX)
     import AppKit.NSImage
-    public typealias NetworkingImage = NSImage
+    public typealias Image = NSImage
 #else
     import UIKit.UIImage
-    public typealias NetworkingImage = UIImage
+    public typealias Image = UIImage
 #endif
 
-extension NetworkingImage {
+extension Image {
 
-    static func find(named name: String, inBundle bundle: Bundle) -> NetworkingImage {
+    static func find(named name: String, inBundle bundle: Bundle) -> Image {
         #if os(OSX)
             return bundle.image(forResource: name)!
         #elseif os(watchOS)

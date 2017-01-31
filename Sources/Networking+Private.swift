@@ -13,9 +13,9 @@ extension Networking {
         } else if FileManager.default.exists(at: destinationURL) {
             var returnedObject: Any?
 
-            let object = data(for: destinationURL)
+            let object = Networking.data(for: destinationURL)
             if responseType == .image {
-                returnedObject = NetworkingImage(data: object)
+                returnedObject = Image(data: object)
             } else {
                 returnedObject = object
             }
@@ -29,7 +29,7 @@ extension Networking {
         }
     }
 
-    func data(for destinationURL: URL) -> Data {
+    class func data(for destinationURL: URL) -> Data {
         let path = destinationURL.path
         guard let data = FileManager.default.contents(atPath: path) else { fatalError("Couldn't get image in destination url: \(url)") }
 
@@ -155,7 +155,7 @@ extension Networking {
                         self.cache.setObject(data as AnyObject, forKey: destinationURL.absoluteString as AnyObject)
                         returnedResponse = data
                     case .image:
-                        if let image = NetworkingImage(data: data) {
+                        if let image = Image(data: data) {
                             self.cache.setObject(image, forKey: destinationURL.absoluteString as AnyObject)
                             returnedResponse = image
                         }
@@ -172,28 +172,7 @@ extension Networking {
 
     func dataRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Data?, _ response: HTTPURLResponse, _ error: NSError?) -> Void) -> String {
         let requestID = UUID().uuidString
-        var request = URLRequest(url: try! url(for: path))
-        request.httpMethod = requestType.rawValue
-
-        if let parameterType = parameterType, let contentType = parameterType.contentType(boundary) {
-            request.addValue(contentType, forHTTPHeaderField: "Content-Type")
-        }
-
-        if let accept = responseType.accept {
-            request.addValue(accept, forHTTPHeaderField: "Accept")
-        }
-
-        if let authorizationHeader = authorizationHeaderValue {
-            request.setValue(authorizationHeader, forHTTPHeaderField: authorizationHeaderKey)
-        } else if let token = token {
-            request.setValue("Bearer \(token)", forHTTPHeaderField: authorizationHeaderKey)
-        }
-
-        if let headerFields = headerFields {
-            for (key, value) in headerFields {
-                request.setValue(value, forHTTPHeaderField: key)
-            }
-        }
+        var request = URLRequest(url: try! url(for: path), requestType: requestType, path: path, parameterType: parameterType, responseType: responseType, boundary: boundary, authorizationHeaderValue: authorizationHeaderValue, token: token, authorizationHeaderKey: authorizationHeaderKey, headerFields: headerFields)
 
         DispatchQueue.main.async {
             NetworkActivityIndicator.sharedIndicator.visible = true

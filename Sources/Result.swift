@@ -29,7 +29,7 @@ public enum ImageResult {
     case failure(FailureResponse)
 
     public init(body: Any?, response: HTTPURLResponse, error: NSError?) {
-        let image = body as? NetworkingImage
+        let image = body as? Image
         if let error = error {
             self = .failure(FailureResponse(response: response, error: error))
         } else if let image = image {

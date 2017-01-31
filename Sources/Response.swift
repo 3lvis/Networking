@@ -57,9 +57,9 @@ public class FailureJSONResponse: JSONResponse {
 }
 
 public class SuccessImageResponse: Response {
-    public let image: NetworkingImage
+    public let image: Image
 
-    init(image: NetworkingImage, response: HTTPURLResponse) {
+    init(image: Image, response: HTTPURLResponse) {
         self.image = image
 
         super.init(response: response)
