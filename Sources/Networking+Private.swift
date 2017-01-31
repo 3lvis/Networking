@@ -36,10 +36,10 @@ extension Networking {
         return data
     }
 
-    func registerFake(_ requestType: RequestType, path: String, fileName: String, bundle: Bundle) {
+    func registerFake(requestType: RequestType, path: String, fileName: String, bundle: Bundle) {
         do {
             if let result = try JSON.from(fileName, bundle: bundle) {
-                registerFake(requestType, path: path, response: result, responseType: .json, statusCode: 200)
+                registerFake(requestType: requestType, path: path, response: result, responseType: .json, statusCode: 200)
             }
         } catch ParsingError.notFound {
             fatalError("We couldn't find \(fileName), are you sure is there?")
@@ -48,14 +48,14 @@ extension Networking {
         }
     }
 
-    func registerFake(_ requestType: RequestType, path: String, response: Any?, responseType: ResponseType, statusCode: Int) {
+    func registerFake(requestType: RequestType, path: String, response: Any?, responseType: ResponseType, statusCode: Int) {
         var fakeRequests = self.fakeRequests[requestType] ?? [String: FakeRequest]()
         fakeRequests[path] = FakeRequest(response: response, responseType: responseType, statusCode: statusCode)
         self.fakeRequests[requestType] = fakeRequests
     }
 
     @discardableResult
-    func jsonRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ result: JSONResult) -> Void) -> String {
+    func requestJSON(requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ result: JSONResult) -> Void) -> String {
         let requestID = request(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { deserialized, response, error in
             completion(JSONResult(body: deserialized, response: response, error: error))
         }

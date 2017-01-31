@@ -45,7 +45,7 @@ public extension Networking {
     ///   - image: An image that will be returned when there's a request to the registered path.
     ///   - statusCode: The status code to be used when faking the request.
     public func fakeImageDownload(_ path: String, image: NetworkingImage?, statusCode: Int = 200) {
-        registerFake(.get, path: path, response: image, responseType: .image, statusCode: statusCode)
+        registerFake(requestType: .get, path: path, response: image, responseType: .image, statusCode: statusCode)
     }
 
     /// Downloads data from a URL, caching the result.
