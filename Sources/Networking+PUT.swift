@@ -22,7 +22,7 @@ public extension Networking {
     ///   - response: An `Any` that will be returned when a PUT request is made to the specified path.
     ///   - statusCode: By default it's 200, if you provide any status code that is between 200 and 299 the response object will be returned, otherwise we will return an error containig the provided status code.
     public func fakePUT(_ path: String, response: Any?, statusCode: Int = 200) {
-        fake(.put, path: path, response: response, responseType: .json, statusCode: statusCode)
+        registerFake(.put, path: path, response: response, responseType: .json, statusCode: statusCode)
     }
 
     /// Registers a fake PUT request to the specified path using the contents of a file. After registering this, every PUT request to the path, will return the contents of the registered file.
@@ -32,7 +32,7 @@ public extension Networking {
     ///   - fileName: The name of the file, whose contents will be registered as a reponse.
     ///   - bundle: The Bundle where the file is located.
     public func fakePUT(_ path: String, fileName: String, bundle: Bundle = Bundle.main) {
-        fake(.put, path: path, fileName: fileName, bundle: bundle)
+        registerFake(.put, path: path, fileName: fileName, bundle: bundle)
     }
 
     /// Cancels the PUT request for the specified path. This causes the request to complete with error code URLError.cancelled.
