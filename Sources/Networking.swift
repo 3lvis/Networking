@@ -41,6 +41,17 @@ open class Networking {
     /// - background: A configuration type that allows HTTP and HTTPS uploads or downloads to be performed in the background. It causes upload and download tasks to be performed by the system in a separate process.
     public enum ConfigurationType {
         case `default`, ephemeral, background
+
+        var sessionConfiguration: URLSessionConfiguration {
+            switch self {
+            case .default:
+                return URLSessionConfiguration.default
+            case .ephemeral:
+                return URLSessionConfiguration.ephemeral
+            case .background:
+                return URLSessionConfiguration.background(withIdentifier: "NetworkingBackgroundConfiguration")
+            }
+        }
     }
 
     enum RequestType: String {
@@ -123,7 +134,7 @@ open class Networking {
     let boundary = String(format: "net.3lvis.networking.%08x%08x", arc4random(), arc4random())
 
     lazy var session: URLSession = {
-        var configuration = self.sessionConfiguration()
+        var configuration = self.configurationType.sessionConfiguration
         configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
         configuration.urlCache = nil
 
@@ -330,7 +341,7 @@ open class Networking {
 
 extension Networking {
 
-    func objectFromCache(for path: String, cacheName: String? = nil, responseType: ResponseType) -> Any? {
+    func objectFromCache(for path: String, cacheName: String?, responseType: ResponseType) -> Any? {
         /// Workaround: Remove URL parameters from path. That can lead to writing cached files with names longer than
         /// 255 characters, resulting in error. Another option to explore is to use a hash version of the url if it's
         /// longer than 255 characters.
@@ -364,18 +375,7 @@ extension Networking {
         return data
     }
 
-    func sessionConfiguration() -> URLSessionConfiguration {
-        switch configurationType {
-        case .default:
-            return URLSessionConfiguration.default
-        case .ephemeral:
-            return URLSessionConfiguration.ephemeral
-        case .background:
-            return URLSessionConfiguration.background(withIdentifier: "NetworkingBackgroundConfiguration")
-        }
-    }
-
-    func fake(_ requestType: RequestType, path: String, fileName: String, bundle: Bundle = Bundle.main) {
+    func fake(_ requestType: RequestType, path: String, fileName: String, bundle: Bundle) {
         do {
             if let result = try JSON.from(fileName, bundle: bundle) {
                 fake(requestType, path: path, response: result, responseType: .json, statusCode: 200)
@@ -402,87 +402,103 @@ extension Networking {
         return requestID
     }
 
-    @discardableResult
-    func request(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Any?, _ response: HTTPURLResponse, _ error: NSError?) -> Void) -> String {
-        var requestID = UUID().uuidString
+    func handleFakeRequest(_ fakeRequest: FakeRequest, requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Any?, _ response: HTTPURLResponse, _ error: NSError?) -> Void) -> String {
+        let requestID = UUID().uuidString
 
-        if let fakeRequests = fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
-            if fakeRequest.statusCode.statusCodeType() == .successful {
-                let url = try! self.url(for: path)
-                let response = HTTPURLResponse(url: url, statusCode: fakeRequest.statusCode, httpVersion: nil, headerFields: nil)!
-                TestCheck.testBlock(self.isSynchronous) {
-                    completion(fakeRequest.response, response, nil)
-                }
-            } else {
-                if let unauthorizedRequestCallback = unauthorizedRequestCallback, fakeRequest.statusCode == 403 || fakeRequest.statusCode == 401 {
-                    TestCheck.testBlock(self.isSynchronous) {
-                        unauthorizedRequestCallback()
-                    }
-                } else {
-                    let url = try! self.url(for: path)
-                    let error = NSError(domain: Networking.domain, code: fakeRequest.statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: fakeRequest.statusCode)])
-                    let response = HTTPURLResponse(url: url, statusCode: fakeRequest.statusCode, httpVersion: nil, headerFields: nil)!
-                    TestCheck.testBlock(self.isSynchronous) {
-                        completion(fakeRequest.response, response, error)
-                    }
-                }
+        if fakeRequest.statusCode.statusCodeType() == .successful {
+            let url = try! self.url(for: path)
+            let response = HTTPURLResponse(url: url, statusCode: fakeRequest.statusCode, httpVersion: nil, headerFields: nil)!
+            TestCheck.testBlock(self.isSynchronous) {
+                completion(fakeRequest.response, response, nil)
             }
         } else {
-            switch responseType {
-            case .json:
-                requestID = dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, response, error in
-                    var returnedError = error
-                    var returnedResponse: Any?
-                    if let data = data, data.count > 0 {
-                        do {
-                            returnedResponse = try JSONSerialization.jsonObject(with: data, options: [])
-                        } catch let JSONParsingError as NSError {
-                            if returnedError == nil {
-                                returnedError = JSONParsingError
-                            }
-                        }
-                    }
-                    TestCheck.testBlock(self.isSynchronous) {
-                        completion(returnedResponse, response, returnedError)
-                    }
+            if let unauthorizedRequestCallback = unauthorizedRequestCallback, fakeRequest.statusCode == 403 || fakeRequest.statusCode == 401 {
+                TestCheck.testBlock(self.isSynchronous) {
+                    unauthorizedRequestCallback()
                 }
-            case .data, .image:
-                let object = objectFromCache(for: path, cacheName: cacheName, responseType: responseType)
-                if let object = object {
-                    TestCheck.testBlock(isSynchronous) {
-                        let url = try! self.url(for: path)
-                        let response = HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!
-                        completion(object, response, nil)
-                    }
-                } else {
-                    requestID = dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, response, error in
-
-                        var returnedResponse: Any?
-                        if let data = data, data.count > 0 {
-                            guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
-                            _ = try? data.write(to: destinationURL, options: [.atomic])
-                            switch responseType {
-                            case .data:
-                                self.cache.setObject(data as AnyObject, forKey: destinationURL.absoluteString as AnyObject)
-                                returnedResponse = data
-                            case .image:
-                                if let image = NetworkingImage(data: data) {
-                                    self.cache.setObject(image, forKey: destinationURL.absoluteString as AnyObject)
-                                    returnedResponse = image
-                                }
-                            default:
-                                fatalError("Response Type is different than Data and Image")
-                            }
-                        }
-                        TestCheck.testBlock(self.isSynchronous) {
-                            completion(returnedResponse, response, error)
-                        }
-                    }
+            } else {
+                let url = try! self.url(for: path)
+                let error = NSError(domain: Networking.domain, code: fakeRequest.statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: fakeRequest.statusCode)])
+                let response = HTTPURLResponse(url: url, statusCode: fakeRequest.statusCode, httpVersion: nil, headerFields: nil)!
+                TestCheck.testBlock(self.isSynchronous) {
+                    completion(fakeRequest.response, response, error)
                 }
             }
         }
 
         return requestID
+    }
+
+    func handleJSONRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Any?, _ response: HTTPURLResponse, _ error: NSError?) -> Void) -> String {
+        return dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, response, error in
+            var returnedError = error
+            var returnedResponse: Any?
+            if let data = data, data.count > 0 {
+                do {
+                    returnedResponse = try JSONSerialization.jsonObject(with: data, options: [])
+                } catch let JSONParsingError as NSError {
+                    if returnedError == nil {
+                        returnedError = JSONParsingError
+                    }
+                }
+            }
+            TestCheck.testBlock(self.isSynchronous) {
+                completion(returnedResponse, response, returnedError)
+            }
+        }
+    }
+
+    func handleDataOrImageRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Any?, _ response: HTTPURLResponse, _ error: NSError?) -> Void) -> String {
+        let object = objectFromCache(for: path, cacheName: cacheName, responseType: responseType)
+        if let object = object {
+            let requestID = UUID().uuidString
+
+            TestCheck.testBlock(isSynchronous) {
+                let url = try! self.url(for: path)
+                let response = HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!
+                completion(object, response, nil)
+            }
+
+            return requestID
+        } else {
+            return dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, response, error in
+
+                var returnedResponse: Any?
+                if let data = data, data.count > 0 {
+                    guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
+                    _ = try? data.write(to: destinationURL, options: [.atomic])
+                    switch responseType {
+                    case .data:
+                        self.cache.setObject(data as AnyObject, forKey: destinationURL.absoluteString as AnyObject)
+                        returnedResponse = data
+                    case .image:
+                        if let image = NetworkingImage(data: data) {
+                            self.cache.setObject(image, forKey: destinationURL.absoluteString as AnyObject)
+                            returnedResponse = image
+                        }
+                    default:
+                        fatalError("Response Type is different than Data and Image")
+                    }
+                }
+                TestCheck.testBlock(self.isSynchronous) {
+                    completion(returnedResponse, response, error)
+                }
+            }
+        }
+    }
+
+    @discardableResult
+    func request(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Any?, _ response: HTTPURLResponse, _ error: NSError?) -> Void) -> String {
+        if let fakeRequests = fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
+            return handleFakeRequest(fakeRequest, requestType: requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType, completion: completion)
+        } else {
+            switch responseType {
+            case .json:
+                return handleJSONRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType, completion: completion)
+            case .data, .image:
+                return handleDataOrImageRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType, completion: completion)
+            }
+        }
     }
 
     @discardableResult
