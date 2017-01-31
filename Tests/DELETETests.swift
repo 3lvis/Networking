@@ -146,12 +146,13 @@ class DELETETests: XCTestCase {
             case .success:
                 XCTFail()
             case .failure(let response):
+                XCTAssertEqual(response.json, JSON.none)
                 XCTAssertEqual(response.error.code, URLError.cancelled.rawValue)
                 expectation.fulfill()
             }
         }
 
-        networking.cancel(with: requestID)
+        networking.cancel(requestID)
 
         waitForExpectations(timeout: 15.0, handler: nil)
     }

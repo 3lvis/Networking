@@ -87,7 +87,7 @@ class NetworkingTests: XCTestCase {
 
     func testURLForPath() {
         let networking = Networking(baseURL: baseURL)
-        let url = try! networking.url(for: "/hello")
+        let url = try! networking.composedURL(with: "/hello")
         XCTAssertEqual(url.absoluteString, "http://httpbin.org/hello")
     }
 
@@ -141,19 +141,19 @@ class NetworkingTests: XCTestCase {
     }
 
     func testStatusCodeType() {
-        XCTAssertEqual((URLError.cancelled.rawValue).statusCodeType(), Networking.StatusCodeType.cancelled)
-        XCTAssertEqual(99.statusCodeType(), Networking.StatusCodeType.unknown)
-        XCTAssertEqual(100.statusCodeType(), Networking.StatusCodeType.informational)
-        XCTAssertEqual(199.statusCodeType(), Networking.StatusCodeType.informational)
-        XCTAssertEqual(200.statusCodeType(), Networking.StatusCodeType.successful)
-        XCTAssertEqual(299.statusCodeType(), Networking.StatusCodeType.successful)
-        XCTAssertEqual(300.statusCodeType(), Networking.StatusCodeType.redirection)
-        XCTAssertEqual(399.statusCodeType(), Networking.StatusCodeType.redirection)
-        XCTAssertEqual(400.statusCodeType(), Networking.StatusCodeType.clientError)
-        XCTAssertEqual(499.statusCodeType(), Networking.StatusCodeType.clientError)
-        XCTAssertEqual(500.statusCodeType(), Networking.StatusCodeType.serverError)
-        XCTAssertEqual(599.statusCodeType(), Networking.StatusCodeType.serverError)
-        XCTAssertEqual(600.statusCodeType(), Networking.StatusCodeType.unknown)
+        XCTAssertEqual((URLError.cancelled.rawValue).statusCodeType, Networking.StatusCodeType.cancelled)
+        XCTAssertEqual(99.statusCodeType, Networking.StatusCodeType.unknown)
+        XCTAssertEqual(100.statusCodeType, Networking.StatusCodeType.informational)
+        XCTAssertEqual(199.statusCodeType, Networking.StatusCodeType.informational)
+        XCTAssertEqual(200.statusCodeType, Networking.StatusCodeType.successful)
+        XCTAssertEqual(299.statusCodeType, Networking.StatusCodeType.successful)
+        XCTAssertEqual(300.statusCodeType, Networking.StatusCodeType.redirection)
+        XCTAssertEqual(399.statusCodeType, Networking.StatusCodeType.redirection)
+        XCTAssertEqual(400.statusCodeType, Networking.StatusCodeType.clientError)
+        XCTAssertEqual(499.statusCodeType, Networking.StatusCodeType.clientError)
+        XCTAssertEqual(500.statusCodeType, Networking.StatusCodeType.serverError)
+        XCTAssertEqual(599.statusCodeType, Networking.StatusCodeType.serverError)
+        XCTAssertEqual(600.statusCodeType, Networking.StatusCodeType.unknown)
     }
 
     func testSplitBaseURLAndRelativePath() {
@@ -186,7 +186,7 @@ class NetworkingTests: XCTestCase {
             }
         }
 
-        networking.cancel(with: requestID)
+        networking.cancel(requestID)
 
         waitForExpectations(timeout: 15.0, handler: nil)
     }

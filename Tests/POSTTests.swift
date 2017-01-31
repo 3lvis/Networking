@@ -160,7 +160,7 @@ class POSTTests: XCTestCase {
         let networking = Networking(baseURL: "https://api.cloudinary.com")
         let timestamp = "\(Int(Date().timeIntervalSince1970))"
 
-        let pngImage = NetworkingImage.find(named: "pig.png", inBundle: Bundle(for: POSTTests.self))
+        let pngImage = Image.find(named: "pig.png", inBundle: Bundle(for: POSTTests.self))
         let pngImageData = pngImage.pngData()!
         let pngPart = FormDataPart(data: pngImageData, parameterName: "file", filename: "\(timestamp).png")
 
@@ -285,7 +285,7 @@ class POSTTests: XCTestCase {
             }
         }
 
-        networking.cancel(with: requestID)
+        networking.cancel(requestID)
 
         waitForExpectations(timeout: 15.0, handler: nil)
     }

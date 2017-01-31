@@ -7,6 +7,7 @@ public enum JSONResult {
 
     public init(body: Any?, response: HTTPURLResponse, error: NSError?) {
         var json: JSON
+        
         if let dictionary = body as? [String: Any] {
             json = JSON(dictionary)
         } else if let array = body as? [[String: Any]] {
@@ -16,9 +17,9 @@ public enum JSONResult {
         }
 
         if let error = error {
-            self = .failure(FailureJSONResponse(body: json, response: response, error: error))
+            self = .failure(FailureJSONResponse(json: json, response: response, error: error))
         } else {
-            self = .success(SuccessJSONResponse(body: json, response: response))
+            self = .success(SuccessJSONResponse(json: json, response: response))
         }
     }
 }
@@ -29,7 +30,7 @@ public enum ImageResult {
     case failure(FailureResponse)
 
     public init(body: Any?, response: HTTPURLResponse, error: NSError?) {
-        let image = body as? NetworkingImage
+        let image = body as? Image
         if let error = error {
             self = .failure(FailureResponse(response: response, error: error))
         } else if let image = image {

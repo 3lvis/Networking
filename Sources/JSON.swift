@@ -5,7 +5,7 @@ enum ParsingError: Error {
     case notFound, failed
 }
 
-public enum JSON {
+public enum JSON: Equatable {
     case none
 
     case dictionary([String: Any])
@@ -42,10 +42,6 @@ public enum JSON {
         self = .array(array)
     }
 
-    public init() {
-        self = .none
-    }
-
     /// Returns a JSON object from a file.
     ///
     /// - Parameters:
@@ -63,6 +59,10 @@ public enum JSON {
 
         return json
     }
+}
+
+public func ==(lhs: JSON, rhs: JSON) -> Bool {
+    return lhs.array.debugDescription == rhs.array.debugDescription && lhs.dictionary.debugDescription == rhs.dictionary.debugDescription
 }
 
 extension Data {

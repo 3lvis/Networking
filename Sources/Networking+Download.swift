@@ -8,10 +8,10 @@ public extension Networking {
     ///   - path: The path where the image is located.
     ///   - cacheName: The cache name used to identify the downloaded image, by default the path is used.
     /// - Returns: The cached image.
-    public func imageFromCache(_ path: String, cacheName: String? = nil) -> NetworkingImage? {
+    public func imageFromCache(_ path: String, cacheName: String? = nil) -> Image? {
         let object = objectFromCache(for: path, cacheName: cacheName, responseType: .image)
 
-        return object as? NetworkingImage
+        return object as? Image
     }
 
     /// Downloads an image using the specified path.
@@ -23,18 +23,14 @@ public extension Networking {
     /// - Returns: The request identifier.
     @discardableResult
     public func downloadImage(_ path: String, cacheName: String? = nil, completion: @escaping (_ result: ImageResult) -> Void) -> String {
-        let requestIdentifier = request(.get, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .image) { deserialized, response, error in
-            completion(ImageResult(body: deserialized, response: response, error: error))
-        }
-
-        return requestIdentifier
+        return requestImage(path: path, cacheName: cacheName, completion: completion)
     }
 
     /// Cancels the image download request for the specified path. This causes the request to complete with error code URLError.cancelled.
     ///
     /// - Parameter path: The path for the cancelled image download request.
     public func cancelImageDownload(_ path: String) {
-        let url = try! self.url(for: path)
+        let url = try! self.composedURL(with: path)
         cancelRequest(.data, requestType: .get, url: url)
     }
 
@@ -44,8 +40,8 @@ public extension Networking {
     ///   - path: The path for the faked image download request.
     ///   - image: An image that will be returned when there's a request to the registered path.
     ///   - statusCode: The status code to be used when faking the request.
-    public func fakeImageDownload(_ path: String, image: NetworkingImage?, statusCode: Int = 200) {
-        fake(.get, path: path, response: image, responseType: .image, statusCode: statusCode)
+    public func fakeImageDownload(_ path: String, image: Image?, statusCode: Int = 200) {
+        registerFake(requestType: .get, path: path, response: image, responseType: .image, statusCode: statusCode)
     }
 
     /// Downloads data from a URL, caching the result.
@@ -55,12 +51,8 @@ public extension Networking {
     ///   - cacheName: The cache name used to identify the downloaded data, by default the path is used.
     ///   - completion: A closure that gets called when the download request is completed, it contains  a `data` object and an `NSError`.
     @discardableResult
-    public func downloadData(for path: String, cacheName: String? = nil, completion: @escaping (_ result: DataResult) -> Void) -> String {
-        let requestIdentifier = request(.get, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .data) { deserialized, response, error in
-            completion(DataResult(body: deserialized, response: response, error: error))
-        }
-
-        return requestIdentifier
+    public func downloadData(_ path: String, cacheName: String? = nil, completion: @escaping (_ result: DataResult) -> Void) -> String {
+        return requestData(path: path, cacheName: cacheName, completion: completion)
     }
 
     /// Retrieves data from the cache or from the filesystem.
@@ -69,7 +61,7 @@ public extension Networking {
     ///   - path: The path where the image is located.
     ///   - cacheName: The cache name used to identify the downloaded data, by default the path is used.
     /// - Returns: The cached data.
-    public func dataFromCache(for path: String, cacheName: String? = nil) -> Data? {
+    public func dataFromCache(_ path: String, cacheName: String? = nil) -> Data? {
         let object = objectFromCache(for: path, cacheName: cacheName, responseType: .data)
 
         return object as? Data
