@@ -5,7 +5,7 @@ public extension Int {
     /// Categorizes a status code.
     ///
     /// - Returns: The NetworkingStatusCodeType of the status code.
-    public func statusCodeType() -> Networking.StatusCodeType {
+    var statusCodeType: Networking.StatusCodeType {
         switch self {
         case URLError.cancelled.rawValue:
             return .cancelled

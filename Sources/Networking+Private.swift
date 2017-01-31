@@ -81,7 +81,7 @@ extension Networking {
     func handleFakeRequest(_ fakeRequest: FakeRequest, requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Any?, _ response: HTTPURLResponse, _ error: NSError?) -> Void) -> String {
         let requestID = UUID().uuidString
 
-        if fakeRequest.statusCode.statusCodeType() == .successful {
+        if fakeRequest.statusCode.statusCodeType == .successful {
             let url = try! self.url(for: path)
             let response = HTTPURLResponse(url: url, statusCode: fakeRequest.statusCode)
             TestCheck.testBlock(self.isSynchronous) {
