@@ -7,12 +7,13 @@ public enum JSONResult {
 
     public init(body: Any?, response: HTTPURLResponse, error: NSError?) {
         var json: JSON
+        
         if let dictionary = body as? [String: Any] {
             json = JSON(dictionary)
         } else if let array = body as? [[String: Any]] {
             json = JSON(array)
         } else {
-            fatalError("JSON is not an array or a dictionary")
+            json = JSON.none
         }
 
         if let error = error {
