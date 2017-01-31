@@ -366,14 +366,14 @@
 				147B32ED1CF9B1C500D5BAED /* Networking+DELETE.swift */,
 				1474C1C01CA2988900E15D84 /* Networking+Download.swift */,
 				44A6D5471E4122DE00405A7E /* Networking+Private.swift */,
-				446C24621DFEE964006FA6CC /* Helpers.swift */,
 				14D144DD1CEED63B00048629 /* FormDataPart.swift */,
-				1474C1BD1CA2988900E15D84 /* JSON.swift */,
-				1474C1BE1CA2988900E15D84 /* NetworkActivityIndicator.swift */,
-				148341701CF1CF0500E91F01 /* Image.swift */,
-				1474C1C21CA2988900E15D84 /* TestCheck.swift */,
 				44A5718F1E3E394900F29064 /* Result.swift */,
 				145F164F1E3E89E200597D7B /* Response.swift */,
+				148341701CF1CF0500E91F01 /* Image.swift */,
+				1474C1BD1CA2988900E15D84 /* JSON.swift */,
+				1474C1BE1CA2988900E15D84 /* NetworkActivityIndicator.swift */,
+				1474C1C21CA2988900E15D84 /* TestCheck.swift */,
+				446C24621DFEE964006FA6CC /* Helpers.swift */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
