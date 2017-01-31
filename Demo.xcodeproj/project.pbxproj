@@ -139,6 +139,9 @@
 		44A6D54D1E4122DE00405A7E /* Networking+Private.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44A6D5471E4122DE00405A7E /* Networking+Private.swift */; };
 		44A6D54E1E4122DE00405A7E /* Networking+Private.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44A6D5471E4122DE00405A7E /* Networking+Private.swift */; };
 		44A6D54F1E4122DE00405A7E /* Networking+Private.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44A6D5471E4122DE00405A7E /* Networking+Private.swift */; };
+		44A6D55A1E4143F400405A7E /* JSONTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44A6D5591E4143F400405A7E /* JSONTests.swift */; };
+		44A6D55B1E4143F400405A7E /* JSONTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44A6D5591E4143F400405A7E /* JSONTests.swift */; };
+		44A6D55C1E4143F400405A7E /* JSONTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44A6D5591E4143F400405A7E /* JSONTests.swift */; };
 		44B5D38A1D19B9E5004378B9 /* TestCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1474C1C21CA2988900E15D84 /* TestCheck.swift */; };
 		44B5D38B1D19B9E5004378B9 /* DownloadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1413F4631CE7963700482096 /* DownloadTests.swift */; };
 		44B5D38C1D19B9E5004378B9 /* Dictionary+FormURLEncodedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1413F45E1CE7963700482096 /* Dictionary+FormURLEncodedTests.swift */; };
@@ -234,6 +237,7 @@
 		4496E8E51DAFB27A0092254E /* String+UTF8Tests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+UTF8Tests.swift"; sourceTree = "<group>"; };
 		44A5718F1E3E394900F29064 /* Result.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Result.swift; sourceTree = "<group>"; };
 		44A6D5471E4122DE00405A7E /* Networking+Private.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Networking+Private.swift"; sourceTree = "<group>"; };
+		44A6D5591E4143F400405A7E /* JSONTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSONTests.swift; sourceTree = "<group>"; };
 		44B5D3AB1D19B9E5004378B9 /* tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = tvOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		44DFD38D1D9A2D5A0014E9F2 /* iOSDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iOSDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		44DFD38F1D9A2D5A0014E9F2 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -322,6 +326,7 @@
 				E6ED61301E27CD630058ACE9 /* UnauthorizedCallbackTests.swift */,
 				1488E23C1CF138D700C6FBA3 /* SHA1.h */,
 				4496E8E51DAFB27A0092254E /* String+UTF8Tests.swift */,
+				44A6D5591E4143F400405A7E /* JSONTests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -791,6 +796,7 @@
 				1413F46D1CE7963700482096 /* TestHelpers.swift in Sources */,
 				145F16531E3E89E200597D7B /* Response.swift in Sources */,
 				147B33041CF9B1C500D5BAED /* Networking+PUT.swift in Sources */,
+				44A6D55C1E4143F400405A7E /* JSONTests.swift in Sources */,
 				146EF9141CEBCEA50059DDB1 /* GETTests.swift in Sources */,
 				147B32F21CF9B1C500D5BAED /* Networking+DELETE.swift in Sources */,
 				1488E23F1CF138D700C6FBA3 /* SHA1.m in Sources */,
@@ -912,6 +918,7 @@
 				145F16511E3E89E200597D7B /* Response.swift in Sources */,
 				147B33031CF9B1C500D5BAED /* Networking+PUT.swift in Sources */,
 				146EF9131CEBCEA50059DDB1 /* GETTests.swift in Sources */,
+				44A6D55A1E4143F400405A7E /* JSONTests.swift in Sources */,
 				147B32F11CF9B1C500D5BAED /* Networking+DELETE.swift in Sources */,
 				1413F4721CE7963700482096 /* NetworkingTests.swift in Sources */,
 				1488E23E1CF138D700C6FBA3 /* SHA1.m in Sources */,
@@ -945,6 +952,7 @@
 				145F16521E3E89E200597D7B /* Response.swift in Sources */,
 				44B5D39A1D19B9E5004378B9 /* Networking+PUT.swift in Sources */,
 				44B5D39B1D19B9E5004378B9 /* GETTests.swift in Sources */,
+				44A6D55B1E4143F400405A7E /* JSONTests.swift in Sources */,
 				44B5D39D1D19B9E5004378B9 /* Networking+DELETE.swift in Sources */,
 				44B5D39E1D19B9E5004378B9 /* NetworkingTests.swift in Sources */,
 				44B5D39F1D19B9E5004378B9 /* SHA1.m in Sources */,

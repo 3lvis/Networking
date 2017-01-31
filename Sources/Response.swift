@@ -27,18 +27,18 @@ public class FailureResponse: Response {
 }
 
 public class JSONResponse: Response {
-    public let body: JSON
+    public let json: JSON
 
     public var dictionaryBody: [String: Any] {
-        return body.dictionary
+        return json.dictionary
     }
 
     public var arrayBody: [[String: Any]] {
-        return body.array
+        return json.array
     }
 
-    init(body: JSON, response: HTTPURLResponse) {
-        self.body = body
+    init(json: JSON, response: HTTPURLResponse) {
+        self.json = json
 
         super.init(response: response)
     }
@@ -49,10 +49,10 @@ public class SuccessJSONResponse: JSONResponse { }
 public class FailureJSONResponse: JSONResponse {
     public let error: NSError
 
-    init(body: JSON, response: HTTPURLResponse, error: NSError) {
+    init(json: JSON, response: HTTPURLResponse, error: NSError) {
         self.error = error
 
-        super.init(body: body, response: response)
+        super.init(json: json, response: response)
     }
 }
 
