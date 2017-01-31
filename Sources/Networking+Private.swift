@@ -49,33 +49,27 @@ extension Networking {
     }
 
     func registerFake(requestType: RequestType, path: String, response: Any?, responseType: ResponseType, statusCode: Int) {
-        var fakeRequests = self.fakeRequests[requestType] ?? [String: FakeRequest]()
-        fakeRequests[path] = FakeRequest(response: response, responseType: responseType, statusCode: statusCode)
-        self.fakeRequests[requestType] = fakeRequests
+        var requests = fakeRequests[requestType] ?? [String: FakeRequest]()
+        requests[path] = FakeRequest(response: response, responseType: responseType, statusCode: statusCode)
+        fakeRequests[requestType] = requests
     }
 
     func requestJSON(requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, completion: @escaping (_ result: JSONResult) -> Void) -> String {
-        let requestID = request(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: .json) { deserialized, response, error in
+        return request(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: .json) { deserialized, response, error in
             completion(JSONResult(body: deserialized, response: response, error: error))
         }
-
-        return requestID
     }
 
     func requestImage(path: String, cacheName: String?, completion: @escaping (_ result: ImageResult) -> Void) -> String {
-        let requestID = request(.get, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .image) { deserialized, response, error in
+        return request(.get, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .image) { deserialized, response, error in
             completion(ImageResult(body: deserialized, response: response, error: error))
         }
-
-        return requestID
     }
 
     func requestData(path: String, cacheName: String?, completion: @escaping (_ result: DataResult) -> Void) -> String {
-        let requestID = request(.get, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .data) { deserialized, response, error in
+        return request(.get, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .data) { deserialized, response, error in
             completion(DataResult(body: deserialized, response: response, error: error))
         }
-
-        return requestID
     }
 
     func request(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Any?, _ response: HTTPURLResponse, _ error: NSError?) -> Void) -> String {
