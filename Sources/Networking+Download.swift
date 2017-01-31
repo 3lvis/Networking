@@ -23,11 +23,7 @@ public extension Networking {
     /// - Returns: The request identifier.
     @discardableResult
     public func downloadImage(_ path: String, cacheName: String? = nil, completion: @escaping (_ result: ImageResult) -> Void) -> String {
-        let requestIdentifier = request(.get, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .image) { deserialized, response, error in
-            completion(ImageResult(body: deserialized, response: response, error: error))
-        }
-
-        return requestIdentifier
+        return requestImage(path: path, cacheName: cacheName, completion: completion)
     }
 
     /// Cancels the image download request for the specified path. This causes the request to complete with error code URLError.cancelled.
@@ -55,12 +51,8 @@ public extension Networking {
     ///   - cacheName: The cache name used to identify the downloaded data, by default the path is used.
     ///   - completion: A closure that gets called when the download request is completed, it contains  a `data` object and an `NSError`.
     @discardableResult
-    public func downloadData(for path: String, cacheName: String? = nil, completion: @escaping (_ result: DataResult) -> Void) -> String {
-        let requestIdentifier = request(.get, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .data) { deserialized, response, error in
-            completion(DataResult(body: deserialized, response: response, error: error))
-        }
-
-        return requestIdentifier
+    public func downloadData(_ path: String, cacheName: String? = nil, completion: @escaping (_ result: DataResult) -> Void) -> String {
+        return requestData(path: path, cacheName: cacheName, completion: completion)
     }
 
     /// Retrieves data from the cache or from the filesystem.
@@ -69,7 +61,7 @@ public extension Networking {
     ///   - path: The path where the image is located.
     ///   - cacheName: The cache name used to identify the downloaded data, by default the path is used.
     /// - Returns: The cached data.
-    public func dataFromCache(for path: String, cacheName: String? = nil) -> Data? {
+    public func dataFromCache(_ path: String, cacheName: String? = nil) -> Data? {
         let object = objectFromCache(for: path, cacheName: cacheName, responseType: .data)
 
         return object as? Data

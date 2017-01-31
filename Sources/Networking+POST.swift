@@ -12,7 +12,7 @@ public extension Networking {
     /// - Returns: The request identifier.
     @discardableResult
     public func post(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
-        return requestJSON(requestType: .post, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
+        return requestJSON(requestType: .post, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, completion: completion)
     }
 
     /// POST request to the specified path, using the provided parameters.
@@ -25,7 +25,7 @@ public extension Networking {
     /// - Returns: The request identifier.
     @discardableResult
     public func post(_ path: String, parameters: Any? = nil, parts: [FormDataPart], completion: @escaping (_ result: JSONResult) -> Void) -> String {
-        return requestJSON(requestType: .post, path: path, cacheName: nil, parameterType: .multipartFormData, parameters: parameters, parts: parts, responseType: .json, completion: completion)
+        return requestJSON(requestType: .post, path: path, cacheName: nil, parameterType: .multipartFormData, parameters: parameters, parts: parts, completion: completion)
     }
 
     /// Registers a fake POST request for the specified path. After registering this, every POST request to the path, will return the registered response.

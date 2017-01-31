@@ -13,7 +13,7 @@ public extension Networking {
     public func get(_ path: String, parameters: Any? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
         let parameterType = parameters != nil ? ParameterType.formURLEncoded : ParameterType.none
 
-        return requestJSON(requestType: .get, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
+        return requestJSON(requestType: .get, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, completion: completion)
     }
 
     /// Registers a fake GET request for the specified path. After registering this, every GET request to the path, will return the registered response.

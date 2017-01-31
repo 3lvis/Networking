@@ -54,13 +54,41 @@ extension Networking {
         self.fakeRequests[requestType] = fakeRequests
     }
 
-    @discardableResult
-    func requestJSON(requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ result: JSONResult) -> Void) -> String {
-        let requestID = request(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { deserialized, response, error in
+    func requestJSON(requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, completion: @escaping (_ result: JSONResult) -> Void) -> String {
+        let requestID = request(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: .json) { deserialized, response, error in
             completion(JSONResult(body: deserialized, response: response, error: error))
         }
 
         return requestID
+    }
+
+    func requestImage(path: String, cacheName: String?, completion: @escaping (_ result: ImageResult) -> Void) -> String {
+        let requestID = request(.get, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .image) { deserialized, response, error in
+            completion(ImageResult(body: deserialized, response: response, error: error))
+        }
+
+        return requestID
+    }
+
+    func requestData(path: String, cacheName: String?, completion: @escaping (_ result: DataResult) -> Void) -> String {
+        let requestID = request(.get, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .data) { deserialized, response, error in
+            completion(DataResult(body: deserialized, response: response, error: error))
+        }
+
+        return requestID
+    }
+
+    func request(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Any?, _ response: HTTPURLResponse, _ error: NSError?) -> Void) -> String {
+        if let fakeRequests = fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
+            return handleFakeRequest(fakeRequest, requestType: requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType, completion: completion)
+        } else {
+            switch responseType {
+            case .json:
+                return handleJSONRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType, completion: completion)
+            case .data, .image:
+                return handleDataOrImageRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType, completion: completion)
+            }
+        }
     }
 
     func handleFakeRequest(_ fakeRequest: FakeRequest, requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Any?, _ response: HTTPURLResponse, _ error: NSError?) -> Void) -> String {
@@ -144,20 +172,6 @@ extension Networking {
                 TestCheck.testBlock(self.isSynchronous) {
                     completion(returnedResponse, response, error)
                 }
-            }
-        }
-    }
-
-    @discardableResult
-    func request(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Any?, _ response: HTTPURLResponse, _ error: NSError?) -> Void) -> String {
-        if let fakeRequests = fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
-            return handleFakeRequest(fakeRequest, requestType: requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType, completion: completion)
-        } else {
-            switch responseType {
-            case .json:
-                return handleJSONRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType, completion: completion)
-            case .data, .image:
-                return handleDataOrImageRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType, completion: completion)
             }
         }
     }

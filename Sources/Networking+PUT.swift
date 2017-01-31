@@ -12,7 +12,7 @@ public extension Networking {
     /// - Returns: The request identifier.
     @discardableResult
     public func put(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
-        return requestJSON(requestType: .put, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
+        return requestJSON(requestType: .put, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, completion: completion)
     }
 
     /// Registers a fake PUT request for the specified path. After registering this, every PUT request to the path, will return the registered response.
