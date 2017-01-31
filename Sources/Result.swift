@@ -12,7 +12,7 @@ public enum JSONResult {
         } else if let array = body as? [[String: Any]] {
             json = JSON(array)
         } else {
-            json = JSON.none
+            fatalError("JSON is not an array or a dictionary")
         }
 
         if let error = error {
