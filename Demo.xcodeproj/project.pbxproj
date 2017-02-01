@@ -59,6 +59,15 @@
 		1474C1C51CA2988900E15D84 /* NetworkActivityIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1474C1BE1CA2988900E15D84 /* NetworkActivityIndicator.swift */; };
 		1474C1C81CA2988900E15D84 /* Networking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1474C1C11CA2988900E15D84 /* Networking.swift */; };
 		1474C1C91CA2988900E15D84 /* TestCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1474C1C21CA2988900E15D84 /* TestCheck.swift */; };
+		1476C3211E41FD9000E9FB4D /* invalid.json in Resources */ = {isa = PBXBuildFile; fileRef = 1476C31E1E41FD9000E9FB4D /* invalid.json */; };
+		1476C3221E41FD9000E9FB4D /* invalid.json in Resources */ = {isa = PBXBuildFile; fileRef = 1476C31E1E41FD9000E9FB4D /* invalid.json */; };
+		1476C3231E41FD9000E9FB4D /* invalid.json in Resources */ = {isa = PBXBuildFile; fileRef = 1476C31E1E41FD9000E9FB4D /* invalid.json */; };
+		1476C3241E41FD9000E9FB4D /* simple_array.json in Resources */ = {isa = PBXBuildFile; fileRef = 1476C31F1E41FD9000E9FB4D /* simple_array.json */; };
+		1476C3251E41FD9000E9FB4D /* simple_array.json in Resources */ = {isa = PBXBuildFile; fileRef = 1476C31F1E41FD9000E9FB4D /* simple_array.json */; };
+		1476C3261E41FD9000E9FB4D /* simple_array.json in Resources */ = {isa = PBXBuildFile; fileRef = 1476C31F1E41FD9000E9FB4D /* simple_array.json */; };
+		1476C3271E41FD9000E9FB4D /* simple_dictionary.json in Resources */ = {isa = PBXBuildFile; fileRef = 1476C3201E41FD9000E9FB4D /* simple_dictionary.json */; };
+		1476C3281E41FD9000E9FB4D /* simple_dictionary.json in Resources */ = {isa = PBXBuildFile; fileRef = 1476C3201E41FD9000E9FB4D /* simple_dictionary.json */; };
+		1476C3291E41FD9000E9FB4D /* simple_dictionary.json in Resources */ = {isa = PBXBuildFile; fileRef = 1476C3201E41FD9000E9FB4D /* simple_dictionary.json */; };
 		147B32F71CF9B1C500D5BAED /* Networking+HTTPRequests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147B32EE1CF9B1C500D5BAED /* Networking+HTTPRequests.swift */; };
 		147B32F81CF9B1C500D5BAED /* Networking+HTTPRequests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147B32EE1CF9B1C500D5BAED /* Networking+HTTPRequests.swift */; };
 		147B32F91CF9B1C500D5BAED /* Networking+HTTPRequests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147B32EE1CF9B1C500D5BAED /* Networking+HTTPRequests.swift */; };
@@ -182,6 +191,9 @@
 		1474C1BE1CA2988900E15D84 /* NetworkActivityIndicator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkActivityIndicator.swift; sourceTree = "<group>"; };
 		1474C1C11CA2988900E15D84 /* Networking.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Networking.swift; sourceTree = "<group>"; };
 		1474C1C21CA2988900E15D84 /* TestCheck.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestCheck.swift; sourceTree = "<group>"; };
+		1476C31E1E41FD9000E9FB4D /* invalid.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = invalid.json; sourceTree = "<group>"; };
+		1476C31F1E41FD9000E9FB4D /* simple_array.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = simple_array.json; sourceTree = "<group>"; };
+		1476C3201E41FD9000E9FB4D /* simple_dictionary.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = simple_dictionary.json; sourceTree = "<group>"; };
 		147B32EE1CF9B1C500D5BAED /* Networking+HTTPRequests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Networking+HTTPRequests.swift"; sourceTree = "<group>"; };
 		148341701CF1CF0500E91F01 /* Image.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Image.swift; sourceTree = "<group>"; };
 		1488E23C1CF138D700C6FBA3 /* SHA1.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SHA1.h; sourceTree = "<group>"; };
@@ -351,6 +363,9 @@
 				14B0CEDE1CF1D0D700049AD6 /* døgnvillburgere.jpg */,
 				14B0CEE41CF1D0D700049AD6 /* sample.jpg */,
 				14B0CEDF1CF1D0D700049AD6 /* entries.json */,
+				1476C31E1E41FD9000E9FB4D /* invalid.json */,
+				1476C31F1E41FD9000E9FB4D /* simple_array.json */,
+				1476C3201E41FD9000E9FB4D /* simple_dictionary.json */,
 				14B0CEE11CF1D0D700049AD6 /* Keys.plist */,
 				14B0CEE31CF1D0D700049AD6 /* pig.png */,
 			);
@@ -658,10 +673,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				14B0CEEA1CF1D0D700049AD6 /* Keys.plist in Resources */,
+				1476C3261E41FD9000E9FB4D /* simple_array.json in Resources */,
 				14B0CEE81CF1D0D700049AD6 /* entries.json in Resources */,
 				14B0CEEC1CF1D0D700049AD6 /* pig.png in Resources */,
 				14B0CEE61CF1D0D700049AD6 /* døgnvillburgere.jpg in Resources */,
+				1476C3291E41FD9000E9FB4D /* simple_dictionary.json in Resources */,
 				14B0CEEE1CF1D0D700049AD6 /* sample.jpg in Resources */,
+				1476C3231E41FD9000E9FB4D /* invalid.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -698,10 +716,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				44DFD3B11D9A3FC80014E9F2 /* pig.png in Resources */,
+				1476C3241E41FD9000E9FB4D /* simple_array.json in Resources */,
 				14B0CEE91CF1D0D700049AD6 /* Keys.plist in Resources */,
 				14B0CEE71CF1D0D700049AD6 /* entries.json in Resources */,
 				14B0CEE51CF1D0D700049AD6 /* døgnvillburgere.jpg in Resources */,
+				1476C3271E41FD9000E9FB4D /* simple_dictionary.json in Resources */,
 				14B0CEED1CF1D0D700049AD6 /* sample.jpg in Resources */,
+				1476C3211E41FD9000E9FB4D /* invalid.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -710,10 +731,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				44B5D3A31D19B9E5004378B9 /* Keys.plist in Resources */,
+				1476C3251E41FD9000E9FB4D /* simple_array.json in Resources */,
 				44B5D3A41D19B9E5004378B9 /* entries.json in Resources */,
 				44B5D3A51D19B9E5004378B9 /* pig.png in Resources */,
 				44B5D3A61D19B9E5004378B9 /* døgnvillburgere.jpg in Resources */,
+				1476C3281E41FD9000E9FB4D /* simple_dictionary.json in Resources */,
 				44B5D3A71D19B9E5004378B9 /* sample.jpg in Resources */,
+				1476C3221E41FD9000E9FB4D /* invalid.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
