@@ -150,6 +150,28 @@ class POSTTests: XCTestCase {
         }
     }
 
+    func testPOSTWithMultipartFormDataNoParameters() {
+        let networking = Networking(baseURL: baseURL)
+
+        let item1 = "FIRSTDATA"
+        let part1 = FormDataPart(data: item1.data(using: .utf8)!, parameterName: item1, filename: "\(item1).png")
+        networking.post("/post", parameters: nil, parts: [part1]) { result in
+            switch result {
+            case .success(let response):
+                let json = response.dictionaryBody
+                XCTAssertEqual(json["url"] as? String, "http://httpbin.org/post")
+
+                guard let headers = json["headers"] as? [String: Any] else { XCTFail(); return }
+                XCTAssertEqual(headers["Content-Type"] as? String, "multipart/form-data; boundary=\(networking.boundary)")
+
+                guard let files = json["files"] as? [String: Any] else { XCTFail(); return }
+                XCTAssertEqual(files[item1] as? String, item1)
+            case .failure:
+                XCTFail()
+            }
+        }
+    }
+
     func testUploadingAnImageWithMultipartFormData() {
         guard let path = Bundle(for: POSTTests.self).path(forResource: "Keys", ofType: "plist") else { return }
         guard let dictionary = NSDictionary(contentsOfFile: path) else { return }
