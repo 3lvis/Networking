@@ -126,7 +126,7 @@ class POSTTests: XCTestCase {
             "double": 20.0,
             "bool": true,
         ] as [String: Any]
-        networking.post("/post", parameters: parameters as Any?, parts: [part1, part2]) { result in
+        networking.post("/post", parameters: parameters, parts: [part1, part2]) { result in
             switch result {
             case .success(let response):
                 let json = response.dictionaryBody
@@ -172,7 +172,7 @@ class POSTTests: XCTestCase {
         parameters["api_key"] = CloudinaryAPIKey
         parameters["signature"] = signature
 
-        networking.post("/v1_1/\(CloudinaryCloudName)/image/upload", parameters: parameters as Any?, parts: [pngPart]) { result in
+        networking.post("/v1_1/\(CloudinaryCloudName)/image/upload", parameters: parameters, parts: [pngPart]) { result in
             switch result {
             case .success(let response):
                 let JSONResponse = response.dictionaryBody
