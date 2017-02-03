@@ -36,7 +36,8 @@ public enum ImageResult {
         } else if let image = image {
             self = .success(SuccessImageResponse(image: image, response: response))
         } else {
-            fatalError("No error, no image")
+            let error = NSError(domain: Networking.domain, code: URLError.cannotParseResponse.rawValue, userInfo: [NSLocalizedDescriptionKey: "Malformed image"])
+            self = .failure(FailureResponse(response: response, error: error))
         }
     }
 }
@@ -53,7 +54,8 @@ public enum DataResult {
         } else if let data = data {
             self = .success(SuccessDataResponse(data: data, response: response))
         } else {
-            fatalError("No data, no error")
+            let error = NSError(domain: Networking.domain, code: URLError.cannotParseResponse.rawValue, userInfo: [NSLocalizedDescriptionKey: "Malformed data"])
+            self = .failure(FailureResponse(response: response, error: error))
         }
     }
 }
