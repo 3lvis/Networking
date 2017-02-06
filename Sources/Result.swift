@@ -5,6 +5,15 @@ public enum JSONResult {
 
     case failure(FailureJSONResponse)
 
+    public var error: NSError? {
+        switch self {
+        case .success:
+            return nil
+        case .failure(let response):
+            return response.error
+        }
+    }
+
     public init(body: Any?, response: HTTPURLResponse, error: NSError?) {
         var json: JSON
         
