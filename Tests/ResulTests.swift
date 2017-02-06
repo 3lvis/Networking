@@ -29,4 +29,16 @@ class ResultTests: XCTestCase {
             XCTAssertEqual(result.error.code, URLError.cannotParseResponse.rawValue)
         }
     }
+
+    func testJSONResponseError() {
+        let url = URL(string: "http://www.google.com")!
+        let urlResponse = HTTPURLResponse(url: url, statusCode: 200)
+
+        let nilErrorResult = JSONResult(body: [:], response: urlResponse, error: nil)
+        XCTAssertNil(nilErrorResult.error)
+
+        let error = NSError(domain: "", code: 0, userInfo: nil)
+        let errorResult = JSONResult(body: [:], response: urlResponse, error: error)
+        XCTAssertNotNil(errorResult.error)
+    }
 }
