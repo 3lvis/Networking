@@ -6,7 +6,7 @@ extension Networking {
         /// Workaround: Remove URL parameters from path. That can lead to writing cached files with names longer than
         /// 255 characters, resulting in error. Another option to explore is to use a hash version of the url if it's
         /// longer than 255 characters.
-        guard let destinationURL = try? destinationURL(for: path, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
+        guard let destinationURL = try? destinationURL(for: path, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(String(describing: cacheName))") }
 
         if let object = cache.object(forKey: destinationURL.absoluteString as AnyObject) {
             return object
@@ -141,7 +141,7 @@ extension Networking {
 
                 var returnedResponse: Any?
                 if let data = data, data.count > 0 {
-                    guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(cacheName)") }
+                    guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(String(describing: cacheName))") }
                     _ = try? data.write(to: destinationURL, options: [.atomic])
                     switch responseType {
                     case .data:
@@ -184,7 +184,7 @@ extension Networking {
                     }
                 }
             case .formURLEncoded:
-                guard let parametersDictionary = parameters as? [String: Any] else { fatalError("Couldn't convert parameters to a dictionary: \(parameters)") }
+                guard let parametersDictionary = parameters as? [String: Any] else { fatalError("Couldn't convert parameters to a dictionary: \(String(describing: parameters))") }
                 do {
                     let formattedParameters = try parametersDictionary.urlEncodedString()
                     switch requestType {
@@ -256,7 +256,7 @@ extension Networking {
                         }
                     } else {
                         var errorCode = httpResponse.statusCode
-                        if let error = error as? NSError {
+                        if let error = error as NSError? {
                             if error.code == URLError.cancelled.rawValue {
                                 errorCode = error.code
                             }
@@ -281,7 +281,7 @@ extension Networking {
                             completion(returnedData, response, connectionError as NSError?)
                         } else {
                             let url = try! self.composedURL(with: path)
-                            let errorCode = (connectionError as? NSError)?.code ?? 200
+                            let errorCode = (connectionError as NSError?)?.code ?? 200
                             let response = HTTPURLResponse(url: url, statusCode: errorCode)
                             completion(returnedData, response, connectionError as NSError?)
                         }
@@ -302,7 +302,7 @@ extension Networking {
                         completion(returnedData, response, connectionError as NSError?)
                     } else {
                         let url = try! self.composedURL(with: path)
-                        let errorCode = (connectionError as? NSError)?.code ?? 200
+                        let errorCode = (connectionError as NSError?)?.code ?? 200
                         let response = HTTPURLResponse(url: url, statusCode: errorCode)
                         completion(returnedData, response, connectionError as NSError?)
                     }
