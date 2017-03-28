@@ -633,7 +633,7 @@
 					146D72AB1AB782920058798C = {
 						CreatedOnToolsVersion = 6.2;
 						DevelopmentTeamName = "Elvis Nunez (Personal Team)";
-						LastSwiftMigration = 0800;
+						LastSwiftMigration = 0830;
 						ProvisioningStyle = Manual;
 					};
 					44B5D3881D19B9E5004378B9 = {
@@ -643,6 +643,7 @@
 					};
 					44DFD38C1D9A2D5A0014E9F2 = {
 						CreatedOnToolsVersion = 8.0;
+						LastSwiftMigration = 0830;
 						ProvisioningStyle = Automatic;
 					};
 				};
