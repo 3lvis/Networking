@@ -1,5 +1,11 @@
 import Foundation
 
+/// The type of the form data part.
+///
+/// - data: Plain data, it uses "application/octet-stream" as the Content-Type.
+/// - png: PNG image, it uses "image/png" as the Content-Type.
+/// - jpg: JPG image, it uses "image/jpeg" as the Content-Type.
+/// - custom: Sends your parameters as plain data, sets your `Content-Type` to the value inside `custom`.
 public enum FormDataPartType {
     case data
     case png
@@ -20,30 +26,34 @@ public enum FormDataPartType {
     }
 }
 
+/// The form data part.
 public struct FormDataPart {
-    private let data: Data
-    private let parameterName: String
-    private let filename: String
-    private let type: FormDataPartType
+    fileprivate let data: Data
+    fileprivate let parameterName: String
+    fileprivate let filename: String?
+    fileprivate let type: FormDataPartType
     var boundary: String = ""
 
     var formData: Data {
         var body = ""
         body += "--\(boundary)\r\n"
         body += "Content-Disposition: form-data; "
-        body += "name=\"\(self.parameterName)\"; "
-        body += "filename=\"\(self.filename)\"\r\n"
-        body += "Content-Type: \(self.type.contentType)\r\n\r\n"
+        body += "name=\"\(parameterName)\""
+        if let filename = filename {
+            body += "; filename=\"\(filename)\""
+        }
+        body += "\r\n"
+        body += "Content-Type: \(type.contentType)\r\n\r\n"
 
         var bodyData = Data()
         bodyData.append(body.data(using: .utf8)!)
-        bodyData.append(self.data)
+        bodyData.append(data)
         bodyData.append("\r\n".data(using: .utf8)!)
 
         return bodyData as Data
     }
 
-    public init(type: FormDataPartType = .data, data: Data, parameterName: String, filename: String) {
+    public init(type: FormDataPartType = .data, data: Data, parameterName: String, filename: String? = nil) {
         self.type = type
         self.data = data
         self.parameterName = parameterName

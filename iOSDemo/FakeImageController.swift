@@ -20,15 +20,20 @@ class FakeImageController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        self.view.backgroundColor = .white
-        self.view.addSubview(self.imageView)
+        view.backgroundColor = .white
+        view.addSubview(imageView)
     }
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
-        self.networking.downloadImage("/pig") { image, error in
-            self.imageView.image = image
+        networking.downloadImage("/pig") { result in
+            switch result {
+            case .success(let response):
+                self.imageView.image = response.image
+            case .failure:
+                break
+            }
         }
     }
 }
