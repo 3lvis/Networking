@@ -152,22 +152,32 @@ class GETTests: XCTestCase {
 
         networking.fakeGET("/users/{userID}", fileName: "user.json", bundle: Bundle(for: GETTests.self))
 
-        networking.GET("/users/10") { JSON, error in
-            guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
-            let id = JSON["id"] as? String
-            XCTAssertEqual(id, "10")
+        networking.get("/users/10") { result in
+            switch result {
+            case .success(let response):
+                let json = response.dictionaryBody
+                let id = json["id"] as? String
+                XCTAssertEqual(id, "10")
 
-            let name = JSON["name"] as? String
-            XCTAssertEqual(name, "Name 10")
+                let name = json["name"] as? String
+                XCTAssertEqual(name, "Name 10")
+            case .failure:
+                XCTFail()
+            }
         }
 
-        networking.GET("/users/20") { JSON, error in
-            guard let JSON = JSON as? [String: Any] else { XCTFail(); return }
-            let id = JSON["id"] as? String
-            XCTAssertEqual(id, "20")
+        networking.get("/users/20") { result in
+            switch result {
+            case .success(let response):
+                let json = response.dictionaryBody
+                let id = json["id"] as? String
+                XCTAssertEqual(id, "20")
 
-            let name = JSON["name"] as? String
-            XCTAssertEqual(name, "Name 20")
+                let name = json["name"] as? String
+                XCTAssertEqual(name, "Name 20")
+            case .failure:
+                XCTFail()
+            }
         }
     }
 
