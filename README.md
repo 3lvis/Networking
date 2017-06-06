@@ -548,6 +548,8 @@ it, simply add the following line to your Cartfile:
 github "3lvis/Networking" ~> 3.0
 ```
 
+If you are using Swift 4, check out [this branch](https://github.com/3lvis/Networking/tree/swift4).
+
 ## Author
 
 This library was made with love by [@3lvis](https://twitter.com/3lvis).
