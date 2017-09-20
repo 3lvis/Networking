@@ -260,7 +260,7 @@ open class Networking {
         guard let url = URL(string: encodedPath) else { fatalError("Path \(encodedPath) can't be converted to url") }
         guard let baseURLWithDash = URL(string: "/", relativeTo: url)?.absoluteURL.absoluteString else { fatalError("Can't find absolute url of url: \(url)") }
         let index = baseURLWithDash.index(before: baseURLWithDash.endIndex)
-        let baseURL = baseURLWithDash.substring(to: index)
+        let baseURL = String(baseURLWithDash[..<index])
         let relativePath = path.replacingOccurrences(of: baseURL, with: "")
 
         return (baseURL, relativePath)
