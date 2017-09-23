@@ -340,7 +340,7 @@ extension Networking {
     }
 
     func logError(parameterType: ParameterType?, parameters: Any? = nil, data: Data?, request: URLRequest?, response: URLResponse?, error: NSError?) {
-        if disableErrorLogging { return }
+        if isErrorLoggingEnabled { return }
         guard let error = error else { return }
 
         print(" ")

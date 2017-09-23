@@ -128,7 +128,7 @@ open class Networking {
     public var isSynchronous = false
 
     /// Flag used to disable error logging. Useful when want to disable log before release build.
-    public var disableErrorLogging = false
+    public var isErrorLoggingEnabled = true
 
     /// The boundary used for multipart requests.
     let boundary = String(format: "net.3lvis.networking.%08x%08x", arc4random(), arc4random())
