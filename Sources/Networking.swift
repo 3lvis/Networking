@@ -34,26 +34,6 @@ open class Networking {
         let statusCode: Int
     }
 
-    /// Provides the options for configuring your Networking object with NSURLSessionConfiguration.
-    ///
-    /// - `default`: This configuration type manages upload and download tasks using the default options.
-    /// - ephemeral: A configuration type that uses no persistent storage for caches, cookies, or credentials. It's optimized for transferring data to and from your app’s memory.
-    /// - background: A configuration type that allows HTTP and HTTPS uploads or downloads to be performed in the background. It causes upload and download tasks to be performed by the system in a separate process.
-    public enum ConfigurationType {
-        case `default`, ephemeral, background
-
-        var sessionConfiguration: URLSessionConfiguration {
-            switch self {
-            case .default:
-                return URLSessionConfiguration.default
-            case .ephemeral:
-                return URLSessionConfiguration.ephemeral
-            case .background:
-                return URLSessionConfiguration.background(withIdentifier: "NetworkingBackgroundConfiguration")
-            }
-        }
-    }
-
     enum RequestType: String {
         case get = "GET", post = "POST", put = "PUT", delete = "DELETE"
     }
@@ -121,7 +101,7 @@ open class Networking {
     var token: String?
     var authorizationHeaderValue: String?
     var authorizationHeaderKey = "Authorization"
-    fileprivate var configurationType: ConfigurationType
+    fileprivate var configuration: URLSessionConfiguration
     var cache: NSCache<AnyObject, AnyObject>
 
     /// Flag used to indicate synchronous request.
@@ -134,27 +114,8 @@ open class Networking {
     let boundary = String(format: "net.3lvis.networking.%08x%08x", arc4random(), arc4random())
 
     lazy var session: URLSession = {
-        var configuration = self.configurationType.sessionConfiguration
-        configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
-        configuration.urlCache = nil
-
-        return URLSession(configuration: configuration)
+        return URLSession(configuration: self.configuration)
     }()
-
-    /// Base initializer, it creates an instance of `Networking`.
-    ///
-    /// - Parameters:
-    ///   - baseURL: The base URL for HTTP requests under `Networking`.
-    ///   - configurationType: The configuration type to be used, by default is default.
-    ///   - cache: The NSCache to use, it has a built-in default one.
-    public init(baseURL: String, configurationType: ConfigurationType = .default, cache: NSCache<AnyObject, AnyObject>? = nil) {
-        self.baseURL = baseURL
-        self.configurationType = configurationType
-        self.cache = cache ?? NSCache()
-        self.configuration = configurationType.sessionConfiguration
-    }
-
-    fileprivate var configuration: URLSessionConfiguration
 
     /// Base initializer, it creates an instance of `Networking`.
     ///
@@ -162,11 +123,10 @@ open class Networking {
     ///   - baseURL: The base URL for HTTP requests under `Networking`.
     ///   - configuration: The URLSessionConfiguration configuration to be used
     ///   - cache: The NSCache to use, it has a built-in default one.
-    public init(baseURL: String, configuration: URLSessionConfiguration, cache: NSCache<AnyObject, AnyObject>? = nil) {
-        self.configuration = configuration
+    public init(baseURL: String, configuration: URLSessionConfiguration = .default, cache: NSCache<AnyObject, AnyObject>? = nil) {
         self.baseURL = baseURL
+        self.configuration = configuration
         self.cache = cache ?? NSCache()
-        self.configurationType = .default
     }
 
     /// Authenticates using Basic Authentication, it converts username:password to Base64 then sets the Authorization header to "Basic \(Base64(username:password))".
