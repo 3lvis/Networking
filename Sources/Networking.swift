@@ -151,6 +151,22 @@ open class Networking {
         self.baseURL = baseURL
         self.configurationType = configurationType
         self.cache = cache ?? NSCache()
+        self.configuration = configurationType.sessionConfiguration
+    }
+
+    fileprivate var configuration: URLSessionConfiguration
+
+    /// Base initializer, it creates an instance of `Networking`.
+    ///
+    /// - Parameters:
+    ///   - baseURL: The base URL for HTTP requests under `Networking`.
+    ///   - configuration: The URLSessionConfiguration configuration to be used
+    ///   - cache: The NSCache to use, it has a built-in default one.
+    public init(baseURL: String, configuration: URLSessionConfiguration, cache: NSCache<AnyObject, AnyObject>? = nil) {
+        self.configuration = configuration
+        self.baseURL = baseURL
+        self.cache = cache ?? NSCache()
+        self.configurationType = .default
     }
 
     /// Authenticates using Basic Authentication, it converts username:password to Base64 then sets the Authorization header to "Basic \(Base64(username:password))".
