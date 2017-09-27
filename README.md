@@ -41,7 +41,7 @@
 
 ## Table of Contents
 
-* [Choosing a configuration type](#choosing-a-configuration-type)
+* [Choosing a configuration](#choosing-a-configuration)
 * [Changing request headers](#changing-request-headers)
 * [Authenticating](#authenticating)
     * [HTTP basic](#http-basic)
@@ -65,7 +65,7 @@
 * [License](#license)
 * [Attribution](#attribution)
 
-## Configuration
+## Choosing a configuration
 
 Initializing an instance of **Networking** means you have to select a [NSURLSessionConfiguration](https://developer.apple.com/documentation/foundation/nsurlsessionconfiguration). The available types are `Default`, `Ephemeral` and `Background`, if you don't provide any or don't have special needs then `Default` will be used.
 
