@@ -129,6 +129,14 @@ open class Networking {
 
     /// Flag used to disable error logging. Useful when want to disable log before release build.
     public var isErrorLoggingEnabled = true
+    
+    
+    /// Controls how long (in seconds) a task should wait for additional data to arrive before giving up.
+    public var requestTimeOutInterval = TimeInterval(60)
+    
+    
+    /// Controls how long (in seconds) to wait for an entire resource to transfer before giving up.
+    public var resourceTimeOutInterval = TimeInterval(6048000)
 
     /// The boundary used for multipart requests.
     let boundary = String(format: "net.3lvis.networking.%08x%08x", arc4random(), arc4random())
@@ -137,6 +145,8 @@ open class Networking {
         var configuration = self.configurationType.sessionConfiguration
         configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
         configuration.urlCache = nil
+        configuration.timeoutIntervalForRequest = requestTimeOutInterval
+        configuration.timeoutIntervalForResource = resourceTimeOutInterval
 
         return URLSession(configuration: configuration)
     }()
