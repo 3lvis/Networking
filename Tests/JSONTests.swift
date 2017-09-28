@@ -2,12 +2,14 @@ import Foundation
 import XCTest
 
 class JSONTests: XCTestCase {
-    func testDictionary() {
+    // MARK: - Equatable
+
+    func testEqualDictionary() {
         XCTAssertEqual(JSON(["hello":"value"]), JSON(["hello":"value"]))
         XCTAssertNotEqual(JSON(["hello1":"value"]), JSON(["hello2":"value"]))
     }
 
-    func testArray() {
+    func testEqualArray() {
         XCTAssertEqual(JSON([["hello":"value"]]), JSON([["hello":"value"]]))
         XCTAssertNotEqual(JSON([["hello1":"value"]]), JSON([["hello2":"value"]]))
 
@@ -15,7 +17,14 @@ class JSONTests: XCTestCase {
         XCTAssertNotEqual(JSON([["hello1":"value"], ["hello2":"value"]]), JSON([["hello3":"value"], ["hello4":"value"]]))
     }
 
-    func testNone() {
+    func testEqualData() {
+        let helloData = "hello".data(using: .utf8)!
+        let byeData = "bye".data(using: .utf8)!
+        XCTAssertEqual(JSON(helloData), JSON(helloData))
+        XCTAssertNotEqual(JSON(helloData), JSON(byeData))
+    }
+
+    func testEqualNone() {
         XCTAssertEqual(JSON.none, JSON.none)
         XCTAssertNotEqual(JSON.none, JSON(["hello":"value"]))
     }

@@ -12,6 +12,8 @@ public enum JSON: Equatable {
 
     case array([[String: Any]])
 
+    case data(Data)
+
     public var dictionary: [String: Any] {
         get {
             switch self {
@@ -34,12 +36,27 @@ public enum JSON: Equatable {
         }
     }
 
+    public var data: Data {
+        get {
+            switch self {
+            case .data(let value):
+                return value
+            default:
+                return Data()
+            }
+        }
+    }
+
     public init(_ dictionary: [String: Any]) {
         self = .dictionary(dictionary)
     }
 
     public init(_ array: [[String: Any]]) {
         self = .array(array)
+    }
+
+    public init(_ data: Data) {
+        self = .data(data)
     }
 
     /// Returns a JSON object from a file.
@@ -62,7 +79,7 @@ public enum JSON: Equatable {
 }
 
 public func ==(lhs: JSON, rhs: JSON) -> Bool {
-    return lhs.array.debugDescription == rhs.array.debugDescription && lhs.dictionary.debugDescription == rhs.dictionary.debugDescription
+    return lhs.array.debugDescription == rhs.array.debugDescription && lhs.dictionary.debugDescription == rhs.dictionary.debugDescription && lhs.data.hashValue == rhs.data.hashValue
 }
 
 extension Data {
