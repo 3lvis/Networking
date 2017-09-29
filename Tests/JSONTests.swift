@@ -2,12 +2,14 @@ import Foundation
 import XCTest
 
 class JSONTests: XCTestCase {
-    func testDictionary() {
+    // MARK: - Equatable
+
+    func testEqualDictionary() {
         XCTAssertEqual(JSON(["hello":"value"]), JSON(["hello":"value"]))
         XCTAssertNotEqual(JSON(["hello1":"value"]), JSON(["hello2":"value"]))
     }
 
-    func testArray() {
+    func testEqualArray() {
         XCTAssertEqual(JSON([["hello":"value"]]), JSON([["hello":"value"]]))
         XCTAssertNotEqual(JSON([["hello1":"value"]]), JSON([["hello2":"value"]]))
 
@@ -15,9 +17,45 @@ class JSONTests: XCTestCase {
         XCTAssertNotEqual(JSON([["hello1":"value"], ["hello2":"value"]]), JSON([["hello3":"value"], ["hello4":"value"]]))
     }
 
-    func testNone() {
+    func testEqualData() {
+        let helloData = "hello".data(using: .utf8)!
+        let byeData = "bye".data(using: .utf8)!
+        XCTAssertEqual(JSON(helloData), JSON(helloData))
+        XCTAssertNotEqual(JSON(helloData), JSON(byeData))
+    }
+
+    func testEqualNone() {
         XCTAssertEqual(JSON.none, JSON.none)
         XCTAssertNotEqual(JSON.none, JSON(["hello":"value"]))
+    }
+
+    // MARKL - Accessors
+
+    func testDictionaryAccessor() {
+        let body = ["hello":"value"]
+
+        let json = JSON(body)
+        XCTAssertEqual(json.dictionary.debugDescription, body.debugDescription)
+        XCTAssertEqual(json.array.debugDescription, [[String: Any]]().debugDescription)
+        XCTAssertEqual(json.data.hashValue, Data().hashValue)
+    }
+
+    func testArrayAccessor() {
+        let body = [["hello":"value"]]
+
+        let json = JSON(body)
+        XCTAssertEqual(json.dictionary.debugDescription, [String: Any]().debugDescription)
+        XCTAssertEqual(json.array.debugDescription, body.debugDescription)
+        XCTAssertEqual(json.data.hashValue, Data().hashValue)
+    }
+
+    func testDataAccessor() {
+        let body = "Data".data(using: .utf8)!
+
+        let json = JSON(body)
+        XCTAssertEqual(json.dictionary.debugDescription, [String: Any]().debugDescription)
+        XCTAssertEqual(json.array.debugDescription, [[String: Any]]().debugDescription)
+        XCTAssertEqual(json.data.hashValue, body.hashValue)
     }
 
     // MARK: - from
