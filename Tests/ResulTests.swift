@@ -2,11 +2,39 @@ import Foundation
 import XCTest
 
 class ResultTests: XCTestCase {
-    func testImageResultWithMalformedImage() {
+    var response: HTTPURLResponse {
         let url = URL(string: "http://www.google.com")!
         let urlResponse = HTTPURLResponse(url: url, statusCode: 200)
+
+        return urlResponse
+    }
+
+    func testJSONResultDictionary() {
+        let body = ["a": "b"]
+        let result = JSONResult(body: body, response: response, error: nil)
+        switch result {
+        case .success(let value):
+            XCTAssertEqual(value.dictionaryBody.debugDescription, body.debugDescription)
+        case .failure(_):
+            XCTFail()
+        }
+    }
+
+    func testJSONResultArray() {
+
+    }
+
+    func testJSONResultData() {
+
+    }
+
+    func testJSONResultNone() {
+
+    }
+
+    func testImageResultWithMalformedImage() {
         let malformedImage = "Malformed image"
-        let result = ImageResult(body: malformedImage, response: urlResponse, error: nil)
+        let result = ImageResult(body: malformedImage, response: response, error: nil)
 
         switch result {
         case .success:
@@ -17,10 +45,8 @@ class ResultTests: XCTestCase {
     }
 
     func testDataResultWithMalformedData() {
-        let url = URL(string: "http://www.google.com")!
-        let urlResponse = HTTPURLResponse(url: url, statusCode: 200)
         let malformedData = "Malformed data"
-        let result = DataResult(body: malformedData, response: urlResponse, error: nil)
+        let result = DataResult(body: malformedData, response: response, error: nil)
 
         switch result {
         case .success:
@@ -31,14 +57,11 @@ class ResultTests: XCTestCase {
     }
 
     func testJSONResponseError() {
-        let url = URL(string: "http://www.google.com")!
-        let urlResponse = HTTPURLResponse(url: url, statusCode: 200)
-
-        let nilErrorResult = JSONResult(body: [:], response: urlResponse, error: nil)
+        let nilErrorResult = JSONResult(body: [:], response: response, error: nil)
         XCTAssertNil(nilErrorResult.error)
 
         let error = NSError(domain: "", code: 0, userInfo: nil)
-        let errorResult = JSONResult(body: [:], response: urlResponse, error: error)
+        let errorResult = JSONResult(body: [:], response: response, error: error)
         XCTAssertNotNil(errorResult.error)
     }
 }

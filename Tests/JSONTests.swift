@@ -29,6 +29,21 @@ class JSONTests: XCTestCase {
         XCTAssertNotEqual(JSON.none, JSON(["hello":"value"]))
     }
 
+    // MARKL - Accessors
+
+    func testDictionaryAccessor() {
+        let json = JSON(["hello":"value"])
+        json.dictionary
+    }
+
+    func testArrayAccessor() {
+
+    }
+
+    func testDataAccessor() {
+
+    }
+
     // MARK: - from
 
     func testArrayJSONFromFileNamed() {
