@@ -32,16 +32,30 @@ class JSONTests: XCTestCase {
     // MARKL - Accessors
 
     func testDictionaryAccessor() {
-        let json = JSON(["hello":"value"])
-        json.dictionary
+        let body = ["hello":"value"]
+
+        let json = JSON(body)
+        XCTAssertEqual(json.dictionary.debugDescription, body.debugDescription)
+        XCTAssertEqual(json.array.debugDescription, [[String: Any]]().debugDescription)
+        XCTAssertEqual(json.data.hashValue, Data().hashValue)
     }
 
     func testArrayAccessor() {
+        let body = [["hello":"value"]]
 
+        let json = JSON(body)
+        XCTAssertEqual(json.dictionary.debugDescription, [String: Any]().debugDescription)
+        XCTAssertEqual(json.array.debugDescription, body.debugDescription)
+        XCTAssertEqual(json.data.hashValue, Data().hashValue)
     }
 
     func testDataAccessor() {
+        let body = "Data".data(using: .utf8)!
 
+        let json = JSON(body)
+        XCTAssertEqual(json.dictionary.debugDescription, [String: Any]().debugDescription)
+        XCTAssertEqual(json.array.debugDescription, [[String: Any]]().debugDescription)
+        XCTAssertEqual(json.data.hashValue, body.hashValue)
     }
 
     // MARK: - from
