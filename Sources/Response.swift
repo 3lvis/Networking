@@ -37,10 +37,6 @@ public class JSONResponse: Response {
         return json.array
     }
 
-    public var data: Data {
-        return json.data
-    }
-
     init(json: JSON, response: HTTPURLResponse) {
         self.json = json
 
