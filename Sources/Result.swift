@@ -21,8 +21,6 @@ public enum JSONResult {
             json = JSON(dictionary)
         } else if let array = body as? [[String: Any]] {
             json = JSON(array)
-        } else if let data = body as? Data {
-            json = JSON(data)
         } else {
             json = JSON.none
         }
