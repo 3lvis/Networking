@@ -32,23 +32,6 @@ open class Networking {
         let response: Any?
         let responseType: ResponseType
         let statusCode: Int
-
-        init(response: Any?, responseType: ResponseType, statusCode: Int) {
-            do {
-                if let dictionary = response as? [String: Any] {
-                    self.response = try JSONSerialization.data(withJSONObject: dictionary, options: [])
-                } else if let array = response as? [[String: Any]] {
-                    self.response = try JSONSerialization.data(withJSONObject: array, options: [])
-                } else {
-                    self.response = response
-                }
-            } catch {
-                self.response = response
-            }
-
-            self.responseType = responseType
-            self.statusCode = statusCode
-        }
     }
 
     enum RequestType: String {

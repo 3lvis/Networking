@@ -11,13 +11,12 @@ class ResultTests: XCTestCase {
 
     func testJSONResultDictionary() {
         let body = ["a": 12]
-        let bodyData = try! JSONSerialization.data(withJSONObject: body, options: [])
-        let result = JSONResult(body: bodyData, response: response, error: nil)
+        let result = JSONResult(body: body, response: response, error: nil)
         switch result {
         case .success(let value):
             XCTAssertEqual(value.dictionaryBody.debugDescription, body.debugDescription)
             XCTAssertEqual(value.arrayBody.debugDescription, [[String: Any]]().debugDescription)
-            XCTAssertEqual(value.data.hashValue, bodyData.hashValue)
+            //XCTAssertEqual(value.data.hashValue, body.hashValue)
 
             switch value.json {
             case .dictionary(_, let valueBody):
@@ -31,18 +30,62 @@ class ResultTests: XCTestCase {
     }
 
     func testJSONResultArray() {
-        let body = [["a": 12]]
-        let bodyData = try! JSONSerialization.data(withJSONObject: body, options: [])
-        let result = JSONResult(body: bodyData, response: response, error: nil)
+        let expectedBody = [["a": 12]]
+        let result = JSONResult(body: expectedBody, response: response, error: nil)
         switch result {
         case .success(let value):
             XCTAssertEqual(value.dictionaryBody.debugDescription, [String: Any]().debugDescription)
-            XCTAssertEqual(value.arrayBody.debugDescription, body.debugDescription)
-            XCTAssertEqual(value.data.hashValue, bodyData.hashValue)
+            XCTAssertEqual(value.arrayBody.debugDescription, expectedBody.debugDescription)
+            //XCTAssertEqual(value.data.hashValue, bodyData.hashValue)
 
             switch value.json {
             case .array(_, let valueBody):
-                XCTAssertEqual(body.debugDescription, valueBody.debugDescription)
+                XCTAssertEqual(expectedBody.debugDescription, valueBody.debugDescription)
+                //XCTAssertEqual(dataBody.hashValue, expectedBody.hashValue)
+            case .dictionary(_, _), .none:
+                XCTFail()
+            }
+        case .failure(_):
+            XCTFail()
+        }
+    }
+
+    func testJSONResultDictionaryData() {
+        let expectedBody = ["a": 12]
+        let expectedBodyData = try! JSONSerialization.data(withJSONObject: expectedBody, options: [])
+        let result = JSONResult(body: expectedBodyData, response: response, error: nil)
+        switch result {
+        case .success(let value):
+            XCTAssertEqual(value.dictionaryBody.debugDescription, expectedBody.debugDescription)
+            XCTAssertEqual(value.arrayBody.debugDescription, [[String: Any]]().debugDescription)
+            XCTAssertEqual(value.data.hashValue, expectedBodyData.hashValue)
+
+            switch value.json {
+            case .dictionary(let dataBody, let valueBody):
+                XCTAssertEqual(dataBody.hashValue, expectedBodyData.hashValue)
+                XCTAssertEqual(valueBody.debugDescription, expectedBody.debugDescription)
+            case .array(_, _), .none:
+                XCTFail()
+            }
+        case .failure(_):
+            XCTFail()
+        }
+    }
+
+    func testJSONResultArrayData() {
+        let expectedBody = [["a": 12]]
+        let expectedBodyData = try! JSONSerialization.data(withJSONObject: expectedBody, options: [])
+        let result = JSONResult(body: expectedBodyData, response: response, error: nil)
+        switch result {
+        case .success(let value):
+            XCTAssertEqual(value.dictionaryBody.debugDescription, [String: Any]().debugDescription)
+            XCTAssertEqual(value.arrayBody.debugDescription, expectedBody.debugDescription)
+            XCTAssertEqual(value.data.hashValue, expectedBodyData.hashValue)
+
+            switch value.json {
+            case .array(let dataBody, let valueBody):
+                XCTAssertEqual(dataBody.hashValue, expectedBodyData.hashValue)
+                XCTAssertEqual(valueBody.debugDescription, expectedBody.debugDescription)
             case .dictionary(_, _), .none:
                 XCTFail()
             }

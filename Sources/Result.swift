@@ -18,7 +18,11 @@ public enum JSONResult {
         var returnedError = error
         var json = JSON.none
 
-        if let data = body as? Data, data.count > 0 {
+        if let dictionary = body as? [String: Any] {
+            json = JSON(dictionary)
+        } else if let array = body as? [[String: Any]] {
+            json = JSON(array)
+        } else if let data = body as? Data, data.count > 0 {
             do {
                 json = try JSON(data)
             } catch let JSONParsingError as NSError {
