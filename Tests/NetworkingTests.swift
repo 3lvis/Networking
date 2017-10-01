@@ -10,7 +10,7 @@ class NetworkingTests: XCTestCase {
         networking.get("/basic-auth/user/passwd") { result in
             switch result {
             case .success(let response):
-                let json = response.dictionaryBody
+                let json = response.dictionary
                 let user = json["user"] as? String
                 let authenticated = json["authenticated"] as? Bool
                 XCTAssertEqual(user, "user")
@@ -28,7 +28,7 @@ class NetworkingTests: XCTestCase {
         networking.post("/post") { result in
             switch result {
             case .success(let response):
-                let json = response.dictionaryBody
+                let json = response.dictionary
                 let headers = json["headers"] as? [String: Any]
                 XCTAssertEqual("Bearer \(token)", headers?["Authorization"] as? String)
             case .failure:
@@ -44,7 +44,7 @@ class NetworkingTests: XCTestCase {
         networking.post("/post") { result in
             switch result {
             case .success(let response):
-                let json = response.dictionaryBody
+                let json = response.dictionary
                 let headers = json["headers"] as? [String: Any]
                 XCTAssertEqual(value, headers?["Authorization"] as? String)
             case .failure:
@@ -61,7 +61,7 @@ class NetworkingTests: XCTestCase {
         networking.post("/post") { result in
             switch result {
             case .success(let response):
-                let json = response.dictionaryBody
+                let json = response.dictionary
                 let headers = json["headers"] as? [String: Any]
                 XCTAssertEqual(value, headers?[key] as? String)
             case .failure:
@@ -76,7 +76,7 @@ class NetworkingTests: XCTestCase {
         networking.post("/post") { result in
             switch result {
             case .success(let response):
-                let json = response.dictionaryBody
+                let json = response.dictionary
                 let headers = json["headers"] as? [String: Any]
                 XCTAssertEqual("HeaderValue", headers?["Headerkey"] as? String)
             case .failure:
