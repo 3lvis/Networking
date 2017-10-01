@@ -27,7 +27,7 @@ public class FailureResponse: Response {
 }
 
 public class JSONResponse: Response {
-    public let json: JSON
+    let json: JSON
 
     @available (*, deprecated: 4.0, renamed: "dictionary")
     public var dictionaryBody: [String: Any] {
