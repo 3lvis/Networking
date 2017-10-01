@@ -31,7 +31,7 @@ extension Networking {
 
     func registerFake(requestType: RequestType, path: String, fileName: String, bundle: Bundle) {
         do {
-            if let result = try JSON.from(fileName, bundle: bundle) {
+            if let result = try FileReader.jsonFrom(fileName, bundle: bundle) {
                 registerFake(requestType: requestType, path: path, response: result, responseType: .json, statusCode: 200)
             }
         } catch ParsingError.notFound {
