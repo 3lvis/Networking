@@ -48,7 +48,6 @@ extension Networking {
     }
 
     func handleFakeRequest(_ fakeRequest: FakeRequest, path: String, completion: @escaping (_ body: Any?, _ response: HTTPURLResponse, _ error: NSError?) -> Void) -> String {
-        let requestID = UUID().uuidString
         var error: NSError?
         let url = try! composedURL(with: path)
         let response = HTTPURLResponse(url: url, statusCode: fakeRequest.statusCode)
@@ -65,6 +64,7 @@ extension Networking {
             completion(fakeRequest.response, response, error)
         }
 
+        let requestID = UUID().uuidString
         return requestID
     }
 
@@ -90,13 +90,12 @@ extension Networking {
         } else {
             let object = objectFromCache(for: path, cacheName: cacheName, responseType: responseType)
             if let object = object {
-                let requestID = UUID().uuidString
                 TestCheck.testBlock(isSynchronous) {
                     let url = try! self.composedURL(with: path)
                     let response = HTTPURLResponse(url: url, statusCode: 200)
                     completion(DataResult(body: object, response: response, error: nil))
                 }
-
+                let requestID = UUID().uuidString
                 return requestID
             } else {
                 return requestData(requestType, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: responseType) { data, response, error in
@@ -104,18 +103,15 @@ extension Networking {
                         fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(String(describing: cacheName))")
                     }
 
-                    let returnedResponse: DataResult
                     if let data = data, data.count > 0 {
                         _ = try? data.write(to: destinationURL, options: [.atomic])
                         self.cache.setObject(data as AnyObject, forKey: destinationURL.absoluteString as AnyObject)
-                        returnedResponse = DataResult(body: data, response: response, error: error)
                     } else {
                         self.cache.removeObject(forKey: destinationURL.absoluteString as AnyObject)
-                        returnedResponse = DataResult(body: nil, response: response, error: error)
                     }
 
                     TestCheck.testBlock(self.isSynchronous) {
-                        completion(returnedResponse)
+                        completion(DataResult(body: data, response: response, error: error))
                     }
                 }
             }
@@ -130,13 +126,13 @@ extension Networking {
         } else {
             let object = objectFromCache(for: path, cacheName: cacheName, responseType: responseType)
             if let object = object {
-                let requestID = UUID().uuidString
                 TestCheck.testBlock(isSynchronous) {
                     let url = try! self.composedURL(with: path)
                     let response = HTTPURLResponse(url: url, statusCode: 200)
                     completion(ImageResult(body: object, response: response, error: nil))
                 }
 
+                let requestID = UUID().uuidString
                 return requestID
             } else {
                 return requestData(requestType, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: responseType) { data, response, error in
@@ -144,23 +140,17 @@ extension Networking {
                         fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(String(describing: cacheName))")
                     }
 
-                    let returnedResponse: ImageResult
-                    if let data = data, data.count > 0 {
+                    var returnedImage: Image?
+                    if let data = data, data.count > 0, let image = Image(data: data) {
                         _ = try? data.write(to: destinationURL, options: [.atomic])
-                        if let image = Image(data: data) {
-                            self.cache.setObject(image, forKey: destinationURL.absoluteString as AnyObject)
-                            returnedResponse = ImageResult(body: image, response: response, error: error)
-                        } else {
-                            self.cache.removeObject(forKey: destinationURL.absoluteString as AnyObject)
-                            returnedResponse = ImageResult(body: nil, response: response, error: error)
-                        }
+                        returnedImage = image
+                        self.cache.setObject(image, forKey: destinationURL.absoluteString as AnyObject)
                     } else {
                         self.cache.removeObject(forKey: destinationURL.absoluteString as AnyObject)
-                        returnedResponse = ImageResult(body: nil, response: response, error: error)
                     }
 
                     TestCheck.testBlock(self.isSynchronous) {
-                        completion(returnedResponse)
+                        completion(ImageResult(body: returnedImage, response: response, error: error))
                     }
                 }
             }
@@ -260,10 +250,8 @@ extension Networking {
                         }
                     } else {
                         var errorCode = httpResponse.statusCode
-                        if let error = error as NSError? {
-                            if error.code == URLError.cancelled.rawValue {
-                                errorCode = error.code
-                            }
+                        if let error = error as NSError?, error.code == URLError.cancelled.rawValue {
+                            errorCode = error.code
                         }
 
                         connectionError = NSError(domain: Networking.domain, code: errorCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode)])
