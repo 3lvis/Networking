@@ -48,24 +48,24 @@ extension Networking {
     }
 
     func requestJSON(requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, completion: @escaping (_ result: JSONResult) -> Void) -> String {
-        return request(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: .json) { deserialized, response, error in
+        return handleRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: .json) { deserialized, response, error in
             completion(JSONResult(body: deserialized, response: response, error: error))
         }
     }
 
     func requestImage(path: String, cacheName: String?, completion: @escaping (_ result: ImageResult) -> Void) -> String {
-        return request(.get, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .image) { deserialized, response, error in
+        return handleRequest(.get, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .image) { deserialized, response, error in
             completion(ImageResult(body: deserialized, response: response, error: error))
         }
     }
 
     func requestData(path: String, cacheName: String?, completion: @escaping (_ result: DataResult) -> Void) -> String {
-        return request(.get, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .data) { deserialized, response, error in
+        return handleRequest(.get, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .data) { deserialized, response, error in
             completion(DataResult(body: deserialized, response: response, error: error))
         }
     }
 
-    func request(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Any?, _ response: HTTPURLResponse, _ error: NSError?) -> Void) -> String {
+    func handleRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Any?, _ response: HTTPURLResponse, _ error: NSError?) -> Void) -> String {
         if let fakeRequests = fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
             return handleFakeRequest(fakeRequest, requestType: requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType, completion: completion)
         } else {
