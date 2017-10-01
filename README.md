@@ -538,17 +538,15 @@ it, simply add the following line to your Podfile:
 ```ruby
 use_frameworks!
 
-pod 'Networking', '~> 3'
+pod 'Networking', '~> 4'
 ```
 
 **Networking** is also available through [Carthage](https://github.com/Carthage/Carthage). To install
 it, simply add the following line to your Cartfile:
 
 ```ruby
-github "3lvis/Networking" ~> 3.0
+github "3lvis/Networking" ~> 4.0
 ```
-
-If you are using Swift 4, check out [this branch](https://github.com/3lvis/Networking/tree/swift4).
 
 ## Author
 
