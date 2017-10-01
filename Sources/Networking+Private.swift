@@ -48,20 +48,20 @@ extension Networking {
     }
 
     func requestJSON(requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, completion: @escaping (_ result: JSONResult) -> Void) -> String {
-        return handleRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: .json) { deserialized, response, error in
-            completion(JSONResult(body: deserialized, response: response, error: error))
+        return handleRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: .json) { data, response, error in
+            completion(JSONResult(body: data, response: response, error: error))
         }
     }
 
     func requestImage(path: String, cacheName: String?, completion: @escaping (_ result: ImageResult) -> Void) -> String {
-        return handleRequest(.get, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .image) { deserialized, response, error in
-            completion(ImageResult(body: deserialized, response: response, error: error))
+        return handleRequest(.get, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .image) { image, response, error in
+            completion(ImageResult(body: image, response: response, error: error))
         }
     }
 
     func requestData(path: String, cacheName: String?, completion: @escaping (_ result: DataResult) -> Void) -> String {
-        return handleRequest(.get, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .data) { deserialized, response, error in
-            completion(DataResult(body: deserialized, response: response, error: error))
+        return handleRequest(.get, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .data) { data, response, error in
+            completion(DataResult(body: data, response: response, error: error))
         }
     }
 
@@ -107,19 +107,9 @@ extension Networking {
 
     func handleJSONRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Any?, _ response: HTTPURLResponse, _ error: NSError?) -> Void) -> String {
         return dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, response, error in
-            var returnedError = error
-            var returnedResponse: Any?
-            if let data = data, data.count > 0 {
-                do {
-                    returnedResponse = try JSONSerialization.jsonObject(with: data, options: [])
-                } catch let JSONParsingError as NSError {
-                    if returnedError == nil {
-                        returnedError = JSONParsingError
-                    }
-                }
-            }
+
             TestCheck.testBlock(self.isSynchronous) {
-                completion(returnedResponse, response, returnedError)
+                completion(data, response, error)
             }
         }
     }

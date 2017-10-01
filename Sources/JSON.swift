@@ -8,15 +8,15 @@ public enum ParsingError: Error {
 public enum JSON: Equatable {
     case none
 
-    case dictionary([String: Any])
+    case dictionary(Data, [String: Any])
 
-    case array([[String: Any]])
+    case array(Data, [[String: Any]])
 
     public var dictionary: [String: Any] {
         get {
             switch self {
-            case .dictionary(let value):
-                return value
+            case .dictionary(_, let body):
+                return body
             default:
                 return [String: Any]()
             }
@@ -26,20 +26,36 @@ public enum JSON: Equatable {
     public var array: [[String: Any]] {
         get {
             switch self {
-            case .array(let value):
-                return value
+            case .array(_, let body):
+                return body
             default:
                 return [[String: Any]]()
             }
         }
     }
 
+    public init(_ data: Data) throws {
+        let body = try JSONSerialization.jsonObject(with: data, options: [])
+
+        if let dictionary = body as? [String: Any] {
+            self = .dictionary(data, dictionary)
+        } else if let array = body as? [[String: Any]] {
+            self = .array(data, array)
+        } else {
+            self = JSON.none
+        }
+    }
+
     public init(_ dictionary: [String: Any]) {
-        self = .dictionary(dictionary)
+        let data = try! JSONSerialization.data(withJSONObject: dictionary, options: [])
+
+        self = .dictionary(data, dictionary)
     }
 
     public init(_ array: [[String: Any]]) {
-        self = .array(array)
+        let data = try! JSONSerialization.data(withJSONObject: array, options: [])
+
+        self = .array(data, array)
     }
 
     /// Returns a JSON object from a file.

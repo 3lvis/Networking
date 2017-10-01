@@ -15,18 +15,21 @@ public enum JSONResult {
     }
 
     public init(body: Any?, response: HTTPURLResponse, error: NSError?) {
-        var json: JSON
-        
-        if let dictionary = body as? [String: Any] {
-            json = JSON(dictionary)
-        } else if let array = body as? [[String: Any]] {
-            json = JSON(array)
-        } else {
-            json = JSON.none
+        var returnedError = error
+        var json = JSON.none
+
+        if let data = body as? Data, data.count > 0 {
+            do {
+                json = try JSON(data)
+            } catch let JSONParsingError as NSError {
+                if returnedError == nil {
+                    returnedError = JSONParsingError
+                }
+            }
         }
 
-        if let error = error {
-            self = .failure(FailureJSONResponse(json: json, response: response, error: error))
+        if let finalError = returnedError {
+            self = .failure(FailureJSONResponse(json: json, response: response, error: finalError))
         } else {
             self = .success(SuccessJSONResponse(json: json, response: response))
         }
