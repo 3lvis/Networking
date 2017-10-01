@@ -154,7 +154,7 @@ let networking = Networking(baseURL: "http://httpbin.org")
 networking.get("/get") { result in
     switch result {
     case .success(let response):
-        let json = response.dictionary
+        let json = response.dictionaryBody
         // Do something with JSON, you can also get arrayBody
     case .failure(let response):
         // Handle error
@@ -238,7 +238,7 @@ networking.get("/recipes") { result in
     switch result {
     case .success(let response):
         // We know we'll be receiving an array with the best recipes, so we can just do:
-        let recipes = response.array // BOOM, no optionals. [[String: Any]]
+        let recipes = response.arrayBody // BOOM, no optionals. [[String: Any]]
 
         // If we need headers or response status code we can use the HTTPURLResponse for this.
         let headers = response.headers // [String: Any]
@@ -248,7 +248,7 @@ networking.get("/recipes") { result in
 
         // Our backend developer told us that they will send a json with some
         // additional information on why the request failed, this will be a dictionary.
-        let json = response.dictionary // BOOM, no optionals here [String: Any]
+        let json = response.dictionaryBody // BOOM, no optionals here [String: Any]
 
         // We want to know the headers of the failed response.
         let headers = response.headers // [String: Any]

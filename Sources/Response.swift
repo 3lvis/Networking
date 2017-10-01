@@ -29,21 +29,11 @@ public class FailureResponse: Response {
 public class JSONResponse: Response {
     let json: JSON
 
-    @available (*, deprecated: 4.0, renamed: "dictionary")
     public var dictionaryBody: [String: Any] {
         return json.dictionary
     }
 
-    @available (*, deprecated: 4.0, renamed: "array")
     public var arrayBody: [[String: Any]] {
-        return json.array
-    }
-
-    public var dictionary: [String: Any] {
-        return json.dictionary
-    }
-
-    public var array: [[String: Any]] {
         return json.array
     }
 
