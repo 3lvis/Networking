@@ -14,8 +14,8 @@ class ResultTests: XCTestCase {
         let result = JSONResult(body: body, response: response, error: nil)
         switch result {
         case .success(let value):
-            XCTAssertEqual(value.dictionary.debugDescription, body.debugDescription)
-            XCTAssertEqual(value.array.debugDescription, [[String: Any]]().debugDescription)
+            XCTAssertEqual(value.dictionaryBody.debugDescription, body.debugDescription)
+            XCTAssertEqual(value.arrayBody.debugDescription, [[String: Any]]().debugDescription)
             //XCTAssertEqual(value.data.hashValue, body.hashValue)
 
             switch value.json {
@@ -34,8 +34,8 @@ class ResultTests: XCTestCase {
         let result = JSONResult(body: expectedBody, response: response, error: nil)
         switch result {
         case .success(let value):
-            XCTAssertEqual(value.dictionary.debugDescription, [String: Any]().debugDescription)
-            XCTAssertEqual(value.array.debugDescription, expectedBody.debugDescription)
+            XCTAssertEqual(value.dictionaryBody.debugDescription, [String: Any]().debugDescription)
+            XCTAssertEqual(value.arrayBody.debugDescription, expectedBody.debugDescription)
             //XCTAssertEqual(value.data.hashValue, bodyData.hashValue)
 
             switch value.json {
@@ -56,8 +56,8 @@ class ResultTests: XCTestCase {
         let result = JSONResult(body: expectedBodyData, response: response, error: nil)
         switch result {
         case .success(let value):
-            XCTAssertEqual(value.dictionary.debugDescription, expectedBody.debugDescription)
-            XCTAssertEqual(value.array.debugDescription, [[String: Any]]().debugDescription)
+            XCTAssertEqual(value.dictionaryBody.debugDescription, expectedBody.debugDescription)
+            XCTAssertEqual(value.arrayBody.debugDescription, [[String: Any]]().debugDescription)
             XCTAssertEqual(value.data.hashValue, expectedBodyData.hashValue)
 
             switch value.json {
@@ -78,8 +78,8 @@ class ResultTests: XCTestCase {
         let result = JSONResult(body: expectedBodyData, response: response, error: nil)
         switch result {
         case .success(let value):
-            XCTAssertEqual(value.dictionary.debugDescription, [String: Any]().debugDescription)
-            XCTAssertEqual(value.array.debugDescription, expectedBody.debugDescription)
+            XCTAssertEqual(value.dictionaryBody.debugDescription, [String: Any]().debugDescription)
+            XCTAssertEqual(value.arrayBody.debugDescription, expectedBody.debugDescription)
             XCTAssertEqual(value.data.hashValue, expectedBodyData.hashValue)
 
             switch value.json {
@@ -98,8 +98,8 @@ class ResultTests: XCTestCase {
         let result = JSONResult(body: nil, response: response, error: nil)
         switch result {
         case .success(let value):
-            XCTAssertEqual(value.dictionary.debugDescription, [String: Any]().debugDescription)
-            XCTAssertEqual(value.array.debugDescription, [[String: Any]]().debugDescription)
+            XCTAssertEqual(value.dictionaryBody.debugDescription, [String: Any]().debugDescription)
+            XCTAssertEqual(value.arrayBody.debugDescription, [[String: Any]]().debugDescription)
             XCTAssertEqual(value.data.hashValue, Data().hashValue)
 
             switch value.json {
