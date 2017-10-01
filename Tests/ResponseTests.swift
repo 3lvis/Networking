@@ -9,7 +9,7 @@ class ResponseTest: XCTestCase {
         networking.headerFields = expectedBody
         networking.get("/user-agent") { result in
             switch result {
-            case .success(let response):
+            case let .success(response):
                 XCTAssertEqual(response.data.toStringStringDictionary().debugDescription, expectedBody.debugDescription)
             case .failure:
                 XCTFail()

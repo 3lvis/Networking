@@ -20,7 +20,7 @@ public enum FormDataPartType {
             return "image/png"
         case .jpg:
             return "image/jpeg"
-        case .custom(let value):
+        case let .custom(value):
             return value
         }
     }

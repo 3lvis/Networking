@@ -13,7 +13,7 @@ public enum JSONResult: Result {
         switch self {
         case .success:
             return nil
-        case .failure(let response):
+        case let .failure(response):
             return response.error
         }
     }

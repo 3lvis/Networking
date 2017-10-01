@@ -18,7 +18,7 @@ class DELETETests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.delete("/delete") { result in
             switch result {
-            case .success(let response):
+            case let .success(response):
                 let json = response.dictionaryBody
                 guard let url = json["url"] as? String else { XCTFail(); return }
                 XCTAssertEqual(url, "http://httpbin.org/delete")
@@ -36,7 +36,7 @@ class DELETETests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.delete("/delete") { result in
             switch result {
-            case .success(let response):
+            case let .success(response):
                 let json = response.dictionaryBody
                 guard let url = json["url"] as? String else { XCTFail(); return }
                 XCTAssertEqual(url, "http://httpbin.org/delete")
@@ -57,7 +57,7 @@ class DELETETests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let response):
+            case let .failure(response):
                 XCTAssertEqual(response.error.code, 404)
             }
         }
@@ -70,7 +70,7 @@ class DELETETests: XCTestCase {
 
         networking.delete("/stories") { result in
             switch result {
-            case .success(let response):
+            case let .success(response):
                 let json = response.dictionaryBody
                 let value = json["name"] as? String
                 XCTAssertEqual(value, "Elvis")
@@ -89,7 +89,7 @@ class DELETETests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let response):
+            case let .failure(response):
                 XCTAssertEqual(response.error.code, 401)
             }
         }
@@ -102,7 +102,7 @@ class DELETETests: XCTestCase {
 
         networking.delete("/entries") { result in
             switch result {
-            case .success(let response):
+            case let .success(response):
                 let json = response.arrayBody
                 let entry = json[0]
                 let value = entry["title"] as? String
@@ -123,7 +123,7 @@ class DELETETests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let response):
+            case let .failure(response):
                 XCTAssertTrue(completed)
                 XCTAssertEqual(response.error.code, URLError.cancelled.rawValue)
                 expectation.fulfill()
@@ -145,7 +145,7 @@ class DELETETests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let response):
+            case let .failure(response):
                 XCTAssertEqual(response.json, JSON.none)
                 XCTAssertEqual(response.error.code, URLError.cancelled.rawValue)
                 expectation.fulfill()
@@ -161,7 +161,7 @@ class DELETETests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.delete("/delete", parameters: ["userId": 25]) { result in
             switch result {
-            case .success(let response):
+            case let .success(response):
                 let json = response.dictionaryBody
                 XCTAssertEqual(json["url"] as? String, "http://httpbin.org/delete?userId=25")
             case .failure:

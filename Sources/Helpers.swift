@@ -45,7 +45,7 @@ extension String {
         var components = self.components(separatedBy: "/")
         guard let lastComponent = components.popLast(),
             let endcodedLastComponent = lastComponent.addingPercentEncoding(withAllowedCharacters: .urlQueryParametersAllowed) else {
-                return nil
+            return nil
         }
 
         return (components + [endcodedLastComponent]).joined(separator: "/")
@@ -69,27 +69,27 @@ extension FileManager {
 }
 
 extension URLRequest {
-    init(url: URL, requestType: Networking.RequestType, path: String, parameterType: Networking.ParameterType?, responseType: Networking.ResponseType, boundary: String, authorizationHeaderValue: String?, token: String?, authorizationHeaderKey: String, headerFields: [String: String]?) {
+    init(url: URL, requestType: Networking.RequestType, path _: String, parameterType: Networking.ParameterType?, responseType: Networking.ResponseType, boundary: String, authorizationHeaderValue: String?, token: String?, authorizationHeaderKey: String, headerFields: [String: String]?) {
         self = URLRequest(url: url)
-        self.httpMethod = requestType.rawValue
+        httpMethod = requestType.rawValue
 
         if let parameterType = parameterType, let contentType = parameterType.contentType(boundary) {
-            self.addValue(contentType, forHTTPHeaderField: "Content-Type")
+            addValue(contentType, forHTTPHeaderField: "Content-Type")
         }
 
         if let accept = responseType.accept {
-            self.addValue(accept, forHTTPHeaderField: "Accept")
+            addValue(accept, forHTTPHeaderField: "Accept")
         }
 
         if let authorizationHeader = authorizationHeaderValue {
-            self.setValue(authorizationHeader, forHTTPHeaderField: authorizationHeaderKey)
+            setValue(authorizationHeader, forHTTPHeaderField: authorizationHeaderKey)
         } else if let token = token {
-            self.setValue("Bearer \(token)", forHTTPHeaderField: authorizationHeaderKey)
+            setValue("Bearer \(token)", forHTTPHeaderField: authorizationHeaderKey)
         }
 
         if let headerFields = headerFields {
             for (key, value) in headerFields {
-                self.setValue(value, forHTTPHeaderField: key)
+                setValue(value, forHTTPHeaderField: key)
             }
         }
     }
