@@ -10,14 +10,14 @@ class ResultTests: XCTestCase {
     }
 
     func testJSONResultDictionary() {
-        let body = ["a": "b"]
+        let body = ["a": 12]
         let bodyData = try! JSONSerialization.data(withJSONObject: body, options: [])
         let result = JSONResult(body: bodyData, response: response, error: nil)
         switch result {
         case .success(let value):
             XCTAssertEqual(value.dictionaryBody.debugDescription, body.debugDescription)
             XCTAssertEqual(value.arrayBody.debugDescription, [[String: Any]]().debugDescription)
-            XCTAssertEqual(value.data.hashValue, Data().hashValue)
+            XCTAssertEqual(value.data.hashValue, bodyData.hashValue)
 
             switch value.json {
             case .dictionary(_, let valueBody):
@@ -31,14 +31,14 @@ class ResultTests: XCTestCase {
     }
 
     func testJSONResultArray() {
-        let body = [["a": "b"]]
+        let body = [["a": 12]]
         let bodyData = try! JSONSerialization.data(withJSONObject: body, options: [])
         let result = JSONResult(body: bodyData, response: response, error: nil)
         switch result {
         case .success(let value):
             XCTAssertEqual(value.dictionaryBody.debugDescription, [String: Any]().debugDescription)
             XCTAssertEqual(value.arrayBody.debugDescription, body.debugDescription)
-            XCTAssertEqual(value.data.hashValue, Data().hashValue)
+            XCTAssertEqual(value.data.hashValue, bodyData.hashValue)
 
             switch value.json {
             case .array(_, let valueBody):
@@ -52,9 +52,7 @@ class ResultTests: XCTestCase {
     }
 
     func testJSONResultNone() {
-        let body = "Invalid"
-        let bodyData = try! JSONSerialization.data(withJSONObject: body, options: [])
-        let result = JSONResult(body: bodyData, response: response, error: nil)
+        let result = JSONResult(body: nil, response: response, error: nil)
         switch result {
         case .success(let value):
             XCTAssertEqual(value.dictionaryBody.debugDescription, [String: Any]().debugDescription)

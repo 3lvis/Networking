@@ -9,3 +9,23 @@ struct Helper {
         }
     }
 }
+
+extension Data {
+    func toStringStringDictionary() -> [String: String] {
+        let json = try? JSONSerialization.jsonObject(with: self, options: [])
+        if let receivedBody = json as? [String: String] {
+            return receivedBody
+        } else {
+            return [String: String]()
+        }
+    }
+
+    func toStringStringArray() -> [[String: String]] {
+        let json = try? JSONSerialization.jsonObject(with: self, options: [])
+        if let receivedBody = json as? [[String: String]] {
+            return receivedBody
+        } else {
+            return [[String: String]]()
+        }
+    }
+}

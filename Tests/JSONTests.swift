@@ -2,12 +2,14 @@ import Foundation
 import XCTest
 
 class JSONTests: XCTestCase {
-    func testDictionary() {
+    // MARK: - Equatable
+
+    func testEqualDictionary() {
         XCTAssertEqual(JSON(["hello":"value"]), JSON(["hello":"value"]))
         XCTAssertNotEqual(JSON(["hello1":"value"]), JSON(["hello2":"value"]))
     }
 
-    func testArray() {
+    func testEqualArray() {
         XCTAssertEqual(JSON([["hello":"value"]]), JSON([["hello":"value"]]))
         XCTAssertNotEqual(JSON([["hello1":"value"]]), JSON([["hello2":"value"]]))
 
@@ -15,9 +17,47 @@ class JSONTests: XCTestCase {
         XCTAssertNotEqual(JSON([["hello1":"value"], ["hello2":"value"]]), JSON([["hello3":"value"], ["hello4":"value"]]))
     }
 
-    func testNone() {
+    func testEqualData() {
+        let helloData = try! JSONSerialization.data(withJSONObject: ["a":"b"], options: [])
+        let byeData = try! JSONSerialization.data(withJSONObject: ["c":"d"], options: [])
+        XCTAssertEqual(try! JSON(helloData), try! JSON(helloData))
+        XCTAssertNotEqual(try! JSON(helloData), try! JSON(byeData))
+    }
+
+    func testEqualNone() {
         XCTAssertEqual(JSON.none, JSON.none)
         XCTAssertNotEqual(JSON.none, JSON(["hello":"value"]))
+    }
+
+    // MARKL - Accessors
+
+    func testDictionaryAccessor() {
+        let body = ["hello":"value"]
+
+        let json = JSON(body)
+        XCTAssertEqual(json.dictionary.debugDescription, body.debugDescription)
+        XCTAssertEqual(json.array.debugDescription, [[String: Any]]().debugDescription)
+    }
+
+    func testArrayAccessor() {
+        let body = [["hello":"value"]]
+
+        let json = JSON(body)
+        XCTAssertEqual(json.dictionary.debugDescription, [String: Any]().debugDescription)
+        XCTAssertEqual(json.array.debugDescription, body.debugDescription)
+    }
+
+    func testDataAccessor() {
+        let body = ["hello":"value"]
+        let bodyData = try! JSONSerialization.data(withJSONObject: body, options: [])
+
+        let json = try! JSON(body)
+        switch json {
+        case .dictionary(let data, _):
+            XCTAssertEqual(data.hashValue, bodyData.hashValue)
+        default:
+            XCTFail()
+        }
     }
 
     // MARK: - from
@@ -86,3 +126,4 @@ class JSONTests: XCTestCase {
         waitForExpectations(timeout: 10, handler: nil)
     }
 }
+

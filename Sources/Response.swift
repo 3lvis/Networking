@@ -40,10 +40,8 @@ public class JSONResponse: Response {
     public var data: Data {
         switch json {
         case .array(let value, let body):
-            print(body)
             return value
         case .dictionary(let value, let body):
-            print(body)
             return value
         case .none:
             return Data()
