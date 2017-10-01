@@ -37,6 +37,25 @@ public class JSONResponse: Response {
         return json.array
     }
 
+    public var data: Data {
+        switch json {
+        case .array(let value):
+            do {
+                return try JSONSerialization.data(withJSONObject: value, options: [])
+            } catch {
+                return Data()
+            }
+        case .dictionary(let value):
+            do {
+                return try JSONSerialization.data(withJSONObject: value, options: [])
+            } catch {
+                return Data()
+            }
+        case .none:
+            return Data()
+        }
+    }
+
     init(json: JSON, response: HTTPURLResponse) {
         self.json = json
 
