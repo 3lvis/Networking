@@ -1,6 +1,10 @@
 import Foundation
 
-public enum JSONResult {
+public protocol Result {
+    init(body: Any?, response: HTTPURLResponse, error: NSError?)
+}
+
+public enum JSONResult: Result {
     case success(SuccessJSONResponse)
 
     case failure(FailureJSONResponse)
@@ -40,7 +44,7 @@ public enum JSONResult {
     }
 }
 
-public enum ImageResult {
+public enum ImageResult: Result {
     case success(SuccessImageResponse)
 
     case failure(FailureResponse)
@@ -58,7 +62,7 @@ public enum ImageResult {
     }
 }
 
-public enum DataResult {
+public enum DataResult: Result {
     case success(SuccessDataResponse)
 
     case failure(FailureResponse)

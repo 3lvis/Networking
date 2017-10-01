@@ -47,7 +47,7 @@ extension Networking {
         fakeRequests[requestType] = requests
     }
 
-    func handleRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ result: Any) -> Void) -> String {
+    func handleRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ result: Result) -> Void) -> String {
         if let fakeRequests = fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
             return handleFakeRequest(fakeRequest, requestType: requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType, completion: completion)
         } else {
@@ -60,7 +60,7 @@ extension Networking {
         }
     }
 
-    func handleFakeRequest(_ fakeRequest: FakeRequest, requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ result: Any) -> Void) -> String {
+    func handleFakeRequest(_ fakeRequest: FakeRequest, requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ result: Result) -> Void) -> String {
         let requestID = UUID().uuidString
 
         if fakeRequest.statusCode.statusCodeType == .successful {
@@ -110,7 +110,7 @@ extension Networking {
         }
     }
 
-    func handleDataOrImageRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ result: Any) -> Void) -> String {
+    func handleDataOrImageRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ result: Result) -> Void) -> String {
         let object = objectFromCache(for: path, cacheName: cacheName, responseType: responseType)
         if let object = object {
             let requestID = UUID().uuidString
@@ -138,7 +138,7 @@ extension Networking {
 
                 }
 
-                let returnedResponse: Any
+                let returnedResponse: Result
                 if let data = data, data.count > 0 {
                     _ = try? data.write(to: destinationURL, options: [.atomic])
                     switch responseType {
