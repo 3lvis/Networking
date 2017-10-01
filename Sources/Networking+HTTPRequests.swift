@@ -11,9 +11,9 @@ public extension Networking {
     /// - Returns: The request identifier.
     @discardableResult
     public func get(_ path: String, parameters: Any? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
-        let parameterType = parameters != nil ? ParameterType.formURLEncoded : ParameterType.none
+        let parameterType: ParameterType = parameters != nil ? .formURLEncoded : .none
 
-        return handleJSONRequest(.get, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
+        return handleJSONRequest(.get, path: path, parameterType: parameterType, parameters: parameters, responseType: .json, completion: completion)
     }
 
     /// Registers a fake GET request for the specified path. After registering this, every GET request to the path, will return the registered response.
@@ -57,7 +57,7 @@ public extension Networking {
     /// - Returns: The request identifier.
     @discardableResult
     public func put(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
-        return handleJSONRequest(.put, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
+        return handleJSONRequest(.put, path: path, parameterType: parameterType, parameters: parameters, responseType: .json, completion: completion)
     }
 
     /// Registers a fake PUT request for the specified path. After registering this, every PUT request to the path, will return the registered response.
@@ -101,7 +101,7 @@ public extension Networking {
     /// - Returns: The request identifier.
     @discardableResult
     public func post(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
-        return handleJSONRequest(.post, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
+        return handleJSONRequest(.post, path: path, parameterType: parameterType, parameters: parameters, responseType: .json, completion: completion)
     }
 
     /// POST request to the specified path, using the provided parameters.
@@ -114,7 +114,7 @@ public extension Networking {
     /// - Returns: The request identifier.
     @discardableResult
     public func post(_ path: String, parameters: Any? = nil, parts: [FormDataPart], completion: @escaping (_ result: JSONResult) -> Void) -> String {
-        return handleJSONRequest(.post, path: path, cacheName: nil, parameterType: .multipartFormData, parameters: parameters, parts: parts, responseType: .json, completion: completion)
+        return handleJSONRequest(.post, path: path, parameterType: .multipartFormData, parameters: parameters, parts: parts, responseType: .json, completion: completion)
     }
 
     /// Registers a fake POST request for the specified path. After registering this, every POST request to the path, will return the registered response.
@@ -157,8 +157,8 @@ public extension Networking {
     /// - Returns: The request identifier.
     @discardableResult
     public func delete(_ path: String, parameters: Any? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
-        let parameterType = parameters != nil ? ParameterType.formURLEncoded : ParameterType.none
-        return handleJSONRequest(.delete, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, responseType: .json, completion: completion)
+        let parameterType: ParameterType = parameters != nil ? .formURLEncoded : .none
+        return handleJSONRequest(.delete, path: path, parameterType: parameterType, parameters: parameters, responseType: .json, completion: completion)
     }
 
     /// Registers a fake DELETE request for the specified path. After registering this, every DELETE request to the path, will return the registered response.
@@ -213,7 +213,7 @@ public extension Networking {
     /// - Returns: The request identifier.
     @discardableResult
     public func downloadImage(_ path: String, cacheName: String? = nil, completion: @escaping (_ result: ImageResult) -> Void) -> String {
-        return handleImageRequest(.get, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .image, completion: completion)
+        return handleImageRequest(.get, path: path, cacheName: cacheName, responseType: .image, completion: completion)
     }
 
     /// Cancels the image download request for the specified path. This causes the request to complete with error code URLError.cancelled.
@@ -242,7 +242,7 @@ public extension Networking {
     ///   - completion: A closure that gets called when the download request is completed, it contains  a `data` object and an `NSError`.
     @discardableResult
     public func downloadData(_ path: String, cacheName: String? = nil, completion: @escaping (_ result: DataResult) -> Void) -> String {
-        return handleDataRequest(.get, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .data, completion: completion)
+        return handleDataRequest(.get, path: path, cacheName: cacheName, responseType: .data, completion: completion)
     }
 
     /// Retrieves data from the cache or from the filesystem.
