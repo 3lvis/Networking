@@ -13,18 +13,18 @@ class ResultTests: XCTestCase {
         let body = ["a": 12]
         let result = JSONResult(body: body, response: response, error: nil)
         switch result {
-        case .success(let value):
+        case let .success(value):
             XCTAssertEqual(value.dictionaryBody.debugDescription, body.debugDescription)
             XCTAssertEqual(value.arrayBody.debugDescription, [[String: Any]]().debugDescription)
-            //XCTAssertEqual(value.data.hashValue, body.hashValue)
+            // XCTAssertEqual(value.data.hashValue, body.hashValue)
 
             switch value.json {
-            case .dictionary(_, let valueBody):
+            case let .dictionary(_, valueBody):
                 XCTAssertEqual(body.debugDescription, valueBody.debugDescription)
             case .array(_, _), .none:
                 XCTFail()
             }
-        case .failure(_):
+        case .failure:
             XCTFail()
         }
     }
@@ -33,19 +33,19 @@ class ResultTests: XCTestCase {
         let expectedBody = [["a": 12]]
         let result = JSONResult(body: expectedBody, response: response, error: nil)
         switch result {
-        case .success(let value):
+        case let .success(value):
             XCTAssertEqual(value.dictionaryBody.debugDescription, [String: Any]().debugDescription)
             XCTAssertEqual(value.arrayBody.debugDescription, expectedBody.debugDescription)
-            //XCTAssertEqual(value.data.hashValue, bodyData.hashValue)
+            // XCTAssertEqual(value.data.hashValue, bodyData.hashValue)
 
             switch value.json {
-            case .array(_, let valueBody):
+            case let .array(_, valueBody):
                 XCTAssertEqual(expectedBody.debugDescription, valueBody.debugDescription)
-                //XCTAssertEqual(dataBody.hashValue, expectedBody.hashValue)
+                // XCTAssertEqual(dataBody.hashValue, expectedBody.hashValue)
             case .dictionary(_, _), .none:
                 XCTFail()
             }
-        case .failure(_):
+        case .failure:
             XCTFail()
         }
     }
@@ -55,19 +55,19 @@ class ResultTests: XCTestCase {
         let expectedBodyData = try! JSONSerialization.data(withJSONObject: expectedBody, options: [])
         let result = JSONResult(body: expectedBodyData, response: response, error: nil)
         switch result {
-        case .success(let value):
+        case let .success(value):
             XCTAssertEqual(value.dictionaryBody.debugDescription, expectedBody.debugDescription)
             XCTAssertEqual(value.arrayBody.debugDescription, [[String: Any]]().debugDescription)
             XCTAssertEqual(value.data.hashValue, expectedBodyData.hashValue)
 
             switch value.json {
-            case .dictionary(let dataBody, let valueBody):
+            case let .dictionary(dataBody, valueBody):
                 XCTAssertEqual(dataBody.hashValue, expectedBodyData.hashValue)
                 XCTAssertEqual(valueBody.debugDescription, expectedBody.debugDescription)
             case .array(_, _), .none:
                 XCTFail()
             }
-        case .failure(_):
+        case .failure:
             XCTFail()
         }
     }
@@ -77,19 +77,19 @@ class ResultTests: XCTestCase {
         let expectedBodyData = try! JSONSerialization.data(withJSONObject: expectedBody, options: [])
         let result = JSONResult(body: expectedBodyData, response: response, error: nil)
         switch result {
-        case .success(let value):
+        case let .success(value):
             XCTAssertEqual(value.dictionaryBody.debugDescription, [String: Any]().debugDescription)
             XCTAssertEqual(value.arrayBody.debugDescription, expectedBody.debugDescription)
             XCTAssertEqual(value.data.hashValue, expectedBodyData.hashValue)
 
             switch value.json {
-            case .array(let dataBody, let valueBody):
+            case let .array(dataBody, valueBody):
                 XCTAssertEqual(dataBody.hashValue, expectedBodyData.hashValue)
                 XCTAssertEqual(valueBody.debugDescription, expectedBody.debugDescription)
             case .dictionary(_, _), .none:
                 XCTFail()
             }
-        case .failure(_):
+        case .failure:
             XCTFail()
         }
     }
@@ -97,18 +97,18 @@ class ResultTests: XCTestCase {
     func testJSONResultNone() {
         let result = JSONResult(body: nil, response: response, error: nil)
         switch result {
-        case .success(let value):
+        case let .success(value):
             XCTAssertEqual(value.dictionaryBody.debugDescription, [String: Any]().debugDescription)
             XCTAssertEqual(value.arrayBody.debugDescription, [[String: Any]]().debugDescription)
             XCTAssertEqual(value.data.hashValue, Data().hashValue)
 
             switch value.json {
-            case .dictionary(_, _), .array(_, _):
+            case .dictionary(_, _), .array:
                 XCTFail()
             case .none:
                 break
             }
-        case .failure(_):
+        case .failure:
             XCTFail()
         }
     }
@@ -120,7 +120,7 @@ class ResultTests: XCTestCase {
         switch result {
         case .success:
             XCTFail()
-        case .failure(let result):
+        case let .failure(result):
             XCTAssertEqual(result.error.code, URLError.cannotParseResponse.rawValue)
         }
     }
@@ -132,7 +132,7 @@ class ResultTests: XCTestCase {
         switch result {
         case .success:
             XCTFail()
-        case .failure(let result):
+        case let .failure(result):
             XCTAssertEqual(result.error.code, URLError.cannotParseResponse.rawValue)
         }
     }
@@ -149,4 +149,3 @@ class ResultTests: XCTestCase {
         XCTAssertNotNil(errorResult.error)
     }
 }
-

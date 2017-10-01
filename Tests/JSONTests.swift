@@ -5,34 +5,34 @@ class JSONTests: XCTestCase {
     // MARK: - Equatable
 
     func testEqualDictionary() {
-        XCTAssertEqual(JSON(["hello":"value"]), JSON(["hello":"value"]))
-        XCTAssertNotEqual(JSON(["hello1":"value"]), JSON(["hello2":"value"]))
+        XCTAssertEqual(JSON(["hello": "value"]), JSON(["hello": "value"]))
+        XCTAssertNotEqual(JSON(["hello1": "value"]), JSON(["hello2": "value"]))
     }
 
     func testEqualArray() {
-        XCTAssertEqual(JSON([["hello":"value"]]), JSON([["hello":"value"]]))
-        XCTAssertNotEqual(JSON([["hello1":"value"]]), JSON([["hello2":"value"]]))
+        XCTAssertEqual(JSON([["hello": "value"]]), JSON([["hello": "value"]]))
+        XCTAssertNotEqual(JSON([["hello1": "value"]]), JSON([["hello2": "value"]]))
 
-        XCTAssertEqual(JSON([["hello2":"value"], ["hello1":"value"]]), JSON([["hello2":"value"], ["hello1":"value"]]))
-        XCTAssertNotEqual(JSON([["hello1":"value"], ["hello2":"value"]]), JSON([["hello3":"value"], ["hello4":"value"]]))
+        XCTAssertEqual(JSON([["hello2": "value"], ["hello1": "value"]]), JSON([["hello2": "value"], ["hello1": "value"]]))
+        XCTAssertNotEqual(JSON([["hello1": "value"], ["hello2": "value"]]), JSON([["hello3": "value"], ["hello4": "value"]]))
     }
 
     func testEqualData() {
-        let helloData = try! JSONSerialization.data(withJSONObject: ["a":"b"], options: [])
-        let byeData = try! JSONSerialization.data(withJSONObject: ["c":"d"], options: [])
+        let helloData = try! JSONSerialization.data(withJSONObject: ["a": "b"], options: [])
+        let byeData = try! JSONSerialization.data(withJSONObject: ["c": "d"], options: [])
         XCTAssertEqual(try! JSON(helloData), try! JSON(helloData))
         XCTAssertNotEqual(try! JSON(helloData), try! JSON(byeData))
     }
 
     func testEqualNone() {
         XCTAssertEqual(JSON.none, JSON.none)
-        XCTAssertNotEqual(JSON.none, JSON(["hello":"value"]))
+        XCTAssertNotEqual(JSON.none, JSON(["hello": "value"]))
     }
 
     // MARKL - Accessors
 
     func testDictionaryAccessor() {
-        let body = ["hello":"value"]
+        let body = ["hello": "value"]
 
         let json = JSON(body)
         XCTAssertEqual(json.dictionary.debugDescription, body.debugDescription)
@@ -40,7 +40,7 @@ class JSONTests: XCTestCase {
     }
 
     func testArrayAccessor() {
-        let body = [["hello":"value"]]
+        let body = [["hello": "value"]]
 
         let json = JSON(body)
         XCTAssertEqual(json.dictionary.debugDescription, [String: Any]().debugDescription)
@@ -48,12 +48,12 @@ class JSONTests: XCTestCase {
     }
 
     func testDataAccessor() {
-        let body = ["hello":"value"]
+        let body = ["hello": "value"]
         let bodyData = try! JSONSerialization.data(withJSONObject: body, options: [])
 
         let json = try! JSON(bodyData)
         switch json {
-        case .dictionary(let data, _):
+        case let .dictionary(data, _):
             XCTAssertEqual(data.hashValue, bodyData.hashValue)
         default:
             XCTFail()
@@ -63,8 +63,8 @@ class JSONTests: XCTestCase {
     // MARK: - from
 
     func testArrayJSONFromFileNamed() {
-        let result = try! FileManager.json(from: "simple_array.json", bundle: Bundle(for: JSONTests.self)) as? [[String : Any]]  ?? [[String : Any]]()
-        let compared = [["id" : 1, "name" : "Hi"]]
+        let result = try! FileManager.json(from: "simple_array.json", bundle: Bundle(for: JSONTests.self)) as? [[String: Any]] ?? [[String: Any]]()
+        let compared = [["id": 1, "name": "Hi"]]
         XCTAssertEqual(compared.count, result.count)
 
         // This should work but Swift is not able to compile it.
@@ -76,8 +76,8 @@ class JSONTests: XCTestCase {
     }
 
     func testDictionaryJSONFromFileNamed() {
-        let result = try! FileManager.json(from: "simple_dictionary.json", bundle: Bundle(for: JSONTests.self)) as? [String : Any] ?? [String : Any]()
-        let compared = ["id" : 1, "name" : "Hi"] as [String : Any]
+        let result = try! FileManager.json(from: "simple_dictionary.json", bundle: Bundle(for: JSONTests.self)) as? [String: Any] ?? [String: Any]()
+        let compared = ["id": 1, "name": "Hi"] as [String: Any]
         XCTAssertEqual(compared.count, result.count)
         XCTAssertEqual(Array(compared.keys), Array(result.keys))
     }
@@ -85,10 +85,10 @@ class JSONTests: XCTestCase {
     func testFromFileNamedWithNotFoundFile() {
         var failed = false
         do {
-            let _ = try FileManager.json(from: "nonexistingfile.json", bundle: Bundle(for: JSONTests.self))
+            _ = try FileManager.json(from: "nonexistingfile.json", bundle: Bundle(for: JSONTests.self))
         } catch ParsingError.notFound {
             failed = true
-        } catch { }
+        } catch {}
 
         XCTAssertTrue(failed)
     }
@@ -96,10 +96,10 @@ class JSONTests: XCTestCase {
     func testFromFileNamedWithInvalidJSON() {
         var failed = false
         do {
-            let _ = try FileManager.json(from: "invalid.json", bundle: Bundle(for: JSONTests.self))
+            _ = try FileManager.json(from: "invalid.json", bundle: Bundle(for: JSONTests.self))
         } catch ParsingError.failed {
             failed = true
-        } catch { }
+        } catch {}
 
         XCTAssertTrue(failed)
     }
@@ -111,9 +111,9 @@ class JSONTests: XCTestCase {
 
         guard let url = URL(string: "http://httpbin.org/get") else { return }
         let request = URLRequest(url: url)
-        URLSession.shared.dataTask(with: request) { data, _, error in
+        URLSession.shared.dataTask(with: request) { data, _, _ in
             do {
-                let JSON = try data?.toJSON() as? [String : Any]
+                let JSON = try data?.toJSON() as? [String: Any]
                 let url = JSON?["url"] as! String
                 XCTAssertEqual(url, "http://httpbin.org/get")
             } catch {
@@ -121,9 +121,8 @@ class JSONTests: XCTestCase {
             }
 
             expectation.fulfill()
-            }.resume()
+        }.resume()
 
         waitForExpectations(timeout: 10, handler: nil)
     }
 }
-

@@ -62,7 +62,7 @@ open class Networking {
                 return "application/x-www-form-urlencoded"
             case .multipartFormData:
                 return "multipart/form-data; boundary=\(boundary)"
-            case .custom(let value):
+            case let .custom(value):
                 return value
             }
         }
@@ -114,7 +114,7 @@ open class Networking {
     let boundary = String(format: "net.3lvis.networking.%08x%08x", arc4random(), arc4random())
 
     lazy var session: URLSession = {
-        return URLSession(configuration: self.configuration)
+        URLSession(configuration: self.configuration)
     }()
 
     /// Base initializer, it creates an instance of `Networking`.
@@ -194,7 +194,7 @@ open class Networking {
         if let normalizedCacheName = normalizedCacheName {
             resourcesPath = normalizedCacheName
         } else {
-            let url = try self.composedURL(with: path)
+            let url = try composedURL(with: path)
             resourcesPath = url.absoluteString
         }
 

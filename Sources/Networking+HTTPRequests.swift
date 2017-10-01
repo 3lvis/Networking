@@ -40,7 +40,7 @@ public extension Networking {
     ///
     /// - Parameter path: The path for the cancelled GET request
     public func cancelGET(_ path: String) {
-        let url = try! self.composedURL(with: path)
+        let url = try! composedURL(with: path)
         cancelRequest(.data, requestType: .get, url: url)
     }
 }
@@ -84,7 +84,7 @@ public extension Networking {
     ///
     /// - Parameter path: The path for the cancelled PUT request.
     public func cancelPUT(_ path: String) {
-        let url = try! self.composedURL(with: path)
+        let url = try! composedURL(with: path)
         cancelRequest(.data, requestType: .put, url: url)
     }
 }
@@ -141,7 +141,7 @@ public extension Networking {
     ///
     /// - Parameter path: The path for the cancelled POST request.
     public func cancelPOST(_ path: String) {
-        let url = try! self.composedURL(with: path)
+        let url = try! composedURL(with: path)
         cancelRequest(.data, requestType: .post, url: url)
     }
 }
@@ -185,7 +185,7 @@ public extension Networking {
     ///
     /// - Parameter path: The path for the cancelled DELETE request.
     public func cancelDELETE(_ path: String) {
-        let url = try! self.composedURL(with: path)
+        let url = try! composedURL(with: path)
         cancelRequest(.data, requestType: .delete, url: url)
     }
 }
@@ -220,7 +220,7 @@ public extension Networking {
     ///
     /// - Parameter path: The path for the cancelled image download request.
     public func cancelImageDownload(_ path: String) {
-        let url = try! self.composedURL(with: path)
+        let url = try! composedURL(with: path)
         cancelRequest(.data, requestType: .get, url: url)
     }
 

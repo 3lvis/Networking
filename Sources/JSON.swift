@@ -13,24 +13,20 @@ enum JSON: Equatable {
     case array(Data, [[String: Any]])
 
     var dictionary: [String: Any] {
-        get {
-            switch self {
-            case .dictionary(_, let body):
-                return body
-            default:
-                return [String: Any]()
-            }
+        switch self {
+        case let .dictionary(_, body):
+            return body
+        default:
+            return [String: Any]()
         }
     }
 
     var array: [[String: Any]] {
-        get {
-            switch self {
-            case .array(_, let body):
-                return body
-            default:
-                return [[String: Any]]()
-            }
+        switch self {
+        case let .array(_, body):
+            return body
+        default:
+            return [[String: Any]]()
         }
     }
 

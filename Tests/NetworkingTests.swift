@@ -9,7 +9,7 @@ class NetworkingTests: XCTestCase {
         networking.setAuthorizationHeader(username: "user", password: "passwd")
         networking.get("/basic-auth/user/passwd") { result in
             switch result {
-            case .success(let response):
+            case let .success(response):
                 let json = response.dictionaryBody
                 let user = json["user"] as? String
                 let authenticated = json["authenticated"] as? Bool
@@ -27,7 +27,7 @@ class NetworkingTests: XCTestCase {
         networking.setAuthorizationHeader(token: token)
         networking.post("/post") { result in
             switch result {
-            case .success(let response):
+            case let .success(response):
                 let json = response.dictionaryBody
                 let headers = json["headers"] as? [String: Any]
                 XCTAssertEqual("Bearer \(token)", headers?["Authorization"] as? String)
@@ -43,7 +43,7 @@ class NetworkingTests: XCTestCase {
         networking.setAuthorizationHeader(headerValue: value)
         networking.post("/post") { result in
             switch result {
-            case .success(let response):
+            case let .success(response):
                 let json = response.dictionaryBody
                 let headers = json["headers"] as? [String: Any]
                 XCTAssertEqual(value, headers?["Authorization"] as? String)
@@ -60,7 +60,7 @@ class NetworkingTests: XCTestCase {
         networking.setAuthorizationHeader(headerKey: key, headerValue: value)
         networking.post("/post") { result in
             switch result {
-            case .success(let response):
+            case let .success(response):
                 let json = response.dictionaryBody
                 let headers = json["headers"] as? [String: Any]
                 XCTAssertEqual(value, headers?[key] as? String)
@@ -75,7 +75,7 @@ class NetworkingTests: XCTestCase {
         networking.headerFields = ["HeaderKey": "HeaderValue"]
         networking.post("/post") { result in
             switch result {
-            case .success(let response):
+            case let .success(response):
                 let json = response.dictionaryBody
                 let headers = json["headers"] as? [String: Any]
                 XCTAssertEqual("HeaderValue", headers?["Headerkey"] as? String)
@@ -176,7 +176,7 @@ class NetworkingTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let response):
+            case let .failure(response):
                 cancelledGET = response.error.code == URLError.cancelled.rawValue
                 XCTAssertTrue(cancelledGET)
 
@@ -202,7 +202,7 @@ class NetworkingTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let response):
+            case let .failure(response):
                 cancelledGET = response.error.code == URLError.cancelled.rawValue
                 XCTAssertTrue(cancelledGET)
 
@@ -216,7 +216,7 @@ class NetworkingTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let response):
+            case let .failure(response):
                 cancelledPOST = response.error.code == URLError.cancelled.rawValue
                 XCTAssertTrue(cancelledPOST)
 
@@ -239,7 +239,7 @@ class NetworkingTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let response):
+            case let .failure(response):
                 XCTAssertTrue(Thread.isMainThread)
                 XCTAssertEqual(response.error.code, URLError.cancelled.rawValue)
                 expectation.fulfill()

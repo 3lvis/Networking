@@ -18,7 +18,7 @@ class POSTTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.post("/post", parameters: nil) { result in
             switch result {
-            case .success(let response):
+            case let .success(response):
                 let json = response.dictionaryBody
 
                 guard let headers = json["headers"] as? [String: String] else { XCTFail(); return }
@@ -39,7 +39,7 @@ class POSTTests: XCTestCase {
         ] as [String: Any]
         networking.post("/post", parameters: parameters) { result in
             switch result {
-            case .success(let response):
+            case let .success(response):
                 let json = response.dictionaryBody
                 guard let JSONResponse = json["json"] as? [String: Any] else { XCTFail(); return }
                 XCTAssertEqual(JSONResponse["string"] as? String, "valueA")
@@ -60,7 +60,7 @@ class POSTTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.post("/post") { result in
             switch result {
-            case .success(let response):
+            case let .success(response):
                 let json = response.dictionaryBody
                 guard let url = json["url"] as? String else { XCTFail(); return }
                 XCTAssertEqual(url, "http://httpbin.org/post")
@@ -79,7 +79,7 @@ class POSTTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.post("/post") { result in
             switch result {
-            case .success(let response):
+            case let .success(response):
                 let JSONResponse = response.dictionaryBody
                 XCTAssertEqual("http://httpbin.org/post", JSONResponse["url"] as? String)
             case .failure:
@@ -99,7 +99,7 @@ class POSTTests: XCTestCase {
         ] as [String: Any]
         networking.post("/post", parameterType: .formURLEncoded, parameters: parameters) { result in
             switch result {
-            case .success(let response):
+            case let .success(response):
                 let json = response.dictionaryBody
                 guard let form = json["form"] as? [String: Any] else { XCTFail(); return }
                 XCTAssertEqual(form["string"] as? String, "B&B")
@@ -128,7 +128,7 @@ class POSTTests: XCTestCase {
         ] as [String: Any]
         networking.post("/post", parameters: parameters, parts: [part1, part2]) { result in
             switch result {
-            case .success(let response):
+            case let .success(response):
                 let json = response.dictionaryBody
                 XCTAssertEqual(json["url"] as? String, "http://httpbin.org/post")
 
@@ -157,7 +157,7 @@ class POSTTests: XCTestCase {
         let part1 = FormDataPart(data: item1.data(using: .utf8)!, parameterName: item1, filename: "\(item1).png")
         networking.post("/post", parameters: nil, parts: [part1]) { result in
             switch result {
-            case .success(let response):
+            case let .success(response):
                 let json = response.dictionaryBody
                 XCTAssertEqual(json["url"] as? String, "http://httpbin.org/post")
 
@@ -196,7 +196,7 @@ class POSTTests: XCTestCase {
 
         networking.post("/v1_1/\(CloudinaryCloudName)/image/upload", parameters: parameters, parts: [pngPart]) { result in
             switch result {
-            case .success(let response):
+            case let .success(response):
                 let JSONResponse = response.dictionaryBody
                 XCTAssertEqual(timestamp, JSONResponse["original_filename"] as? String)
 
@@ -213,7 +213,7 @@ class POSTTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let response):
+            case let .failure(response):
                 XCTAssertEqual(response.error.code, 404)
             }
         }
@@ -226,7 +226,7 @@ class POSTTests: XCTestCase {
 
         networking.post("/story", parameters: ["username": "jameson", "password": "secret"]) { result in
             switch result {
-            case .success(let response):
+            case let .success(response):
                 let json = response.arrayBody
                 let value = json[0]["name"] as? String
                 XCTAssertEqual(value, "Elvis")
@@ -245,7 +245,7 @@ class POSTTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let response):
+            case let .failure(response):
                 XCTAssertEqual(response.error.code, 401)
             }
         }
@@ -258,7 +258,7 @@ class POSTTests: XCTestCase {
 
         networking.post("/entries") { result in
             switch result {
-            case .success(let response):
+            case let .success(response):
                 let json = response.arrayBody
                 let entry = json[0]
                 let value = entry["title"] as? String
@@ -279,7 +279,7 @@ class POSTTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let response):
+            case let .failure(response):
                 XCTAssertTrue(completed)
                 XCTAssertEqual(response.error.code, URLError.cancelled.rawValue)
                 expectation.fulfill()
@@ -301,7 +301,7 @@ class POSTTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let response):
+            case let .failure(response):
                 XCTAssertEqual(response.error.code, URLError.cancelled.rawValue)
                 expectation.fulfill()
             }
