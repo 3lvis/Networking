@@ -2,12 +2,14 @@ import Foundation
 import XCTest
 
 class JSONTests: XCTestCase {
-    func testDictionary() {
+    // MARK: - Equatable
+
+    func testEqualDictionary() {
         XCTAssertEqual(JSON(["hello":"value"]), JSON(["hello":"value"]))
         XCTAssertNotEqual(JSON(["hello1":"value"]), JSON(["hello2":"value"]))
     }
 
-    func testArray() {
+    func testEqualArray() {
         XCTAssertEqual(JSON([["hello":"value"]]), JSON([["hello":"value"]]))
         XCTAssertNotEqual(JSON([["hello1":"value"]]), JSON([["hello2":"value"]]))
 
@@ -15,15 +17,53 @@ class JSONTests: XCTestCase {
         XCTAssertNotEqual(JSON([["hello1":"value"], ["hello2":"value"]]), JSON([["hello3":"value"], ["hello4":"value"]]))
     }
 
-    func testNone() {
+    func testEqualData() {
+        let helloData = try! JSONSerialization.data(withJSONObject: ["a":"b"], options: [])
+        let byeData = try! JSONSerialization.data(withJSONObject: ["c":"d"], options: [])
+        XCTAssertEqual(try! JSON(helloData), try! JSON(helloData))
+        XCTAssertNotEqual(try! JSON(helloData), try! JSON(byeData))
+    }
+
+    func testEqualNone() {
         XCTAssertEqual(JSON.none, JSON.none)
         XCTAssertNotEqual(JSON.none, JSON(["hello":"value"]))
+    }
+
+    // MARKL - Accessors
+
+    func testDictionaryAccessor() {
+        let body = ["hello":"value"]
+
+        let json = JSON(body)
+        XCTAssertEqual(json.dictionary.debugDescription, body.debugDescription)
+        XCTAssertEqual(json.array.debugDescription, [[String: Any]]().debugDescription)
+    }
+
+    func testArrayAccessor() {
+        let body = [["hello":"value"]]
+
+        let json = JSON(body)
+        XCTAssertEqual(json.dictionary.debugDescription, [String: Any]().debugDescription)
+        XCTAssertEqual(json.array.debugDescription, body.debugDescription)
+    }
+
+    func testDataAccessor() {
+        let body = ["hello":"value"]
+        let bodyData = try! JSONSerialization.data(withJSONObject: body, options: [])
+
+        let json = try! JSON(bodyData)
+        switch json {
+        case .dictionary(let data, _):
+            XCTAssertEqual(data.hashValue, bodyData.hashValue)
+        default:
+            XCTFail()
+        }
     }
 
     // MARK: - from
 
     func testArrayJSONFromFileNamed() {
-        let result = try! JSON.from("simple_array.json", bundle: Bundle(for: JSONTests.self)) as? [[String : Any]]  ?? [[String : Any]]()
+        let result = try! FileManager.json(from: "simple_array.json", bundle: Bundle(for: JSONTests.self)) as? [[String : Any]]  ?? [[String : Any]]()
         let compared = [["id" : 1, "name" : "Hi"]]
         XCTAssertEqual(compared.count, result.count)
 
@@ -36,7 +76,7 @@ class JSONTests: XCTestCase {
     }
 
     func testDictionaryJSONFromFileNamed() {
-        let result = try! JSON.from("simple_dictionary.json", bundle: Bundle(for: JSONTests.self)) as? [String : Any] ?? [String : Any]()
+        let result = try! FileManager.json(from: "simple_dictionary.json", bundle: Bundle(for: JSONTests.self)) as? [String : Any] ?? [String : Any]()
         let compared = ["id" : 1, "name" : "Hi"] as [String : Any]
         XCTAssertEqual(compared.count, result.count)
         XCTAssertEqual(Array(compared.keys), Array(result.keys))
@@ -45,7 +85,7 @@ class JSONTests: XCTestCase {
     func testFromFileNamedWithNotFoundFile() {
         var failed = false
         do {
-            let _ = try JSON.from("nonexistingfile.json", bundle: Bundle(for: JSONTests.self))
+            let _ = try FileManager.json(from: "nonexistingfile.json", bundle: Bundle(for: JSONTests.self))
         } catch ParsingError.notFound {
             failed = true
         } catch { }
@@ -56,7 +96,7 @@ class JSONTests: XCTestCase {
     func testFromFileNamedWithInvalidJSON() {
         var failed = false
         do {
-            let _ = try JSON.from("invalid.json", bundle: Bundle(for: JSONTests.self))
+            let _ = try FileManager.json(from: "invalid.json", bundle: Bundle(for: JSONTests.self))
         } catch ParsingError.failed {
             failed = true
         } catch { }
@@ -86,3 +126,4 @@ class JSONTests: XCTestCase {
         waitForExpectations(timeout: 10, handler: nil)
     }
 }
+

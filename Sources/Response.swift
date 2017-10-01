@@ -27,7 +27,7 @@ public class FailureResponse: Response {
 }
 
 public class JSONResponse: Response {
-    public let json: JSON
+    let json: JSON
 
     public var dictionaryBody: [String: Any] {
         return json.dictionary
@@ -39,18 +39,10 @@ public class JSONResponse: Response {
 
     public var data: Data {
         switch json {
-        case .array(let value):
-            do {
-                return try JSONSerialization.data(withJSONObject: value, options: [])
-            } catch {
-                return Data()
-            }
-        case .dictionary(let value):
-            do {
-                return try JSONSerialization.data(withJSONObject: value, options: [])
-            } catch {
-                return Data()
-            }
+        case .array(let value, _):
+            return value
+        case .dictionary(let value, _):
+            return value
         case .none:
             return Data()
         }

@@ -31,7 +31,7 @@ extension Networking {
 
     func registerFake(requestType: RequestType, path: String, fileName: String, bundle: Bundle) {
         do {
-            if let result = try JSON.from(fileName, bundle: bundle) {
+            if let result = try FileManager.json(from: fileName, bundle: bundle) {
                 registerFake(requestType: requestType, path: path, response: result, responseType: .json, statusCode: 200)
             }
         } catch ParsingError.notFound {
@@ -47,45 +47,36 @@ extension Networking {
         fakeRequests[requestType] = requests
     }
 
-    func requestJSON(requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, completion: @escaping (_ result: JSONResult) -> Void) -> String {
-        return handleRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: .json) { deserialized, response, error in
-            completion(JSONResult(body: deserialized, response: response, error: error))
-        }
-    }
-
-    func requestImage(path: String, cacheName: String?, completion: @escaping (_ result: ImageResult) -> Void) -> String {
-        return handleRequest(.get, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .image) { deserialized, response, error in
-            completion(ImageResult(body: deserialized, response: response, error: error))
-        }
-    }
-
-    func requestData(path: String, cacheName: String?, completion: @escaping (_ result: DataResult) -> Void) -> String {
-        return handleRequest(.get, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: .data) { deserialized, response, error in
-            completion(DataResult(body: deserialized, response: response, error: error))
-        }
-    }
-
-    func handleRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Any?, _ response: HTTPURLResponse, _ error: NSError?) -> Void) -> String {
+    func handleRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ result: Result) -> Void) -> String {
         if let fakeRequests = fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
             return handleFakeRequest(fakeRequest, requestType: requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType, completion: completion)
         } else {
             switch responseType {
             case .json:
                 return handleJSONRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType, completion: completion)
-            case .data, .image:
-                return handleDataOrImageRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType, completion: completion)
+            case .data:
+                return handleDataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType, completion: completion)
+            case .image:
+                return handleImageRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType, completion: completion)
             }
         }
     }
 
-    func handleFakeRequest(_ fakeRequest: FakeRequest, requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Any?, _ response: HTTPURLResponse, _ error: NSError?) -> Void) -> String {
+    func handleFakeRequest(_ fakeRequest: FakeRequest, requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ result: Result) -> Void) -> String {
         let requestID = UUID().uuidString
 
         if fakeRequest.statusCode.statusCodeType == .successful {
             let url = try! self.composedURL(with: path)
             let response = HTTPURLResponse(url: url, statusCode: fakeRequest.statusCode)
             TestCheck.testBlock(self.isSynchronous) {
-                completion(fakeRequest.response, response, nil)
+                switch responseType {
+                case .data:
+                    completion(DataResult(body: fakeRequest.response, response: response, error: nil))
+                case .image:
+                    completion(ImageResult(body: fakeRequest.response, response: response, error: nil))
+                case .json:
+                    completion(JSONResult(body: fakeRequest.response, response: response, error: nil))
+                }
             }
         } else {
             if let unauthorizedRequestCallback = unauthorizedRequestCallback, fakeRequest.statusCode == 403 || fakeRequest.statusCode == 401 {
@@ -97,7 +88,14 @@ extension Networking {
                 let error = NSError(fakeRequest: fakeRequest)
                 let response = HTTPURLResponse(url: url, statusCode: fakeRequest.statusCode)
                 TestCheck.testBlock(self.isSynchronous) {
-                    completion(fakeRequest.response, response, error)
+                    switch responseType {
+                    case .data:
+                        completion(DataResult(body: fakeRequest.response, response: response, error: error))
+                    case .image:
+                        completion(ImageResult(body: fakeRequest.response, response: response, error: error))
+                    case .json:
+                        completion(JSONResult(body: fakeRequest.response, response: response, error: error))
+                    }
                 }
             }
         }
@@ -105,26 +103,16 @@ extension Networking {
         return requestID
     }
 
-    func handleJSONRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Any?, _ response: HTTPURLResponse, _ error: NSError?) -> Void) -> String {
+    func handleJSONRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ result: JSONResult) -> Void) -> String {
         return dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, response, error in
-            var returnedError = error
-            var returnedResponse: Any?
-            if let data = data, data.count > 0 {
-                do {
-                    returnedResponse = try JSONSerialization.jsonObject(with: data, options: [])
-                } catch let JSONParsingError as NSError {
-                    if returnedError == nil {
-                        returnedError = JSONParsingError
-                    }
-                }
-            }
+
             TestCheck.testBlock(self.isSynchronous) {
-                completion(returnedResponse, response, returnedError)
+                completion(JSONResult(body: data, response: response, error: error))
             }
         }
     }
 
-    func handleDataOrImageRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Any?, _ response: HTTPURLResponse, _ error: NSError?) -> Void) -> String {
+    func handleDataRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ result: DataResult) -> Void) -> String {
         let object = objectFromCache(for: path, cacheName: cacheName, responseType: responseType)
         if let object = object {
             let requestID = UUID().uuidString
@@ -132,32 +120,72 @@ extension Networking {
             TestCheck.testBlock(isSynchronous) {
                 let url = try! self.composedURL(with: path)
                 let response = HTTPURLResponse(url: url, statusCode: 200)
-                completion(object, response, nil)
+                completion(DataResult(body: object, response: response, error: nil))
             }
 
             return requestID
         } else {
             return dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, response, error in
 
-                var returnedResponse: Any?
-                if let data = data, data.count > 0 {
-                    guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(String(describing: cacheName))") }
-                    _ = try? data.write(to: destinationURL, options: [.atomic])
-                    switch responseType {
-                    case .data:
-                        self.cache.setObject(data as AnyObject, forKey: destinationURL.absoluteString as AnyObject)
-                        returnedResponse = data
-                    case .image:
-                        if let image = Image(data: data) {
-                            self.cache.setObject(image, forKey: destinationURL.absoluteString as AnyObject)
-                            returnedResponse = image
-                        }
-                    default:
-                        fatalError("Response Type is different than Data and Image")
-                    }
+                guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else {
+                    fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(String(describing: cacheName))")
+
                 }
+
+                let returnedResponse: DataResult
+                if let data = data, data.count > 0 {
+                    _ = try? data.write(to: destinationURL, options: [.atomic])
+                    self.cache.setObject(data as AnyObject, forKey: destinationURL.absoluteString as AnyObject)
+                    returnedResponse = DataResult(body: data, response: response, error: error)
+                } else {
+                    self.cache.removeObject(forKey: destinationURL.absoluteString as AnyObject)
+                    returnedResponse = DataResult(body: nil, response: response, error: error)
+                }
+
                 TestCheck.testBlock(self.isSynchronous) {
-                    completion(returnedResponse, response, error)
+                    completion(returnedResponse)
+                }
+            }
+        }
+    }
+
+    func handleImageRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ result: ImageResult) -> Void) -> String {
+        let object = objectFromCache(for: path, cacheName: cacheName, responseType: responseType)
+        if let object = object {
+            let requestID = UUID().uuidString
+
+            TestCheck.testBlock(isSynchronous) {
+                let url = try! self.composedURL(with: path)
+                let response = HTTPURLResponse(url: url, statusCode: 200)
+                completion(ImageResult(body: object, response: response, error: nil))
+            }
+
+            return requestID
+        } else {
+            return dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, response, error in
+
+                guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else {
+                    fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(String(describing: cacheName))")
+
+                }
+
+                let returnedResponse: ImageResult
+                if let data = data, data.count > 0 {
+                    _ = try? data.write(to: destinationURL, options: [.atomic])
+                    if let image = Image(data: data) {
+                        self.cache.setObject(image, forKey: destinationURL.absoluteString as AnyObject)
+                        returnedResponse = ImageResult(body: image, response: response, error: error)
+                    } else {
+                        self.cache.removeObject(forKey: destinationURL.absoluteString as AnyObject)
+                        returnedResponse = ImageResult(body: nil, response: response, error: error)
+                    }
+                } else {
+                    self.cache.removeObject(forKey: destinationURL.absoluteString as AnyObject)
+                    returnedResponse = ImageResult(body: nil, response: response, error: error)
+                }
+
+                TestCheck.testBlock(self.isSynchronous) {
+                    completion(returnedResponse)
                 }
             }
         }
