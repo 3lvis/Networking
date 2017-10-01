@@ -49,10 +49,9 @@ extension Networking {
 
     func handleFakeRequest(_ fakeRequest: FakeRequest, path: String, completion: @escaping (_ body: Any?, _ response: HTTPURLResponse, _ error: NSError?) -> Void) -> String {
         let requestID = UUID().uuidString
-        let response: HTTPURLResponse
         var error: NSError? = nil
         let url = try! self.composedURL(with: path)
-        response = HTTPURLResponse(url: url, statusCode: fakeRequest.statusCode)
+        let response = HTTPURLResponse(url: url, statusCode: fakeRequest.statusCode)
 
         if let unauthorizedRequestCallback = unauthorizedRequestCallback, fakeRequest.statusCode == 403 || fakeRequest.statusCode == 401 {
             TestCheck.testBlock(self.isSynchronous) {
@@ -75,7 +74,7 @@ extension Networking {
                 completion(JSONResult(body: fakeRequest.response, response: response, error: error))
             }
         } else {
-            return dataRequest(requestType, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, response, error in
+            return requestData(requestType, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, response, error in
                 TestCheck.testBlock(self.isSynchronous) {
                     completion(JSONResult(body: data, response: response, error: error))
                 }
@@ -100,7 +99,7 @@ extension Networking {
 
                 return requestID
             } else {
-                return dataRequest(requestType, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: responseType) { data, response, error in
+                return requestData(requestType, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: responseType) { data, response, error in
                     guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else {
                         fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(String(describing: cacheName))")
 
@@ -141,7 +140,7 @@ extension Networking {
 
                 return requestID
             } else {
-                return dataRequest(requestType, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: responseType) { data, response, error in
+                return requestData(requestType, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: responseType) { data, response, error in
                     guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else {
                         fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(String(describing: cacheName))")
 
@@ -170,7 +169,7 @@ extension Networking {
         }
     }
 
-    func dataRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Data?, _ response: HTTPURLResponse, _ error: NSError?) -> Void) -> String {
+    func requestData(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Data?, _ response: HTTPURLResponse, _ error: NSError?) -> Void) -> String {
         let requestID = UUID().uuidString
         var request = URLRequest(url: try! composedURL(with: path), requestType: requestType, path: path, parameterType: parameterType, responseType: responseType, boundary: boundary, authorizationHeaderValue: authorizationHeaderValue, token: token, authorizationHeaderKey: authorizationHeaderKey, headerFields: headerFields)
 
