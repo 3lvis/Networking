@@ -63,7 +63,7 @@ class JSONTests: XCTestCase {
     // MARK: - from
 
     func testArrayJSONFromFileNamed() {
-        let result = try! FileReader.jsonFrom("simple_array.json", bundle: Bundle(for: JSONTests.self)) as? [[String : Any]]  ?? [[String : Any]]()
+        let result = try! FileManager.jsonFrom("simple_array.json", bundle: Bundle(for: JSONTests.self)) as? [[String : Any]]  ?? [[String : Any]]()
         let compared = [["id" : 1, "name" : "Hi"]]
         XCTAssertEqual(compared.count, result.count)
 
@@ -76,7 +76,7 @@ class JSONTests: XCTestCase {
     }
 
     func testDictionaryJSONFromFileNamed() {
-        let result = try! FileReader.jsonFrom("simple_dictionary.json", bundle: Bundle(for: JSONTests.self)) as? [String : Any] ?? [String : Any]()
+        let result = try! FileManager.jsonFrom("simple_dictionary.json", bundle: Bundle(for: JSONTests.self)) as? [String : Any] ?? [String : Any]()
         let compared = ["id" : 1, "name" : "Hi"] as [String : Any]
         XCTAssertEqual(compared.count, result.count)
         XCTAssertEqual(Array(compared.keys), Array(result.keys))
@@ -85,7 +85,7 @@ class JSONTests: XCTestCase {
     func testFromFileNamedWithNotFoundFile() {
         var failed = false
         do {
-            let _ = try FileReader.jsonFrom("nonexistingfile.json", bundle: Bundle(for: JSONTests.self))
+            let _ = try FileManager.jsonFrom("nonexistingfile.json", bundle: Bundle(for: JSONTests.self))
         } catch ParsingError.notFound {
             failed = true
         } catch { }
@@ -96,7 +96,7 @@ class JSONTests: XCTestCase {
     func testFromFileNamedWithInvalidJSON() {
         var failed = false
         do {
-            let _ = try FileReader.jsonFrom("invalid.json", bundle: Bundle(for: JSONTests.self))
+            let _ = try FileManager.jsonFrom("invalid.json", bundle: Bundle(for: JSONTests.self))
         } catch ParsingError.failed {
             failed = true
         } catch { }
