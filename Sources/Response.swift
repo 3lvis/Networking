@@ -39,9 +39,9 @@ public class JSONResponse: Response {
 
     public var data: Data {
         switch json {
-        case .array(let value, let body):
+        case .array(let value, _):
             return value
-        case .dictionary(let value, let body):
+        case .dictionary(let value, _):
             return value
         case .none:
             return Data()
