@@ -133,30 +133,44 @@ extension Networking {
         } else {
             return dataRequest(requestType, path: path, cacheName: cacheName, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, response, error in
 
-                var returnedResponse: Any?
+                guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else {
+                    fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(String(describing: cacheName))")
+
+                }
+
+                let returnedResponse: Any
                 if let data = data, data.count > 0 {
-                    guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(String(describing: cacheName))") }
                     _ = try? data.write(to: destinationURL, options: [.atomic])
                     switch responseType {
                     case .data:
                         self.cache.setObject(data as AnyObject, forKey: destinationURL.absoluteString as AnyObject)
-                        returnedResponse = data
-
-                        TestCheck.testBlock(self.isSynchronous) {
-                            completion(DataResult(body: returnedResponse, response: response, error: error))
-                        }
+                        returnedResponse = DataResult(body: data, response: response, error: error)
                     case .image:
                         if let image = Image(data: data) {
                             self.cache.setObject(image, forKey: destinationURL.absoluteString as AnyObject)
-                            returnedResponse = image
-                        }
-
-                        TestCheck.testBlock(self.isSynchronous) {
-                            completion(ImageResult(body: returnedResponse, response: response, error: error))
+                            returnedResponse = ImageResult(body: image, response: response, error: error)
+                        } else {
+                            self.cache.removeObject(forKey: destinationURL.absoluteString as AnyObject)
+                            returnedResponse = ImageResult(body: nil, response: response, error: error)
                         }
                     default:
                         fatalError("Response Type is different than Data and Image")
                     }
+                } else {
+                    self.cache.removeObject(forKey: destinationURL.absoluteString as AnyObject)
+
+                    switch responseType {
+                    case .data:
+                        returnedResponse = DataResult(body: nil, response: response, error: error)
+                    case .image:
+                        returnedResponse = ImageResult(body: nil, response: response, error: error)
+                    default:
+                        fatalError("Response Type is different than Data and Image")
+                    }
+                }
+
+                TestCheck.testBlock(self.isSynchronous) {
+                    completion(returnedResponse)
                 }
             }
         }
