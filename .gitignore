@@ -27,6 +27,8 @@ DerivedData
 *.xcuserstate
 *.xcscmblueprint
 
+Networking.framework.zip
+
 # CocoaPods
 Pods
 *.lock
