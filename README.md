@@ -536,8 +536,6 @@ networking.disableErrorLogging = true
 it, simply add the following line to your Podfile:
 
 ```ruby
-use_frameworks!
-
 pod 'Networking', '~> 4'
 ```
 
@@ -545,7 +543,7 @@ pod 'Networking', '~> 4'
 it, simply add the following line to your Cartfile:
 
 ```ruby
-github "3lvis/Networking" ~> 4.0
+github "3lvis/Networking" ~> 4.1
 ```
 
 ## Author
