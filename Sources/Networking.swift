@@ -25,7 +25,7 @@ public extension Int {
     }
 }
 
-open class Networking {
+open class Networking: NSObject {
     static let domain = "com.3lvis.networking"
 
     struct FakeRequest {
