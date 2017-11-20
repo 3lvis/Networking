@@ -69,7 +69,8 @@ extension Networking {
     }
 
     func handleJSONRequest(_ requestType: RequestType, path: String, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]? = nil, responseType: ResponseType, completion: @escaping (_ result: JSONResult) -> Void) -> String {
-        if let fakeRequests = fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
+
+        if let fakeRequest = FakeRequest.find(ofType: requestType, forPath: path, in: fakeRequests) {
             return handleFakeRequest(fakeRequest, path: path) { _, response, error in
                 completion(JSONResult(body: fakeRequest.response, response: response, error: error))
             }
