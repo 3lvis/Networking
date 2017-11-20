@@ -11,9 +11,9 @@ public extension Networking {
     /// - Returns: The request identifier.
     @discardableResult
     public func get(_ path: String, parameters: Any? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
-        let parameterType = parameters != nil ? ParameterType.formURLEncoded : ParameterType.none
+        let parameterType: ParameterType = parameters != nil ? .formURLEncoded : .none
 
-        return requestJSON(requestType: .get, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, completion: completion)
+        return handleJSONRequest(.get, path: path, parameterType: parameterType, parameters: parameters, responseType: .json, completion: completion)
     }
 
     /// Registers a fake GET request for the specified path. After registering this, every GET request to the path, will return the registered response.
@@ -40,7 +40,7 @@ public extension Networking {
     ///
     /// - Parameter path: The path for the cancelled GET request
     public func cancelGET(_ path: String) {
-        let url = try! self.composedURL(with: path)
+        let url = try! composedURL(with: path)
         cancelRequest(.data, requestType: .get, url: url)
     }
 }
@@ -57,7 +57,7 @@ public extension Networking {
     /// - Returns: The request identifier.
     @discardableResult
     public func put(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
-        return requestJSON(requestType: .put, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, completion: completion)
+        return handleJSONRequest(.put, path: path, parameterType: parameterType, parameters: parameters, responseType: .json, completion: completion)
     }
 
     /// Registers a fake PUT request for the specified path. After registering this, every PUT request to the path, will return the registered response.
@@ -84,7 +84,7 @@ public extension Networking {
     ///
     /// - Parameter path: The path for the cancelled PUT request.
     public func cancelPUT(_ path: String) {
-        let url = try! self.composedURL(with: path)
+        let url = try! composedURL(with: path)
         cancelRequest(.data, requestType: .put, url: url)
     }
 }
@@ -101,7 +101,7 @@ public extension Networking {
     /// - Returns: The request identifier.
     @discardableResult
     public func post(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
-        return requestJSON(requestType: .post, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, completion: completion)
+        return handleJSONRequest(.post, path: path, parameterType: parameterType, parameters: parameters, responseType: .json, completion: completion)
     }
 
     /// POST request to the specified path, using the provided parameters.
@@ -114,7 +114,7 @@ public extension Networking {
     /// - Returns: The request identifier.
     @discardableResult
     public func post(_ path: String, parameters: Any? = nil, parts: [FormDataPart], completion: @escaping (_ result: JSONResult) -> Void) -> String {
-        return requestJSON(requestType: .post, path: path, cacheName: nil, parameterType: .multipartFormData, parameters: parameters, parts: parts, completion: completion)
+        return handleJSONRequest(.post, path: path, parameterType: .multipartFormData, parameters: parameters, parts: parts, responseType: .json, completion: completion)
     }
 
     /// Registers a fake POST request for the specified path. After registering this, every POST request to the path, will return the registered response.
@@ -141,7 +141,7 @@ public extension Networking {
     ///
     /// - Parameter path: The path for the cancelled POST request.
     public func cancelPOST(_ path: String) {
-        let url = try! self.composedURL(with: path)
+        let url = try! composedURL(with: path)
         cancelRequest(.data, requestType: .post, url: url)
     }
 }
@@ -157,8 +157,8 @@ public extension Networking {
     /// - Returns: The request identifier.
     @discardableResult
     public func delete(_ path: String, parameters: Any? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
-        let parameterType = parameters != nil ? ParameterType.formURLEncoded : ParameterType.none
-        return requestJSON(requestType: .delete, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: nil, completion: completion)
+        let parameterType: ParameterType = parameters != nil ? .formURLEncoded : .none
+        return handleJSONRequest(.delete, path: path, parameterType: parameterType, parameters: parameters, responseType: .json, completion: completion)
     }
 
     /// Registers a fake DELETE request for the specified path. After registering this, every DELETE request to the path, will return the registered response.
@@ -185,7 +185,7 @@ public extension Networking {
     ///
     /// - Parameter path: The path for the cancelled DELETE request.
     public func cancelDELETE(_ path: String) {
-        let url = try! self.composedURL(with: path)
+        let url = try! composedURL(with: path)
         cancelRequest(.data, requestType: .delete, url: url)
     }
 }
@@ -213,14 +213,14 @@ public extension Networking {
     /// - Returns: The request identifier.
     @discardableResult
     public func downloadImage(_ path: String, cacheName: String? = nil, completion: @escaping (_ result: ImageResult) -> Void) -> String {
-        return requestImage(path: path, cacheName: cacheName, completion: completion)
+        return handleImageRequest(.get, path: path, cacheName: cacheName, responseType: .image, completion: completion)
     }
 
     /// Cancels the image download request for the specified path. This causes the request to complete with error code URLError.cancelled.
     ///
     /// - Parameter path: The path for the cancelled image download request.
     public func cancelImageDownload(_ path: String) {
-        let url = try! self.composedURL(with: path)
+        let url = try! composedURL(with: path)
         cancelRequest(.data, requestType: .get, url: url)
     }
 
@@ -242,7 +242,7 @@ public extension Networking {
     ///   - completion: A closure that gets called when the download request is completed, it contains  a `data` object and an `NSError`.
     @discardableResult
     public func downloadData(_ path: String, cacheName: String? = nil, completion: @escaping (_ result: DataResult) -> Void) -> String {
-        return requestData(path: path, cacheName: cacheName, completion: completion)
+        return handleDataRequest(.get, path: path, cacheName: cacheName, responseType: .data, completion: completion)
     }
 
     /// Retrieves data from the cache or from the filesystem.

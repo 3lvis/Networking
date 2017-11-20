@@ -34,26 +34,6 @@ open class Networking {
         let statusCode: Int
     }
 
-    /// Provides the options for configuring your Networking object with NSURLSessionConfiguration.
-    ///
-    /// - `default`: This configuration type manages upload and download tasks using the default options.
-    /// - ephemeral: A configuration type that uses no persistent storage for caches, cookies, or credentials. It's optimized for transferring data to and from your app’s memory.
-    /// - background: A configuration type that allows HTTP and HTTPS uploads or downloads to be performed in the background. It causes upload and download tasks to be performed by the system in a separate process.
-    public enum ConfigurationType {
-        case `default`, ephemeral, background
-
-        var sessionConfiguration: URLSessionConfiguration {
-            switch self {
-            case .default:
-                return URLSessionConfiguration.default
-            case .ephemeral:
-                return URLSessionConfiguration.ephemeral
-            case .background:
-                return URLSessionConfiguration.background(withIdentifier: "NetworkingBackgroundConfiguration")
-            }
-        }
-    }
-
     enum RequestType: String {
         case get = "GET", post = "POST", put = "PUT", delete = "DELETE"
     }
@@ -82,7 +62,7 @@ open class Networking {
                 return "application/x-www-form-urlencoded"
             case .multipartFormData:
                 return "multipart/form-data; boundary=\(boundary)"
-            case .custom(let value):
+            case let .custom(value):
                 return value
             }
         }
@@ -121,35 +101,31 @@ open class Networking {
     var token: String?
     var authorizationHeaderValue: String?
     var authorizationHeaderKey = "Authorization"
-    fileprivate var configurationType: ConfigurationType
+    fileprivate var configuration: URLSessionConfiguration
     var cache: NSCache<AnyObject, AnyObject>
 
     /// Flag used to indicate synchronous request.
     public var isSynchronous = false
 
     /// Flag used to disable error logging. Useful when want to disable log before release build.
-    public var disableErrorLogging = false
+    public var isErrorLoggingEnabled = true
 
     /// The boundary used for multipart requests.
     let boundary = String(format: "net.3lvis.networking.%08x%08x", arc4random(), arc4random())
 
     lazy var session: URLSession = {
-        var configuration = self.configurationType.sessionConfiguration
-        configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
-        configuration.urlCache = nil
-
-        return URLSession(configuration: configuration)
+        URLSession(configuration: self.configuration)
     }()
 
     /// Base initializer, it creates an instance of `Networking`.
     ///
     /// - Parameters:
     ///   - baseURL: The base URL for HTTP requests under `Networking`.
-    ///   - configurationType: The configuration type to be used, by default is default.
+    ///   - configuration: The URLSessionConfiguration configuration to be used
     ///   - cache: The NSCache to use, it has a built-in default one.
-    public init(baseURL: String, configurationType: ConfigurationType = .default, cache: NSCache<AnyObject, AnyObject>? = nil) {
+    public init(baseURL: String, configuration: URLSessionConfiguration = .default, cache: NSCache<AnyObject, AnyObject>? = nil) {
         self.baseURL = baseURL
-        self.configurationType = configurationType
+        self.configuration = configuration
         self.cache = cache ?? NSCache()
     }
 
@@ -218,7 +194,7 @@ open class Networking {
         if let normalizedCacheName = normalizedCacheName {
             resourcesPath = normalizedCacheName
         } else {
-            let url = try self.composedURL(with: path)
+            let url = try composedURL(with: path)
             resourcesPath = url.absoluteString
         }
 
@@ -260,7 +236,7 @@ open class Networking {
         guard let url = URL(string: encodedPath) else { fatalError("Path \(encodedPath) can't be converted to url") }
         guard let baseURLWithDash = URL(string: "/", relativeTo: url)?.absoluteURL.absoluteString else { fatalError("Can't find absolute url of url: \(url)") }
         let index = baseURLWithDash.index(before: baseURLWithDash.endIndex)
-        let baseURL = baseURLWithDash.substring(to: index)
+        let baseURL = String(baseURLWithDash[..<index])
         let relativePath = path.replacingOccurrences(of: baseURL, with: "")
 
         return (baseURL, relativePath)

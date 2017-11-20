@@ -29,7 +29,7 @@ class GETTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.get("/get") { result in
             switch result {
-            case .success(let response):
+            case let .success(response):
                 let json = response.dictionaryBody
 
                 guard let url = json["url"] as? String else { XCTFail(); return }
@@ -48,7 +48,7 @@ class GETTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.get("/get") { result in
             switch result {
-            case .success(let response):
+            case let .success(response):
                 let json = response.dictionaryBody
                 guard let url = json["url"] as? String else { XCTFail(); return }
                 XCTAssertEqual(url, "http://httpbin.org/get")
@@ -69,7 +69,7 @@ class GETTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let response):
+            case let .failure(response):
                 XCTAssertEqual(response.error.code, 404)
             }
         }
@@ -86,7 +86,7 @@ class GETTests: XCTestCase {
 
         networking.get("/stories") { result in
             switch result {
-            case .success(let response):
+            case let .success(response):
                 let json = response.dictionaryBody
                 let value = json["name"] as? String
                 XCTAssertEqual(value, "Elvis")
@@ -105,7 +105,7 @@ class GETTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let response):
+            case let .failure(response):
                 XCTAssertEqual(response.error.code, 401)
             }
         }
@@ -121,7 +121,7 @@ class GETTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let response):
+            case let .failure(response):
                 let json = response.dictionaryBody
                 XCTAssertEqual(json as! [String: String], expectedResponse)
                 XCTAssertEqual(response.error.code, 401)
@@ -136,7 +136,7 @@ class GETTests: XCTestCase {
 
         networking.get("/entries") { result in
             switch result {
-            case .success(let response):
+            case let .success(response):
                 let json = response.arrayBody
                 let entry = json[0]
                 let value = entry["title"] as? String
@@ -191,7 +191,7 @@ class GETTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let response):
+            case let .failure(response):
                 XCTAssertTrue(completed)
                 XCTAssertEqual(response.error.code, URLError.cancelled.rawValue)
                 expectation.fulfill()
@@ -213,7 +213,7 @@ class GETTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let response):
+            case let .failure(response):
                 XCTAssertEqual(response.error.code, URLError.cancelled.rawValue)
                 expectation.fulfill()
             }
@@ -229,7 +229,7 @@ class GETTests: XCTestCase {
 
         networking.get("/status/200") { result in
             switch result {
-            case .success(let response):
+            case let .success(response):
                 XCTAssertEqual(response.statusCode, 200)
             case .failure:
                 XCTFail()
@@ -241,7 +241,7 @@ class GETTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let response):
+            case let .failure(response):
                 let connectionError = NSError(domain: Networking.domain, code: statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: statusCode)])
                 XCTAssertEqual(response.error, connectionError)
             }
@@ -252,7 +252,7 @@ class GETTests: XCTestCase {
             switch result {
             case .success:
                 XCTFail()
-            case .failure(let response):
+            case let .failure(response):
                 let connectionError = NSError(domain: Networking.domain, code: statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: statusCode)])
                 XCTAssertEqual(response.error, connectionError)
             }
@@ -263,7 +263,7 @@ class GETTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.get("/get", parameters: ["count": 25]) { result in
             switch result {
-            case .success(let response):
+            case let .success(response):
                 let json = response.dictionaryBody
                 XCTAssertEqual(json["url"] as? String, "http://httpbin.org/get?count=25")
             case .failure:
@@ -276,7 +276,7 @@ class GETTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.get("/get?accountId=123", parameters: ["userId": 5]) { result in
             switch result {
-            case .success(let response):
+            case let .success(response):
                 let json = response.dictionaryBody
                 XCTAssertEqual(json["url"] as? String, "http://httpbin.org/get?accountId=123&userId=5")
             case .failure:
@@ -289,7 +289,7 @@ class GETTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.get("/get", parameters: ["name": "Elvis Nuñez"]) { result in
             switch result {
-            case .success(let response):
+            case let .success(response):
                 let json = response.dictionaryBody
                 XCTAssertEqual(json["url"] as? String, "http://httpbin.org/get?name=Elvis Nuñez")
             case .failure:

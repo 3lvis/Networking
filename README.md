@@ -8,7 +8,7 @@
     <img src="https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat" />
   </a>
   <a href="https://github.com/SyncDB/Networking#installation">
-    <img src="https://img.shields.io/badge/compatible-swift%203.0%20-orange.svg" />
+    <img src="https://img.shields.io/badge/compatible-swift%204.0%20-orange.svg" />
   </a>
 </div>
 
@@ -41,7 +41,7 @@
 
 ## Table of Contents
 
-* [Choosing a configuration type](#choosing-a-configuration-type)
+* [Choosing a configuration](#choosing-a-configuration)
 * [Changing request headers](#changing-request-headers)
 * [Authenticating](#authenticating)
     * [HTTP basic](#http-basic)
@@ -65,9 +65,9 @@
 * [License](#license)
 * [Attribution](#attribution)
 
-## Choosing a configuration type
+## Choosing a configuration
 
-Since **Networking** is basically a wrapper of `NSURLSession` we can take leverage of the great configuration types that it supports, such as `Default`, `Ephemeral` and `Background`, if you don't provide any or don't have special needs then `Default` will be used.
+Initializing an instance of **Networking** means you have to select a [NSURLSessionConfiguration](https://developer.apple.com/documentation/foundation/nsurlsessionconfiguration). The available types are `Default`, `Ephemeral` and `Background`, if you don't provide any or don't have special needs then `Default` will be used.
 
  - `Default`: The default session configuration uses a persistent disk-based cache (except when the result is downloaded to a file) and stores credentials in the user’s keychain. It also stores cookies (by default) in the same shared cookie store as the `NSURLConnection` and `NSURLDownload` classes.
 
@@ -80,7 +80,7 @@ Since **Networking** is basically a wrapper of `NSURLSession` we can take levera
 let networking = Networking(baseURL: "http://httpbin.org")
 
 // Ephemeral
-let networking = Networking(baseURL: "http://httpbin.org", configurationType: .ephemeral)
+let networking = Networking(baseURL: "http://httpbin.org", configuration: .ephemeral)
 ```
 
 ## Changing request headers
@@ -538,14 +538,14 @@ it, simply add the following line to your Podfile:
 ```ruby
 use_frameworks!
 
-pod 'Networking', '~> 3'
+pod 'Networking', '~> 4'
 ```
 
 **Networking** is also available through [Carthage](https://github.com/Carthage/Carthage). To install
 it, simply add the following line to your Cartfile:
 
 ```ruby
-github "3lvis/Networking" ~> 3.0
+github "3lvis/Networking" ~> 4.0
 ```
 
 ## Author

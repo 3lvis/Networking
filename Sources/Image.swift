@@ -10,7 +10,7 @@ extension Image {
 
     static func find(named name: String, inBundle bundle: Bundle) -> Image {
         #if os(OSX)
-            return bundle.image(forResource: name)!
+            return bundle.image(forResource: NSImage.Name(rawValue: name))!
         #elseif os(watchOS)
             return UIImage(named: name)!
         #else
@@ -20,17 +20,17 @@ extension Image {
 
     #if os(OSX)
 
-        func data(_ type: NSBitmapImageFileType) -> Data? {
+        func data(_ type: NSBitmapImageRep.FileType) -> Data? {
             let imageData = tiffRepresentation!
             let bitmapImageRep = NSBitmapImageRep(data: imageData)!
-            let data = bitmapImageRep.representation(using: type, properties: [String: Any]())
+            let data = bitmapImageRep.representation(using: type, properties: [NSBitmapImageRep.PropertyKey: Any]())
             return data
         }
     #endif
 
     func pngData() -> Data? {
         #if os(OSX)
-            return data(.PNG)
+            return data(.png)
         #else
             return UIImagePNGRepresentation(self)
         #endif
@@ -38,7 +38,7 @@ extension Image {
 
     func jpgData() -> Data? {
         #if os(OSX)
-            return data(.JPEG)
+            return data(.jpeg)
         #else
             return UIImageJPEGRepresentation(self, 1)
         #endif

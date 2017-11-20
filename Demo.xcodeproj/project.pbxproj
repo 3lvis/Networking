@@ -159,9 +159,12 @@
 		44B5D3A51D19B9E5004378B9 /* pig.png in Resources */ = {isa = PBXBuildFile; fileRef = 14B0CEE31CF1D0D700049AD6 /* pig.png */; };
 		44B5D3A61D19B9E5004378B9 /* døgnvillburgere.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 14B0CEDE1CF1D0D700049AD6 /* døgnvillburgere.jpg */; };
 		44B5D3A71D19B9E5004378B9 /* sample.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 14B0CEE41CF1D0D700049AD6 /* sample.jpg */; };
-		44BC3A851E44569C004A948D /* ResulTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44BC3A841E44569C004A948D /* ResulTests.swift */; };
-		44BC3A861E44569C004A948D /* ResulTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44BC3A841E44569C004A948D /* ResulTests.swift */; };
-		44BC3A871E44569C004A948D /* ResulTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44BC3A841E44569C004A948D /* ResulTests.swift */; };
+		44BC3A851E44569C004A948D /* ResultTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44BC3A841E44569C004A948D /* ResultTests.swift */; };
+		44BC3A861E44569C004A948D /* ResultTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44BC3A841E44569C004A948D /* ResultTests.swift */; };
+		44BC3A871E44569C004A948D /* ResultTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44BC3A841E44569C004A948D /* ResultTests.swift */; };
+		44CAF68D1F7F6B31001AB0F6 /* ResponseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44CAF68C1F7F6B31001AB0F6 /* ResponseTests.swift */; };
+		44CAF68E1F7F6B31001AB0F6 /* ResponseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44CAF68C1F7F6B31001AB0F6 /* ResponseTests.swift */; };
+		44CAF68F1F7F6B31001AB0F6 /* ResponseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44CAF68C1F7F6B31001AB0F6 /* ResponseTests.swift */; };
 		44DFD3901D9A2D5A0014E9F2 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44DFD38F1D9A2D5A0014E9F2 /* AppDelegate.swift */; };
 		44DFD3921D9A2D5A0014E9F2 /* OptionsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44DFD3911D9A2D5A0014E9F2 /* OptionsController.swift */; };
 		44DFD3971D9A2D5A0014E9F2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 44DFD3961D9A2D5A0014E9F2 /* Assets.xcassets */; };
@@ -230,7 +233,8 @@
 		44A6D5471E4122DE00405A7E /* Networking+Private.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Networking+Private.swift"; sourceTree = "<group>"; };
 		44A6D5591E4143F400405A7E /* JSONTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSONTests.swift; sourceTree = "<group>"; };
 		44B5D3AB1D19B9E5004378B9 /* tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = tvOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		44BC3A841E44569C004A948D /* ResulTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResulTests.swift; sourceTree = "<group>"; };
+		44BC3A841E44569C004A948D /* ResultTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResultTests.swift; sourceTree = "<group>"; };
+		44CAF68C1F7F6B31001AB0F6 /* ResponseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseTests.swift; sourceTree = "<group>"; };
 		44DFD38D1D9A2D5A0014E9F2 /* iOSDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iOSDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		44DFD38F1D9A2D5A0014E9F2 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		44DFD3911D9A2D5A0014E9F2 /* OptionsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OptionsController.swift; sourceTree = "<group>"; };
@@ -319,7 +323,8 @@
 				1488E23C1CF138D700C6FBA3 /* SHA1.h */,
 				4496E8E51DAFB27A0092254E /* String+UTF8Tests.swift */,
 				44A6D5591E4143F400405A7E /* JSONTests.swift */,
-				44BC3A841E44569C004A948D /* ResulTests.swift */,
+				44BC3A841E44569C004A948D /* ResultTests.swift */,
+				44CAF68C1F7F6B31001AB0F6 /* ResponseTests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -609,7 +614,7 @@
 			attributes = {
 				CLASSPREFIX = "";
 				LastSwiftUpdateCheck = 0800;
-				LastUpgradeCheck = 0810;
+				LastUpgradeCheck = 0900;
 				ORGANIZATIONNAME = "";
 				TargetAttributes = {
 					1413F4541CE795DC00482096 = {
@@ -646,7 +651,7 @@
 					146D72AB1AB782920058798C = {
 						CreatedOnToolsVersion = 6.2;
 						DevelopmentTeamName = "Elvis Nunez (Personal Team)";
-						LastSwiftMigration = 0830;
+						LastSwiftMigration = 0900;
 						ProvisioningStyle = Manual;
 					};
 					44B5D3881D19B9E5004378B9 = {
@@ -656,7 +661,7 @@
 					};
 					44DFD38C1D9A2D5A0014E9F2 = {
 						CreatedOnToolsVersion = 8.0;
-						LastSwiftMigration = 0830;
+						LastSwiftMigration = 0900;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -788,7 +793,8 @@
 				148341721CF1CF0500E91F01 /* Image.swift in Sources */,
 				1413F4781CE7969100482096 /* NetworkActivityIndicator.swift in Sources */,
 				E6ED61331E27CD630058ACE9 /* UnauthorizedCallbackTests.swift in Sources */,
-				44BC3A871E44569C004A948D /* ResulTests.swift in Sources */,
+				44BC3A871E44569C004A948D /* ResultTests.swift in Sources */,
+				44CAF68F1F7F6B31001AB0F6 /* ResponseTests.swift in Sources */,
 				146EF9161CEBCEA50059DDB1 /* POSTTests.swift in Sources */,
 				1413F4671CE7963700482096 /* Dictionary+FormURLEncodedTests.swift in Sources */,
 				147B32F81CF9B1C500D5BAED /* Networking+HTTPRequests.swift in Sources */,
@@ -897,7 +903,8 @@
 				1474C1C41CA2988900E15D84 /* JSON.swift in Sources */,
 				E6ED61311E27CD630058ACE9 /* UnauthorizedCallbackTests.swift in Sources */,
 				146EF9151CEBCEA50059DDB1 /* POSTTests.swift in Sources */,
-				44BC3A851E44569C004A948D /* ResulTests.swift in Sources */,
+				44BC3A851E44569C004A948D /* ResultTests.swift in Sources */,
+				44CAF68D1F7F6B31001AB0F6 /* ResponseTests.swift in Sources */,
 				147B32F71CF9B1C500D5BAED /* Networking+HTTPRequests.swift in Sources */,
 				1474C1C51CA2988900E15D84 /* NetworkActivityIndicator.swift in Sources */,
 				146EF9171CEBCEA50059DDB1 /* PUTTests.swift in Sources */,
@@ -929,7 +936,8 @@
 				44B5D38F1D19B9E5004378B9 /* JSON.swift in Sources */,
 				E6ED61321E27CD630058ACE9 /* UnauthorizedCallbackTests.swift in Sources */,
 				44B5D3911D19B9E5004378B9 /* POSTTests.swift in Sources */,
-				44BC3A861E44569C004A948D /* ResulTests.swift in Sources */,
+				44BC3A861E44569C004A948D /* ResultTests.swift in Sources */,
+				44CAF68E1F7F6B31001AB0F6 /* ResponseTests.swift in Sources */,
 				44B5D3931D19B9E5004378B9 /* Networking+HTTPRequests.swift in Sources */,
 				44B5D3941D19B9E5004378B9 /* NetworkActivityIndicator.swift in Sources */,
 				44B5D3951D19B9E5004378B9 /* PUTTests.swift in Sources */,
@@ -1003,7 +1011,7 @@
 				SDKROOT = macosx;
 				SWIFT_OBJC_BRIDGING_HEADER = "Tests/Resources/Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 3.0;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
 		};
@@ -1025,7 +1033,7 @@
 				SDKROOT = macosx;
 				SWIFT_OBJC_BRIDGING_HEADER = "Tests/Resources/Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_VERSION = 3.0;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Release;
 		};
@@ -1050,7 +1058,7 @@
 				PRODUCT_NAME = Networking;
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 3.0;
+				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -1078,7 +1086,7 @@
 				PRODUCT_NAME = Networking;
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_VERSION = 3.0;
+				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -1106,7 +1114,7 @@
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 3.0;
+				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = 4;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -1135,7 +1143,7 @@
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_VERSION = 3.0;
+				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = 4;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -1163,7 +1171,7 @@
 				SDKROOT = appletvos;
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 3.0;
+				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = 3;
 				TVOS_DEPLOYMENT_TARGET = 9.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -1191,7 +1199,7 @@
 				SDKROOT = appletvos;
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_VERSION = 3.0;
+				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = 3;
 				TVOS_DEPLOYMENT_TARGET = 9.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -1222,7 +1230,7 @@
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 3.0;
+				SWIFT_VERSION = 4.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -1251,7 +1259,7 @@
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_VERSION = 3.0;
+				SWIFT_VERSION = 4.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -1265,14 +1273,20 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -1311,14 +1325,20 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -1358,7 +1378,8 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Tests/Resources/Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
 		};
@@ -1374,7 +1395,8 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Tests/Resources/Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Release;
 		};
@@ -1395,7 +1417,7 @@
 				SDKROOT = appletvos;
 				SWIFT_OBJC_BRIDGING_HEADER = "Tests/Resources/Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 3.0;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
 		};
@@ -1412,7 +1434,7 @@
 				SDKROOT = appletvos;
 				SWIFT_OBJC_BRIDGING_HEADER = "Tests/Resources/Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_VERSION = 3.0;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Release;
 		};
@@ -1433,7 +1455,8 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
 		};
@@ -1453,7 +1476,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.3lvis.networking.iOSDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Release;
 		};

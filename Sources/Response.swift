@@ -12,7 +12,7 @@ public class Response {
     public let fullResponse: HTTPURLResponse
 
     init(response: HTTPURLResponse) {
-        self.fullResponse = response
+        fullResponse = response
     }
 }
 
@@ -27,7 +27,7 @@ public class FailureResponse: Response {
 }
 
 public class JSONResponse: Response {
-    public let json: JSON
+    let json: JSON
 
     public var dictionaryBody: [String: Any] {
         return json.dictionary
@@ -37,6 +37,17 @@ public class JSONResponse: Response {
         return json.array
     }
 
+    public var data: Data {
+        switch json {
+        case let .array(value, _):
+            return value
+        case let .dictionary(value, _):
+            return value
+        case .none:
+            return Data()
+        }
+    }
+
     init(json: JSON, response: HTTPURLResponse) {
         self.json = json
 
@@ -44,7 +55,7 @@ public class JSONResponse: Response {
     }
 }
 
-public class SuccessJSONResponse: JSONResponse { }
+public class SuccessJSONResponse: JSONResponse {}
 
 public class FailureJSONResponse: JSONResponse {
     public let error: NSError
