@@ -357,3 +357,35 @@ extension FakeRequestTests {
         }
     }
 }
+
+// Image tests
+extension FakeRequestTests {
+    func testFakeImageDownload() {
+        let networking = Networking(baseURL: baseURL)
+        let pigImage = Image.find(named: "pig.png", inBundle: Bundle(for: DownloadTests.self))
+        networking.fakeImageDownload("/image/png", image: pigImage)
+        networking.downloadImage("/image/png") { result in
+            switch result {
+            case let .success(response):
+                let pigImageData = pigImage.pngData()
+                let imageData = response.image.pngData()
+                XCTAssertEqual(pigImageData, imageData)
+            case .failure:
+                XCTFail()
+            }
+        }
+    }
+
+    func testFakeImageDownloadWithInvalidStatusCode() {
+        let networking = Networking(baseURL: baseURL)
+        networking.fakeImageDownload("/image/png", image: nil, statusCode: 401)
+        networking.downloadImage("/image/png") { result in
+            switch result {
+            case .success:
+                XCTFail()
+            case let .failure(response):
+                XCTAssertEqual(response.error.code, 401)
+            }
+        }
+    }
+}
