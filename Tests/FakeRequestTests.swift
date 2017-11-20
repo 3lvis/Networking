@@ -38,8 +38,6 @@ class FakeRequestTests: XCTestCase {
 
         XCTAssertNil(FakeRequest.find(ofType: .get, forPath: "/users", in: existingRequests))
         XCTAssertNil(FakeRequest.find(ofType: .get, forPath: "/users", in: [:]))
-
-
     }
 
     func testOneLevelFind() {
@@ -164,18 +162,18 @@ extension FakeRequestTests {
         }
     }
 
-    func testFakeGETUsingPattern() {
+    func testFakeGETOneLevelUsingPattern() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakeGET("/users/{userID}", fileName: "user.json", bundle: Bundle(for: GETTests.self))
+        let json = [
+            "name": "Name {userID}"
+        ]
+        networking.fakeGET("/users/{userID}", response: json, statusCode: 200)
 
         networking.get("/users/10") { result in
             switch result {
             case .success(let response):
                 let json = response.dictionaryBody
-                let id = json["id"] as? String
-                XCTAssertEqual(id, "10")
-
                 let name = json["name"] as? String
                 XCTAssertEqual(name, "Name 10")
             case .failure:
@@ -187,9 +185,6 @@ extension FakeRequestTests {
             switch result {
             case .success(let response):
                 let json = response.dictionaryBody
-                let id = json["id"] as? String
-                XCTAssertEqual(id, "20")
-
                 let name = json["name"] as? String
                 XCTAssertEqual(name, "Name 20")
             case .failure:
