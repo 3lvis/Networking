@@ -28,12 +28,6 @@ public extension Int {
 open class Networking {
     static let domain = "com.3lvis.networking"
 
-    struct FakeRequest {
-        let response: Any?
-        let responseType: ResponseType
-        let statusCode: Int
-    }
-
     enum RequestType: String {
         case get = "GET", post = "POST", put = "PUT", delete = "DELETE"
     }

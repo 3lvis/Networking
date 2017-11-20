@@ -219,56 +219,6 @@ class POSTTests: XCTestCase {
         }
     }
 
-    func testFakePOST() {
-        let networking = Networking(baseURL: baseURL)
-
-        networking.fakePOST("/story", response: [["name": "Elvis"]])
-
-        networking.post("/story", parameters: ["username": "jameson", "password": "secret"]) { result in
-            switch result {
-            case let .success(response):
-                let json = response.arrayBody
-                let value = json[0]["name"] as? String
-                XCTAssertEqual(value, "Elvis")
-            case .failure:
-                XCTFail()
-            }
-        }
-    }
-
-    func testFakePOSTWithInvalidStatusCode() {
-        let networking = Networking(baseURL: baseURL)
-
-        networking.fakePOST("/story", response: nil, statusCode: 401)
-
-        networking.post("/story") { result in
-            switch result {
-            case .success:
-                XCTFail()
-            case let .failure(response):
-                XCTAssertEqual(response.error.code, 401)
-            }
-        }
-    }
-
-    func testFakePOSTUsingFile() {
-        let networking = Networking(baseURL: baseURL)
-
-        networking.fakePOST("/entries", fileName: "entries.json", bundle: Bundle(for: POSTTests.self))
-
-        networking.post("/entries") { result in
-            switch result {
-            case let .success(response):
-                let json = response.arrayBody
-                let entry = json[0]
-                let value = entry["title"] as? String
-                XCTAssertEqual(value, "Entry 1")
-            case .failure:
-                XCTFail()
-            }
-        }
-    }
-
     func testCancelPOSTWithPath() {
         let expectation = self.expectation(description: "testCancelPOST")
 
