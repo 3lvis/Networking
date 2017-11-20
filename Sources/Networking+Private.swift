@@ -185,7 +185,7 @@ extension Networking {
                     case .get, .delete:
                         let urlEncodedPath: String
                         if path.contains("?") {
-                            if let lastCharacter = path.characters.last, lastCharacter == "?" {
+                            if let lastCharacter = path.last, lastCharacter == "?" {
                                 urlEncodedPath = path + formattedParameters
                             } else {
                                 urlEncodedPath = path + "&" + formattedParameters
