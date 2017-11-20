@@ -63,56 +63,6 @@ class DELETETests: XCTestCase {
         }
     }
 
-    func testFakeDELETE() {
-        let networking = Networking(baseURL: baseURL)
-
-        networking.fakeDELETE("/stories", response: ["name": "Elvis"])
-
-        networking.delete("/stories") { result in
-            switch result {
-            case let .success(response):
-                let json = response.dictionaryBody
-                let value = json["name"] as? String
-                XCTAssertEqual(value, "Elvis")
-            case .failure:
-                XCTFail()
-            }
-        }
-    }
-
-    func testFakeDELETEWithInvalidStatusCode() {
-        let networking = Networking(baseURL: baseURL)
-
-        networking.fakeDELETE("/story", response: nil, statusCode: 401)
-
-        networking.delete("/story") { result in
-            switch result {
-            case .success:
-                XCTFail()
-            case let .failure(response):
-                XCTAssertEqual(response.error.code, 401)
-            }
-        }
-    }
-
-    func testFakeDELETEUsingFile() {
-        let networking = Networking(baseURL: baseURL)
-
-        networking.fakeDELETE("/entries", fileName: "entries.json", bundle: Bundle(for: DELETETests.self))
-
-        networking.delete("/entries") { result in
-            switch result {
-            case let .success(response):
-                let json = response.arrayBody
-                let entry = json[0]
-                let value = entry["title"] as? String
-                XCTAssertEqual(value, "Entry 1")
-            case .failure:
-                XCTFail()
-            }
-        }
-    }
-
     func testCancelDELETEWithPath() {
         let expectation = self.expectation(description: "testCancelDELETE")
 

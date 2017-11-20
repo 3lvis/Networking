@@ -63,56 +63,6 @@ class PUTTests: XCTestCase {
         }
     }
 
-    func testFakePUT() {
-        let networking = Networking(baseURL: baseURL)
-
-        networking.fakePUT("/story", response: [["name": "Elvis"]])
-
-        networking.put("/story", parameters: ["username": "jameson", "password": "secret"]) { result in
-            switch result {
-            case let .success(response):
-                let json = response.arrayBody
-                let value = json[0]["name"] as? String
-                XCTAssertEqual(value, "Elvis")
-            case .failure:
-                XCTFail()
-            }
-        }
-    }
-
-    func testFakePUTWithInvalidStatusCode() {
-        let networking = Networking(baseURL: baseURL)
-
-        networking.fakePUT("/story", response: nil, statusCode: 401)
-
-        networking.put("/story", parameters: nil) { result in
-            switch result {
-            case .success:
-                XCTFail()
-            case let .failure(response):
-                XCTAssertEqual(response.error.code, 401)
-            }
-        }
-    }
-
-    func testFakePUTUsingFile() {
-        let networking = Networking(baseURL: baseURL)
-
-        networking.fakePUT("/entries", fileName: "entries.json", bundle: Bundle(for: PUTTests.self))
-
-        networking.put("/entries", parameters: nil) { result in
-            switch result {
-            case let .success(response):
-                let json = response.arrayBody
-                let entry = json[0]
-                let value = entry["title"] as? String
-                XCTAssertEqual(value, "Entry 1")
-            case .failure:
-                XCTFail()
-            }
-        }
-    }
-
     func testCancelPUTWithPath() {
         let expectation = self.expectation(description: "testCancelPUT")
 
