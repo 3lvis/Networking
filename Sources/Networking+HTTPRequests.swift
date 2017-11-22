@@ -23,7 +23,7 @@ public extension Networking {
     ///   - response: An `Any` that will be returned when a GET request is made to the specified path.
     ///   - statusCode: By default it's 200, if you provide any status code that is between 200 and 299 the response object will be returned, otherwise we will return an error containig the provided status code.
     public func fakeGET(_ path: String, response: Any?, statusCode: Int = 200, headers: [String: String]? = nil) {
-        registerFake(requestType: .get, path: path, response: response, responseType: .json, statusCode: statusCode)
+        registerFake(requestType: .get, path: path, response: response, responseType: .json, statusCode: statusCode, headers: nil)
     }
 
     /// Registers a fake GET request for the specified path using the contents of a file. After registering this, every GET request to the path, will return the contents of the registered file.
@@ -66,8 +66,8 @@ public extension Networking {
     ///   - path: The path for the faked PUT request.
     ///   - response: An `Any` that will be returned when a PUT request is made to the specified path.
     ///   - statusCode: By default it's 200, if you provide any status code that is between 200 and 299 the response object will be returned, otherwise we will return an error containig the provided status code.
-    public func fakePUT(_ path: String, response: Any?, statusCode: Int = 200) {
-        registerFake(requestType: .put, path: path, response: response, responseType: .json, statusCode: statusCode)
+    public func fakePUT(_ path: String, response: Any?, statusCode: Int = 200, headers: [String: String]? = nil) {
+        registerFake(requestType: .put, path: path, response: response, responseType: .json, statusCode: statusCode, headers: nil)
     }
 
     /// Registers a fake PUT request to the specified path using the contents of a file. After registering this, every PUT request to the path, will return the contents of the registered file.
@@ -123,8 +123,8 @@ public extension Networking {
     ///   - path: The path for the faked POST request.
     ///   - response: An `Any` that will be returned when a POST request is made to the specified path.
     ///   - statusCode: By default it's 200, if you provide any status code that is between 200 and 299 the response object will be returned, otherwise we will return an error containig the provided status code.
-    public func fakePOST(_ path: String, response: Any?, statusCode: Int = 200) {
-        registerFake(requestType: .post, path: path, response: response, responseType: .json, statusCode: statusCode)
+    public func fakePOST(_ path: String, response: Any?, statusCode: Int = 200, headers: [String: String]? = nil) {
+        registerFake(requestType: .post, path: path, response: response, responseType: .json, statusCode: statusCode, headers: nil)
     }
 
     /// Registers a fake POST request to the specified path using the contents of a file. After registering this, every POST request to the path, will return the contents of the registered file.
@@ -167,8 +167,8 @@ public extension Networking {
     ///   - path: The path for the faked DELETE request.
     ///   - response: An `Any` that will be returned when a DELETE request is made to the specified path.
     ///   - statusCode: By default it's 200, if you provide any status code that is between 200 and 299 the response object will be returned, otherwise we will return an error containig the provided status code.
-    public func fakeDELETE(_ path: String, response: Any?, statusCode: Int = 200) {
-        registerFake(requestType: .delete, path: path, response: response, responseType: .json, statusCode: statusCode)
+    public func fakeDELETE(_ path: String, response: Any?, statusCode: Int = 200, headers: [String: String]? = nil) {
+        registerFake(requestType: .delete, path: path, response: response, responseType: .json, statusCode: statusCode, headers: nil)
     }
 
     /// Registers a fake DELETE request to the specified path using the contents of a file. After registering this, every DELETE request to the path, will return the contents of the registered file.
@@ -231,7 +231,7 @@ public extension Networking {
     ///   - image: An image that will be returned when there's a request to the registered path.
     ///   - statusCode: The status code to be used when faking the request.
     public func fakeImageDownload(_ path: String, image: Image?, statusCode: Int = 200) {
-        registerFake(requestType: .get, path: path, response: image, responseType: .image, statusCode: statusCode)
+        registerFake(requestType: .get, path: path, response: image, responseType: .image, statusCode: statusCode, headers: nil)
     }
 
     /// Downloads data from a URL, caching the result.

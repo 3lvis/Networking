@@ -33,7 +33,7 @@ class FakeRequestTests: XCTestCase {
     }
 
     func testFind() {
-        let request = FakeRequest(response: nil, responseType: .json, statusCode: 200)
+        let request = FakeRequest(response: nil, responseType: .json, statusCode: 200, headers: nil)
         let existingRequests = [Networking.RequestType.get: ["/companies": request]]
 
         XCTAssertNil(FakeRequest.find(ofType: .get, forPath: "/users", in: existingRequests))
@@ -44,7 +44,7 @@ class FakeRequestTests: XCTestCase {
         let json = [
             "name": "Name {userID}"
         ]
-        let request = FakeRequest(response: json, responseType: .json, statusCode: 200)
+        let request = FakeRequest(response: json, responseType: .json, statusCode: 200, headers: nil)
         let existingRequests = [Networking.RequestType.get: ["/users/{userID}": request]]
         let result = FakeRequest.find(ofType: .get, forPath: "/users/10", in: existingRequests)
 
@@ -60,7 +60,7 @@ class FakeRequestTests: XCTestCase {
             "user": "User {userID}",
             "company": "Company {companyID}"
         ]
-        let request = FakeRequest(response: json, responseType: .json, statusCode: 200)
+        let request = FakeRequest(response: json, responseType: .json, statusCode: 200, headers: nil)
         let existingRequests = [Networking.RequestType.get: ["/users/{userID}/companies/{companyID}": request]]
         let result = FakeRequest.find(ofType: .get, forPath: "/users/10/companies/20", in: existingRequests)
 
@@ -78,7 +78,7 @@ class FakeRequestTests: XCTestCase {
             "company": "Company {companyID}",
             "product": "Product {productID}"
         ]
-        let request = FakeRequest(response: json, responseType: .json, statusCode: 200)
+        let request = FakeRequest(response: json, responseType: .json, statusCode: 200, headers: nil)
         let existingRequests = [Networking.RequestType.get: ["/users/{userID}/companies/{companyID}/products/{productID}": request]]
         let result = FakeRequest.find(ofType: .get, forPath: "/users/10/companies/20/products/30", in: existingRequests)
 
@@ -105,7 +105,7 @@ class FakeRequestTests: XCTestCase {
             "resource10": "Resource {resourceID10}",
         ]
 
-        let request = FakeRequest(response: json, responseType: .json, statusCode: 200)
+        let request = FakeRequest(response: json, responseType: .json, statusCode: 200, headers: nil)
         let existingRequests = [Networking.RequestType.get: ["resource1/{resourceID1}/resource2/{resourceID2}/resource3/{resourceID3}/resource4/{resourceID4}/resource5/{resourceID5}/resource6/{resourceID6}/resource7/{resourceID7}/resource8/{resourceID8}/resource9/{resourceID9}/resource10/{resourceID10}": request]]
         let result = FakeRequest.find(ofType: .get, forPath: "resource1/1/resource2/2/resource3/3/resource4/4/resource5/5/resource6/6/resource7/7/resource8/8/resource9/9/resource10/10", in: existingRequests)
         let expected = [
@@ -163,7 +163,7 @@ extension FakeRequestTests {
     func testFakeGETWithInvalidStatusCode() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakeGET("/stories", response: nil, statusCode: 401)
+        networking.fakeGET("/stories", response: nil, statusCode: 401, headers: nil)
 
         networking.get("/stories") { result in
             switch result {
@@ -179,7 +179,7 @@ extension FakeRequestTests {
         let networking = Networking(baseURL: baseURL)
 
         let expectedResponse = ["error_message": "Shit went down"]
-        networking.fakeGET("/stories", response: expectedResponse, statusCode: 401)
+        networking.fakeGET("/stories", response: expectedResponse, statusCode: 401, headers: nil)
 
         networking.get("/stories") { result in
             switch result {
@@ -217,7 +217,7 @@ extension FakeRequestTests {
         let json = [
             "name": "Name {userID}"
         ]
-        networking.fakeGET("/users/{userID}", response: json, statusCode: 200)
+        networking.fakeGET("/users/{userID}", response: json, statusCode: 200, headers: nil)
 
         networking.get("/users/10") { result in
             switch result {
@@ -265,7 +265,7 @@ extension FakeRequestTests {
     func testFakePOSTWithInvalidStatusCode() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakePOST("/story", response: nil, statusCode: 401)
+        networking.fakePOST("/story", response: nil, statusCode: 401, headers: nil)
 
         networking.post("/story") { result in
             switch result {
@@ -318,7 +318,7 @@ extension FakeRequestTests {
     func testFakePUTWithInvalidStatusCode() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakePUT("/story", response: nil, statusCode: 401)
+        networking.fakePUT("/story", response: nil, statusCode: 401, headers: nil)
 
         networking.put("/story", parameters: nil) { result in
             switch result {
@@ -371,7 +371,7 @@ extension FakeRequestTests {
     func testFakeDELETEWithInvalidStatusCode() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakeDELETE("/story", response: nil, statusCode: 401)
+        networking.fakeDELETE("/story", response: nil, statusCode: 401, headers: nil)
 
         networking.delete("/story") { result in
             switch result {

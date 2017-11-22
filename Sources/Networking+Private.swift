@@ -32,7 +32,7 @@ extension Networking {
     func registerFake(requestType: RequestType, path: String, fileName: String, bundle: Bundle) {
         do {
             if let result = try FileManager.json(from: fileName, bundle: bundle) {
-                registerFake(requestType: requestType, path: path, response: result, responseType: .json, statusCode: 200)
+                registerFake(requestType: requestType, path: path, response: result, responseType: .json, statusCode: 200, headers: nil)
             }
         } catch ParsingError.notFound {
             fatalError("We couldn't find \(fileName), are you sure is there?")
@@ -41,9 +41,9 @@ extension Networking {
         }
     }
 
-    func registerFake(requestType: RequestType, path: String, response: Any?, responseType: ResponseType, statusCode: Int) {
+    func registerFake(requestType: RequestType, path: String, response: Any?, responseType: ResponseType, statusCode: Int, headers: [String: String]?) {
         var requests = fakeRequests[requestType] ?? [String: FakeRequest]()
-        requests[path] = FakeRequest(response: response, responseType: responseType, statusCode: statusCode)
+        requests[path] = FakeRequest(response: response, responseType: responseType, statusCode: statusCode, headers: nil)
         fakeRequests[requestType] = requests
     }
 

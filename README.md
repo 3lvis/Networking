@@ -395,7 +395,7 @@ If you do not provide a status code for this fake request, the default returned 
 
 ```swift
 let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
-networking.fakeGET("/stories", response: nil, statusCode: 500)
+networking.fakeGET("/stories", response: nil, statusCode: 500, headers: nil)
 networking.get("/stories") { result in
     // error with status code 500
 }

@@ -30,7 +30,7 @@ class UnauthorizedCallbackTests: XCTestCase {
         }
 
         var ignoredCompletionBlock = true
-        networking.fakeGET("/hi-mom", response: nil, statusCode: 401)
+        networking.fakeGET("/hi-mom", response: nil, statusCode: 401, headers: nil)
         networking.get("/hi-mom") { _ in
             ignoredCompletionBlock = false
         }
