@@ -10,7 +10,7 @@ public extension Networking {
     ///   - completion: The result of the operation, it's an enum with two cases: success and failure.
     /// - Returns: The request identifier.
     @discardableResult
-    public func get(_ path: String, parameters: Any? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
+    public func get(_ path: String, parameters: Any? = nil, headers: [String: String]? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
         let parameterType: ParameterType = parameters != nil ? .formURLEncoded : .none
 
         return handleJSONRequest(.get, path: path, parameterType: parameterType, parameters: parameters, responseType: .json, completion: completion)
@@ -22,7 +22,7 @@ public extension Networking {
     ///   - path: The path for the faked GET request.
     ///   - response: An `Any` that will be returned when a GET request is made to the specified path.
     ///   - statusCode: By default it's 200, if you provide any status code that is between 200 and 299 the response object will be returned, otherwise we will return an error containig the provided status code.
-    public func fakeGET(_ path: String, response: Any?, statusCode: Int = 200) {
+    public func fakeGET(_ path: String, response: Any?, statusCode: Int = 200, headers: [String: String]? = nil) {
         registerFake(requestType: .get, path: path, response: response, responseType: .json, statusCode: statusCode)
     }
 

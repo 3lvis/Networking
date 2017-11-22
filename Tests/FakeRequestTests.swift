@@ -143,6 +143,23 @@ extension FakeRequestTests {
         }
     }
 
+    func testFakeGETWithHeaders() {
+        let networking = Networking(baseURL: baseURL)
+        let expected = ["user-agent": "hi mom!"]
+
+        networking.fakeGET("/stories", response: nil, headers: expected)
+
+        networking.get("/user-agent", headers: expected) { result in
+            switch result {
+            case let .success(response):
+                let headers = response.headers as? [String: String] ?? [String: String]()
+                XCTAssertEqual(headers, expected)
+            case .failure:
+                XCTFail()
+            }
+        }
+    }
+
     func testFakeGETWithInvalidStatusCode() {
         let networking = Networking(baseURL: baseURL)
 
