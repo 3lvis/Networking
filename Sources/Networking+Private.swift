@@ -195,7 +195,7 @@ extension Networking {
                             urlEncodedPath = path + "?" + formattedParameters
                         }
                         request.url = try! composedURL(with: urlEncodedPath)
-                    case .post, .put:
+                    case .post, .put, .patch:
                         request.httpBody = formattedParameters.data(using: .utf8)
                     }
                 } catch let error as NSError {

@@ -29,7 +29,7 @@ open class Networking {
     static let domain = "com.3lvis.networking"
 
     enum RequestType: String {
-        case get = "GET", post = "POST", put = "PUT", delete = "DELETE"
+        case get = "GET", post = "POST", put = "PUT", patch = "PATCH", delete = "DELETE"
     }
 
     enum SessionTaskType: String {
