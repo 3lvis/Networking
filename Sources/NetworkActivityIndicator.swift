@@ -30,8 +30,8 @@ class NetworkActivityIndicator: NSObject {
                 let deadline = DispatchTime.now() + Double(Int64(0.5 * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)
                 DispatchQueue.main.asyncAfter(deadline: deadline) {
                     // This is needed in order to let this library be used in app extensions.
-                    if UIApplication.responds(to: NSSelectorFromString("shared")) {
-                        (UIApplication.value(forKeyPath: "shared") as? UIApplication)?.isNetworkActivityIndicatorVisible = (self.activitiesCount > 0)
+                    if UIApplication.responds(to: NSSelectorFromString("sharedApplication")) {
+                        (UIApplication.value(forKeyPath: "sharedApplication") as? UIApplication)?.isNetworkActivityIndicatorVisible = (self.activitiesCount > 0)
                     }
                 }
             #endif
