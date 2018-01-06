@@ -43,7 +43,7 @@ extension Networking {
 
     func registerFake(requestType: RequestType, path: String, response: Any?, responseType: ResponseType, statusCode: Int, headers: [String: String]?) {
         var requests = fakeRequests[requestType] ?? [String: FakeRequest]()
-        requests[path] = FakeRequest(response: response, responseType: responseType, statusCode: statusCode, headers: nil)
+        requests[path] = FakeRequest(response: response, responseType: responseType, statusCode: statusCode, headers: headers)
         fakeRequests[requestType] = requests
     }
 
