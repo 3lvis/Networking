@@ -32,14 +32,8 @@ public extension Int {
 open class Networking {
     static let domain = "com.3lvis.networking"
 
-    struct FakeRequest {
-        let response: Any?
-        let responseType: ResponseType
-        let statusCode: Int
-    }
-
     enum RequestType: String {
-        case get = "GET", post = "POST", put = "PUT", delete = "DELETE"
+        case get = "GET", post = "POST", put = "PUT", patch = "PATCH", delete = "DELETE"
     }
 
     enum SessionTaskType: String {
@@ -318,7 +312,7 @@ open class Networking {
         headerFields = nil
         authorizationHeaderKey = "Authorization"
         authorizationHeaderValue = nil
-
+        
         Networking.deleteCachedFiles()
     }
 }

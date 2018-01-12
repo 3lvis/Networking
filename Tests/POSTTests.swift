@@ -175,9 +175,9 @@ class POSTTests: XCTestCase {
     func testUploadingAnImageWithMultipartFormData() {
         guard let path = Bundle(for: POSTTests.self).path(forResource: "Keys", ofType: "plist") else { return }
         guard let dictionary = NSDictionary(contentsOfFile: path) else { return }
-        guard let CloudinaryCloudName = dictionary["CloudinaryCloudName"] as? String, CloudinaryCloudName.characters.count > 0 else { return }
-        guard let CloudinarySecret = dictionary["CloudinarySecret"] as? String, CloudinarySecret.characters.count > 0 else { return }
-        guard let CloudinaryAPIKey = dictionary["CloudinaryAPIKey"] as? String, CloudinaryAPIKey.characters.count > 0 else { return }
+        guard let CloudinaryCloudName = dictionary["CloudinaryCloudName"] as? String, CloudinaryCloudName.count > 0 else { return }
+        guard let CloudinarySecret = dictionary["CloudinarySecret"] as? String, CloudinarySecret.count > 0 else { return }
+        guard let CloudinaryAPIKey = dictionary["CloudinaryAPIKey"] as? String, CloudinaryAPIKey.count > 0 else { return }
 
         let networking = Networking(baseURL: "https://api.cloudinary.com")
         let timestamp = "\(Int(Date().timeIntervalSince1970))"
@@ -215,56 +215,6 @@ class POSTTests: XCTestCase {
                 XCTFail()
             case let .failure(response):
                 XCTAssertEqual(response.error.code, 404)
-            }
-        }
-    }
-
-    func testFakePOST() {
-        let networking = Networking(baseURL: baseURL)
-
-        networking.fakePOST("/story", response: [["name": "Elvis"]])
-
-        networking.post("/story", parameters: ["username": "jameson", "password": "secret"]) { result in
-            switch result {
-            case let .success(response):
-                let json = response.arrayBody
-                let value = json[0]["name"] as? String
-                XCTAssertEqual(value, "Elvis")
-            case .failure:
-                XCTFail()
-            }
-        }
-    }
-
-    func testFakePOSTWithInvalidStatusCode() {
-        let networking = Networking(baseURL: baseURL)
-
-        networking.fakePOST("/story", response: nil, statusCode: 401)
-
-        networking.post("/story") { result in
-            switch result {
-            case .success:
-                XCTFail()
-            case let .failure(response):
-                XCTAssertEqual(response.error.code, 401)
-            }
-        }
-    }
-
-    func testFakePOSTUsingFile() {
-        let networking = Networking(baseURL: baseURL)
-
-        networking.fakePOST("/entries", fileName: "entries.json", bundle: Bundle(for: POSTTests.self))
-
-        networking.post("/entries") { result in
-            switch result {
-            case let .success(response):
-                let json = response.arrayBody
-                let entry = json[0]
-                let value = entry["title"] as? String
-                XCTAssertEqual(value, "Entry 1")
-            case .failure:
-                XCTFail()
             }
         }
     }

@@ -1,22 +1,22 @@
 import Foundation
 import XCTest
 
-class PUTTests: XCTestCase {
+class PATCHTests: XCTestCase {
     let baseURL = "http://httpbin.org"
 
-    func testSynchronousPUT() {
+    func testSynchronousPATCH() {
         var synchronous = false
         let networking = Networking(baseURL: baseURL)
-        networking.put("/put", parameters: nil) { _ in
+        networking.patch("/patch", parameters: nil) { _ in
             synchronous = true
         }
 
         XCTAssertTrue(synchronous)
     }
 
-    func testPUT() {
+    func testPATCH() {
         let networking = Networking(baseURL: baseURL)
-        networking.put("/put", parameters: ["username": "jameson", "password": "secret"]) { result in
+        networking.patch("/patch", parameters: ["username": "jameson", "password": "secret"]) { result in
             switch result {
             case let .success(response):
                 let json = response.dictionaryBody
@@ -32,14 +32,14 @@ class PUTTests: XCTestCase {
         }
     }
 
-    func testPUTWithHeaders() {
+    func testPATCHWithHeaders() {
         let networking = Networking(baseURL: baseURL)
-        networking.put("/put") { result in
+        networking.patch("/patch") { result in
             switch result {
             case let .success(response):
                 let json = response.dictionaryBody
                 guard let url = json["url"] as? String else { XCTFail(); return }
-                XCTAssertEqual(url, "http://httpbin.org/put")
+                XCTAssertEqual(url, "http://httpbin.org/patch")
 
                 let headers = response.headers
                 guard let connection = headers["Connection"] as? String else { XCTFail(); return }
@@ -51,9 +51,9 @@ class PUTTests: XCTestCase {
         }
     }
 
-    func testPUTWithIvalidPath() {
+    func testPATCHWithIvalidPath() {
         let networking = Networking(baseURL: baseURL)
-        networking.put("/posdddddt", parameters: ["username": "jameson", "password": "secret"]) { result in
+        networking.patch("/posdddddt", parameters: ["username": "jameson", "password": "secret"]) { result in
             switch result {
             case .success:
                 XCTFail()
@@ -63,13 +63,13 @@ class PUTTests: XCTestCase {
         }
     }
 
-    func testCancelPUTWithPath() {
-        let expectation = self.expectation(description: "testCancelPUT")
+    func testCancelPATCHWithPath() {
+        let expectation = self.expectation(description: "testCancelPATCH")
 
         let networking = Networking(baseURL: baseURL)
         networking.isSynchronous = true
         var completed = false
-        networking.put("/put", parameters: ["username": "jameson", "password": "secret"]) { result in
+        networking.patch("/patch", parameters: ["username": "jameson", "password": "secret"]) { result in
             switch result {
             case .success:
                 XCTFail()
@@ -80,18 +80,18 @@ class PUTTests: XCTestCase {
             }
         }
 
-        networking.cancelPUT("/put")
+        networking.cancelPATCH("/patch")
         completed = true
 
         waitForExpectations(timeout: 150.0, handler: nil)
     }
 
-    func testCancelPUTWithID() {
-        let expectation = self.expectation(description: "testCancelPUT")
+    func testCancelPATCHWithID() {
+        let expectation = self.expectation(description: "testCancelPATCH")
 
         let networking = Networking(baseURL: baseURL)
         networking.isSynchronous = true
-        let requestID = networking.put("/put", parameters: ["username": "jameson", "password": "secret"]) { result in
+        let requestID = networking.patch("/patch", parameters: ["username": "jameson", "password": "secret"]) { result in
             switch result {
             case .success:
                 XCTFail()
@@ -106,3 +106,4 @@ class PUTTests: XCTestCase {
         waitForExpectations(timeout: 150.0, handler: nil)
     }
 }
+
