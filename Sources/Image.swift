@@ -1,11 +1,12 @@
 #if os(OSX)
     import AppKit.NSImage
     public typealias Image = NSImage
-#else
+#elseif os(iOS) || os(tvOS) || os(watchOS)
     import UIKit.UIImage
     public typealias Image = UIImage
 #endif
 
+#if !os(Linux)
 extension Image {
 
     static func find(named name: String, inBundle bundle: Bundle) -> Image {
@@ -44,3 +45,4 @@ extension Image {
         #endif
     }
 }
+#endif

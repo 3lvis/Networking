@@ -1,4 +1,7 @@
 import Foundation
+#if os(Linux)
+import Glibc
+#endif
 
 public extension Networking {
 
@@ -192,6 +195,7 @@ public extension Networking {
 
 public extension Networking {
 
+	#if !os(Linux)
     /// Retrieves an image from the cache or from the filesystem.
     ///
     /// - Parameters:
@@ -233,6 +237,7 @@ public extension Networking {
     public func fakeImageDownload(_ path: String, image: Image?, statusCode: Int = 200) {
         registerFake(requestType: .get, path: path, response: image, responseType: .image, statusCode: statusCode)
     }
+	#endif
 
     /// Downloads data from a URL, caching the result.
     ///

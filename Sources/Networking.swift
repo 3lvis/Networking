@@ -1,4 +1,8 @@
 import Foundation
+#if os(Linux)
+import Glibc
+import Dispatch
+#endif
 
 public extension Int {
 
@@ -111,7 +115,11 @@ open class Networking {
     public var isErrorLoggingEnabled = true
 
     /// The boundary used for multipart requests.
-    let boundary = String(format: "net.3lvis.networking.%08x%08x", arc4random(), arc4random())
+	#if os(Linux)
+	let boundary = String(format: "net.3lvis.networking.%08x%08x", random(), random())
+	#else
+	let boundary = String(format: "net.3lvis.networking.%08x%08x", arc4random(), arc4random())
+	#endif
 
     lazy var session: URLSession = {
         URLSession(configuration: self.configuration)

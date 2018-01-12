@@ -32,3 +32,5 @@ Networking.framework.zip
 # CocoaPods
 Pods
 *.lock
+
+.build/

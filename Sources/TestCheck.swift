@@ -1,4 +1,7 @@
 import Foundation
+#if os(Linux)
+	import Dispatch
+#endif
 
 struct TestCheck {
     /// Method to check whether you are on testing mode or not.

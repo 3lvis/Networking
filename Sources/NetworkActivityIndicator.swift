@@ -1,6 +1,9 @@
 #if os(iOS)
     import UIKit
 #endif
+#if os(Linux)
+	import Dispatch
+#endif
 
 import Foundation
 
