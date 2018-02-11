@@ -160,7 +160,7 @@ extension FakeRequestTests {
 
     func testFakeGETWithHeaders() {
         let networking = Networking(baseURL: baseURL)
-        let expected = ["user-agent": "hi mom!"]
+        let expected = ["Random": "Morada"]
 
         networking.fakeGET("/stories", response: nil, headers: expected)
 

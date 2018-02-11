@@ -60,7 +60,7 @@ extension Networking {
     func handleFakeRequest(_ fakeRequest: FakeRequest, path: String, completion: @escaping (_ body: Any?, _ response: HTTPURLResponse, _ error: NSError?) -> Void) -> String {
         var error: NSError?
         let url = try! composedURL(with: path)
-        let response = HTTPURLResponse(url: url, statusCode: fakeRequest.statusCode)
+        let response = HTTPURLResponse(url: url, statusCode: fakeRequest.statusCode, httpVersion: nil, headerFields: fakeRequest.headers)!
 
         if let unauthorizedRequestCallback = unauthorizedRequestCallback, fakeRequest.statusCode == 403 || fakeRequest.statusCode == 401 {
             TestCheck.testBlock(isSynchronous) {
