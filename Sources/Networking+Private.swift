@@ -2,29 +2,39 @@ import Foundation
 
 extension Networking {
 
-    func objectFromCache(for path: String, cacheName: String?, responseType: ResponseType) -> Any? {
+    func objectFromCache(for path: String, cacheName: String?, cachingLevel: CachingLevel, responseType: ResponseType) -> Any? {
         /// Workaround: Remove URL parameters from path. That can lead to writing cached files with names longer than
         /// 255 characters, resulting in error. Another option to explore is to use a hash version of the url if it's
         /// longer than 255 characters.
         guard let destinationURL = try? destinationURL(for: path, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(String(describing: cacheName))") }
 
-        if let object = cache.object(forKey: destinationURL.absoluteString as AnyObject) {
-            return object
-        } else if FileManager.default.exists(at: destinationURL) {
-            var returnedObject: Any?
+        switch cachingLevel {
+        case .memory:
+            try? FileManager.default.remove(at: destinationURL)
+            return cache.object(forKey: destinationURL.absoluteString as AnyObject)
+        case .memoryAndFile:
+            if let object = cache.object(forKey: destinationURL.absoluteString as AnyObject) {
+                return object
+            } else if FileManager.default.exists(at: destinationURL) {
+                var returnedObject: Any?
 
-            let object = destinationURL.getData()
-            if responseType == .image {
-                returnedObject = Image(data: object)
+                let object = destinationURL.getData()
+                if responseType == .image {
+                    returnedObject = Image(data: object)
+                } else {
+                    returnedObject = object
+                }
+                if let returnedObject = returnedObject {
+                    cache.setObject(returnedObject as AnyObject, forKey: destinationURL.absoluteString as AnyObject)
+                }
+
+                return returnedObject
             } else {
-                returnedObject = object
+                return nil
             }
-            if let returnedObject = returnedObject {
-                cache.setObject(returnedObject as AnyObject, forKey: destinationURL.absoluteString as AnyObject)
-            }
-
-            return returnedObject
-        } else {
+        case .none:
+            cache.removeObject(forKey: destinationURL.absoluteString as AnyObject)
+            try? FileManager.default.remove(at: destinationURL)
             return nil
         }
     }
@@ -83,13 +93,13 @@ extension Networking {
         }
     }
 
-    func handleDataRequest(_ requestType: RequestType, path: String, cacheName: String?, responseType: ResponseType, completion: @escaping (_ result: DataResult) -> Void) -> String {
+    func handleDataRequest(_ requestType: RequestType, path: String, cacheName: String?, cachingLevel: CachingLevel, responseType: ResponseType, completion: @escaping (_ result: DataResult) -> Void) -> String {
         if let fakeRequests = fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
             return handleFakeRequest(fakeRequest, path: path) { _, response, error in
                 completion(DataResult(body: fakeRequest.response, response: response, error: error))
             }
         } else {
-            let object = objectFromCache(for: path, cacheName: cacheName, responseType: responseType)
+            let object = objectFromCache(for: path, cacheName: cacheName, cachingLevel: cachingLevel, responseType: responseType)
             if let object = object {
                 TestCheck.testBlock(isSynchronous) {
                     let url = try! self.composedURL(with: path)
@@ -105,8 +115,15 @@ extension Networking {
                     }
 
                     if let data = data, data.count > 0 {
-                        _ = try? data.write(to: destinationURL, options: [.atomic])
-                        self.cache.setObject(data as AnyObject, forKey: destinationURL.absoluteString as AnyObject)
+                        switch cachingLevel {
+                        case .memory:
+                            self.cache.setObject(data as AnyObject, forKey: destinationURL.absoluteString as AnyObject)
+                        case .memoryAndFile:
+                            _ = try? data.write(to: destinationURL, options: [.atomic])
+                            self.cache.setObject(data as AnyObject, forKey: destinationURL.absoluteString as AnyObject)
+                        case .none:
+                            break
+                        }
                     } else {
                         self.cache.removeObject(forKey: destinationURL.absoluteString as AnyObject)
                     }
@@ -119,13 +136,13 @@ extension Networking {
         }
     }
 
-    func handleImageRequest(_ requestType: RequestType, path: String, cacheName: String?, responseType: ResponseType, completion: @escaping (_ result: ImageResult) -> Void) -> String {
+    func handleImageRequest(_ requestType: RequestType, path: String, cacheName: String?, cachingLevel: CachingLevel, responseType: ResponseType, completion: @escaping (_ result: ImageResult) -> Void) -> String {
         if let fakeRequests = fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
             return handleFakeRequest(fakeRequest, path: path) { _, response, error in
                 completion(ImageResult(body: fakeRequest.response, response: response, error: error))
             }
         } else {
-            let object = objectFromCache(for: path, cacheName: cacheName, responseType: responseType)
+            let object = objectFromCache(for: path, cacheName: cacheName, cachingLevel: cachingLevel, responseType: responseType)
             if let object = object {
                 TestCheck.testBlock(isSynchronous) {
                     let url = try! self.composedURL(with: path)
@@ -143,9 +160,17 @@ extension Networking {
 
                     var returnedImage: Image?
                     if let data = data, data.count > 0, let image = Image(data: data) {
-                        _ = try? data.write(to: destinationURL, options: [.atomic])
+                        switch cachingLevel {
+                        case .memory:
+                            self.cache.setObject(image, forKey: destinationURL.absoluteString as AnyObject)
+                        case .memoryAndFile:
+                            _ = try? data.write(to: destinationURL, options: [.atomic])
+                            self.cache.setObject(image, forKey: destinationURL.absoluteString as AnyObject)
+                        case .none:
+                            break
+                        }
+
                         returnedImage = image
-                        self.cache.setObject(image, forKey: destinationURL.absoluteString as AnyObject)
                     } else {
                         self.cache.removeObject(forKey: destinationURL.absoluteString as AnyObject)
                     }
@@ -195,7 +220,7 @@ extension Networking {
                             urlEncodedPath = path + "?" + formattedParameters
                         }
                         request.url = try! composedURL(with: urlEncodedPath)
-                    case .post, .put:
+                    case .post, .put, .patch:
                         request.httpBody = formattedParameters.data(using: .utf8)
                     }
                 } catch let error as NSError {

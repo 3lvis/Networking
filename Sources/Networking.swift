@@ -29,7 +29,7 @@ open class Networking {
     static let domain = "com.3lvis.networking"
 
     enum RequestType: String {
-        case get = "GET", post = "POST", put = "PUT", delete = "DELETE"
+        case get = "GET", post = "POST", put = "PUT", patch = "PATCH", delete = "DELETE"
     }
 
     enum SessionTaskType: String {
@@ -110,6 +110,13 @@ open class Networking {
     lazy var session: URLSession = {
         URLSession(configuration: self.configuration)
     }()
+
+    /// Caching options
+    public enum CachingLevel {
+        case memory
+        case memoryAndFile
+        case none
+    }
 
     /// Base initializer, it creates an instance of `Networking`.
     ///

@@ -1,3 +1,5 @@
+// swift-tools-version:4.0
+
 // Licensed under the **MIT** license
 // Copyright (c) 2016 Elvis Nuñez
 //
@@ -23,5 +25,14 @@
 import PackageDescription
 
 let package = Package(
-    name: "Networking"
+	name: "Networking",
+	products: [
+		.library(name: "Networking", targets: ["Networking"]),
+		],
+	targets: [
+		.target(
+			name: "Networking",
+			dependencies: [],
+			path: "./Sources"),
+	]
 )

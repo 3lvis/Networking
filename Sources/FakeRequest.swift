@@ -72,7 +72,7 @@ struct FakeRequest {
 extension String {
 
     mutating func removeFirstLetterIfDash() {
-        let initialCharacter = substring(to: index(after: startIndex))
+        let initialCharacter = String(self[..<index(after: startIndex)])
         if initialCharacter == "/" {
             if count > 1 {
                 remove(at: startIndex)
@@ -85,9 +85,9 @@ extension String {
     mutating func removeLastLetterIfDash() {
         let initialCharacter: String
         if count > 1 {
-            initialCharacter = substring(from: index(endIndex, offsetBy: -1))
+            initialCharacter = String(self[index(endIndex, offsetBy: -1)...])
         } else {
-            initialCharacter = substring(to: endIndex)
+            initialCharacter = String(self[..<endIndex])
         }
 
         if initialCharacter == "/" {

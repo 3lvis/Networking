@@ -47,6 +47,50 @@ public extension Networking {
 
 public extension Networking {
 
+    /// PATCH request to the specified path, using the provided parameters.
+    ///
+    /// - Parameters:
+    ///   - path: The path for the PATCH request.
+    ///   - parameterType: The parameters type to be used, by default is JSON.
+    ///   - parameters: The parameters to be used, they will be serialized using the ParameterType, by default this is JSON.
+    ///   - completion: The result of the operation, it's an enum with two cases: success and failure.
+    /// - Returns: The request identifier.
+    @discardableResult
+    public func patch(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
+        return handleJSONRequest(.patch, path: path, parameterType: parameterType, parameters: parameters, responseType: .json, completion: completion)
+    }
+
+    /// Registers a fake PATCH request for the specified path. After registering this, every PATCH request to the path, will return the registered response.
+    ///
+    /// - Parameters:
+    ///   - path: The path for the faked PATCH request.
+    ///   - response: An `Any` that will be returned when a PATCH request is made to the specified path.
+    ///   - statusCode: By default it's 200, if you provide any status code that is between 200 and 299 the response object will be returned, otherwise we will return an error containig the provided status code.
+    public func fakePATCH(_ path: String, response: Any?, statusCode: Int = 200) {
+        registerFake(requestType: .patch, path: path, response: response, responseType: .json, statusCode: statusCode)
+    }
+
+    /// Registers a fake PATCH request to the specified path using the contents of a file. After registering this, every PATCH request to the path, will return the contents of the registered file.
+    ///
+    /// - Parameters:
+    ///   - path: The path for the faked PATCH request.
+    ///   - fileName: The name of the file, whose contents will be registered as a reponse.
+    ///   - bundle: The Bundle where the file is located.
+    public func fakePATCH(_ path: String, fileName: String, bundle: Bundle = Bundle.main) {
+        registerFake(requestType: .patch, path: path, fileName: fileName, bundle: bundle)
+    }
+
+    /// Cancels the PATCH request for the specified path. This causes the request to complete with error code URLError.cancelled.
+    ///
+    /// - Parameter path: The path for the cancelled PATCH request.
+    public func cancelPATCH(_ path: String) {
+        let url = try! composedURL(with: path)
+        cancelRequest(.data, requestType: .patch, url: url)
+    }
+}
+
+public extension Networking {
+
     /// PUT request to the specified path, using the provided parameters.
     ///
     /// - Parameters:
@@ -199,7 +243,7 @@ public extension Networking {
     ///   - cacheName: The cache name used to identify the downloaded image, by default the path is used.
     /// - Returns: The cached image.
     public func imageFromCache(_ path: String, cacheName: String? = nil) -> Image? {
-        let object = objectFromCache(for: path, cacheName: cacheName, responseType: .image)
+        let object = objectFromCache(for: path, cacheName: cacheName, cachingLevel: .memoryAndFile, responseType: .image)
 
         return object as? Image
     }
@@ -209,11 +253,12 @@ public extension Networking {
     /// - Parameters:
     ///   - path: The path where the image is located.
     ///   - cacheName: The cache name used to identify the downloaded image, by default the path is used.
+    ///   - cachingLevel: Enum to control the caching level: .memory, .memoryAndFile, .none
     ///   - completion: The result of the operation, it's an enum with two cases: success and failure.
     /// - Returns: The request identifier.
     @discardableResult
-    public func downloadImage(_ path: String, cacheName: String? = nil, completion: @escaping (_ result: ImageResult) -> Void) -> String {
-        return handleImageRequest(.get, path: path, cacheName: cacheName, responseType: .image, completion: completion)
+    public func downloadImage(_ path: String, cacheName: String? = nil, cachingLevel: CachingLevel = .memoryAndFile, completion: @escaping (_ result: ImageResult) -> Void) -> String {
+        return handleImageRequest(.get, path: path, cacheName: cacheName, cachingLevel: cachingLevel, responseType: .image, completion: completion)
     }
 
     /// Cancels the image download request for the specified path. This causes the request to complete with error code URLError.cancelled.
@@ -239,10 +284,11 @@ public extension Networking {
     /// - Parameters:
     ///   - path: The path used to download the resource.
     ///   - cacheName: The cache name used to identify the downloaded data, by default the path is used.
+    ///   - cachingLevel: Enum to control the caching level: .memory, .memoryAndFile, .none
     ///   - completion: A closure that gets called when the download request is completed, it contains  a `data` object and an `NSError`.
     @discardableResult
-    public func downloadData(_ path: String, cacheName: String? = nil, completion: @escaping (_ result: DataResult) -> Void) -> String {
-        return handleDataRequest(.get, path: path, cacheName: cacheName, responseType: .data, completion: completion)
+    public func downloadData(_ path: String, cacheName: String? = nil, cachingLevel: CachingLevel = .memoryAndFile, completion: @escaping (_ result: DataResult) -> Void) -> String {
+        return handleDataRequest(.get, path: path, cacheName: cacheName, cachingLevel: cachingLevel, responseType: .data, completion: completion)
     }
 
     /// Retrieves data from the cache or from the filesystem.
@@ -252,7 +298,7 @@ public extension Networking {
     ///   - cacheName: The cache name used to identify the downloaded data, by default the path is used.
     /// - Returns: The cached data.
     public func dataFromCache(_ path: String, cacheName: String? = nil) -> Data? {
-        let object = objectFromCache(for: path, cacheName: cacheName, responseType: .data)
+        let object = objectFromCache(for: path, cacheName: cacheName, cachingLevel: .memoryAndFile, responseType: .data)
 
         return object as? Data
     }

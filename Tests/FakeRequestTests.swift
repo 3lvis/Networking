@@ -364,6 +364,59 @@ extension FakeRequestTests {
     }
 }
 
+// PATCH tests
+extension FakeRequestTests {
+    func testFakePATCH() {
+        let networking = Networking(baseURL: baseURL)
+
+        networking.fakePATCH("/story", response: [["name": "Elvis"]])
+
+        networking.patch("/story", parameters: ["username": "jameson", "password": "secret"]) { result in
+            switch result {
+            case let .success(response):
+                let json = response.arrayBody
+                let value = json[0]["name"] as? String
+                XCTAssertEqual(value, "Elvis")
+            case .failure:
+                XCTFail()
+            }
+        }
+    }
+
+    func testFakePATCHWithInvalidStatusCode() {
+        let networking = Networking(baseURL: baseURL)
+
+        networking.fakePATCH("/story", response: nil, statusCode: 401)
+
+        networking.patch("/story", parameters: nil) { result in
+            switch result {
+            case .success:
+                XCTFail()
+            case let .failure(response):
+                XCTAssertEqual(response.error.code, 401)
+            }
+        }
+    }
+
+    func testFakePATCHUsingFile() {
+        let networking = Networking(baseURL: baseURL)
+
+        networking.fakePATCH("/entries", fileName: "entries.json", bundle: Bundle(for: PATCHTests.self))
+
+        networking.patch("/entries", parameters: nil) { result in
+            switch result {
+            case let .success(response):
+                let json = response.arrayBody
+                let entry = json[0]
+                let value = entry["title"] as? String
+                XCTAssertEqual(value, "Entry 1")
+            case .failure:
+                XCTFail()
+            }
+        }
+    }
+}
+
 // DELETE tests
 extension FakeRequestTests {
     func testFakeDELETE() {
