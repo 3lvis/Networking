@@ -11,8 +11,8 @@ class FakeImageController: UIViewController {
     lazy var networking: Networking = {
         let networking = Networking(baseURL: "http://httpbin.org")
 
-        let image = UIImage(named: "pig.png")
-        networking.fakeImageDownload("/pig", image: image)
+        // let image = UIImage(named: "pig.png")
+        // networking.fakeImageDownload("/image/png", image: image)
 
         return networking
     }()
@@ -27,7 +27,7 @@ class FakeImageController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
-        networking.downloadImage("/pig") { result in
+        networking.downloadImage("/image/png") { result in
             switch result {
             case let .success(response):
                 self.imageView.image = response.image

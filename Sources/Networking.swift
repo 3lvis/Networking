@@ -111,6 +111,13 @@ open class Networking {
         URLSession(configuration: self.configuration)
     }()
 
+    /// Caching options
+    public enum CachingLevel {
+        case memory
+        case memoryAndFile
+        case none
+    }
+
     /// Base initializer, it creates an instance of `Networking`.
     ///
     /// - Parameters:

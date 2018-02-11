@@ -243,7 +243,7 @@ public extension Networking {
     ///   - cacheName: The cache name used to identify the downloaded image, by default the path is used.
     /// - Returns: The cached image.
     public func imageFromCache(_ path: String, cacheName: String? = nil) -> Image? {
-        let object = objectFromCache(for: path, cacheName: cacheName, responseType: .image)
+        let object = objectFromCache(for: path, cacheName: cacheName, cachingLevel: .memoryAndFile, responseType: .image)
 
         return object as? Image
     }
@@ -256,8 +256,8 @@ public extension Networking {
     ///   - completion: The result of the operation, it's an enum with two cases: success and failure.
     /// - Returns: The request identifier.
     @discardableResult
-    public func downloadImage(_ path: String, cacheName: String? = nil, completion: @escaping (_ result: ImageResult) -> Void) -> String {
-        return handleImageRequest(.get, path: path, cacheName: cacheName, responseType: .image, completion: completion)
+    public func downloadImage(_ path: String, cacheName: String? = nil, cachingLevel: CachingLevel = .memoryAndFile, completion: @escaping (_ result: ImageResult) -> Void) -> String {
+        return handleImageRequest(.get, path: path, cacheName: cacheName, cachingLevel: cachingLevel, responseType: .image, completion: completion)
     }
 
     /// Cancels the image download request for the specified path. This causes the request to complete with error code URLError.cancelled.
@@ -285,8 +285,8 @@ public extension Networking {
     ///   - cacheName: The cache name used to identify the downloaded data, by default the path is used.
     ///   - completion: A closure that gets called when the download request is completed, it contains  a `data` object and an `NSError`.
     @discardableResult
-    public func downloadData(_ path: String, cacheName: String? = nil, completion: @escaping (_ result: DataResult) -> Void) -> String {
-        return handleDataRequest(.get, path: path, cacheName: cacheName, responseType: .data, completion: completion)
+    public func downloadData(_ path: String, cacheName: String? = nil, cachingLevel: CachingLevel = .memoryAndFile, completion: @escaping (_ result: DataResult) -> Void) -> String {
+        return handleDataRequest(.get, path: path, cacheName: cacheName, cachingLevel: cachingLevel, responseType: .data, completion: completion)
     }
 
     /// Retrieves data from the cache or from the filesystem.
@@ -296,7 +296,7 @@ public extension Networking {
     ///   - cacheName: The cache name used to identify the downloaded data, by default the path is used.
     /// - Returns: The cached data.
     public func dataFromCache(_ path: String, cacheName: String? = nil) -> Data? {
-        let object = objectFromCache(for: path, cacheName: cacheName, responseType: .data)
+        let object = objectFromCache(for: path, cacheName: cacheName, cachingLevel: .memoryAndFile, responseType: .data)
 
         return object as? Data
     }
