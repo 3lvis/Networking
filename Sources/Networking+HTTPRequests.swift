@@ -253,6 +253,7 @@ public extension Networking {
     /// - Parameters:
     ///   - path: The path where the image is located.
     ///   - cacheName: The cache name used to identify the downloaded image, by default the path is used.
+    ///   - cachingLevel: Enum to control the caching level: .memory, .memoryAndFile, .none
     ///   - completion: The result of the operation, it's an enum with two cases: success and failure.
     /// - Returns: The request identifier.
     @discardableResult
@@ -283,6 +284,7 @@ public extension Networking {
     /// - Parameters:
     ///   - path: The path used to download the resource.
     ///   - cacheName: The cache name used to identify the downloaded data, by default the path is used.
+    ///   - cachingLevel: Enum to control the caching level: .memory, .memoryAndFile, .none
     ///   - completion: A closure that gets called when the download request is completed, it contains  a `data` object and an `NSError`.
     @discardableResult
     public func downloadData(_ path: String, cacheName: String? = nil, cachingLevel: CachingLevel = .memoryAndFile, completion: @escaping (_ result: DataResult) -> Void) -> String {
