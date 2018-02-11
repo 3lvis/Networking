@@ -33,6 +33,7 @@ extension Networking {
                 return nil
             }
         case .none:
+            cache.removeObject(forKey: destinationURL.absoluteString as AnyObject)
             try? FileManager.default.remove(at: destinationURL)
             return nil
         }
