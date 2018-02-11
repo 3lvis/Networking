@@ -78,14 +78,14 @@ extension Networking {
         return requestID
     }
 
-    func handleJSONRequest(_ requestType: RequestType, path: String, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]? = nil, responseType: ResponseType, completion: @escaping (_ result: JSONResult) -> Void) -> String {
+    func handleJSONRequest(_ requestType: RequestType, path: String, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]? = nil, responseType: ResponseType, headers: [String: String]?, completion: @escaping (_ result: JSONResult) -> Void) -> String {
 
         if let fakeRequest = FakeRequest.find(ofType: requestType, forPath: path, in: fakeRequests) {
             return handleFakeRequest(fakeRequest, path: path) { _, response, error in
                 completion(JSONResult(body: fakeRequest.response, response: response, error: error))
             }
         } else {
-            return requestData(requestType, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, response, error in
+            return requestData(requestType, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType, headers: headers) { data, response, error in
                 TestCheck.testBlock(self.isSynchronous) {
                     completion(JSONResult(body: data, response: response, error: error))
                 }
@@ -93,7 +93,7 @@ extension Networking {
         }
     }
 
-    func handleDataRequest(_ requestType: RequestType, path: String, cacheName: String?, cachingLevel: CachingLevel, responseType: ResponseType, completion: @escaping (_ result: DataResult) -> Void) -> String {
+    func handleDataRequest(_ requestType: RequestType, path: String, cacheName: String?, cachingLevel: CachingLevel, responseType: ResponseType, headers: [String: String]?,  completion: @escaping (_ result: DataResult) -> Void) -> String {
         if let fakeRequests = fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
             return handleFakeRequest(fakeRequest, path: path) { _, response, error in
                 completion(DataResult(body: fakeRequest.response, response: response, error: error))
@@ -109,7 +109,7 @@ extension Networking {
                 let requestID = UUID().uuidString
                 return requestID
             } else {
-                return requestData(requestType, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: responseType) { data, response, error in
+                return requestData(requestType, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: responseType, headers: headers) { data, response, error in
                     guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else {
                         fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(String(describing: cacheName))")
                     }
@@ -136,7 +136,7 @@ extension Networking {
         }
     }
 
-    func handleImageRequest(_ requestType: RequestType, path: String, cacheName: String?, cachingLevel: CachingLevel, responseType: ResponseType, completion: @escaping (_ result: ImageResult) -> Void) -> String {
+    func handleImageRequest(_ requestType: RequestType, path: String, cacheName: String?, cachingLevel: CachingLevel, responseType: ResponseType, headers: [String: String]?, completion: @escaping (_ result: ImageResult) -> Void) -> String {
         if let fakeRequests = fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
             return handleFakeRequest(fakeRequest, path: path) { _, response, error in
                 completion(ImageResult(body: fakeRequest.response, response: response, error: error))
@@ -153,7 +153,7 @@ extension Networking {
                 let requestID = UUID().uuidString
                 return requestID
             } else {
-                return requestData(requestType, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: responseType) { data, response, error in
+                return requestData(requestType, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: responseType, headers: headers) { data, response, error in
                     guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else {
                         fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(String(describing: cacheName))")
                     }
@@ -183,9 +183,15 @@ extension Networking {
         }
     }
 
-    func requestData(_ requestType: RequestType, path: String, cacheName _: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Data?, _ response: HTTPURLResponse, _ error: NSError?) -> Void) -> String {
+    func requestData(_ requestType: RequestType, path: String, cacheName _: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, headers: [String: String]?, completion: @escaping (_ response: Data?, _ response: HTTPURLResponse, _ error: NSError?) -> Void) -> String {
         let requestID = UUID().uuidString
-        var request = URLRequest(url: try! composedURL(with: path), requestType: requestType, path: path, parameterType: parameterType, responseType: responseType, boundary: boundary, authorizationHeaderValue: authorizationHeaderValue, token: token, authorizationHeaderKey: authorizationHeaderKey, headerFields: headerFields)
+
+        var composedHeaderFields = headerFields ?? [String: String]()
+        if let headers = headers {
+            composedHeaderFields.merge(headers) { (_, new) in new }
+        }
+
+        var request = URLRequest(url: try! composedURL(with: path), requestType: requestType, path: path, parameterType: parameterType, responseType: responseType, boundary: boundary, authorizationHeaderValue: authorizationHeaderValue, token: token, authorizationHeaderKey: authorizationHeaderKey, headerFields: composedHeaderFields)
 
         DispatchQueue.main.async {
             NetworkActivityIndicator.sharedIndicator.visible = true

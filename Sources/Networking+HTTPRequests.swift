@@ -13,7 +13,7 @@ public extension Networking {
     public func get(_ path: String, parameters: Any? = nil, headers: [String: String]? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
         let parameterType: ParameterType = parameters != nil ? .formURLEncoded : .none
 
-        return handleJSONRequest(.get, path: path, parameterType: parameterType, parameters: parameters, responseType: .json, completion: completion)
+        return handleJSONRequest(.get, path: path, parameterType: parameterType, parameters: parameters, responseType: .json, headers: headers, completion: completion)
     }
 
     /// Registers a fake GET request for the specified path. After registering this, every GET request to the path, will return the registered response.
@@ -56,8 +56,8 @@ public extension Networking {
     ///   - completion: The result of the operation, it's an enum with two cases: success and failure.
     /// - Returns: The request identifier.
     @discardableResult
-    public func patch(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
-        return handleJSONRequest(.patch, path: path, parameterType: parameterType, parameters: parameters, responseType: .json, completion: completion)
+    public func patch(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, headers: [String: String]? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
+        return handleJSONRequest(.patch, path: path, parameterType: parameterType, parameters: parameters, responseType: .json, headers: headers, completion: completion)
     }
 
     /// Registers a fake PATCH request for the specified path. After registering this, every PATCH request to the path, will return the registered response.
@@ -101,8 +101,8 @@ public extension Networking {
     ///   - completion: The result of the operation, it's an enum with two cases: success and failure.
     /// - Returns: The request identifier.
     @discardableResult
-    public func put(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
-        return handleJSONRequest(.put, path: path, parameterType: parameterType, parameters: parameters, responseType: .json, completion: completion)
+    public func put(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, headers: [String: String]? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
+        return handleJSONRequest(.put, path: path, parameterType: parameterType, parameters: parameters, responseType: .json, headers: headers, completion: completion)
     }
 
     /// Registers a fake PUT request for the specified path. After registering this, every PUT request to the path, will return the registered response.
@@ -145,8 +145,8 @@ public extension Networking {
     ///   - completion: The result of the operation, it's an enum with two cases: success and failure.
     /// - Returns: The request identifier.
     @discardableResult
-    public func post(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
-        return handleJSONRequest(.post, path: path, parameterType: parameterType, parameters: parameters, responseType: .json, completion: completion)
+    public func post(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, headers: [String: String]? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
+        return handleJSONRequest(.post, path: path, parameterType: parameterType, parameters: parameters, responseType: .json, headers: headers, completion: completion)
     }
 
     /// POST request to the specified path, using the provided parameters.
@@ -158,8 +158,8 @@ public extension Networking {
     ///   - completion: A closure that gets called when the POST request is completed, it contains a `JSON` object and an `NSError`.
     /// - Returns: The request identifier.
     @discardableResult
-    public func post(_ path: String, parameters: Any? = nil, parts: [FormDataPart], completion: @escaping (_ result: JSONResult) -> Void) -> String {
-        return handleJSONRequest(.post, path: path, parameterType: .multipartFormData, parameters: parameters, parts: parts, responseType: .json, completion: completion)
+    public func post(_ path: String, parameters: Any? = nil, parts: [FormDataPart], headers: [String: String]? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
+        return handleJSONRequest(.post, path: path, parameterType: .multipartFormData, parameters: parameters, parts: parts, responseType: .json, headers: headers, completion: completion)
     }
 
     /// Registers a fake POST request for the specified path. After registering this, every POST request to the path, will return the registered response.
@@ -201,9 +201,9 @@ public extension Networking {
     ///   - completion: The result of the operation, it's an enum with two cases: success and failure.
     /// - Returns: The request identifier.
     @discardableResult
-    public func delete(_ path: String, parameters: Any? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
+    public func delete(_ path: String, parameters: Any? = nil, headers: [String: String]? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
         let parameterType: ParameterType = parameters != nil ? .formURLEncoded : .none
-        return handleJSONRequest(.delete, path: path, parameterType: parameterType, parameters: parameters, responseType: .json, completion: completion)
+        return handleJSONRequest(.delete, path: path, parameterType: parameterType, parameters: parameters, responseType: .json, headers: headers, completion: completion)
     }
 
     /// Registers a fake DELETE request for the specified path. After registering this, every DELETE request to the path, will return the registered response.
@@ -258,8 +258,8 @@ public extension Networking {
     ///   - completion: The result of the operation, it's an enum with two cases: success and failure.
     /// - Returns: The request identifier.
     @discardableResult
-    public func downloadImage(_ path: String, cacheName: String? = nil, cachingLevel: CachingLevel = .memoryAndFile, completion: @escaping (_ result: ImageResult) -> Void) -> String {
-        return handleImageRequest(.get, path: path, cacheName: cacheName, cachingLevel: cachingLevel, responseType: .image, completion: completion)
+    public func downloadImage(_ path: String, cacheName: String? = nil, cachingLevel: CachingLevel = .memoryAndFile, headers: [String: String]? = nil, completion: @escaping (_ result: ImageResult) -> Void) -> String {
+        return handleImageRequest(.get, path: path, cacheName: cacheName, cachingLevel: cachingLevel, responseType: .image, headers: headers, completion: completion)
     }
 
     /// Cancels the image download request for the specified path. This causes the request to complete with error code URLError.cancelled.
@@ -288,8 +288,8 @@ public extension Networking {
     ///   - cachingLevel: Enum to control the caching level: .memory, .memoryAndFile, .none
     ///   - completion: A closure that gets called when the download request is completed, it contains  a `data` object and an `NSError`.
     @discardableResult
-    public func downloadData(_ path: String, cacheName: String? = nil, cachingLevel: CachingLevel = .memoryAndFile, completion: @escaping (_ result: DataResult) -> Void) -> String {
-        return handleDataRequest(.get, path: path, cacheName: cacheName, cachingLevel: cachingLevel, responseType: .data, completion: completion)
+    public func downloadData(_ path: String, cacheName: String? = nil, cachingLevel: CachingLevel = .memoryAndFile, headers: [String: String]? = nil, completion: @escaping (_ result: DataResult) -> Void) -> String {
+        return handleDataRequest(.get, path: path, cacheName: cacheName, cachingLevel: cachingLevel, responseType: .data, headers: headers, completion: completion)
     }
 
     /// Retrieves data from the cache or from the filesystem.
