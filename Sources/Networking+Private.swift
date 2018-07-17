@@ -127,11 +127,7 @@ extension Networking {
                 return requestID
             } else {
                 return requestData(requestType, path: path, cachingLevel: cachingLevel, parameterType: nil, parameters: nil, parts: nil, responseType: responseType) { data, response, error in
-                    guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else {
-                        fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(String(describing: cacheName))")
-                    }
-
-                    self.cacheOrPurgeData(data: data, cachingLevel: cachingLevel, destinationURL: destinationURL)
+                    self.cacheOrPurgeData(data: data, cachingLevel: cachingLevel, path: path, cacheName: cacheName)
 
                     TestCheck.testBlock(self.isSynchronous) {
                         completion(DataResult(body: data, response: response, error: error))
@@ -159,11 +155,7 @@ extension Networking {
                 return requestID
             } else {
                 return requestData(requestType, path: path, cachingLevel: cachingLevel, parameterType: nil, parameters: nil, parts: nil, responseType: responseType) { data, response, error in
-                    guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else {
-                        fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(String(describing: cacheName))")
-                    }
-
-                    let returnedImage = self.cacheOrPurgeImage(data: data, cachingLevel: cachingLevel, destinationURL: destinationURL)
+                    let returnedImage = self.cacheOrPurgeImage(data: data, cachingLevel: cachingLevel, path: path, cacheName: cacheName)
 
                     TestCheck.testBlock(self.isSynchronous) {
                         completion(ImageResult(body: returnedImage, response: response, error: error))
@@ -274,11 +266,7 @@ extension Networking {
                     }
                 }
 
-                guard let destinationURL = try? self.destinationURL(for: path, cacheName: nil) else {
-                    fatalError("Couldn't get destination URL for path: \(path)")
-                }
-
-                self.cacheOrPurgeData(data: data, cachingLevel: cachingLevel, destinationURL: destinationURL)
+                self.cacheOrPurgeData(data: data, cachingLevel: cachingLevel, path: path, cacheName: nil)
 
                 if TestCheck.isTesting && self.isSynchronous == false {
                     semaphore.signal()
@@ -449,7 +437,11 @@ extension Networking {
         }
     }
 
-    func cacheOrPurgeData(data: Data?, cachingLevel: CachingLevel, destinationURL: URL) {
+    func cacheOrPurgeData(data: Data?, cachingLevel: CachingLevel, path: String, cacheName: String?) {
+        guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else {
+            fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(String(describing: cacheName))")
+        }
+
         if let returnedData = data, returnedData.count > 0 {
             switch cachingLevel {
             case .memory:
@@ -465,7 +457,11 @@ extension Networking {
         }
     }
 
-    func cacheOrPurgeImage(data: Data?, cachingLevel: CachingLevel, destinationURL: URL) -> Image? {
+    func cacheOrPurgeImage(data: Data?, cachingLevel: CachingLevel, path: String, cacheName: String?) -> Image? {
+        guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else {
+            fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(String(describing: cacheName))")
+        }
+
         var image: Image?
         if let data = data, let nonOptionalImage = Image(data: data), data.count > 0 {
             switch cachingLevel {
