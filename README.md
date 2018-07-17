@@ -543,7 +543,7 @@ pod 'Networking', '~> 4'
 it, simply add the following line to your Cartfile:
 
 ```ruby
-github "3lvis/Networking" ~> 4.1
+github "3lvis/Networking" ~> 4.2
 ```
 
 ## Author
