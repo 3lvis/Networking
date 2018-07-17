@@ -75,12 +75,7 @@ extension Networking {
                 fatalError("Couldn't get destination URL for path: \(path)")
             }
 
-            var data: Data?
-            if let response = fakeRequest.response {
-                data = NSKeyedArchiver.archivedData(withRootObject: response)
-            }
-
-            cacheOrPurgeData(data: data, cachingLevel: cachingLevel, destinationURL: destinationURL)
+            cacheOrPurgeObject(object: fakeRequest.response, cachingLevel: cachingLevel, destinationURL: destinationURL)
             completion(fakeRequest.response, response, error)
         }
 
@@ -433,6 +428,24 @@ extension Networking {
         }
         print("================= ~ ==================")
         print(" ")
+    }
+
+    func cacheOrPurgeObject(object: Any?, cachingLevel: CachingLevel, destinationURL: URL) {
+        if let unwrappedObject = object {
+            switch cachingLevel {
+            case .memory:
+                self.cache.setObject(unwrappedObject as AnyObject, forKey: destinationURL.absoluteString as AnyObject)
+            case .memoryAndFile:
+
+                let convertedData = try! JSONSerialization.data(withJSONObject: unwrappedObject, options: [])
+                _ = try? convertedData.write(to: destinationURL, options: [.atomic])
+                self.cache.setObject(unwrappedObject as AnyObject, forKey: destinationURL.absoluteString as AnyObject)
+            case .none:
+                break
+            }
+        } else {
+            self.cache.removeObject(forKey: destinationURL.absoluteString as AnyObject)
+        }
     }
 
     func cacheOrPurgeData(data: Data?, cachingLevel: CachingLevel, destinationURL: URL) {
