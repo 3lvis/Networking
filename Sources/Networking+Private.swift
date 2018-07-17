@@ -85,15 +85,16 @@ extension Networking {
 
     func handleJSONRequest(_ requestType: RequestType, path: String, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]? = nil, responseType: ResponseType, cachingLevel: CachingLevel, completion: @escaping (_ result: JSONResult) -> Void) -> String {
 
-        if cachingLevel != .none {
-            let object = objectFromCache(for: path, cacheName: nil, cachingLevel: cachingLevel, responseType: responseType)
-            if let object = object {
+        switch cachingLevel {
+        case .none:
+            if let object = objectFromCache(for: path, cacheName: nil, cachingLevel: cachingLevel, responseType: responseType) {
                 TestCheck.testBlock(isSynchronous) {
                     let url = try! self.composedURL(with: path)
                     let response = HTTPURLResponse(url: url, statusCode: 200)
                     completion(JSONResult(body: object, response: response, error: nil))
                 }
             }
+        default: break
         }
 
         if let fakeRequest = FakeRequest.find(ofType: requestType, forPath: path, in: fakeRequests) {
