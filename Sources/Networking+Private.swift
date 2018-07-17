@@ -57,7 +57,7 @@ extension Networking {
         fakeRequests[requestType] = requests
     }
 
-    func handleFakeRequest(_ fakeRequest: FakeRequest, path: String, completion: @escaping (_ body: Any?, _ response: HTTPURLResponse, _ error: NSError?) -> Void) -> String {
+    func handleFakeRequest(_ fakeRequest: FakeRequest, path: String, cachingLevel: CachingLevel, completion: @escaping (_ body: Any?, _ response: HTTPURLResponse, _ error: NSError?) -> Void) -> String {
         var error: NSError?
         let url = try! composedURL(with: path)
         let response = HTTPURLResponse(url: url, statusCode: fakeRequest.statusCode)
@@ -71,6 +71,25 @@ extension Networking {
                 error = NSError(fakeRequest: fakeRequest)
             }
 
+            guard let destinationURL = try? self.destinationURL(for: path, cacheName: nil) else {
+                fatalError("Couldn't get destination URL for path: \(path)")
+            }
+
+            if let returnedData = fakeRequest.response {
+                switch cachingLevel {
+                case .memory:
+                    self.cache.setObject(returnedData as AnyObject, forKey: destinationURL.absoluteString as AnyObject)
+                case .memoryAndFile:
+                    let convertedData = NSKeyedArchiver.archivedData(withRootObject: returnedData)
+                    _ = try! convertedData.write(to: destinationURL, options: [.atomic])
+                    self.cache.setObject(returnedData as AnyObject, forKey: destinationURL.absoluteString as AnyObject)
+                case .none:
+                    break
+                }
+            } else {
+                self.cache.removeObject(forKey: destinationURL.absoluteString as AnyObject)
+            }
+
             completion(fakeRequest.response, response, error)
         }
 
@@ -78,14 +97,25 @@ extension Networking {
         return requestID
     }
 
-    func handleJSONRequest(_ requestType: RequestType, path: String, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]? = nil, responseType: ResponseType, completion: @escaping (_ result: JSONResult) -> Void) -> String {
+    func handleJSONRequest(_ requestType: RequestType, path: String, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]? = nil, responseType: ResponseType, cachingLevel: CachingLevel, completion: @escaping (_ result: JSONResult) -> Void) -> String {
+
+        if cachingLevel != .none {
+            let object = objectFromCache(for: path, cacheName: nil, cachingLevel: cachingLevel, responseType: responseType)
+            if let object = object {
+                //TestCheck.testBlock(isSynchronous) {
+                    let url = try! self.composedURL(with: path)
+                    let response = HTTPURLResponse(url: url, statusCode: 200)
+                    completion(JSONResult(body: object, response: response, error: nil))
+                //}
+            }
+        }
 
         if let fakeRequest = FakeRequest.find(ofType: requestType, forPath: path, in: fakeRequests) {
-            return handleFakeRequest(fakeRequest, path: path) { _, response, error in
+            return handleFakeRequest(fakeRequest, path: path, cachingLevel: cachingLevel) { _, response, error in
                 completion(JSONResult(body: fakeRequest.response, response: response, error: error))
             }
         } else {
-            return requestData(requestType, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, response, error in
+            return requestData(requestType, path: path, cacheName: nil, cachingLevel: cachingLevel, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, response, error in
                 TestCheck.testBlock(self.isSynchronous) {
                     completion(JSONResult(body: data, response: response, error: error))
                 }
@@ -95,7 +125,7 @@ extension Networking {
 
     func handleDataRequest(_ requestType: RequestType, path: String, cacheName: String?, cachingLevel: CachingLevel, responseType: ResponseType, completion: @escaping (_ result: DataResult) -> Void) -> String {
         if let fakeRequests = fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
-            return handleFakeRequest(fakeRequest, path: path) { _, response, error in
+            return handleFakeRequest(fakeRequest, path: path, cachingLevel: .none) { _, response, error in
                 completion(DataResult(body: fakeRequest.response, response: response, error: error))
             }
         } else {
@@ -109,7 +139,7 @@ extension Networking {
                 let requestID = UUID().uuidString
                 return requestID
             } else {
-                return requestData(requestType, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: responseType) { data, response, error in
+                return requestData(requestType, path: path, cacheName: cacheName, cachingLevel: .none, parameterType: nil, parameters: nil, parts: nil, responseType: responseType) { data, response, error in
                     guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else {
                         fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(String(describing: cacheName))")
                     }
@@ -138,7 +168,7 @@ extension Networking {
 
     func handleImageRequest(_ requestType: RequestType, path: String, cacheName: String?, cachingLevel: CachingLevel, responseType: ResponseType, completion: @escaping (_ result: ImageResult) -> Void) -> String {
         if let fakeRequests = fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
-            return handleFakeRequest(fakeRequest, path: path) { _, response, error in
+            return handleFakeRequest(fakeRequest, path: path, cachingLevel: .none) { _, response, error in
                 completion(ImageResult(body: fakeRequest.response, response: response, error: error))
             }
         } else {
@@ -153,7 +183,7 @@ extension Networking {
                 let requestID = UUID().uuidString
                 return requestID
             } else {
-                return requestData(requestType, path: path, cacheName: cacheName, parameterType: nil, parameters: nil, parts: nil, responseType: responseType) { data, response, error in
+                return requestData(requestType, path: path, cacheName: cacheName, cachingLevel: .none, parameterType: nil, parameters: nil, parts: nil, responseType: responseType) { data, response, error in
                     guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else {
                         fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(String(describing: cacheName))")
                     }
@@ -183,7 +213,7 @@ extension Networking {
         }
     }
 
-    func requestData(_ requestType: RequestType, path: String, cacheName _: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Data?, _ response: HTTPURLResponse, _ error: NSError?) -> Void) -> String {
+    func requestData(_ requestType: RequestType, path: String, cacheName _: String?, cachingLevel: CachingLevel, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Data?, _ response: HTTPURLResponse, _ error: NSError?) -> Void) -> String {
         let requestID = UUID().uuidString
         var request = URLRequest(url: try! composedURL(with: path), requestType: requestType, path: path, parameterType: parameterType, responseType: responseType, boundary: boundary, authorizationHeaderValue: authorizationHeaderValue, token: token, authorizationHeaderKey: authorizationHeaderKey, headerFields: headerFields)
 
@@ -282,6 +312,24 @@ extension Networking {
 
                         connectionError = NSError(domain: Networking.domain, code: errorCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode)])
                     }
+                }
+
+                guard let destinationURL = try? self.destinationURL(for: path, cacheName: nil) else {
+                    fatalError("Couldn't get destination URL for path: \(path)")
+                }
+
+                if let returnedData = data, returnedData.count > 0 {
+                    switch cachingLevel {
+                    case .memory:
+                        self.cache.setObject(returnedData as AnyObject, forKey: destinationURL.absoluteString as AnyObject)
+                    case .memoryAndFile:
+                        _ = try? returnedData.write(to: destinationURL, options: [.atomic])
+                        self.cache.setObject(returnedData as AnyObject, forKey: destinationURL.absoluteString as AnyObject)
+                    case .none:
+                        break
+                    }
+                } else {
+                    self.cache.removeObject(forKey: destinationURL.absoluteString as AnyObject)
                 }
 
                 if TestCheck.isTesting && self.isSynchronous == false {
