@@ -39,7 +39,7 @@ open class Networking {
     /// Sets the rules to serialize your parameters, also sets the `Content-Type` header.
     ///
     /// - none: No Content-Type header
-    /// - json: Serializes your parameters using `NSJSONSerialization` and sets your `Content-Type` to `application/json`.
+    /// - json: Serializes your parameters using `JSONSerialization` and sets your `Content-Type` to `application/json`.
     /// - formURLEncoded: Serializes your parameters using `Percent-encoding` and sets your `Content-Type` to `application/x-www-form-urlencoded`.
     /// - multipartFormData: Serializes your parameters and parts as multipart and sets your `Content-Type` to `multipart/form-data`.
     /// - custom: Sends your parameters as plain data, sets your `Content-Type` to the value inside `custom`.

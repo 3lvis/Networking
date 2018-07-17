@@ -195,4 +195,62 @@ class GETTests: XCTestCase {
             }
         }
     }
+
+    func testGETCachedFromMemory() {
+        let networking = Networking(baseURL: baseURL)
+        networking.fakeGET("/get", response: ["key": "value1"])
+        networking.get("/get", cachingLevel: .memory) { _ in }
+        networking.fakeGET("/get", response: ["key": "value2"])
+        var callbackCount = 0
+        networking.get("/get", cachingLevel: .memory) { result in
+            if callbackCount == 0 {
+                switch result {
+                case let .success(response):
+                    let json = response.dictionaryBody
+                    XCTAssertEqual(json["key"] as? String, "value1")
+                case .failure:
+                    XCTFail()
+                }
+            } else {
+                switch result {
+                case let .success(response):
+                    let json = response.dictionaryBody
+                    XCTAssertEqual(json["key"] as? String, "value2")
+                case .failure:
+                    XCTFail()
+                }
+            }
+            callbackCount += 1
+        }
+    }
+
+    func testGETCachedFromFile() {
+        let cache = NSCache<AnyObject, AnyObject>()
+        let networking = Networking(baseURL: baseURL, configuration: .default, cache: cache)
+        networking.fakeGET("/get", response: ["key": "value1"])
+        networking.get("/get", cachingLevel: .memoryAndFile) { _ in }
+        networking.fakeGET("/get", response: ["key": "value2"])
+        var callbackCount = 0
+        cache.removeAllObjects()
+        networking.get("/get", cachingLevel: .memoryAndFile) { result in
+            if callbackCount == 0 {
+                switch result {
+                case let .success(response):
+                    let json = response.dictionaryBody
+                    XCTAssertEqual(json["key"] as? String, "value1")
+                case .failure(let response):
+                    XCTFail("Error: \(response.error)")
+                }
+            } else {
+                switch result {
+                case let .success(response):
+                    let json = response.dictionaryBody
+                    XCTAssertEqual(json["key"] as? String, "value2")
+                case .failure:
+                    XCTFail()
+                }
+            }
+            callbackCount += 1
+        }
+    }
 }
