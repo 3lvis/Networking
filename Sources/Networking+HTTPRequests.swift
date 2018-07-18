@@ -302,4 +302,26 @@ public extension Networking {
 
         return object as? Data
     }
+
+    /// Removes the folder where the Networking caches are stored.
+    public func removeCachesFolder() throws {
+        let folderPath = Networking.domain
+        let finalPath = "\(folderPath)"
+
+        if let url = URL(string: finalPath) {
+            #if os(tvOS)
+            let directory = FileManager.SearchPathDirectory.cachesDirectory
+            #else
+            let directory = TestCheck.isTesting ? FileManager.SearchPathDirectory.cachesDirectory : FileManager.SearchPathDirectory.documentDirectory
+            #endif
+            if let cachesURL = FileManager.default.urls(for: directory, in: .userDomainMask).first {
+                let destinationURL = cachesURL.appendingPathComponent(url.absoluteString)
+                try FileManager.default.remove(at: destinationURL)
+            } else {
+                throw NSError(domain: Networking.domain, code: 9999, userInfo: [NSLocalizedDescriptionKey: "Couldn't normalize url"])
+            }
+        } else {
+            throw NSError(domain: Networking.domain, code: 9999, userInfo: [NSLocalizedDescriptionKey: "Couldn't create a url using replacedPath: \(finalPath)"])
+        }
+    }
 }
