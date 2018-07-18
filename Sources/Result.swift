@@ -4,6 +4,16 @@ public protocol Result {
     init(body: Any?, response: HTTPURLResponse, error: NSError?)
 }
 
+public enum GenericResult<T> {
+    case success(T)
+    case failure(FailureJSONResponse)
+}
+
+public enum VoidResult {
+    case success
+    case failure(FailureJSONResponse)
+}
+
 public enum JSONResult: Result {
     case success(SuccessJSONResponse)
 
