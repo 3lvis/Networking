@@ -287,22 +287,6 @@ open class Networking {
         _ = semaphore.wait(timeout: DispatchTime.now() + 60.0)
     }
 
-    /// Deletes the downloaded/cached files.
-    public static func deleteCachedFiles() {
-        #if os(tvOS)
-            let directory = FileManager.SearchPathDirectory.cachesDirectory
-        #else
-            let directory = TestCheck.isTesting ? FileManager.SearchPathDirectory.cachesDirectory : FileManager.SearchPathDirectory.documentDirectory
-        #endif
-        if let cachesURL = FileManager.default.urls(for: directory, in: .userDomainMask).first {
-            let folderURL = cachesURL.appendingPathComponent(URL(string: Networking.domain)!.absoluteString)
-
-            if FileManager.default.exists(at: folderURL) {
-                _ = try? FileManager.default.remove(at: folderURL)
-            }
-        }
-    }
-
     /// Removes the stored credentials and cached data.
     public func reset() {
         cache.removeAllObjects()
@@ -313,5 +297,20 @@ open class Networking {
         authorizationHeaderValue = nil
         
         Networking.deleteCachedFiles()
+    }
+
+    /// Deletes the downloaded/cached files.
+    public static func deleteCachedFiles() {
+        #if os(tvOS)
+        let directory = FileManager.SearchPathDirectory.cachesDirectory
+        #else
+        let directory = TestCheck.isTesting ? FileManager.SearchPathDirectory.cachesDirectory : FileManager.SearchPathDirectory.documentDirectory
+        #endif
+        if let cachesURL = FileManager.default.urls(for: directory, in: .userDomainMask).first {
+            let folderURL = cachesURL.appendingPathComponent(URL(string: Networking.domain)!.absoluteString)
+            if FileManager.default.exists(at: folderURL) {
+                _ = try? FileManager.default.remove(at: folderURL)
+            }
+        }
     }
 }
