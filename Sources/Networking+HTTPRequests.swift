@@ -13,7 +13,7 @@ public extension Networking {
     public func get(_ path: String, parameters: Any? = nil, cachingLevel: CachingLevel = .none, completion: @escaping (_ result: JSONResult) -> Void) -> String {
         let parameterType: ParameterType = parameters != nil ? .formURLEncoded : .none
 
-        return handleJSONRequest(.get, path: path, parameterType: parameterType, parameters: parameters, responseType: .json, cachingLevel: cachingLevel, completion: completion)
+        return handleJSONRequest(.get, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, responseType: .json, cachingLevel: cachingLevel, completion: completion)
     }
 
     /// Registers a fake GET request for the specified path. After registering this, every GET request to the path, will return the registered response.
@@ -57,7 +57,7 @@ public extension Networking {
     /// - Returns: The request identifier.
     @discardableResult
     public func patch(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
-        return handleJSONRequest(.patch, path: path, parameterType: parameterType, parameters: parameters, responseType: .json, cachingLevel: .none, completion: completion)
+        return handleJSONRequest(.patch, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, responseType: .json, cachingLevel: .none, completion: completion)
     }
 
     /// Registers a fake PATCH request for the specified path. After registering this, every PATCH request to the path, will return the registered response.
@@ -101,7 +101,7 @@ public extension Networking {
     /// - Returns: The request identifier.
     @discardableResult
     public func put(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
-        return handleJSONRequest(.put, path: path, parameterType: parameterType, parameters: parameters, responseType: .json, cachingLevel: .none, completion: completion)
+        return handleJSONRequest(.put, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, responseType: .json, cachingLevel: .none, completion: completion)
     }
 
     /// Registers a fake PUT request for the specified path. After registering this, every PUT request to the path, will return the registered response.
@@ -145,7 +145,7 @@ public extension Networking {
     /// - Returns: The request identifier.
     @discardableResult
     public func post(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
-        return handleJSONRequest(.post, path: path, parameterType: parameterType, parameters: parameters, responseType: .json, cachingLevel: .none, completion: completion)
+        return handleJSONRequest(.post, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, responseType: .json, cachingLevel: .none, completion: completion)
     }
 
     /// POST request to the specified path, using the provided parameters.
@@ -158,7 +158,7 @@ public extension Networking {
     /// - Returns: The request identifier.
     @discardableResult
     public func post(_ path: String, parameters: Any? = nil, parts: [FormDataPart], completion: @escaping (_ result: JSONResult) -> Void) -> String {
-        return handleJSONRequest(.post, path: path, parameterType: .multipartFormData, parameters: parameters, parts: parts, responseType: .json, cachingLevel: .none, completion: completion)
+        return handleJSONRequest(.post, path: path, cacheName: nil, parameterType: .multipartFormData, parameters: parameters, parts: parts, responseType: .json, cachingLevel: .none, completion: completion)
     }
 
     /// Registers a fake POST request for the specified path. After registering this, every POST request to the path, will return the registered response.
@@ -202,7 +202,7 @@ public extension Networking {
     @discardableResult
     public func delete(_ path: String, parameters: Any? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
         let parameterType: ParameterType = parameters != nil ? .formURLEncoded : .none
-        return handleJSONRequest(.delete, path: path, parameterType: parameterType, parameters: parameters, responseType: .json, cachingLevel: .none, completion: completion)
+        return handleJSONRequest(.delete, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, responseType: .json, cachingLevel: .none, completion: completion)
     }
 
     /// Registers a fake DELETE request for the specified path. After registering this, every DELETE request to the path, will return the registered response.
