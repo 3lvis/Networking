@@ -306,20 +306,4 @@ class DownloadTests: XCTestCase {
             }
         }
     }
-
-    func testDeleteDownloadedFiles() {
-        let networking = Networking(baseURL: baseURL)
-        networking.downloadImage("/image/png") { _ in
-            #if os(tvOS)
-                let directory = FileManager.SearchPathDirectory.cachesDirectory
-            #else
-                let directory = TestCheck.isTesting ? FileManager.SearchPathDirectory.cachesDirectory : FileManager.SearchPathDirectory.documentDirectory
-            #endif
-            let cachesURL = FileManager.default.urls(for: directory, in: .userDomainMask).first!
-            let folderURL = cachesURL.appendingPathComponent(URL(string: Networking.domain)!.absoluteString)
-            XCTAssertTrue(FileManager.default.exists(at: folderURL))
-            Networking.deleteCachedFiles()
-            XCTAssertFalse(FileManager.default.exists(at: folderURL))
-        }
-    }
 }

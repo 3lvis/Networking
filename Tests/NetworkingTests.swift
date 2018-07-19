@@ -266,4 +266,37 @@ class NetworkingTests: XCTestCase {
         XCTAssertEqual(networking.authorizationHeaderKey, "Authorization")
         XCTAssertNil(networking.authorizationHeaderValue)
     }
+
+    func testDeleteCachedFiles() {
+        #if os(tvOS)
+        let directory = FileManager.SearchPathDirectory.cachesDirectory
+        #else
+        let directory = TestCheck.isTesting ? FileManager.SearchPathDirectory.cachesDirectory : FileManager.SearchPathDirectory.documentDirectory
+        #endif
+        let cachesURL = FileManager.default.urls(for: directory, in: .userDomainMask).first!
+        let folderURL = cachesURL.appendingPathComponent(URL(string: Networking.domain)!.absoluteString)
+
+        let networking = Networking(baseURL: baseURL)
+        networking.downloadImage("/image/png") { _ in
+            let image = Image.find(named: "sample.jpg", inBundle: Bundle(for: NetworkingTests.self))
+            let data = image.jpgData()
+            let filename = cachesURL.appendingPathComponent("sample.jpg")
+            try? data?.write(to: filename)
+
+            XCTAssertTrue(FileManager.default.exists(at: cachesURL))
+            XCTAssertTrue(FileManager.default.exists(at: folderURL))
+            XCTAssertTrue(FileManager.default.exists(at: filename))
+
+            Networking.deleteCachedFiles()
+
+            // Caches folder should be there
+            XCTAssertTrue(FileManager.default.exists(at: cachesURL))
+
+            // Files under networking domain are gone
+            XCTAssertFalse(FileManager.default.exists(at: folderURL))
+
+            // Saved image should be there
+            XCTAssertTrue(FileManager.default.exists(at: filename))
+        }
+    }
 }
