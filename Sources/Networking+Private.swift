@@ -57,7 +57,7 @@ extension Networking {
         fakeRequests[requestType] = requests
     }
 
-    func handleFakeRequest(_ fakeRequest: FakeRequest, path: String, cachingLevel: CachingLevel, completion: @escaping (_ body: Any?, _ response: HTTPURLResponse, _ error: NSError?) -> Void) -> String {
+    func handleFakeRequest(_ fakeRequest: FakeRequest, path: String, cacheName: String?, cachingLevel: CachingLevel, completion: @escaping (_ body: Any?, _ response: HTTPURLResponse, _ error: NSError?) -> Void) -> String {
         var error: NSError?
         let url = try! composedURL(with: path)
         let response = HTTPURLResponse(url: url, statusCode: fakeRequest.statusCode)
@@ -71,11 +71,14 @@ extension Networking {
                 error = NSError(fakeRequest: fakeRequest)
             }
 
-            guard let destinationURL = try? self.destinationURL(for: path, cacheName: nil) else {
-                fatalError("Couldn't get destination URL for path: \(path)")
+            switch fakeRequest.responseType {
+            case .image:
+                let _ = cacheOrPurgeImage(data: fakeRequest.response as? Data, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
+            case .data:
+                cacheOrPurgeData(data: fakeRequest.response as? Data, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
+            case .json:
+                try! cacheOrPurgeJSON(object: fakeRequest.response, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
             }
-
-            cacheOrPurgeObject(object: fakeRequest.response, cachingLevel: cachingLevel, destinationURL: destinationURL)
             completion(fakeRequest.response, response, error)
         }
 
@@ -83,10 +86,10 @@ extension Networking {
         return requestID
     }
 
-    func handleJSONRequest(_ requestType: RequestType, path: String, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]? = nil, responseType: ResponseType, cachingLevel: CachingLevel, completion: @escaping (_ result: JSONResult) -> Void) -> String {
+    func handleJSONRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]? = nil, responseType: ResponseType, cachingLevel: CachingLevel, completion: @escaping (_ result: JSONResult) -> Void) -> String {
 
         switch cachingLevel {
-        case .none:
+        case .memory, .memoryAndFile:
             if let object = objectFromCache(for: path, cacheName: nil, cachingLevel: cachingLevel, responseType: responseType) {
                 TestCheck.testBlock(isSynchronous) {
                     let url = try! self.composedURL(with: path)
@@ -98,7 +101,7 @@ extension Networking {
         }
 
         if let fakeRequest = FakeRequest.find(ofType: requestType, forPath: path, in: fakeRequests) {
-            return handleFakeRequest(fakeRequest, path: path, cachingLevel: cachingLevel) { _, response, error in
+            return handleFakeRequest(fakeRequest, path: path, cacheName: cacheName, cachingLevel: cachingLevel) { _, response, error in
                 completion(JSONResult(body: fakeRequest.response, response: response, error: error))
             }
         } else {
@@ -112,7 +115,7 @@ extension Networking {
 
     func handleDataRequest(_ requestType: RequestType, path: String, cacheName: String?, cachingLevel: CachingLevel, responseType: ResponseType, completion: @escaping (_ result: DataResult) -> Void) -> String {
         if let fakeRequests = fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
-            return handleFakeRequest(fakeRequest, path: path, cachingLevel: cachingLevel) { _, response, error in
+            return handleFakeRequest(fakeRequest, path: path, cacheName: cacheName, cachingLevel: cachingLevel) { _, response, error in
                 completion(DataResult(body: fakeRequest.response, response: response, error: error))
             }
         } else {
@@ -127,7 +130,7 @@ extension Networking {
                 return requestID
             } else {
                 return requestData(requestType, path: path, cachingLevel: cachingLevel, parameterType: nil, parameters: nil, parts: nil, responseType: responseType) { data, response, error in
-                    self.cacheOrPurgeData(data: data, cachingLevel: cachingLevel, path: path, cacheName: cacheName)
+                    self.cacheOrPurgeData(data: data, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
 
                     TestCheck.testBlock(self.isSynchronous) {
                         completion(DataResult(body: data, response: response, error: error))
@@ -139,7 +142,7 @@ extension Networking {
 
     func handleImageRequest(_ requestType: RequestType, path: String, cacheName: String?, cachingLevel: CachingLevel, responseType: ResponseType, completion: @escaping (_ result: ImageResult) -> Void) -> String {
         if let fakeRequests = fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
-            return handleFakeRequest(fakeRequest, path: path, cachingLevel: cachingLevel) { _, response, error in
+            return handleFakeRequest(fakeRequest, path: path, cacheName: cacheName, cachingLevel: cachingLevel) { _, response, error in
                 completion(ImageResult(body: fakeRequest.response, response: response, error: error))
             }
         } else {
@@ -155,7 +158,7 @@ extension Networking {
                 return requestID
             } else {
                 return requestData(requestType, path: path, cachingLevel: cachingLevel, parameterType: nil, parameters: nil, parts: nil, responseType: responseType) { data, response, error in
-                    let returnedImage = self.cacheOrPurgeImage(data: data, cachingLevel: cachingLevel, path: path, cacheName: cacheName)
+                    let returnedImage = self.cacheOrPurgeImage(data: data, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
 
                     TestCheck.testBlock(self.isSynchronous) {
                         completion(ImageResult(body: returnedImage, response: response, error: error))
@@ -266,7 +269,7 @@ extension Networking {
                     }
                 }
 
-                self.cacheOrPurgeData(data: data, cachingLevel: cachingLevel, path: path, cacheName: nil)
+                self.cacheOrPurgeData(data: data, path: path, cacheName: nil, cachingLevel: cachingLevel)
 
                 if TestCheck.isTesting && self.isSynchronous == false {
                     semaphore.signal()
@@ -419,15 +422,19 @@ extension Networking {
         print(" ")
     }
 
-    func cacheOrPurgeObject(object: Any?, cachingLevel: CachingLevel, destinationURL: URL) {
+    func cacheOrPurgeJSON(object: Any?, path: String, cacheName: String?, cachingLevel: CachingLevel) throws {
+        guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else {
+            fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(String(describing: cacheName))")
+        }
+
         if let unwrappedObject = object {
             switch cachingLevel {
             case .memory:
                 self.cache.setObject(unwrappedObject as AnyObject, forKey: destinationURL.absoluteString as AnyObject)
             case .memoryAndFile:
 
-                let convertedData = try! JSONSerialization.data(withJSONObject: unwrappedObject, options: [])
-                _ = try? convertedData.write(to: destinationURL, options: [.atomic])
+                let convertedData = try JSONSerialization.data(withJSONObject: unwrappedObject, options: [])
+                _ = try convertedData.write(to: destinationURL, options: [.atomic])
                 self.cache.setObject(unwrappedObject as AnyObject, forKey: destinationURL.absoluteString as AnyObject)
             case .none:
                 break
@@ -437,7 +444,7 @@ extension Networking {
         }
     }
 
-    func cacheOrPurgeData(data: Data?, cachingLevel: CachingLevel, path: String, cacheName: String?) {
+    func cacheOrPurgeData(data: Data?, path: String, cacheName: String?, cachingLevel: CachingLevel) {
         guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else {
             fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(String(describing: cacheName))")
         }
@@ -457,7 +464,7 @@ extension Networking {
         }
     }
 
-    func cacheOrPurgeImage(data: Data?, cachingLevel: CachingLevel, path: String, cacheName: String?) -> Image? {
+    func cacheOrPurgeImage(data: Data?, path: String, cacheName: String?, cachingLevel: CachingLevel) -> Image? {
         guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else {
             fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(String(describing: cacheName))")
         }

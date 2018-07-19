@@ -238,7 +238,7 @@ class DownloadTests: XCTestCase {
                 guard let destinationURL = try? networking.destinationURL(for: path, cacheName: cacheName) else { XCTFail(); return }
                 let absoluteString = destinationURL.absoluteString
                 cache.removeObject(forKey: absoluteString as AnyObject)
-                guard let image = networking.imageFromCache(path) else { XCTFail(); return }
+                guard let image = networking.imageFromCache(path, cacheName: cacheName) else { XCTFail(); return }
                 let pigImage = Image.find(named: "pig.png", inBundle: Bundle(for: DownloadTests.self))
                 let pigImageData = pigImage.pngData()
                 let imageData = image.pngData()
