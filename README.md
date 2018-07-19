@@ -58,6 +58,7 @@
 * [Cancelling a request](#cancelling-a-request)
 * [Faking a request](#faking-a-request)
 * [Downloading and caching an image](#downloading-and-caching-an-image)
+* [Caching and clearing the cache](#caching-and-clearing-the-cache)
 * [Logging errors](#logging-errors)
 * [Updating the Network Activity Indicator](#updating-the-network-activity-indicator)
 * [Installing](#installing)
