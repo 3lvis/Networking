@@ -91,6 +91,12 @@ class NetworkingTests: XCTestCase {
         XCTAssertEqual(url.absoluteString, "http://httpbin.org/hello")
     }
 
+    func testURLForPathWithFullPath() {
+        let networking = Networking()
+        let url = try! networking.composedURL(with: "http://httpbin.org/hello")
+        XCTAssertEqual(url.absoluteString, "http://httpbin.org/hello")
+    }
+
     func testSkipTestMode() {
         let expectation = self.expectation(description: "testSkipTestMode")
 
@@ -114,6 +120,13 @@ class NetworkingTests: XCTestCase {
     func testDestinationURL() {
         let networking = Networking(baseURL: baseURL)
         let path = "/image/png"
+        guard let destinationURL = try? networking.destinationURL(for: path) else { XCTFail(); return }
+        XCTAssertEqual(destinationURL.lastPathComponent, "http:--httpbin.org-image-png")
+    }
+
+    func testDestinationURLWithFullPath() {
+        let networking = Networking()
+        let path = "http://httpbin.org/image/png"
         guard let destinationURL = try? networking.destinationURL(for: path) else { XCTFail(); return }
         XCTAssertEqual(destinationURL.lastPathComponent, "http:--httpbin.org-image-png")
     }

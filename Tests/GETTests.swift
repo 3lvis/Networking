@@ -44,6 +44,25 @@ class GETTests: XCTestCase {
         }
     }
 
+    func testGETWithFullPath() {
+        let networking = Networking()
+        networking.get("http://httpbin.org/get") { result in
+            switch result {
+            case let .success(response):
+                let json = response.dictionaryBody
+
+                guard let url = json["url"] as? String else { XCTFail(); return }
+                XCTAssertEqual(url, "http://httpbin.org/get")
+
+                guard let headers = json["headers"] as? [String: String] else { XCTFail(); return }
+                let contentType = headers["Content-Type"]
+                XCTAssertNil(contentType)
+            case .failure:
+                XCTFail()
+            }
+        }
+    }
+
     func testGETWithHeaders() {
         let networking = Networking(baseURL: baseURL)
         networking.get("/get") { result in
