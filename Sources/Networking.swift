@@ -124,7 +124,7 @@ open class Networking {
     ///   - baseURL: The base URL for HTTP requests under `Networking`.
     ///   - configuration: The URLSessionConfiguration configuration to be used
     ///   - cache: The NSCache to use, it has a built-in default one.
-    public init(baseURL: String, configuration: URLSessionConfiguration = .default, cache: NSCache<AnyObject, AnyObject>? = nil) {
+    public init(baseURL: String = "", configuration: URLSessionConfiguration = .default, cache: NSCache<AnyObject, AnyObject>? = nil) {
         self.baseURL = baseURL
         self.configuration = configuration
         self.cache = cache ?? NSCache()
