@@ -204,13 +204,8 @@ open class Networking {
         let finalPath = "\(folderPath)/\(normalizedResourcesPath)"
 
         if let url = URL(string: finalPath) {
-            #if os(tvOS)
-                let directory = FileManager.SearchPathDirectory.cachesDirectory
-            #else
-                let directory = TestCheck.isTesting ? FileManager.SearchPathDirectory.cachesDirectory : FileManager.SearchPathDirectory.documentDirectory
-            #endif
+            let directory = FileManager.SearchPathDirectory.cachesDirectory
             if let cachesURL = FileManager.default.urls(for: directory, in: .userDomainMask).first {
-                try (cachesURL as NSURL).setResourceValue(true, forKey: URLResourceKey.isExcludedFromBackupKey)
                 let folderURL = cachesURL.appendingPathComponent(URL(string: folderPath)!.absoluteString)
 
                 if FileManager.default.exists(at: folderURL) == false {
