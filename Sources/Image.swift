@@ -7,7 +7,6 @@
 #endif
 
 extension Image {
-
     static func find(named name: String, inBundle bundle: Bundle) -> Image {
         #if os(OSX)
             return bundle.image(forResource: name)!
@@ -19,7 +18,6 @@ extension Image {
     }
 
     #if os(OSX)
-
         func data(_ type: NSBitmapImageRep.FileType) -> Data? {
             let imageData = tiffRepresentation!
             let bitmapImageRep = NSBitmapImageRep(data: imageData)!
