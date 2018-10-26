@@ -296,11 +296,7 @@ open class Networking {
 
     /// Deletes the downloaded/cached files.
     public static func deleteCachedFiles() {
-        #if os(tvOS)
         let directory = FileManager.SearchPathDirectory.cachesDirectory
-        #else
-        let directory = TestCheck.isTesting ? FileManager.SearchPathDirectory.cachesDirectory : FileManager.SearchPathDirectory.documentDirectory
-        #endif
         if let cachesURL = FileManager.default.urls(for: directory, in: .userDomainMask).first {
             let folderURL = cachesURL.appendingPathComponent(URL(string: Networking.domain)!.absoluteString)
             if FileManager.default.exists(at: folderURL) {
