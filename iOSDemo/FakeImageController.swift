@@ -9,7 +9,7 @@ class FakeImageController: UIViewController {
     }()
 
     lazy var networking: Networking = {
-        let networking = Networking(baseURL: "http://httpbin.org")
+        let networking = Networking(baseURL: "https://httpbin.org")
 
         // let image = UIImage(named: "pig.png")
         // networking.fakeImageDownload("/image/png", image: image)

@@ -2,7 +2,7 @@ import Foundation
 import XCTest
 
 class PATCHTests: XCTestCase {
-    let baseURL = "http://httpbin.org"
+    let baseURL = "https://httpbin.org"
 
     func testSynchronousPATCH() {
         var synchronous = false
@@ -39,7 +39,7 @@ class PATCHTests: XCTestCase {
             case let .success(response):
                 let json = response.dictionaryBody
                 guard let url = json["url"] as? String else { XCTFail(); return }
-                XCTAssertEqual(url, "http://httpbin.org/patch")
+                XCTAssertEqual(url, "https://httpbin.org/patch")
 
                 let headers = response.headers
                 guard let connection = headers["Connection"] as? String else { XCTFail(); return }

@@ -2,7 +2,7 @@ import Foundation
 import XCTest
 
 class NetworkingTests: XCTestCase {
-    let baseURL = "http://httpbin.org"
+    let baseURL = "https://httpbin.org"
 
     func testSetAuthorizationHeaderWithUsernameAndPassword() {
         let networking = Networking(baseURL: baseURL)
@@ -88,13 +88,13 @@ class NetworkingTests: XCTestCase {
     func testURLForPath() {
         let networking = Networking(baseURL: baseURL)
         let url = try! networking.composedURL(with: "/hello")
-        XCTAssertEqual(url.absoluteString, "http://httpbin.org/hello")
+        XCTAssertEqual(url.absoluteString, "https://httpbin.org/hello")
     }
 
     func testURLForPathWithFullPath() {
         let networking = Networking()
-        let url = try! networking.composedURL(with: "http://httpbin.org/hello")
-        XCTAssertEqual(url.absoluteString, "http://httpbin.org/hello")
+        let url = try! networking.composedURL(with: "https://httpbin.org/hello")
+        XCTAssertEqual(url.absoluteString, "https://httpbin.org/hello")
     }
 
     func testSkipTestMode() {
@@ -126,7 +126,7 @@ class NetworkingTests: XCTestCase {
 
     func testDestinationURLWithFullPath() {
         let networking = Networking()
-        let path = "http://httpbin.org/image/png"
+        let path = "https://httpbin.org/image/png"
         guard let destinationURL = try? networking.destinationURL(for: path) else { XCTFail(); return }
         XCTAssertEqual(destinationURL.lastPathComponent, "http:--httpbin.org-image-png")
     }
@@ -174,8 +174,8 @@ class NetworkingTests: XCTestCase {
         XCTAssertEqual(baseURL1, "https://rescuejuice.com")
         XCTAssertEqual(relativePath1, "/wp-content/uploads/2015/11/døgnvillburgere.jpg")
 
-        let (baseURL2, relativePath2) = Networking.splitBaseURLAndRelativePath(for: "http://httpbin.org/basic-auth/user/passwd")
-        XCTAssertEqual(baseURL2, "http://httpbin.org")
+        let (baseURL2, relativePath2) = Networking.splitBaseURLAndRelativePath(for: "https://httpbin.org/basic-auth/user/passwd")
+        XCTAssertEqual(baseURL2, "https://httpbin.org")
         XCTAssertEqual(relativePath2, "/basic-auth/user/passwd")
     }
 

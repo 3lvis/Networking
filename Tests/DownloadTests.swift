@@ -2,7 +2,7 @@ import Foundation
 import XCTest
 
 class DownloadTests: XCTestCase {
-    let baseURL = "http://httpbin.org"
+    let baseURL = "https://httpbin.org"
 
     func testImageDownloadSynchronous() {
         var synchronous = false

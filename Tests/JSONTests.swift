@@ -109,13 +109,13 @@ class JSONTests: XCTestCase {
     func testToJSON() {
         let expectation = self.expectation(description: "GET")
 
-        guard let url = URL(string: "http://httpbin.org/get") else { return }
+        guard let url = URL(string: "https://httpbin.org/get") else { return }
         let request = URLRequest(url: url)
         URLSession.shared.dataTask(with: request) { data, _, _ in
             do {
                 let JSON = try data?.toJSON() as? [String: Any]
                 let url = JSON?["url"] as! String
-                XCTAssertEqual(url, "http://httpbin.org/get")
+                XCTAssertEqual(url, "https://httpbin.org/get")
             } catch {
                 // Handle error
             }
