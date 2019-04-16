@@ -130,7 +130,7 @@ class POSTTests: XCTestCase {
             switch result {
             case let .success(response):
                 let json = response.dictionaryBody
-                XCTAssertEqual(json["url"] as? String, "http://httpbin.org/post")
+                XCTAssertEqual(json["url"] as? String, "https://httpbin.org/post")
 
                 guard let headers = json["headers"] as? [String: Any] else { XCTFail(); return }
                 XCTAssertEqual(headers["Content-Type"] as? String, "multipart/form-data; boundary=\(networking.boundary)")
@@ -159,7 +159,7 @@ class POSTTests: XCTestCase {
             switch result {
             case let .success(response):
                 let json = response.dictionaryBody
-                XCTAssertEqual(json["url"] as? String, "http://httpbin.org/post")
+                XCTAssertEqual(json["url"] as? String, "https://httpbin.org/post")
 
                 guard let headers = json["headers"] as? [String: Any] else { XCTFail(); return }
                 XCTAssertEqual(headers["Content-Type"] as? String, "multipart/form-data; boundary=\(networking.boundary)")

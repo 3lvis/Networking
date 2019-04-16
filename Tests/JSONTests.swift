@@ -65,6 +65,7 @@ class JSONTests: XCTestCase {
     func testArrayJSONFromFileNamed() {
         let result = try! FileManager.json(from: "simple_array.json", bundle: Bundle(for: JSONTests.self)) as? [[String: Any]] ?? [[String: Any]]()
         let compared = [["id": 1, "name": "Hi"]]
+        
         XCTAssertEqual(compared.count, result.count)
 
         // This should work but Swift is not able to compile it.
