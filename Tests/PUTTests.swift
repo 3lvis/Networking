@@ -2,7 +2,7 @@ import Foundation
 import XCTest
 
 class PUTTests: XCTestCase {
-    let baseURL = "https://httpbin.org"
+    let baseURL = "http://httpbin.org"
 
     func testSynchronousPUT() {
         var synchronous = false

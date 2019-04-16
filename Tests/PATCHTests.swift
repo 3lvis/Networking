@@ -2,7 +2,7 @@ import Foundation
 import XCTest
 
 class PATCHTests: XCTestCase {
-    let baseURL = "https://httpbin.org"
+    let baseURL = "http://httpbin.org"
 
     func testSynchronousPATCH() {
         var synchronous = false

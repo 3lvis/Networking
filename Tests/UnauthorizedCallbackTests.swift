@@ -2,7 +2,7 @@ import Foundation
 import XCTest
 
 class UnauthorizedCallbackTests: XCTestCase {
-    let baseURL = "https://httpbin.org"
+    let baseURL = "http://httpbin.org"
 
     func testUnauthorizedCallback() {
         let networking = Networking(baseURL: baseURL)

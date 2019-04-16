@@ -2,7 +2,7 @@ import Foundation
 import XCTest
 
 class POSTTests: XCTestCase {
-    let baseURL = "https://httpbin.org"
+    let baseURL = "http://httpbin.org"
 
     func testSynchronousPOST() {
         var synchronous = false
@@ -81,7 +81,7 @@ class POSTTests: XCTestCase {
             switch result {
             case let .success(response):
                 let JSONResponse = response.dictionaryBody
-                XCTAssertEqual("https://httpbin.org/post", JSONResponse["url"] as? String)
+                XCTAssertEqual("http://httpbin.org/post", JSONResponse["url"] as? String)
             case .failure:
                 XCTFail()
             }
@@ -130,7 +130,7 @@ class POSTTests: XCTestCase {
             switch result {
             case let .success(response):
                 let json = response.dictionaryBody
-                XCTAssertEqual(json["url"] as? String, "https://httpbin.org/post")
+                XCTAssertEqual(json["url"] as? String, "http://httpbin.org/post")
 
                 guard let headers = json["headers"] as? [String: Any] else { XCTFail(); return }
                 XCTAssertEqual(headers["Content-Type"] as? String, "multipart/form-data; boundary=\(networking.boundary)")
@@ -159,7 +159,7 @@ class POSTTests: XCTestCase {
             switch result {
             case let .success(response):
                 let json = response.dictionaryBody
-                XCTAssertEqual(json["url"] as? String, "https://httpbin.org/post")
+                XCTAssertEqual(json["url"] as? String, "http://httpbin.org/post")
 
                 guard let headers = json["headers"] as? [String: Any] else { XCTFail(); return }
                 XCTAssertEqual(headers["Content-Type"] as? String, "multipart/form-data; boundary=\(networking.boundary)")

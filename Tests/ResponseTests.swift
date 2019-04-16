@@ -1,7 +1,7 @@
 import XCTest
 
 class ResponseTest: XCTestCase {
-    let baseURL = "https://httpbin.org"
+    let baseURL = "http://httpbin.org"
 
     func testDataAccessor() {
         let networking = Networking(baseURL: baseURL)

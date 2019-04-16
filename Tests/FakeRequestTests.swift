@@ -2,7 +2,7 @@ import Foundation
 import XCTest
 
 class FakeRequestTests: XCTestCase {
-    let baseURL = "https://httpbin.org"
+    let baseURL = "http://httpbin.org"
 
     func testRemoveFirstLetterIfDash() {
         var evaluated = "/"

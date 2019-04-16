@@ -77,10 +77,10 @@ Initializing an instance of **Networking** means you have to select a [NSURLSess
 
 ```swift
 // Default
-let networking = Networking(baseURL: "https://httpbin.org")
+let networking = Networking(baseURL: "http://httpbin.org")
 
 // Ephemeral
-let networking = Networking(baseURL: "https://httpbin.org", configuration: .ephemeral)
+let networking = Networking(baseURL: "http://httpbin.org", configuration: .ephemeral)
 ```
 
 ## Changing request headers
@@ -100,7 +100,7 @@ networking.headerFields = ["User-Agent": "your new user agent"]
 To authenticate using [basic authentication](http://www.w3.org/Protocols/HTTP/1.0/spec.html#BasicAA) with a username **"aladdin"** and password **"opensesame"** you only need to do this:
 
 ```swift
-let networking = Networking(baseURL: "https://httpbin.org")
+let networking = Networking(baseURL: "http://httpbin.org")
 networking.setAuthorizationHeader(username: "aladdin", password: "opensesame")
 networking.get("/basic-auth/aladdin/opensesame") { result in
     // Successfully authenticated!
@@ -112,7 +112,7 @@ networking.get("/basic-auth/aladdin/opensesame") { result in
 To authenticate using a [bearer token](https://tools.ietf.org/html/rfc6750) **"AAAFFAAAA3DAAAAAA"** you only need to do this:
 
 ```swift
-let networking = Networking(baseURL: "https://httpbin.org")
+let networking = Networking(baseURL: "http://httpbin.org")
 networking.setAuthorizationHeader(token: "AAAFFAAAA3DAAAAAA")
 networking.get("/get") { result in
     // Successfully authenticated!
@@ -124,7 +124,7 @@ networking.get("/get") { result in
 To authenticate using a custom authentication header, for example **"Token token=AAAFFAAAA3DAAAAAA"** you would need to set the following header field: `Authorization: Token token=AAAFFAAAA3DAAAAAA`. Luckily, **Networking** provides a simple way to do this:
 
 ```swift
-let networking = Networking(baseURL: "https://httpbin.org")
+let networking = Networking(baseURL: "http://httpbin.org")
 networking.setAuthorizationHeader(headerValue: "Token token=AAAFFAAAA3DAAAAAA")
 networking.get("/get") { result in
     // Successfully authenticated!
@@ -134,7 +134,7 @@ networking.get("/get") { result in
 Providing the following authentication header `Anonymous-Token: AAAFFAAAA3DAAAAAA` is also possible:
 
 ```swift
-let networking = Networking(baseURL: "https://httpbin.org")
+let networking = Networking(baseURL: "http://httpbin.org")
 networking.setAuthorizationHeader(headerKey: "Anonymous-Token", headerValue: "AAAFFAAAA3DAAAAAA")
 networking.get("/get") { result in
     // Successfully authenticated!
@@ -150,7 +150,7 @@ Making a request is as simple as just calling `get`, `post`, `put`, or `delete`.
 **GET example**:
 
 ```swift
-let networking = Networking(baseURL: "https://httpbin.org")
+let networking = Networking(baseURL: "http://httpbin.org")
 networking.get("/get") { result in
     switch result {
     case .success(let response):
@@ -165,7 +165,7 @@ networking.get("/get") { result in
 **POST example**:
 
 ```swift
-let networking = Networking(baseURL: "https://httpbin.org")
+let networking = Networking(baseURL: "http://httpbin.org")
 networking.post("/post", parameters: ["username" : "jameson", "password" : "secret"]) { result in
     /*
     {
@@ -173,7 +173,7 @@ networking.post("/post", parameters: ["username" : "jameson", "password" : "secr
             "username" : "jameson",
             "password" : "secret"
         },
-        "url" : "https://httpbin.org/post",
+        "url" : "http://httpbin.org/post",
         "data" : "{"password" : "secret","username" : "jameson"}",
         "headers" : {
             "Accept" : "application/json",
@@ -190,7 +190,7 @@ networking.post("/post", parameters: ["username" : "jameson", "password" : "secr
 You can get the response headers inside the success.
 
 ```swift
-let networking = Networking(baseURL: "https://httpbin.org")
+let networking = Networking(baseURL: "http://httpbin.org")
 networking.get("/get") { result in
     switch result {
     case .success(let response):
@@ -205,7 +205,7 @@ networking.get("/get") { result in
 By default all the requests are asynchronous, you can make an instance of **Networking** to do all its request as synchronous by using `isSynchronous`.
 
 ```swift
-let networking = Networking(baseURL: "https://httpbin.org")
+let networking = Networking(baseURL: "http://httpbin.org")
 networking.isSynchronous = true
 ```
 
@@ -215,7 +215,7 @@ If you aren't familiar with the [Result](https://github.com/3lvis/Networking/blo
 
 ```swift
 // The old way
-let networking = Networking(baseURL: "https://httpbin.org")
+let networking = Networking(baseURL: "http://httpbin.org")
 networking.get("/get") { json, headers, error in // Both are optional
     if let error = error {
         // OK, now we can handle the error
@@ -269,7 +269,7 @@ The `Content-Type` HTTP specification is so unfriendly, you have to know the spe
 When sending JSON your parameters will be serialized to data using `NSJSONSerialization`.
 
 ```swift
-let networking = Networking(baseURL: "https://httpbin.org")
+let networking = Networking(baseURL: "http://httpbin.org")
 networking.post("/post", parameters: ["name" : "jameson"]) { result in
    // Successfull post using `application/json` as `Content-Type`
 }
@@ -280,7 +280,7 @@ networking.post("/post", parameters: ["name" : "jameson"]) { result in
  If you want to use `application/x-www-form-urlencoded` just use the `.formURLEncoded` parameter type, internally **Networking** will format your parameters so they use [`Percent-encoding` or `URL-enconding`](https://en.wikipedia.org/wiki/Percent-encoding#The_application.2Fx-www-form-urlencoded_type).
 
 ```swift
-let networking = Networking(baseURL: "https://httpbin.org")
+let networking = Networking(baseURL: "http://httpbin.org")
 networking.post("/post", parameterType: .formURLEncoded, parameters: ["name" : "jameson"]) { result in
    // Successfull post using `application/x-www-form-urlencoded` as `Content-Type`
 }
@@ -321,7 +321,7 @@ At the moment **Networking** supports four types of `ParameterType`s out of the 
 
 For example:
 ```swift
-let networking = Networking(baseURL: "https://httpbin.org")
+let networking = Networking(baseURL: "http://httpbin.org")
 networking.post("/upload", parameterType: .Custom("application/octet-stream"), parameters: imageData) { result in
    // Successfull upload using `application/octet-stream` as `Content-Type`
 }
@@ -334,7 +334,7 @@ networking.post("/upload", parameterType: .Custom("application/octet-stream"), p
 Cancelling any request for a specific path is really simple. Beware that cancelling a request will cause the request to return with an error with status code URLError.cancelled.
 
 ```swift
-let networking = Networking(baseURL: "https://httpbin.org")
+let networking = Networking(baseURL: "http://httpbin.org")
 networking.get("/get") { result in
     // Cancelling a GET request returns an error with code URLError.cancelled which means cancelled request
 }
@@ -347,7 +347,7 @@ networking.cancelGET("/get")
 Using `cancelPOST("/upload")` would cancel all POST request for the specific path, but in some cases this isn't what we want. For example if you're trying to upload two photos, but the user requests to cancel one of the uploads, using `cancelPOST("/upload") would cancell all the uploads, this is when ID based cancellation is useful.
 
 ```swift
-let networking = Networking(baseURL: "https://httpbin.org")
+let networking = Networking(baseURL: "http://httpbin.org")
 
 // Start first upload
 let firstRequestID = networking.post("/upload", parts: ...) { result in
@@ -406,7 +406,7 @@ networking.get("/stories") { result in
 **Downloading**:
 
 ```swift
-let networking = Networking(baseURL: "https://httpbin.org")
+let networking = Networking(baseURL: "http://httpbin.org")
 networking.downloadImage("/image/png") { result in
    // Do something with the downloaded image
 }
@@ -428,7 +428,7 @@ networking.cancelImageDownload("/image/png")
 **Networking** uses a multi-cache architecture when downloading images, the first time the `downloadImage` method is called for a specific path, it will store the results in disk (Documents folder) and in memory (NSCache), so in the next call it will return the cached results without hitting the network.
 
 ```swift
-let networking = Networking(baseURL: "https://httpbin.org")
+let networking = Networking(baseURL: "http://httpbin.org")
 networking.downloadImage("/image/png") { result in
    // Image from network
    networking.downloadImage("/image/png") { result in
@@ -440,7 +440,7 @@ networking.downloadImage("/image/png") { result in
 If you want to remove the downloaded image you can do it like this:
 
 ```swift
-let networking = Networking(baseURL: "https://httpbin.org")
+let networking = Networking(baseURL: "http://httpbin.org")
 let destinationURL = try networking.destinationURL(for: "/image/png")
 if let path = destinationURL.path where NSFileManager.defaultManager().fileExistsAtPath(path) {
    try! NSFileManager.defaultManager().removeItemAtPath(path)
@@ -481,7 +481,7 @@ A 404 request will print something like this:
 
 Error 404: Error Domain=NetworkingErrorDomain Code=404 "not found" UserInfo={NSLocalizedDescription=not found}
 
-URL: https://httpbin.org/posdddddt
+URL: http://httpbin.org/posdddddt
 
 Headers: ["Accept": "application/json", "Content-Type": "application/json"]
 
@@ -508,7 +508,7 @@ Status code: 404 — not found
 To disable error logging use the flag `disableErrorLogging`.
 
 ```swift
-let networking = Networking(baseURL: "https://httpbin.org")
+let networking = Networking(baseURL: "http://httpbin.org")
 networking.disableErrorLogging = true
 ```
 

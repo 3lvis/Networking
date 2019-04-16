@@ -2,7 +2,7 @@ import Foundation
 import XCTest
 
 class DELETETests: XCTestCase {
-    let baseURL = "https://httpbin.org"
+    let baseURL = "http://httpbin.org"
 
     func testSynchronousDELETE() {
         var synchronous = false
@@ -113,7 +113,7 @@ class DELETETests: XCTestCase {
             switch result {
             case let .success(response):
                 let json = response.dictionaryBody
-                XCTAssertEqual(json["url"] as? String, "https://httpbin.org/delete?userId=25")
+                XCTAssertEqual(json["url"] as? String, "http://httpbin.org/delete?userId=25")
             case .failure:
                 XCTFail()
             }
