@@ -182,7 +182,7 @@ class GETTests: XCTestCase {
             switch result {
             case let .success(response):
                 let json = response.dictionaryBody
-                XCTAssertEqual(json["url"] as? String, "http://httpbin.org/get?count=25")
+                XCTAssertEqual(json["url"] as? String, "https://httpbin.org/get?count=25")
             case .failure:
                 XCTFail()
             }
@@ -195,7 +195,7 @@ class GETTests: XCTestCase {
             switch result {
             case let .success(response):
                 let json = response.dictionaryBody
-                XCTAssertEqual(json["url"] as? String, "http://httpbin.org/get?accountId=123&userId=5")
+                XCTAssertEqual(json["url"] as? String, "https://httpbin.org/get?accountId=123&userId=5")
             case .failure:
                 XCTFail()
             }
@@ -208,7 +208,7 @@ class GETTests: XCTestCase {
             switch result {
             case let .success(response):
                 let json = response.dictionaryBody
-                XCTAssertEqual(json["url"] as? String, "http://httpbin.org/get?name=Elvis Nuñez")
+                XCTAssertEqual(json["url"] as? String, "https://httpbin.org/get?name=Elvis Nuñez")
             case .failure:
                 XCTFail()
             }

@@ -81,7 +81,7 @@ class POSTTests: XCTestCase {
             switch result {
             case let .success(response):
                 let JSONResponse = response.dictionaryBody
-                XCTAssertEqual("http://httpbin.org/post", JSONResponse["url"] as? String)
+                XCTAssertEqual("https://httpbin.org/post", JSONResponse["url"] as? String)
             case .failure:
                 XCTFail()
             }

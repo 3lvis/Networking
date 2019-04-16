@@ -113,7 +113,7 @@ class DELETETests: XCTestCase {
             switch result {
             case let .success(response):
                 let json = response.dictionaryBody
-                XCTAssertEqual(json["url"] as? String, "http://httpbin.org/delete?userId=25")
+                XCTAssertEqual(json["url"] as? String, "https://httpbin.org/delete?userId=25")
             case .failure:
                 XCTFail()
             }
