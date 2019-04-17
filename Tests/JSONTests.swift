@@ -64,14 +64,16 @@ class JSONTests: XCTestCase {
 
     func testArrayJSONFromFileNamed() {
         let result = try! FileManager.json(from: "simple_array.json", bundle: Bundle(for: JSONTests.self)) as? [[String: Any]] ?? [[String: Any]]()
-        let compared = [["id": 1, "name": "Hi"]]
+        var compared = [["id": 1, "name": "Hi"]]
         
         XCTAssertEqual(compared.count, result.count)
 
         // This should work but Swift is not able to compile it.
         // XCTAssertEqual(compared, result)
 
-        XCTAssertEqual(Array(compared[0].keys), Array(result[0].keys))
+        let comparedKeys = Array(compared[0].keys).sorted()
+        let resultKeys = Array(result[0].keys).sorted()
+        XCTAssertEqual(comparedKeys, resultKeys)
         XCTAssertEqual(compared[0]["id"] as? Int, result[0]["id"] as? Int)
         XCTAssertEqual(compared[0]["name"] as? String, result[0]["name"] as? String)
     }
