@@ -82,7 +82,7 @@ class JSONTests: XCTestCase {
         let result = try! FileManager.json(from: "simple_dictionary.json", bundle: Bundle(for: JSONTests.self)) as? [String: Any] ?? [String: Any]()
         let compared = ["id": 1, "name": "Hi"] as [String: Any]
         XCTAssertEqual(compared.count, result.count)
-        XCTAssertEqual(Array(compared.keys), Array(result.keys))
+        XCTAssertEqual(Array(compared.keys).sorted(), Array(result.keys).sorted())
     }
 
     func testFromFileNamedWithNotFoundFile() {
