@@ -39,7 +39,7 @@ class PUTTests: XCTestCase {
             case let .success(response):
                 let json = response.dictionaryBody
                 guard let url = json["url"] as? String else { XCTFail(); return }
-                XCTAssertEqual(url, "http://httpbin.org/put")
+                XCTAssertEqual(url, "https://httpbin.org/put")
 
                 let headers = response.headers
                 guard let connection = headers["Connection"] as? String else { XCTFail(); return }

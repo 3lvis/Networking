@@ -290,7 +290,7 @@ class NetworkingTests: XCTestCase {
             let image = Image.find(named: "sample.jpg", inBundle: Bundle(for: NetworkingTests.self))
             let data = image.jpgData()
             let filename = cachesURL.appendingPathComponent("sample.jpg")
-            try? data?.write(to: filename)
+            ((try? data?.write(to: filename)) as ()??)
 
             XCTAssertTrue(FileManager.default.exists(at: cachesURL))
             XCTAssertTrue(FileManager.default.exists(at: folderURL))

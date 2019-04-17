@@ -21,7 +21,7 @@ class DELETETests: XCTestCase {
             case let .success(response):
                 let json = response.dictionaryBody
                 guard let url = json["url"] as? String else { XCTFail(); return }
-                XCTAssertEqual(url, "http://httpbin.org/delete")
+                XCTAssertEqual(url, "https://httpbin.org/delete")
 
                 guard let headers = json["headers"] as? [String: String] else { XCTFail(); return }
                 let contentType = headers["Content-Type"]
@@ -39,7 +39,7 @@ class DELETETests: XCTestCase {
             case let .success(response):
                 let json = response.dictionaryBody
                 guard let url = json["url"] as? String else { XCTFail(); return }
-                XCTAssertEqual(url, "http://httpbin.org/delete")
+                XCTAssertEqual(url, "https://httpbin.org/delete")
 
                 let headers = response.headers
                 guard let connection = headers["Connection"] as? String else { XCTFail(); return }
@@ -113,7 +113,7 @@ class DELETETests: XCTestCase {
             switch result {
             case let .success(response):
                 let json = response.dictionaryBody
-                XCTAssertEqual(json["url"] as? String, "http://httpbin.org/delete?userId=25")
+                XCTAssertEqual(json["url"] as? String, "https://httpbin.org/delete?userId=25")
             case .failure:
                 XCTFail()
             }
