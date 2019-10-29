@@ -64,7 +64,7 @@ class JSONTests: XCTestCase {
 
     func testArrayJSONFromFileNamed() {
         let result = try! FileManager.json(from: "simple_array.json", bundle: Bundle(for: JSONTests.self)) as? [[String: Any]] ?? [[String: Any]]()
-        var compared = [["id": 1, "name": "Hi"]]
+        let compared = [["id": 1, "name": "Hi"]]
         
         XCTAssertEqual(compared.count, result.count)
 
