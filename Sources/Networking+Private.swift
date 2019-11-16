@@ -73,11 +73,11 @@ extension Networking {
 
             switch fakeRequest.responseType {
             case .image:
-                let _ = cacheOrPurgeImage(data: fakeRequest.response as? Data, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
+                cacheOrPurgeImage(data: fakeRequest.response as? Data, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
             case .data:
                 cacheOrPurgeData(data: fakeRequest.response as? Data, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
             case .json:
-                try! cacheOrPurgeJSON(object: fakeRequest.response, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
+                try? cacheOrPurgeJSON(object: fakeRequest.response, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
             }
             completion(fakeRequest.response, response, error)
         }
@@ -424,7 +424,8 @@ extension Networking {
 
     func cacheOrPurgeJSON(object: Any?, path: String, cacheName: String?, cachingLevel: CachingLevel) throws {
         guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else {
-            fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(String(describing: cacheName))")
+            assertionFailure("Couldn't get destination URL for path: \(path) and cacheName: \(String(describing: cacheName))")
+            return
         }
 
         if let unwrappedObject = object {
@@ -446,7 +447,8 @@ extension Networking {
 
     func cacheOrPurgeData(data: Data?, path: String, cacheName: String?, cachingLevel: CachingLevel) {
         guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else {
-            fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(String(describing: cacheName))")
+            assertionFailure("Couldn't get destination URL for path: \(path) and cacheName: \(String(describing: cacheName))")
+            return
         }
 
         if let returnedData = data, returnedData.count > 0 {
@@ -463,10 +465,12 @@ extension Networking {
             self.cache.removeObject(forKey: destinationURL.absoluteString as AnyObject)
         }
     }
-
+    
+    @discardableResult
     func cacheOrPurgeImage(data: Data?, path: String, cacheName: String?, cachingLevel: CachingLevel) -> Image? {
         guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else {
-            fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(String(describing: cacheName))")
+            assertionFailure("Couldn't get destination URL for path: \(path) and cacheName: \(String(describing: cacheName))")
+            return nil
         }
 
         var image: Image?
