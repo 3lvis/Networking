@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol Result {
+public protocol NetworkingResult {
     init(body: Any?, response: HTTPURLResponse, error: NSError?)
 }
 
@@ -14,7 +14,7 @@ public enum VoidResult {
     case failure(FailureJSONResponse)
 }
 
-public enum JSONResult: Result {
+public enum JSONResult: NetworkingResult {
     case success(SuccessJSONResponse)
 
     case failure(FailureJSONResponse)
@@ -54,7 +54,7 @@ public enum JSONResult: Result {
     }
 }
 
-public enum ImageResult: Result {
+public enum ImageResult: NetworkingResult {
     case success(SuccessImageResponse)
 
     case failure(FailureResponse)
@@ -72,7 +72,7 @@ public enum ImageResult: Result {
     }
 }
 
-public enum DataResult: Result {
+public enum DataResult: NetworkingResult {
     case success(SuccessDataResponse)
 
     case failure(FailureResponse)
