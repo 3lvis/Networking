@@ -49,7 +49,7 @@ public enum JSONResult: Result {
         if let finalError = returnedError {
             self = .failure(FailureJSONResponse(json: json, response: response, error: finalError))
         } else {
-            self = .success(SuccessJSONResponse(json: json, response: response))
+            self = .success(SuccessJSONResponse(json: json, response: response, body: body))
         }
     }
 }

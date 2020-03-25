@@ -28,6 +28,7 @@ public class FailureResponse: Response {
 
 public class JSONResponse: Response {
     let json: JSON
+    public let body: Any?
 
     public var dictionaryBody: [String: Any] {
         return json.dictionary
@@ -48,9 +49,9 @@ public class JSONResponse: Response {
         }
     }
 
-    init(json: JSON, response: HTTPURLResponse) {
+    init(json: JSON, response: HTTPURLResponse, body: Any? = nil) {
         self.json = json
-
+        self.body = body
         super.init(response: response)
     }
 }
