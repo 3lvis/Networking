@@ -1,4 +1,4 @@
-// swift-tools-version:4.0
+// swift-tools-version:4.2
 
 // Licensed under the **MIT** license
 // Copyright (c) 2016 Elvis Nuñez
