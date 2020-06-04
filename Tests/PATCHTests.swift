@@ -39,7 +39,7 @@ class PATCHTests: XCTestCase {
             case let .success(response):
                 let json = response.dictionaryBody
                 guard let url = json["url"] as? String else { XCTFail(); return }
-                XCTAssertEqual(url, "https://httpbin.org/patch")
+                XCTAssertEqual(url, "http://httpbin.org/patch")
 
                 let headers = response.headers
                 guard let connection = headers["Connection"] as? String else { XCTFail(); return }

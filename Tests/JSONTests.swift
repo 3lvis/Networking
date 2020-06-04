@@ -118,7 +118,7 @@ class JSONTests: XCTestCase {
             do {
                 let JSON = try data?.toJSON() as? [String: Any]
                 let url = JSON?["url"] as! String
-                XCTAssertEqual(url, "https://httpbin.org/get")
+                XCTAssertEqual(url, "http://httpbin.org/get")
             } catch {
                 // Handle error
             }
