@@ -49,6 +49,8 @@ class DownloadTests: XCTestCase {
         }
     }
 
+    // Find a new source for this test
+    /*
     func testImageDownloadWithWeirdCharacters() {
         let networking = Networking(baseURL: "https://rescuejuice.com")
         let path = "/wp-content/uploads/2015/11/døgnvillburgere.jpg"
@@ -67,6 +69,7 @@ class DownloadTests: XCTestCase {
             }
         }
     }
+    */
 
     func testDownloadedImageInFile() {
         let networking = Networking(baseURL: baseURL)
