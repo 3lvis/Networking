@@ -447,7 +447,6 @@ extension Networking {
 
     func cacheOrPurgeData(data: Data?, path: String, cacheName: String?, cachingLevel: CachingLevel) {
         guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else {
-            assertionFailure("Couldn't get destination URL for path: \(path) and cacheName: \(String(describing: cacheName))")
             return
         }
 
