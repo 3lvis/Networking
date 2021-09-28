@@ -111,6 +111,8 @@ open class Networking {
         URLSession(configuration: self.configuration)
     }()
 
+    public var logProvider: ErrorLoggerProvider = ConsoleLogProvider()
+
     /// Caching options
     public enum CachingLevel {
         case memory
