@@ -16,6 +16,21 @@ public extension Networking {
         return handleJSONRequest(.get, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, responseType: .json, cachingLevel: cachingLevel, completion: completion)
     }
 
+    /// GET request to the specified path, allowing overridden parameter types
+    ///
+    /// Overridden parameter types can be useful, for example some REST-ful APIs do not strictly adhere to spec.
+    ///
+    /// - Parameters:
+    ///   - path: The path for the GET request.
+    ///   - parameterType: The parameters type to be used.
+    ///   - parameters: The parameters to be used, they will be serialized using Percent-encoding and appended to the URL.
+    ///   - completion: The result of the operation, it's an enum with two cases: success and failure.
+    /// - Returns: The request identifier.
+    @discardableResult
+    func get(_ path: String, parameterType: ParameterType, parameters: Any? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
+        handleJSONRequest(.get, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, responseType: .json, cachingLevel: .none, completion: completion)
+    }
+
     /// Registers a fake GET request for the specified path. After registering this, every GET request to the path, will return the registered response.
     ///
     /// - Parameters:
@@ -203,6 +218,21 @@ public extension Networking {
     func delete(_ path: String, parameters: Any? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
         let parameterType: ParameterType = parameters != nil ? .formURLEncoded : .none
         return handleJSONRequest(.delete, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, responseType: .json, cachingLevel: .none, completion: completion)
+    }
+
+    /// DELETE request to the specified path, allowing overridden parameter types
+    ///
+    /// Overridden parameter types can be useful, for example some REST-ful APIs do not strictly adhere to spec.
+    ///
+    /// - Parameters:
+    ///   - path: The path for the DELETE request.
+    ///   - parameterType: The parameters type to be used. 
+    ///   - parameters: The parameters to be used, they will be serialized using Percent-encoding and appended to the URL.
+    ///   - completion: The result of the operation, it's an enum with two cases: success and failure.
+    /// - Returns: The request identifier.
+    @discardableResult
+    func delete(_ path: String, parameterType: ParameterType, parameters: Any? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
+        handleJSONRequest(.delete, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, responseType: .json, cachingLevel: .none, completion: completion)
     }
 
     /// Registers a fake DELETE request for the specified path. After registering this, every DELETE request to the path, will return the registered response.

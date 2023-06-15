@@ -347,32 +347,33 @@ extension Networking {
     func logError(parameterType: ParameterType?, parameters: Any? = nil, data: Data?, request: URLRequest?, response: URLResponse?, error: NSError?) {
         guard isErrorLoggingEnabled else { return }
         guard let error = error else { return }
+        let logger = logProvider.provide(error: error)
 
-        print(" ")
-        print("========== Networking Error ==========")
-        print(" ")
+        logger.log(" ")
+        logger.log("========== Networking Error ==========")
+        logger.log(" ")
 
         let isCancelled = error.code == NSURLErrorCancelled
         if isCancelled {
             if let request = request, let url = request.url {
-                print("Cancelled request: \(url.absoluteString)")
-                print(" ")
+                logger.log("Cancelled request: \(url.absoluteString)")
+                logger.log(" ")
             }
         } else {
-            print("*** Request ***")
-            print(" ")
+            logger.log("*** Request ***")
+            logger.log(" ")
 
-            print("Error \(error.code): \(error.description)")
-            print(" ")
+            logger.log("Error \(error.code): \(error.description)")
+            logger.log(" ")
 
             if let request = request, let url = request.url {
-                print("URL: \(url.absoluteString)")
-                print(" ")
+                logger.log("URL: \(url.absoluteString)")
+                logger.log(" ")
             }
 
             if let headers = request?.allHTTPHeaderFields {
-                print("Headers: \(headers)")
-                print(" ")
+                logger.log("Headers: \(headers)")
+                logger.log(" ")
             }
 
             if let parameterType = parameterType, let parameters = parameters {
@@ -382,44 +383,45 @@ extension Networking {
                         let data = try JSONSerialization.data(withJSONObject: parameters, options: .prettyPrinted)
                         let string = String(data: data, encoding: .utf8)
                         if let string = string {
-                            print("Parameters: \(string)")
-                            print(" ")
+                            logger.log("Parameters: \(string)")
+                            logger.log(" ")
                         }
                     } catch let error as NSError {
-                        print("Failed pretty printing parameters: \(parameters), error: \(error)")
-                        print(" ")
+                        logger.log("Failed pretty printing parameters: \(parameters), error: \(error)")
+                        logger.log(" ")
                     }
                 case .formURLEncoded:
                     guard let parametersDictionary = parameters as? [String: Any] else { fatalError("Couldn't cast parameters as dictionary: \(parameters)") }
                     do {
                         let formattedParameters = try parametersDictionary.urlEncodedString()
-                        print("Parameters: \(formattedParameters)")
+                        logger.log("Parameters: \(formattedParameters)")
                     } catch let error as NSError {
-                        print("Failed parsing Parameters: \(parametersDictionary) — \(error)")
+                        logger.log("Failed parsing Parameters: \(parametersDictionary) — \(error)")
                     }
-                    print(" ")
+                    logger.log(" ")
                 default: break
                 }
             }
 
             if let data = data, let stringData = String(data: data, encoding: .utf8) {
-                print("Data: \(stringData)")
-                print(" ")
+                logger.log("Data: \(stringData)")
+                logger.log(" ")
             }
 
             if let response = response as? HTTPURLResponse {
-                print("*** Response ***")
-                print(" ")
+                logger.log("*** Response ***")
+                logger.log(" ")
 
-                print("Headers: \(response.allHeaderFields)")
-                print(" ")
+                logger.log("Headers: \(response.allHeaderFields)")
+                logger.log(" ")
 
-                print("Status code: \(response.statusCode) — \(HTTPURLResponse.localizedString(forStatusCode: response.statusCode))")
-                print(" ")
+                logger.log("Status code: \(response.statusCode) — \(HTTPURLResponse.localizedString(forStatusCode: response.statusCode))")
+                logger.log(" ")
             }
         }
-        print("================= ~ ==================")
-        print(" ")
+        logger.log("================= ~ ==================")
+        logger.log(" ")
+        logger.flush()
     }
 
     func cacheOrPurgeJSON(object: Any?, path: String, cacheName: String?, cachingLevel: CachingLevel) throws {
