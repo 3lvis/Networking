@@ -1,9 +1,3 @@
-**Notice: Networking was supported from it's creation back in 2014 until November 2021**
-
-Moving forward I won't be able to support this project since I'm no longer using it. I'm leaving this repository as a historical reference of what happened during this time. Networking had in total 80 releases with almost 14 contributors. If you still support this project I encourage you to fork it and continue the development. I don't feel comfortable with passing this project to another developer due to the fact that I want to have some involvement in all the projects that live under my account. 5 years was a good run, thank you everyone for using this project and thank you to everyone that has contributed to it. Best of luck in your careers and in what this constantly evolving tech world has for all of us. 
-
---------------------------------------------------------------------
-
 ![Networking](https://raw.githubusercontent.com/3lvis/Networking/master/Images/cover-v3.png)
 
  <div align = "center">
