@@ -1,7 +1,7 @@
 version: 2.1
 jobs:
   build-and-test:
-    parallelism: 2
+    parallelism: 1
     macos:
       xcode: "14.3.1"
     shell: /bin/bash --login -o pipefail
