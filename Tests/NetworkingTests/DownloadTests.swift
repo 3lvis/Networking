@@ -40,7 +40,7 @@ class DownloadTests: XCTestCase {
         networking.downloadImage(path) { result in
             switch result {
             case let .success(response):
-                let pigImage = Image.find(named: "pig.png", inBundle: Bundle(for: DownloadTests.self))
+                let pigImage = Image.find(named: "pig.png", inBundle: .module)
                 let pigImageData = pigImage.pngData()
                 let imageData = response.image.pngData()
                 XCTAssertEqual(pigImageData, imageData)
@@ -61,7 +61,7 @@ class DownloadTests: XCTestCase {
         networking.downloadImage(path) { result in
             switch result {
             case let .success(response):
-                let pigImage = Image.find(named: "døgnvillburgere.jpg", inBundle: Bundle(for: DownloadTests.self))
+                let pigImage = Image.find(named: "døgnvillburgere.jpg", inBundle: .module)
                 let pigImageData = pigImage.pngData()
                 let imageData = response.image.pngData()
                 XCTAssertEqual(pigImageData, imageData)
@@ -115,7 +115,7 @@ class DownloadTests: XCTestCase {
                 guard let destinationURL = try? networking.destinationURL(for: path) else { XCTFail(); return }
                 let absoluteString = destinationURL.absoluteString
                 guard let image = networking.cache.object(forKey: absoluteString as AnyObject) as? Image else { XCTFail(); return }
-                let pigImage = Image.find(named: "pig.png", inBundle: Bundle(for: DownloadTests.self))
+                let pigImage = Image.find(named: "pig.png", inBundle: .module)
                 let pigImageData = pigImage.pngData()
                 let imageData = image.pngData()
                 XCTAssertEqual(pigImageData, imageData)
@@ -138,7 +138,7 @@ class DownloadTests: XCTestCase {
                 guard let destinationURL = try? networking.destinationURL(for: path, cacheName: cacheName) else { XCTFail(); return }
                 let absoluteString = destinationURL.absoluteString
                 guard let image = networking.cache.object(forKey: absoluteString as AnyObject) as? Image else { XCTFail(); return }
-                let pigImage = Image.find(named: "pig.png", inBundle: Bundle(for: DownloadTests.self))
+                let pigImage = Image.find(named: "pig.png", inBundle: .module)
                 let pigImageData = pigImage.pngData()
                 let imageData = image.pngData()
                 XCTAssertEqual(pigImageData, imageData)
@@ -181,7 +181,7 @@ class DownloadTests: XCTestCase {
             switch result {
             case .success:
                 guard let image = networking.imageFromCache(path) else { XCTFail(); return }
-                let pigImage = Image.find(named: "pig.png", inBundle: Bundle(for: DownloadTests.self))
+                let pigImage = Image.find(named: "pig.png", inBundle: .module)
                 let pigImageData = pigImage.pngData()
                 let imageData = image.pngData()
                 XCTAssertEqual(pigImageData, imageData)
@@ -199,7 +199,7 @@ class DownloadTests: XCTestCase {
         try! Helper.removeFileIfNeeded(networking, path: path, cacheName: cacheName)
         networking.downloadImage(path, cacheName: cacheName) { _ in
             let image = networking.imageFromCache(path, cacheName: cacheName)
-            let pigImage = Image.find(named: "pig.png", inBundle: Bundle(for: DownloadTests.self))
+            let pigImage = Image.find(named: "pig.png", inBundle: .module)
             let pigImageData = pigImage.pngData()
             let imageData = image?.pngData()
             XCTAssertEqual(pigImageData, imageData)
@@ -219,7 +219,7 @@ class DownloadTests: XCTestCase {
                 let absoluteString = destinationURL.absoluteString
                 cache.removeObject(forKey: absoluteString as AnyObject)
                 guard let image = networking.imageFromCache(path) else { XCTFail(); return }
-                let pigImage = Image.find(named: "pig.png", inBundle: Bundle(for: DownloadTests.self))
+                let pigImage = Image.find(named: "pig.png", inBundle: .module)
                 let pigImageData = pigImage.pngData()
                 let imageData = image.pngData()
                 XCTAssertEqual(pigImageData, imageData)
@@ -243,7 +243,7 @@ class DownloadTests: XCTestCase {
                 let absoluteString = destinationURL.absoluteString
                 cache.removeObject(forKey: absoluteString as AnyObject)
                 guard let image = networking.imageFromCache(path, cacheName: cacheName) else { XCTFail(); return }
-                let pigImage = Image.find(named: "pig.png", inBundle: Bundle(for: DownloadTests.self))
+                let pigImage = Image.find(named: "pig.png", inBundle: .module)
                 let pigImageData = pigImage.pngData()
                 let imageData = image.pngData()
                 XCTAssertEqual(pigImageData, imageData)

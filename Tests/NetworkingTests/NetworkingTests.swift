@@ -288,7 +288,7 @@ class NetworkingTests: XCTestCase {
 
         let networking = Networking(baseURL: baseURL)
         networking.downloadImage("/image/png") { _ in
-            let image = Image.find(named: "sample.jpg", inBundle: Bundle(for: NetworkingTests.self))
+            let image = Image.find(named: "sample.jpg", inBundle: .module)
             let data = image.jpgData()
             let filename = cachesURL.appendingPathComponent("sample.jpg")
             ((try? data?.write(to: filename)) as ()??)

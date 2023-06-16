@@ -175,7 +175,7 @@ class POSTTests: XCTestCase {
 
     /*
     func testUploadingAnImageWithMultipartFormData() {
-        guard let path = Bundle(for: POSTTests.self).path(forResource: "Keys", ofType: "plist") else { return }
+        guard let path = .module.path(forResource: "Keys", ofType: "plist") else { return }
         guard let dictionary = NSDictionary(contentsOfFile: path) else { return }
         guard let CloudinaryCloudName = dictionary["CloudinaryCloudName"] as? String, CloudinaryCloudName.count > 0 else { return }
         guard let CloudinarySecret = dictionary["CloudinarySecret"] as? String, CloudinarySecret.count > 0 else { return }
@@ -184,7 +184,7 @@ class POSTTests: XCTestCase {
         let networking = Networking(baseURL: "https://api.cloudinary.com")
         let timestamp = "\(Int(Date().timeIntervalSince1970))"
 
-        let pngImage = Image.find(named: "pig.png", inBundle: Bundle(for: POSTTests.self))
+        let pngImage = Image.find(named: "pig.png", inBundle: .module)
         let pngImageData = pngImage.pngData()!
         let pngPart = FormDataPart(data: pngImageData, parameterName: "file", filename: "\(timestamp).png")
 

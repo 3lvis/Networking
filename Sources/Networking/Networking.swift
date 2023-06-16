@@ -290,7 +290,7 @@ open class Networking {
         headerFields = nil
         authorizationHeaderKey = "Authorization"
         authorizationHeaderValue = nil
-        
+
         Networking.deleteCachedFiles()
     }
 

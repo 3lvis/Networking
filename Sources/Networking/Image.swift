@@ -1,4 +1,4 @@
-#if os(OSX)
+#if os(macOS)
     import AppKit.NSImage
     public typealias Image = NSImage
 #else
@@ -8,7 +8,7 @@
 
 extension Image {
     static func find(named name: String, inBundle bundle: Bundle) -> Image {
-        #if os(OSX)
+        #if os(macOS)
             return bundle.image(forResource: name)!
         #elseif os(watchOS)
             return UIImage(named: name)!
@@ -16,8 +16,8 @@ extension Image {
             return UIImage(named: name, in: bundle, compatibleWith: nil)!
         #endif
     }
-
-    #if os(OSX)
+ 
+    #if os(macOS)
         func data(_ type: NSBitmapImageRep.FileType) -> Data? {
             let imageData = tiffRepresentation!
             let bitmapImageRep = NSBitmapImageRep(data: imageData)!
@@ -26,14 +26,14 @@ extension Image {
         }
     #endif
 
-    #if os(OSX)
+    #if os(macOS)
     func pngData() -> Data? {
         return data(.png)
     }
     #endif
 
     func jpgData() -> Data? {
-        #if os(OSX)
+        #if os(macOS)
             return data(.jpeg)
         #else
             return self.jpegData(compressionQuality: 1)

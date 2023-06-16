@@ -180,7 +180,7 @@ extension FakeRequestTests {
     func testFakeGETUsingFile() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakeGET("/entries", fileName: "entries.json", bundle: Bundle(for: GETTests.self))
+        networking.fakeGET("/entries", fileName: "entries.json", bundle: .module)
 
         networking.get("/entries") { result in
             switch result {
@@ -264,7 +264,7 @@ extension FakeRequestTests {
     func testFakePOSTUsingFile() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakePOST("/entries", fileName: "entries.json", bundle: Bundle(for: POSTTests.self))
+        networking.fakePOST("/entries", fileName: "entries.json", bundle: .module)
 
         networking.post("/entries") { result in
             switch result {
@@ -317,7 +317,7 @@ extension FakeRequestTests {
     func testFakePUTUsingFile() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakePUT("/entries", fileName: "entries.json", bundle: Bundle(for: PUTTests.self))
+        networking.fakePUT("/entries", fileName: "entries.json", bundle: .module)
 
         networking.put("/entries", parameters: nil) { result in
             switch result {
@@ -370,7 +370,7 @@ extension FakeRequestTests {
     func testFakePATCHUsingFile() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakePATCH("/entries", fileName: "entries.json", bundle: Bundle(for: PATCHTests.self))
+        networking.fakePATCH("/entries", fileName: "entries.json", bundle: .module)
 
         networking.patch("/entries", parameters: nil) { result in
             switch result {
@@ -423,7 +423,7 @@ extension FakeRequestTests {
     func testFakeDELETEUsingFile() {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakeDELETE("/entries", fileName: "entries.json", bundle: Bundle(for: DELETETests.self))
+        networking.fakeDELETE("/entries", fileName: "entries.json", bundle: .module)
 
         networking.delete("/entries") { result in
             switch result {
@@ -443,7 +443,7 @@ extension FakeRequestTests {
 extension FakeRequestTests {
     func testFakeImageDownload() {
         let networking = Networking(baseURL: baseURL)
-        let pigImage = Image.find(named: "pig.png", inBundle: Bundle(for: DownloadTests.self))
+        let pigImage = Image.find(named: "pig.png", inBundle: .module)
         networking.fakeImageDownload("/image/png", image: pigImage)
         networking.downloadImage("/image/png") { result in
             switch result {
