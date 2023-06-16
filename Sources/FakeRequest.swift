@@ -1,6 +1,6 @@
 import Foundation
 
-struct FakeRequest {
+public struct FakeRequest {
     let response: Any?
     let responseType: Networking.ResponseType
     let statusCode: Int
@@ -63,7 +63,7 @@ struct FakeRequest {
 
 extension String {
 
-    mutating func removeFirstLetterIfDash() {
+    public mutating func removeFirstLetterIfDash() {
         let initialCharacter = String(self[..<index(after: startIndex)])
         if initialCharacter == "/" {
             if count > 1 {
@@ -74,7 +74,7 @@ extension String {
         }
     }
 
-    mutating func removeLastLetterIfDash() {
+    public mutating func removeLastLetterIfDash() {
         let initialCharacter: String
         if count > 1 {
             initialCharacter = String(self[index(endIndex, offsetBy: -1)...])

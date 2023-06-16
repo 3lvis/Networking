@@ -7,7 +7,7 @@
 #endif
 
 extension Image {
-    static func find(named name: String, inBundle bundle: Bundle) -> Image {
+    public static func find(named name: String, inBundle bundle: Bundle) -> Image {
         #if os(OSX)
             return bundle.image(forResource: name)!
         #elseif os(watchOS)
@@ -32,7 +32,7 @@ extension Image {
     }
     #endif
 
-    func jpgData() -> Data? {
+    public func jpgData() -> Data? {
         #if os(OSX)
             return data(.jpeg)
         #else

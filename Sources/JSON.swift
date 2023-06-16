@@ -12,7 +12,7 @@ public enum JSON: Equatable {
 
     case array(Data, [[String: Any]])
 
-    var dictionary: [String: Any] {
+    public var dictionary: [String: Any] {
         switch self {
         case let .dictionary(_, body):
             return body
@@ -21,7 +21,7 @@ public enum JSON: Equatable {
         }
     }
 
-    var array: [[String: Any]] {
+    public var array: [[String: Any]] {
         switch self {
         case let .array(_, body):
             return body
@@ -30,7 +30,7 @@ public enum JSON: Equatable {
         }
     }
 
-    init(_ data: Data) throws {
+    public init(_ data: Data) throws {
         let body = try JSONSerialization.jsonObject(with: data, options: [])
 
         if let dictionary = body as? [String: Any] {
@@ -42,13 +42,13 @@ public enum JSON: Equatable {
         }
     }
 
-    init(_ dictionary: [String: Any]) {
+    public init(_ dictionary: [String: Any]) {
         let data = try! JSONSerialization.data(withJSONObject: dictionary, options: [])
 
         self = .dictionary(data, dictionary)
     }
 
-    init(_ array: [[String: Any]]) {
+    public init(_ array: [[String: Any]]) {
         let data = try! JSONSerialization.data(withJSONObject: array, options: [])
 
         self = .array(data, array)

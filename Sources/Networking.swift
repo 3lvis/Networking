@@ -26,7 +26,7 @@ public extension Int {
 }
 
 open class Networking {
-    static let domain = "com.3lvis.networking"
+    public static let domain = "com.3lvis.networking"
 
     enum RequestType: String {
         case get = "GET", post = "POST", put = "PUT", patch = "PATCH", delete = "DELETE"
@@ -93,8 +93,8 @@ open class Networking {
     fileprivate let baseURL: String
     var fakeRequests = [RequestType: [String: FakeRequest]]()
     public private(set) var token: String?
-    var authorizationHeaderValue: String?
-    var authorizationHeaderKey = "Authorization"
+    public var authorizationHeaderValue: String?
+    public var authorizationHeaderKey = "Authorization"
     fileprivate var configuration: URLSessionConfiguration
     var cache: NSCache<AnyObject, AnyObject>
 
