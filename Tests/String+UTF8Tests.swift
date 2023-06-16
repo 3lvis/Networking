@@ -1,5 +1,6 @@
 import Foundation
 import XCTest
+@testable import Networking
 
 class String_UTF8Tests: XCTestCase {
 

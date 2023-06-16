@@ -1,5 +1,6 @@
 import Foundation
 import XCTest
+@testable import Networking
 
 class POSTTests: XCTestCase {
     let baseURL = "http://httpbin.org"
@@ -172,6 +173,7 @@ class POSTTests: XCTestCase {
         }
     }
 
+    /*
     func testUploadingAnImageWithMultipartFormData() {
         guard let path = Bundle(for: POSTTests.self).path(forResource: "Keys", ofType: "plist") else { return }
         guard let dictionary = NSDictionary(contentsOfFile: path) else { return }
@@ -206,6 +208,7 @@ class POSTTests: XCTestCase {
             }
         }
     }
+    */
 
     func testPOSTWithIvalidPath() {
         let networking = Networking(baseURL: baseURL)

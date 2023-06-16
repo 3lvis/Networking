@@ -1,5 +1,6 @@
 import Foundation
 import XCTest
+@testable import Networking
 
 class UnauthorizedCallbackTests: XCTestCase {
     let baseURL = "http://httpbin.org"

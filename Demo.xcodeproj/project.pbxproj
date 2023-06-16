@@ -69,8 +69,6 @@
 		148341741CF1CF0500E91F01 /* Image.swift in Sources */ = {isa = PBXBuildFile; fileRef = 148341701CF1CF0500E91F01 /* Image.swift */; };
 		148341751CF1CF0500E91F01 /* Image.swift in Sources */ = {isa = PBXBuildFile; fileRef = 148341701CF1CF0500E91F01 /* Image.swift */; };
 		148341761CF1CF0500E91F01 /* Image.swift in Sources */ = {isa = PBXBuildFile; fileRef = 148341701CF1CF0500E91F01 /* Image.swift */; };
-		1488E23E1CF138D700C6FBA3 /* SHA1.m in Sources */ = {isa = PBXBuildFile; fileRef = 1488E23D1CF138D700C6FBA3 /* SHA1.m */; };
-		1488E23F1CF138D700C6FBA3 /* SHA1.m in Sources */ = {isa = PBXBuildFile; fileRef = 1488E23D1CF138D700C6FBA3 /* SHA1.m */; };
 		14B0CEE51CF1D0D700049AD6 /* døgnvillburgere.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 14B0CEDE1CF1D0D700049AD6 /* døgnvillburgere.jpg */; };
 		14B0CEE61CF1D0D700049AD6 /* døgnvillburgere.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 14B0CEDE1CF1D0D700049AD6 /* døgnvillburgere.jpg */; };
 		14B0CEE71CF1D0D700049AD6 /* entries.json in Resources */ = {isa = PBXBuildFile; fileRef = 14B0CEDF1CF1D0D700049AD6 /* entries.json */; };
@@ -144,7 +142,6 @@
 		44B5D3981D19B9E5004378B9 /* FormDataPart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D144DD1CEED63B00048629 /* FormDataPart.swift */; };
 		44B5D3991D19B9E5004378B9 /* TestHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1413F4611CE7963700482096 /* TestHelpers.swift */; };
 		44B5D39B1D19B9E5004378B9 /* GETTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 146EF90E1CEBCEA50059DDB1 /* GETTests.swift */; };
-		44B5D39F1D19B9E5004378B9 /* SHA1.m in Sources */ = {isa = PBXBuildFile; fileRef = 1488E23D1CF138D700C6FBA3 /* SHA1.m */; };
 		44B5D3A01D19B9E5004378B9 /* Networking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1474C1C11CA2988900E15D84 /* Networking.swift */; };
 		44B5D3A31D19B9E5004378B9 /* Keys.plist in Resources */ = {isa = PBXBuildFile; fileRef = 14B0CEE11CF1D0D700049AD6 /* Keys.plist */; };
 		44B5D3A41D19B9E5004378B9 /* entries.json in Resources */ = {isa = PBXBuildFile; fileRef = 14B0CEDF1CF1D0D700049AD6 /* entries.json */; };
@@ -201,11 +198,8 @@
 		1476C3201E41FD9000E9FB4D /* simple_dictionary.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = simple_dictionary.json; sourceTree = "<group>"; };
 		147B32EE1CF9B1C500D5BAED /* Networking+HTTPRequests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Networking+HTTPRequests.swift"; sourceTree = "<group>"; };
 		148341701CF1CF0500E91F01 /* Image.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Image.swift; sourceTree = "<group>"; };
-		1488E23C1CF138D700C6FBA3 /* SHA1.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SHA1.h; sourceTree = "<group>"; };
-		1488E23D1CF138D700C6FBA3 /* SHA1.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SHA1.m; sourceTree = "<group>"; };
 		14B0CEDE1CF1D0D700049AD6 /* døgnvillburgere.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "døgnvillburgere.jpg"; sourceTree = "<group>"; };
 		14B0CEDF1CF1D0D700049AD6 /* entries.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = entries.json; sourceTree = "<group>"; };
-		14B0CEE01CF1D0D700049AD6 /* Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Bridging-Header.h"; sourceTree = "<group>"; };
 		14B0CEE11CF1D0D700049AD6 /* Keys.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Keys.plist; sourceTree = "<group>"; };
 		14B0CEE31CF1D0D700049AD6 /* pig.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = pig.png; sourceTree = "<group>"; };
 		14B0CEE41CF1D0D700049AD6 /* sample.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = sample.jpg; sourceTree = "<group>"; };
@@ -310,9 +304,7 @@
 				1413F4631CE7963700482096 /* DownloadTests.swift */,
 				1413F45E1CE7963700482096 /* Dictionary+FormURLEncodedTests.swift */,
 				1413F4611CE7963700482096 /* TestHelpers.swift */,
-				1488E23D1CF138D700C6FBA3 /* SHA1.m */,
 				E6ED61301E27CD630058ACE9 /* UnauthorizedCallbackTests.swift */,
-				1488E23C1CF138D700C6FBA3 /* SHA1.h */,
 				4496E8E51DAFB27A0092254E /* String+UTF8Tests.swift */,
 				44A6D5591E4143F400405A7E /* JSONTests.swift */,
 				44BC3A841E44569C004A948D /* ResultTests.swift */,
@@ -372,7 +364,6 @@
 			isa = PBXGroup;
 			children = (
 				1420A3721DBC00B8009258C3 /* Info.plist */,
-				14B0CEE01CF1D0D700049AD6 /* Bridging-Header.h */,
 				14B0CEDE1CF1D0D700049AD6 /* døgnvillburgere.jpg */,
 				14B0CEE41CF1D0D700049AD6 /* sample.jpg */,
 				14B0CEDF1CF1D0D700049AD6 /* entries.json */,
@@ -791,7 +782,6 @@
 				145F16531E3E89E200597D7B /* Response.swift in Sources */,
 				44A6D55C1E4143F400405A7E /* JSONTests.swift in Sources */,
 				146EF9141CEBCEA50059DDB1 /* GETTests.swift in Sources */,
-				1488E23F1CF138D700C6FBA3 /* SHA1.m in Sources */,
 				1413F4771CE7968E00482096 /* JSON.swift in Sources */,
 				4488DBCC1D9BCA0E007D7A14 /* FakeRequestTests.swift in Sources */,
 				445F053321007512003906C2 /* NetworkingTests.swift in Sources */,
@@ -897,7 +887,6 @@
 				145F16511E3E89E200597D7B /* Response.swift in Sources */,
 				146EF9131CEBCEA50059DDB1 /* GETTests.swift in Sources */,
 				44A6D55A1E4143F400405A7E /* JSONTests.swift in Sources */,
-				1488E23E1CF138D700C6FBA3 /* SHA1.m in Sources */,
 				1474C1C81CA2988900E15D84 /* Networking.swift in Sources */,
 				4488DBCA1D9BCA0E007D7A14 /* FakeRequestTests.swift in Sources */,
 				445F053121007512003906C2 /* NetworkingTests.swift in Sources */,
@@ -931,7 +920,6 @@
 				145F16521E3E89E200597D7B /* Response.swift in Sources */,
 				44B5D39B1D19B9E5004378B9 /* GETTests.swift in Sources */,
 				44A6D55B1E4143F400405A7E /* JSONTests.swift in Sources */,
-				44B5D39F1D19B9E5004378B9 /* SHA1.m in Sources */,
 				44B5D3A01D19B9E5004378B9 /* Networking.swift in Sources */,
 				4488DBCB1D9BCA0E007D7A14 /* FakeRequestTests.swift in Sources */,
 				445F053221007512003906C2 /* NetworkingTests.swift in Sources */,
@@ -995,7 +983,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.sample.3lvis.macOSTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
-				SWIFT_OBJC_BRIDGING_HEADER = "Tests/Resources/Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 			};
@@ -1023,7 +1010,6 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OBJC_BRIDGING_HEADER = "Tests/Resources/Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 			};
@@ -1443,7 +1429,6 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.sample.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "Tests/Resources/Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 			};
@@ -1465,7 +1450,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.sample.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OBJC_BRIDGING_HEADER = "Tests/Resources/Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 			};
@@ -1490,7 +1474,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.sample.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
-				SWIFT_OBJC_BRIDGING_HEADER = "Tests/Resources/Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TVOS_DEPLOYMENT_TARGET = 13.0;
@@ -1513,7 +1496,6 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
 				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OBJC_BRIDGING_HEADER = "Tests/Resources/Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 				TVOS_DEPLOYMENT_TARGET = 13.0;

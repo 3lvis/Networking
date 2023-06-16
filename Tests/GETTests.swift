@@ -1,5 +1,6 @@
 import Foundation
 import XCTest
+@testable import Networking
 
 class GETTests: XCTestCase {
     let baseURL = "http://httpbin.org"
