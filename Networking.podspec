@@ -18,13 +18,13 @@ Simple NSURLSession wrapper with support for image caching and faking network re
 EOS
 s.homepage         = "https://github.com/3lvis/Networking"
 s.license          = 'MIT'
-s.author           = { "Elvis Nuñez" => "elvisnunez@me.com" }
+s.author           = { "Elvis Nunez" => "elvisnunez@me.com" }
 s.source           = { git: "https://github.com/3lvis/Networking.git", tag: s.version.to_s }
 s.social_media_url = 'https://twitter.com/3lvis'
-s.ios.deployment_target = '11.0'
-s.osx.deployment_target = '10.15'
-s.watchos.deployment_target = '5.0'
-s.tvos.deployment_target = '11.0'
+s.ios.deployment_target = '13.0'
+s.osx.deployment_target = '12.0'
+s.watchos.deployment_target = '6.0'
+s.tvos.deployment_target = '13.0'
 s.requires_arc     = true
 s.source_files     = 'Sources/**/*'
 s.frameworks       = 'Foundation'

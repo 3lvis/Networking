@@ -512,24 +512,6 @@ let networking = Networking(baseURL: "http://httpbin.org")
 networking.disableErrorLogging = true
 ```
 
-## Updating the Network Activity Indicator
-
-**Networking** balances how the network activity indicator is displayed.
-
-> A network activity indicator appears in the status bar and shows that network activity is occurring.
->The network activity indicator:
->
-> - Spins in the status bar while network activity proceeds and disappears when network activity stops
-> - Doesn’t allow user interaction
->
-> Display the network activity indicator to provide feedback when your app accesses the network for more than a couple of seconds. If the operation finishes sooner than that, you don’t have to show the network activity indicator, because the indicator is likely to disappear before users notice its presence.
->
->— [iOS Human Interface Guidelines](https://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/MobileHIG/Controls.html)
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/3lvis/NetworkActivityIndicator/master/GIF/sample.gif"/>
-</p>
-
 ## Installing
 
 **Networking** is available through [CocoaPods](http://cocoapods.org). To install
