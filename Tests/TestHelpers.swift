@@ -1,5 +1,5 @@
 import Foundation
-import Networking
+@testable import Networking
 
 struct Helper {
 

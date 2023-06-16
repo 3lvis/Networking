@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-import Networking
+@testable import Networking
 
 class ResultTests: XCTestCase {
     var response: HTTPURLResponse {

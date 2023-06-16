@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-import Networking
+@testable import Networking
 
 class NetworkingTests: XCTestCase {
     let baseURL = "http://httpbin.org"
