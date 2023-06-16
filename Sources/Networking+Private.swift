@@ -172,10 +172,6 @@ extension Networking {
         let requestID = UUID().uuidString
         var request = URLRequest(url: try! composedURL(with: path), requestType: requestType, path: path, parameterType: parameterType, responseType: responseType, boundary: boundary, authorizationHeaderValue: authorizationHeaderValue, token: token, authorizationHeaderKey: authorizationHeaderKey, headerFields: headerFields)
 
-        DispatchQueue.main.async {
-            NetworkActivityIndicator.sharedIndicator.visible = true
-        }
-
         var serializingError: NSError?
         if let parameterType = parameterType {
             switch parameterType {
@@ -273,11 +269,7 @@ extension Networking {
 
                 if TestCheck.isTesting && self.isSynchronous == false {
                     semaphore.signal()
-                } else {
-                    DispatchQueue.main.async {
-                        NetworkActivityIndicator.sharedIndicator.visible = false
-                    }
-
+                } else {                   
                     self.logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError as NSError?)
                     if let unauthorizedRequestCallback = self.unauthorizedRequestCallback, let error = connectionError as NSError?, error.code == 403 || error.code == 401 {
                         unauthorizedRequestCallback()
