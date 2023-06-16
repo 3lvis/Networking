@@ -7,8 +7,8 @@ jobs:
     steps:
       - checkout
       - run: xcodebuild -project Demo.xcodeproj -scheme "macOSTests" -sdk macosx test | xcpretty
-      - run: xcodebuild -project Demo.xcodeproj -scheme "iOSTests" -sdk iphonesimulator -destination 'platform=iOS Simulator,OS=13.5,name=iPhone 13' test | xcpretty
-      - run: xcodebuild -project Demo.xcodeproj -scheme "tvOSTests" -destination 'platform=tvOS Simulator,name=Apple TV,OS=13.4' test | xcpretty
+      - run: xcodebuild -project Demo.xcodeproj -scheme "iOSTests" -sdk iphonesimulator -destination 'platform=iOS Simulator,OS=16.4,name=iPhone 14' test | xcpretty
+      - run: xcodebuild -project Demo.xcodeproj -scheme "tvOSTests" -destination 'platform=tvOS Simulator,name=Apple TV,OS=16.4' test | xcpretty
 
 workflows:
   version: 2
