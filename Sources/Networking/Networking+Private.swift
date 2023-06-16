@@ -1,5 +1,6 @@
 import Foundation
 
+@available(macOS 12.0, *)
 extension Networking {
 
     func objectFromCache(for path: String, cacheName: String?, cachingLevel: CachingLevel, responseType: ResponseType) -> Any? {
@@ -84,6 +85,22 @@ extension Networking {
 
         let requestID = UUID().uuidString
         return requestID
+    }
+
+    func asyncHandleJSONRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]? = nil, responseType: ResponseType, cachingLevel: CachingLevel) async throws -> JSONResult {
+
+        switch cachingLevel {
+        case .memory, .memoryAndFile:
+            if let object = objectFromCache(for: path, cacheName: nil, cachingLevel: cachingLevel, responseType: responseType) {
+                let url = try self.composedURL(with: path)
+                let response = HTTPURLResponse(url: url, statusCode: 200)
+                return JSONResult(body: object, response: response, error: nil)
+            }
+        default: break
+        }
+
+        let (data, response) = try await asyncRequestData(requestType, path: path, cachingLevel: cachingLevel, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType)
+        return JSONResult(body: data, response: response as! HTTPURLResponse, error: nil)
     }
 
     func handleJSONRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]? = nil, responseType: ResponseType, cachingLevel: CachingLevel, completion: @escaping (_ result: JSONResult) -> Void) -> String {
@@ -308,6 +325,71 @@ extension Networking {
         }
 
         return requestID
+    }
+
+    @available(macOS 12.0, *)
+    func asyncRequestData(_ requestType: RequestType, path: String, cachingLevel: CachingLevel, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType) async throws -> (Data, URLResponse) {
+        var request = URLRequest(url: try composedURL(with: path), requestType: requestType, path: path, parameterType: parameterType, responseType: responseType, boundary: boundary, authorizationHeaderValue: authorizationHeaderValue, token: token, authorizationHeaderKey: authorizationHeaderKey, headerFields: headerFields)
+
+        if let parameterType = parameterType {
+            switch parameterType {
+            case .none: break
+            case .json:
+                if let parameters = parameters {
+                    request.httpBody = try JSONSerialization.data(withJSONObject: parameters, options: [])
+                }
+            case .formURLEncoded:
+                guard let parametersDictionary = parameters as? [String: Any] else { fatalError("Couldn't convert parameters to a dictionary: \(String(describing: parameters))") }
+
+                let formattedParameters = try parametersDictionary.urlEncodedString()
+                switch requestType {
+                case .get, .delete:
+                    let urlEncodedPath: String
+                    if path.contains("?") {
+                        if let lastCharacter = path.last, lastCharacter == "?" {
+                            urlEncodedPath = path + formattedParameters
+                        } else {
+                            urlEncodedPath = path + "&" + formattedParameters
+                        }
+                    } else {
+                        urlEncodedPath = path + "?" + formattedParameters
+                    }
+                    request.url = try composedURL(with: urlEncodedPath)
+                case .post, .put, .patch:
+                    request.httpBody = formattedParameters.data(using: .utf8)
+                }
+
+            case .multipartFormData:
+                var bodyData = Data()
+
+                if let parameters = parameters as? [String: Any] {
+                    for (key, value) in parameters {
+                        let usedValue: Any = value is NSNull ? "null" : value
+                        var body = ""
+                        body += "--\(boundary)\r\n"
+                        body += "Content-Disposition: form-data; name=\"\(key)\""
+                        body += "\r\n\r\n\(usedValue)\r\n"
+                        bodyData.append(body.data(using: .utf8)!)
+                    }
+                }
+
+                if let parts = parts {
+                    for var part in parts {
+                        part.boundary = boundary
+                        bodyData.append(part.formData as Data)
+                    }
+                }
+
+                bodyData.append("--\(boundary)--\r\n".data(using: .utf8)!)
+                request.httpBody = bodyData as Data
+            case .custom:
+                request.httpBody = parameters as? Data
+            }
+        }
+
+        let (data, response) = try await self.session.data(for: request)
+        self.cacheOrPurgeData(data: data, path: path, cacheName: nil, cachingLevel: cachingLevel)
+        return (data, response)
     }
 
     func cancelRequest(_ sessionTaskType: SessionTaskType, requestType: RequestType, url: URL) {

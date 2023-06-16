@@ -26,6 +26,24 @@ class GETTests: XCTestCase {
         waitForExpectations(timeout: 15.0, handler: nil)
     }
 
+    func testAsyncGET() async throws {
+        let networking = Networking(baseURL: baseURL)
+        let result = try await networking.asyncGet("/get")
+        switch result {
+        case let .success(response):
+            let json = response.dictionaryBody
+
+            guard let url = json["url"] as? String else { XCTFail(); return }
+            XCTAssertEqual(url, "http://httpbin.org/get")
+
+            guard let headers = json["headers"] as? [String: String] else { XCTFail(); return }
+            let contentType = headers["Content-Type"]
+            XCTAssertNil(contentType)
+        case .failure:
+            XCTFail()
+        }
+    }
+
     func testGET() {
         let networking = Networking(baseURL: baseURL)
         networking.get("/get") { result in
