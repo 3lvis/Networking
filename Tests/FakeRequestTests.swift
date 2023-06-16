@@ -1,5 +1,6 @@
 import Foundation
 import XCTest
+import Networking
 
 class FakeRequestTests: XCTestCase {
     let baseURL = "http://httpbin.org"

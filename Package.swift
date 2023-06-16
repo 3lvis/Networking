@@ -1,7 +1,7 @@
-// swift-tools-version:4.2
+// swift-tools-version:5.3
 
 // Licensed under the **MIT** license
-// Copyright (c) 2016 Elvis Nuñez
+// Copyright (c) 2023 Elvis Nunez
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -34,5 +34,10 @@ let package = Package(
 			name: "Networking",
 			dependencies: [],
 			path: "./Sources"),
+		.testTarget(
+			name: "iOSTests",
+			dependencies: [],
+			path: "./Tests",
+			exclude: ["Resources"]),
 	]
 )

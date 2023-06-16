@@ -1,5 +1,6 @@
 import Foundation
 import XCTest
+import Networking
 
 class POSTTests: XCTestCase {
     let baseURL = "http://httpbin.org"
@@ -172,6 +173,8 @@ class POSTTests: XCTestCase {
         }
     }
 
+    /*
+    // Disable due to missing API Key and because it relays on the SHA1 file which can't be used due to it's Objective-C form.
     func testUploadingAnImageWithMultipartFormData() {
         guard let path = Bundle(for: POSTTests.self).path(forResource: "Keys", ofType: "plist") else { return }
         guard let dictionary = NSDictionary(contentsOfFile: path) else { return }
@@ -206,6 +209,7 @@ class POSTTests: XCTestCase {
             }
         }
     }
+    */
 
     func testPOSTWithIvalidPath() {
         let networking = Networking(baseURL: baseURL)
@@ -267,3 +271,4 @@ class POSTTests: XCTestCase {
         networking.delete("/v1_1/\(cloudName)/resources/image/upload?all=true") { _ in }
     }
 }
+

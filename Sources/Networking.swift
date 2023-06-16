@@ -92,7 +92,7 @@ open class Networking {
 
     fileprivate let baseURL: String
     var fakeRequests = [RequestType: [String: FakeRequest]]()
-    var token: String?
+    public private(set) var token: String?
     var authorizationHeaderValue: String?
     var authorizationHeaderKey = "Authorization"
     fileprivate var configuration: URLSessionConfiguration
@@ -105,7 +105,7 @@ open class Networking {
     public var isErrorLoggingEnabled = true
 
     /// The boundary used for multipart requests.
-    let boundary = String(format: "net.3lvis.networking.%08x%08x", arc4random(), arc4random())
+    public let boundary = String(format: "net.3lvis.networking.%08x%08x", arc4random(), arc4random())
 
     lazy var session: URLSession = {
         URLSession(configuration: self.configuration)

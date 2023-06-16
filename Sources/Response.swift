@@ -27,7 +27,7 @@ public class FailureResponse: Response {
 }
 
 public class JSONResponse: Response {
-    let json: JSON
+    public let json: JSON
     public let body: Any?
 
     public var dictionaryBody: [String: Any] {

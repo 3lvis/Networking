@@ -5,7 +5,7 @@ enum ParsingError: Error {
     case notFound, failed
 }
 
-enum JSON: Equatable {
+public enum JSON: Equatable {
     case none
 
     case dictionary(Data, [String: Any])
@@ -75,7 +75,7 @@ public extension FileManager {
     }
 }
 
-func ==(lhs: JSON, rhs: JSON) -> Bool {
+public func ==(lhs: JSON, rhs: JSON) -> Bool {
     return lhs.array.debugDescription == rhs.array.debugDescription && lhs.dictionary.debugDescription == rhs.dictionary.debugDescription
 }
 

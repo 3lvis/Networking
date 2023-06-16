@@ -37,7 +37,7 @@ public extension Dictionary where Key: ExpressibleByStringLiteral {
 
 extension String {
 
-    func encodeUTF8() -> String? {
+    public func encodeUTF8() -> String? {
         if let _ = URL(string: self) {
             return self
         }
@@ -105,7 +105,7 @@ extension URL {
 }
 
 extension HTTPURLResponse {
-    convenience init(url: URL, statusCode: Int) {
+    public convenience init(url: URL, statusCode: Int) {
         self.init(url: url, statusCode: statusCode, httpVersion: nil, headerFields: nil)!
     }
 }
