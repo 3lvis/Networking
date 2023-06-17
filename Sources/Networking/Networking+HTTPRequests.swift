@@ -7,27 +7,12 @@ public extension Networking {
     /// - Parameters:
     ///   - path: The path for the GET request.
     ///   - parameters: The parameters to be used, they will be serialized using Percent-encoding and appended to the URL.
-    ///   - completion: The result of the operation, it's an enum with two cases: success and failure.
     /// - Returns: The request identifier.
     @discardableResult
-    func asyncGet(_ path: String, parameters: Any? = nil, cachingLevel: CachingLevel = .none) async throws -> JSONResult {
+    func get(_ path: String, parameters: Any? = nil, cachingLevel: CachingLevel = .none) async throws -> JSONResult {
         let parameterType: ParameterType = parameters != nil ? .formURLEncoded : .none
 
         return try await asyncHandleJSONRequest(.get, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, responseType: .json, cachingLevel: cachingLevel)
-    }
-
-    /// GET request to the specified path.
-    ///
-    /// - Parameters:
-    ///   - path: The path for the GET request.
-    ///   - parameters: The parameters to be used, they will be serialized using Percent-encoding and appended to the URL.
-    ///   - completion: The result of the operation, it's an enum with two cases: success and failure.
-    /// - Returns: The request identifier.
-    @discardableResult
-    func get(_ path: String, parameters: Any? = nil, cachingLevel: CachingLevel = .none, completion: @escaping (_ result: JSONResult) -> Void) -> String {
-        let parameterType: ParameterType = parameters != nil ? .formURLEncoded : .none
-
-        return handleJSONRequest(.get, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, responseType: .json, cachingLevel: cachingLevel, completion: completion)
     }
 
     /// Registers a fake GET request for the specified path. After registering this, every GET request to the path, will return the registered response.

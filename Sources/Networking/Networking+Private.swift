@@ -87,6 +87,32 @@ extension Networking {
         return requestID
     }
 
+    func asyncHandleFakeRequest(_ fakeRequest: FakeRequest, path: String, cacheName: String?, cachingLevel: CachingLevel) -> (Any?, HTTPURLResponse, NSError?) {
+        var error: NSError?
+        let url = try! composedURL(with: path)
+        let response = HTTPURLResponse(url: url, statusCode: fakeRequest.statusCode)
+
+        if let unauthorizedRequestCallback = unauthorizedRequestCallback, fakeRequest.statusCode == 403 || fakeRequest.statusCode == 401 {
+            TestCheck.testBlock(isSynchronous) {
+                unauthorizedRequestCallback()
+            }
+        }
+
+        if fakeRequest.statusCode.statusCodeType != .successful {
+            error = NSError(fakeRequest: fakeRequest)
+        }
+
+        switch fakeRequest.responseType {
+        case .image:
+            cacheOrPurgeImage(data: fakeRequest.response as? Data, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
+        case .data:
+            cacheOrPurgeData(data: fakeRequest.response as? Data, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
+        case .json:
+            try? cacheOrPurgeJSON(object: fakeRequest.response, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
+        }
+        return (fakeRequest.response, response, error)
+    }
+
     func asyncHandleJSONRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]? = nil, responseType: ResponseType, cachingLevel: CachingLevel) async throws -> JSONResult {
 
         switch cachingLevel {
@@ -99,8 +125,13 @@ extension Networking {
         default: break
         }
 
-        let (data, response) = try await asyncRequestData(requestType, path: path, cachingLevel: cachingLevel, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType)
-        return JSONResult(body: data, response: response as! HTTPURLResponse, error: nil)
+        if let fakeRequest = FakeRequest.find(ofType: requestType, forPath: path, in: fakeRequests) {
+            let (_, response, error) = asyncHandleFakeRequest(fakeRequest, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
+            return JSONResult(body: fakeRequest.response, response: response, error: error)
+        } else {
+            let (data, response) = try await asyncRequestData(requestType, path: path, cachingLevel: cachingLevel, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType)
+            return JSONResult(body: data, response: response as! HTTPURLResponse, error: nil)
+        }
     }
 
     func handleJSONRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]? = nil, responseType: ResponseType, cachingLevel: CachingLevel, completion: @escaping (_ result: JSONResult) -> Void) -> String {

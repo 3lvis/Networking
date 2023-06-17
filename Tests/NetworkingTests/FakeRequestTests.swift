@@ -127,75 +127,71 @@ class FakeRequestTests: XCTestCase {
 
 // GET tests
 extension FakeRequestTests {
-    func testFakeGET() {
+    func testFakeGET() async throws {
         let networking = Networking(baseURL: baseURL)
 
         networking.fakeGET("/stories", response: ["name": "Elvis"])
 
-        networking.get("/stories") { result in
-            switch result {
-            case let .success(response):
-                let json = response.dictionaryBody
-                let value = json["name"] as? String
-                XCTAssertEqual(value, "Elvis")
-            case .failure:
-                XCTFail()
-            }
+        let result = try await networking.get("/stories")
+        switch result {
+        case let .success(response):
+            let json = response.dictionaryBody
+            let value = json["name"] as? String
+            XCTAssertEqual(value, "Elvis")
+        case .failure:
+            XCTFail()
         }
     }
 
-    func testFakeGETWithInvalidStatusCode() {
+    func testFakeGETWithInvalidStatusCode() async throws {
         let networking = Networking(baseURL: baseURL)
 
         networking.fakeGET("/stories", response: nil, statusCode: 401)
 
-        networking.get("/stories") { result in
-            switch result {
-            case .success:
-                XCTFail()
-            case let .failure(response):
-                XCTAssertEqual(response.error.code, 401)
-            }
+        let result = try await networking.get("/stories")
+        switch result {
+        case .success:
+            XCTFail()
+        case let .failure(response):
+            XCTAssertEqual(response.error.code, 401)
         }
     }
 
-    func testFakeGETWithInvalidPathAndJSONError() {
+    func testFakeGETWithInvalidPathAndJSONError() async throws {
         let networking = Networking(baseURL: baseURL)
 
         let expectedResponse = ["error_message": "Shit went down"]
         networking.fakeGET("/stories", response: expectedResponse, statusCode: 401)
 
-        networking.get("/stories") { result in
-            switch result {
-            case .success:
-                XCTFail()
-            case let .failure(response):
-                let json = response.dictionaryBody
-                XCTAssertEqual(json as! [String: String], expectedResponse)
-                XCTAssertEqual(response.error.code, 401)
-            }
+        let result = try await networking.get("/stories")
+        switch result {
+        case .success:
+            XCTFail()
+        case let .failure(response):
+            let json = response.dictionaryBody
+            XCTAssertEqual(json as! [String: String], expectedResponse)
+            XCTAssertEqual(response.error.code, 401)
         }
     }
 
-    func testFakeGETUsingFile() {
+    func testFakeGETUsingFile() async throws {
         let networking = Networking(baseURL: baseURL)
 
         networking.fakeGET("/entries", fileName: "entries.json", bundle: .module)
 
-        networking.get("/entries") { result in
-            switch result {
-            case let .success(response):
-                let json = response.arrayBody
-                let entry = json[0]
-                let value = entry["title"] as? String
-                XCTAssertEqual(value, "Entry 1")
-            case .failure:
-                XCTFail()
-            }
+        let result = try await networking.get("/entries")
+        switch result {
+        case let .success(response):
+            let json = response.arrayBody
+            let entry = json[0]
+            let value = entry["title"] as? String
+            XCTAssertEqual(value, "Entry 1")
+        case .failure:
+            XCTFail()
         }
     }
 
-    func testFakeGETOneLevelUsingPattern() {
+    func testFakeGETOneLevelUsingPattern() async throws {
         let networking = Networking(baseURL: baseURL)
 
         let json = [
@@ -203,26 +199,24 @@ extension FakeRequestTests {
         ]
         networking.fakeGET("/users/{userID}", response: json, statusCode: 200)
 
-        networking.get("/users/10") { result in
-            switch result {
-            case .success(let response):
-                let json = response.dictionaryBody
-                let name = json["name"] as? String
-                XCTAssertEqual(name, "Name 10")
-            case .failure:
-                XCTFail()
-            }
+        let result = try await networking.get("/users/10")
+        switch result {
+        case .success(let response):
+            let json = response.dictionaryBody
+            let name = json["name"] as? String
+            XCTAssertEqual(name, "Name 10")
+        case .failure:
+            XCTFail()
         }
 
-        networking.get("/users/20") { result in
-            switch result {
-            case .success(let response):
-                let json = response.dictionaryBody
-                let name = json["name"] as? String
-                XCTAssertEqual(name, "Name 20")
-            case .failure:
-                XCTFail()
-            }
+        let result2 = try await networking.get("/users/20")
+        switch result2 {
+        case .success(let response):
+            let json = response.dictionaryBody
+            let name = json["name"] as? String
+            XCTAssertEqual(name, "Name 20")
+        case .failure:
+            XCTFail()
         }
     }
 }

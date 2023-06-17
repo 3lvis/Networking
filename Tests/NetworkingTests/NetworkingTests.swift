@@ -5,20 +5,19 @@ import XCTest
 class NetworkingTests: XCTestCase {
     let baseURL = "http://httpbin.org"
 
-    func testSetAuthorizationHeaderWithUsernameAndPassword() {
+    func testSetAuthorizationHeaderWithUsernameAndPassword() async throws {
         let networking = Networking(baseURL: baseURL)
         networking.setAuthorizationHeader(username: "user", password: "passwd")
-        networking.get("/basic-auth/user/passwd") { result in
-            switch result {
-            case let .success(response):
-                let json = response.dictionaryBody
-                let user = json["user"] as? String
-                let authenticated = json["authenticated"] as? Bool
-                XCTAssertEqual(user, "user")
-                XCTAssertEqual(authenticated, true)
-            case .failure:
-                XCTFail()
-            }
+        let result = try await networking.get("/basic-auth/user/passwd")
+        switch result {
+        case let .success(response):
+            let json = response.dictionaryBody
+            let user = json["user"] as? String
+            let authenticated = json["authenticated"] as? Bool
+            XCTAssertEqual(user, "user")
+            XCTAssertEqual(authenticated, true)
+        case .failure:
+            XCTFail()
         }
     }
 
@@ -98,24 +97,16 @@ class NetworkingTests: XCTestCase {
         XCTAssertEqual(url.absoluteString, "http://httpbin.org/hello")
     }
 
-    func testSkipTestMode() {
-        let expectation = self.expectation(description: "testSkipTestMode")
-
+    func testSkipTestMode() async throws {
         let networking = Networking(baseURL: baseURL)
         networking.isSynchronous = true
 
         var synchronous = false
-        networking.get("/get") { _ in
-            synchronous = true
+        let _ = try await networking.get("/get")
+        synchronous = true
 
-            XCTAssertTrue(synchronous)
-
-            expectation.fulfill()
-        }
-
+        XCTAssertTrue(synchronous)
         XCTAssertFalse(synchronous)
-
-        waitForExpectations(timeout: 15.0, handler: nil)
     }
 
     func testDestinationURL() {
@@ -180,49 +171,42 @@ class NetworkingTests: XCTestCase {
         XCTAssertEqual(relativePath2, "/basic-auth/user/passwd")
     }
 
-    func testCancelWithRequestID() {
-        let expectation = self.expectation(description: "testCancelAllRequests")
+    func testCancelWithRequestID() async throws {
         let networking = Networking(baseURL: baseURL)
         networking.isSynchronous = true
         var cancelledGET = false
 
-        let requestID = networking.get("/get") { result in
-            switch result {
-            case .success:
-                XCTFail()
-            case let .failure(response):
-                cancelledGET = response.error.code == URLError.cancelled.rawValue
-                XCTAssertTrue(cancelledGET)
+        let result = try await networking.get("/get")
+        switch result {
+        case .success:
+            XCTFail()
+        case let .failure(response):
+            cancelledGET = response.error.code == URLError.cancelled.rawValue
+            XCTAssertTrue(cancelledGET)
 
-                if cancelledGET {
-                    expectation.fulfill()
-                }
+            if cancelledGET {
+                // ?
             }
         }
-
-        networking.cancel(requestID)
-
-        waitForExpectations(timeout: 15.0, handler: nil)
+        // networking.cancel(requestID)
     }
 
-    func testCancelAllRequests() {
-        let expectation = self.expectation(description: "testCancelAllRequests")
+    func testCancelAllRequests() async throws {
         let networking = Networking(baseURL: baseURL)
         networking.isSynchronous = true
         var cancelledGET = false
         var cancelledPOST = false
 
-        networking.get("/get") { result in
-            switch result {
-            case .success:
-                XCTFail()
-            case let .failure(response):
-                cancelledGET = response.error.code == URLError.cancelled.rawValue
-                XCTAssertTrue(cancelledGET)
+        let result = try await networking.get("/get")
+        switch result {
+        case .success:
+            XCTFail()
+        case let .failure(response):
+            cancelledGET = response.error.code == URLError.cancelled.rawValue
+            XCTAssertTrue(cancelledGET)
 
-                if cancelledGET && cancelledPOST {
-                    expectation.fulfill()
-                }
+            if cancelledGET && cancelledPOST {
+                // ?
             }
         }
 
@@ -235,32 +219,26 @@ class NetworkingTests: XCTestCase {
                 XCTAssertTrue(cancelledPOST)
 
                 if cancelledGET && cancelledPOST {
-                    expectation.fulfill()
+                    // ?
                 }
             }
         }
 
         networking.cancelAllRequests()
-
-        waitForExpectations(timeout: 15.0, handler: nil)
     }
 
-    func testCancelRequestsReturnInMainThread() {
-        let expectation = self.expectation(description: "testCancelRequestsReturnInMainThread")
+    func testCancelRequestsReturnInMainThread() async throws {
         let networking = Networking(baseURL: baseURL)
         networking.isSynchronous = true
-        networking.get("/get") { result in
-            switch result {
-            case .success:
-                XCTFail()
-            case let .failure(response):
-                XCTAssertTrue(Thread.isMainThread)
-                XCTAssertEqual(response.error.code, URLError.cancelled.rawValue)
-                expectation.fulfill()
-            }
+        let result = try await networking.get("/get")
+        switch result {
+        case .success:
+            XCTFail()
+        case let .failure(response):
+            XCTAssertTrue(Thread.isMainThread)
+            XCTAssertEqual(response.error.code, URLError.cancelled.rawValue)
         }
         networking.cancelAllRequests()
-        waitForExpectations(timeout: 15.0, handler: nil)
     }
 
     func testReset() {

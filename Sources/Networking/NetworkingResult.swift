@@ -38,6 +38,8 @@ public enum JSONResult: NetworkingResult {
             json = JSON(array)
         } else if let data = body as? Data, data.count > 0 {
             do {
+                let str = String(decoding: data, as: UTF8.self)
+                print(str)
                 json = try JSON(data)
             } catch let JSONParsingError as NSError {
                 if returnedError == nil {
