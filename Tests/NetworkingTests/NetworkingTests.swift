@@ -188,7 +188,9 @@ class NetworkingTests: XCTestCase {
                 // ?
             }
         }
-        // networking.cancel(requestID)
+
+        let requestID = ""
+        await networking.asyncCancel(requestID)
     }
 
     func testCancelAllRequests() async throws {
@@ -224,7 +226,7 @@ class NetworkingTests: XCTestCase {
             }
         }
 
-        networking.cancelAllRequests()
+        await networking.cancelAllRequests()
     }
 
     func testCancelRequestsReturnInMainThread() async throws {
@@ -238,7 +240,7 @@ class NetworkingTests: XCTestCase {
             XCTAssertTrue(Thread.isMainThread)
             XCTAssertEqual(response.error.code, URLError.cancelled.rawValue)
         }
-        networking.cancelAllRequests()
+        await networking.cancelAllRequests()
     }
 
     func testReset() {

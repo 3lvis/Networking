@@ -84,8 +84,26 @@ class GETTests: XCTestCase {
 
     func testCancelGETWithPath() async throws {
         let networking = Networking(baseURL: baseURL)
+
+        do {
+            _ = try await networking.get("/get")
+            XCTFail("Task should be cancelled.")
+        } catch let error as NSError {
+            XCTAssertTrue(Task.isCancelled, "Task should be cancelled.")
+            XCTAssertEqual(error.code, URLError.cancelled.rawValue)
+        }
+
+        try await networking.cancelGET("/get")
+    }
+
+
+    /*
+
+    func testCancelGETWithPath() async throws {
+        let networking = Networking(baseURL: baseURL)
         networking.isSynchronous = true
         var completed = false
+
         let result = try await networking.get("/get")
         switch result {
         case .success:
@@ -95,13 +113,12 @@ class GETTests: XCTestCase {
             XCTAssertEqual(response.error.code, URLError.cancelled.rawValue)
         }
 
-        networking.cancelGET("/get")
+        try await networking.cancelGET("/get")
         completed = true
-    }
+    }*/
 
     func testCancelGETWithID() async throws {
         let networking = Networking(baseURL: baseURL)
-        networking.isSynchronous = true
         let result = try await networking.get("/get")
         switch result {
         case .success:
@@ -110,7 +127,8 @@ class GETTests: XCTestCase {
             XCTAssertEqual(response.error.code, URLError.cancelled.rawValue)
         }
 
-        // networking.cancel(requestID)
+        let requestID = ""
+        await networking.asyncCancel(requestID)
     }
 
     func testStatusCodes() async throws {

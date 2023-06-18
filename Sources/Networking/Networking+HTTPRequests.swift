@@ -38,9 +38,9 @@ public extension Networking {
     /// Cancels the GET request for the specified path. This causes the request to complete with error code URLError.cancelled.
     ///
     /// - Parameter path: The path for the cancelled GET request
-    func cancelGET(_ path: String) {
-        let url = try! composedURL(with: path)
-        cancelRequest(.data, requestType: .get, url: url)
+    func cancelGET(_ path: String) async throws {
+        let url = try composedURL(with: path)
+        await asyncCancelPrivate(.data, requestType: .get, url: url)
     }
 }
 

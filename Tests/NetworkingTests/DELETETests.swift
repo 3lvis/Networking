@@ -73,6 +73,8 @@ class DELETETests: XCTestCase {
             case .success:
                 XCTFail()
             case let .failure(response):
+                print(response.error)
+
                 XCTAssertTrue(completed)
                 XCTAssertEqual(response.error.code, URLError.cancelled.rawValue)
                 expectation.fulfill()

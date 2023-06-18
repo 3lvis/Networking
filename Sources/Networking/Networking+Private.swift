@@ -69,7 +69,7 @@ extension Networking {
             }
         } else {
             if fakeRequest.statusCode.statusCodeType != .successful {
-                error = NSError(fakeRequest: fakeRequest)
+                error = NSError(statusCode: fakeRequest.statusCode)
             }
 
             switch fakeRequest.responseType {
@@ -99,7 +99,7 @@ extension Networking {
         }
 
         if fakeRequest.statusCode.statusCodeType != .successful {
-            error = NSError(fakeRequest: fakeRequest)
+            error = NSError(statusCode: fakeRequest.statusCode)
         }
 
         switch fakeRequest.responseType {
@@ -130,7 +130,11 @@ extension Networking {
             return JSONResult(body: fakeRequest.response, response: response, error: error)
         } else {
             let (data, response) = try await asyncRequestData(requestType, path: path, cachingLevel: cachingLevel, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType)
-            return JSONResult(body: data, response: response as! HTTPURLResponse, error: nil)
+            var responseError: NSError?
+            if response.statusCode.statusCodeType != .successful {
+                responseError = NSError(statusCode: response.statusCode)
+            }
+            return JSONResult(body: data, response: response, error: responseError)
         }
     }
 
@@ -309,6 +313,7 @@ extension Networking {
                             errorCode = error.code
                         }
 
+                        print("?!??!?!?!?!?")
                         connectionError = NSError(domain: Networking.domain, code: errorCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode)])
                     }
                 }
@@ -358,8 +363,7 @@ extension Networking {
         return requestID
     }
 
-    @available(macOS 12.0, *)
-    func asyncRequestData(_ requestType: RequestType, path: String, cachingLevel: CachingLevel, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType) async throws -> (Data, URLResponse) {
+    func asyncRequestData(_ requestType: RequestType, path: String, cachingLevel: CachingLevel, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType) async throws -> (Data, HTTPURLResponse) {
         var request = URLRequest(url: try composedURL(with: path), requestType: requestType, path: path, parameterType: parameterType, responseType: responseType, boundary: boundary, authorizationHeaderValue: authorizationHeaderValue, token: token, authorizationHeaderKey: authorizationHeaderKey, headerFields: headerFields)
 
         if let parameterType = parameterType {
@@ -420,11 +424,32 @@ extension Networking {
 
         let (data, response) = try await self.session.data(for: request)
         self.cacheOrPurgeData(data: data, path: path, cacheName: nil, cachingLevel: cachingLevel)
-        return (data, response)
+        return (data, response as! HTTPURLResponse)
+    }
+
+    func asyncCancelPrivate(_ sessionTaskType: SessionTaskType, requestType: RequestType, url: URL) async {
+        let (dataTasks, uploadTasks, downloadTasks) = await session.tasks
+        var sessionTasks = [URLSessionTask]()
+        switch sessionTaskType {
+        case .data:
+            sessionTasks = dataTasks
+        case .download:
+            sessionTasks = downloadTasks
+        case .upload:
+            sessionTasks = uploadTasks
+        }
+
+        for sessionTask in sessionTasks {
+            if sessionTask.originalRequest?.httpMethod == requestType.rawValue && sessionTask.originalRequest?.url?.absoluteString == url.absoluteString {
+                sessionTask.cancel()
+                break
+            }
+        }
     }
 
     func cancelRequest(_ sessionTaskType: SessionTaskType, requestType: RequestType, url: URL) {
         let semaphore = DispatchSemaphore(value: 0)
+
         session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
             var sessionTasks = [URLSessionTask]()
             switch sessionTaskType {
