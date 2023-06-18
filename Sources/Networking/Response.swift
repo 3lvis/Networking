@@ -54,6 +54,22 @@ public class JSONResponse: Response {
         self.body = body
         super.init(response: response)
     }
+
+    init(body: Any?, response: HTTPURLResponse) {
+        var json = JSON.none
+        self.body = body
+
+        if let dictionary = body as? [String: Any] {
+            json = JSON(dictionary)
+        } else if let array = body as? [[String: Any]] {
+            json = JSON(array)
+        } else if let data = body as? Data, data.count > 0 {
+            json = try! JSON(data)
+        }
+
+        self.json = json
+        super.init(response: response)
+    }
 }
 
 public class SuccessJSONResponse: JSONResponse {}

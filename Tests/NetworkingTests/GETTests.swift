@@ -83,6 +83,18 @@ class GETTests: XCTestCase {
         }
     }
 
+    func testAltGETWithInvalidPath() {
+        let networking = Networking(baseURL: baseURL)
+        networking.altGET("/invalidpath") { result in
+            switch result {
+            case .success:
+                XCTFail()
+            case .failure(let error):
+                XCTAssertEqual(error.code, 404)
+            }
+        }
+    }
+
     func testGETWithInvalidPath() {
         let networking = Networking(baseURL: baseURL)
         networking.get("/invalidpath") { result in

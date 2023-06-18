@@ -86,6 +86,41 @@ extension Networking {
         return requestID
     }
 
+    func altHandleJSONRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]? = nil, responseType: ResponseType, cachingLevel: CachingLevel, completion: @escaping (_ result: Result<JSONResponse, NSError>) -> Void) -> String {
+
+        switch cachingLevel {
+        case .memory, .memoryAndFile:
+            if let object = objectFromCache(for: path, cacheName: nil, cachingLevel: cachingLevel, responseType: responseType) {
+                TestCheck.testBlock(isSynchronous) {
+                    let url = try! self.composedURL(with: path)
+                    let response = HTTPURLResponse(url: url, statusCode: 200)
+                    completion(.success(JSONResponse(body: object, response: response)))
+                }
+            }
+        default: break
+        }
+
+        if let fakeRequest = FakeRequest.find(ofType: requestType, forPath: path, in: fakeRequests) {
+            return handleFakeRequest(fakeRequest, path: path, cacheName: cacheName, cachingLevel: cachingLevel) { _, response, error in
+                if let error = error {
+                    completion(.failure(error))
+                } else {
+                    completion(.success(JSONResponse(body: fakeRequest.response, response: response)))
+                }
+            }
+        } else {
+            return requestData(requestType, path: path, cachingLevel: cachingLevel, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, response, error in
+                TestCheck.testBlock(self.isSynchronous) {
+                    if let error = error {
+                        completion(.failure(error))
+                    } else {
+                        completion(.success(JSONResponse(body: data, response: response)))
+                    }
+                }
+            }
+        }
+    }
+
     func handleJSONRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]? = nil, responseType: ResponseType, cachingLevel: CachingLevel, completion: @escaping (_ result: JSONResult) -> Void) -> String {
 
         switch cachingLevel {
