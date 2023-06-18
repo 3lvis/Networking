@@ -5,14 +5,6 @@ import XCTest
 class GETTests: XCTestCase {
     let baseURL = "http://httpbin.org"
 
-    func testSynchronousGET() async throws {
-        var synchronous = false
-        let networking = Networking(baseURL: baseURL)
-        let _ = try await networking.get("/get")
-        synchronous = true
-        XCTAssertTrue(synchronous)
-    }
-
     func testGET() async throws {
         let networking = Networking(baseURL: baseURL)
         let result = try await networking.get("/get")
@@ -183,58 +175,76 @@ class GETTests: XCTestCase {
     }
 
     func testGETCachedFromMemory() async throws {
-        let networking = Networking(baseURL: baseURL)
+        let cache = NSCache<AnyObject, AnyObject>()
+        let networking = Networking(baseURL: baseURL, configuration: .default, cache: cache)
         networking.fakeGET("/get", response: ["key": "value1"])
-        let _ = try await networking.get("/get", cachingLevel: .memory)
-        networking.fakeGET("/get", response: ["key": "value2"])
-        var callbackCount = 0
-        let result = try await networking.get("/get", cachingLevel: .memory)
-        if callbackCount == 0 {
-            switch result {
-            case let .success(response):
-                let json = response.dictionaryBody
-                XCTAssertEqual(json["key"] as? String, "value1")
-            case .failure:
-                XCTFail()
-            }
-        } else {
-            switch result {
-            case let .success(response):
-                let json = response.dictionaryBody
-                XCTAssertEqual(json["key"] as? String, "value2")
-            case .failure:
-                XCTFail()
-            }
+        let firstResult = try await networking.get("/get", cachingLevel: .memory)
+        switch firstResult {
+        case let .success(response):
+            let json = response.dictionaryBody
+            XCTAssertEqual(json["key"] as? String, "value1")
+        case .failure:
+            XCTFail()
         }
-        callbackCount += 1
+
+        networking.fakeGET("/get", response: ["key": "value2"])
+
+        let secondResult = try await networking.get("/get", cachingLevel: .memory)
+        switch secondResult {
+        case let .success(response):
+            let json = response.dictionaryBody
+            XCTAssertEqual(json["key"] as? String, "value2")
+        case .failure:
+            XCTFail()
+        }
     }
 
     func testGETCachedFromFile() async throws {
         let cache = NSCache<AnyObject, AnyObject>()
         let networking = Networking(baseURL: baseURL, configuration: .default, cache: cache)
         networking.fakeGET("/get", response: ["key": "value1"])
-        let _ = try await networking.get("/get", cachingLevel: .memoryAndFile)
-        networking.fakeGET("/get", response: ["key": "value2"])
-        var callbackCount = 0
-        cache.removeAllObjects()
-        let result = try await networking.get("/get", cachingLevel: .memoryAndFile)
-        if callbackCount == 0 {
-            switch result {
-            case let .success(response):
-                let json = response.dictionaryBody
-                XCTAssertEqual(json["key"] as? String, "value1")
-            case .failure(let response):
-                XCTFail("Error: \(response.error)")
-            }
-        } else {
-            switch result {
-            case let .success(response):
-                let json = response.dictionaryBody
-                XCTAssertEqual(json["key"] as? String, "value2")
-            case .failure:
-                XCTFail()
-            }
+        let firstResult = try await networking.get("/get", cachingLevel: .memoryAndFile)
+        switch firstResult {
+        case let .success(response):
+            let json = response.dictionaryBody
+            XCTAssertEqual(json["key"] as? String, "value1")
+        case .failure(let response):
+            XCTFail("Error: \(response.error)")
         }
-        callbackCount += 1
+
+        networking.fakeGET("/get", response: ["key": "value2"])
+        let secondResult = try await networking.get("/get", cachingLevel: .memoryAndFile)
+        switch secondResult {
+        case let .success(response):
+            let json = response.dictionaryBody
+            XCTAssertEqual(json["key"] as? String, "value2")
+        case .failure:
+            XCTFail()
+        }
     }
+
+    func testGETCachedNone() async throws {
+        let cache = NSCache<AnyObject, AnyObject>()
+        let networking = Networking(baseURL: baseURL, configuration: .default, cache: cache)
+        networking.fakeGET("/get", response: ["key": "value1"])
+        let firstResult = try await networking.get("/get", cachingLevel: .none)
+        switch firstResult {
+        case let .success(response):
+            let json = response.dictionaryBody
+            XCTAssertEqual(json["key"] as? String, "value1")
+        case .failure(let response):
+            XCTFail("Error: \(response.error)")
+        }
+
+        networking.fakeGET("/get", response: ["key": "value2"])
+        let secondResult = try await networking.get("/get", cachingLevel: .none)
+        switch secondResult {
+        case let .success(response):
+            let json = response.dictionaryBody
+            XCTAssertEqual(json["key"] as? String, "value2")
+        case .failure:
+            XCTFail()
+        }
+    }
+
 }

@@ -13,11 +13,8 @@ class UnauthorizedCallbackTests: XCTestCase {
             callbackExecuted = true
         }
 
-        var ignoredCompletionBlock = true
         let _ = try await networking.get("/basic-auth/user/passwd")
-        ignoredCompletionBlock = false
         XCTAssertTrue(callbackExecuted)
-        XCTAssertTrue(ignoredCompletionBlock)
     }
 
     func testCallbackWithFakedRequest() async throws {
@@ -28,11 +25,8 @@ class UnauthorizedCallbackTests: XCTestCase {
             callbackExecuted = true
         }
 
-        var ignoredCompletionBlock = true
         networking.fakeGET("/hi-mom", response: nil, statusCode: 401)
         let _ = try await networking.get("/hi-mom")
-        ignoredCompletionBlock = false
         XCTAssertTrue(callbackExecuted)
-        XCTAssertTrue(ignoredCompletionBlock)
     }
 }

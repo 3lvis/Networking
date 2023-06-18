@@ -87,15 +87,13 @@ extension Networking {
         return requestID
     }
 
-    func asyncHandleFakeRequest(_ fakeRequest: FakeRequest, path: String, cacheName: String?, cachingLevel: CachingLevel) -> (Any?, HTTPURLResponse, NSError?) {
+    func asyncHandleFakeRequest(_ fakeRequest: FakeRequest, path: String, cacheName: String?, cachingLevel: CachingLevel) throws -> (Any?, HTTPURLResponse, NSError?) {
         var error: NSError?
-        let url = try! composedURL(with: path)
+        let url = try composedURL(with: path)
         let response = HTTPURLResponse(url: url, statusCode: fakeRequest.statusCode)
 
         if let unauthorizedRequestCallback = unauthorizedRequestCallback, fakeRequest.statusCode == 403 || fakeRequest.statusCode == 401 {
-            TestCheck.testBlock(isSynchronous) {
-                unauthorizedRequestCallback()
-            }
+            unauthorizedRequestCallback()
         }
 
         if fakeRequest.statusCode.statusCodeType != .successful {
@@ -108,27 +106,27 @@ extension Networking {
         case .data:
             cacheOrPurgeData(data: fakeRequest.response as? Data, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
         case .json:
-            try? cacheOrPurgeJSON(object: fakeRequest.response, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
+            try cacheOrPurgeJSON(object: fakeRequest.response, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
         }
         return (fakeRequest.response, response, error)
     }
 
     func asyncHandleJSONRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]? = nil, responseType: ResponseType, cachingLevel: CachingLevel) async throws -> JSONResult {
 
-        switch cachingLevel {
-        case .memory, .memoryAndFile:
-            if let object = objectFromCache(for: path, cacheName: nil, cachingLevel: cachingLevel, responseType: responseType) {
-                let url = try self.composedURL(with: path)
-                let response = HTTPURLResponse(url: url, statusCode: 200)
-                return JSONResult(body: object, response: response, error: nil)
-            }
-        default: break
-        }
-
         if let fakeRequest = FakeRequest.find(ofType: requestType, forPath: path, in: fakeRequests) {
-            let (_, response, error) = asyncHandleFakeRequest(fakeRequest, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
+            let (_, response, error) = try asyncHandleFakeRequest(fakeRequest, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
             return JSONResult(body: fakeRequest.response, response: response, error: error)
         } else {
+            switch cachingLevel {
+            case .memory, .memoryAndFile:
+                if let object = objectFromCache(for: path, cacheName: nil, cachingLevel: cachingLevel, responseType: responseType) {
+                    let url = try self.composedURL(with: path)
+                    let response = HTTPURLResponse(url: url, statusCode: 200)
+                    return JSONResult(body: object, response: response, error: nil)
+                }
+            default: break
+            }
+
             let (data, response) = try await asyncRequestData(requestType, path: path, cachingLevel: cachingLevel, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType)
             var responseError: NSError?
             if response.statusCode.statusCodeType != .successful {
@@ -423,8 +421,31 @@ extension Networking {
         }
 
         let (data, response) = try await self.session.data(for: request)
-        self.cacheOrPurgeData(data: data, path: path, cacheName: nil, cachingLevel: cachingLevel)
-        return (data, response as! HTTPURLResponse)
+
+        var returnedResponse: URLResponse?
+        var returnedData: Data?
+
+        returnedResponse = response
+        returnedData = data
+
+        if let httpResponse = response as? HTTPURLResponse {
+            if httpResponse.statusCode >= 200 && httpResponse.statusCode < 300 {
+                returnedData = data
+            } else {
+                if let unauthorizedRequestCallback = self.unauthorizedRequestCallback, httpResponse.statusCode == 403 || httpResponse.statusCode == 401 {
+                    unauthorizedRequestCallback()
+                }
+            }
+
+            self.cacheOrPurgeData(data: data, path: path, cacheName: nil, cachingLevel: cachingLevel)
+
+            self.logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request, response: returnedResponse, error: nil)
+            return (data, httpResponse)
+        } else {
+            let url = try self.composedURL(with: path)
+            let response = HTTPURLResponse(url: url, statusCode: 400)
+            return (data, response)
+        }
     }
 
     func asyncCancelPrivate(_ sessionTaskType: SessionTaskType, requestType: RequestType, url: URL) async {
@@ -553,9 +574,7 @@ extension Networking {
     }
 
     func cacheOrPurgeJSON(object: Any?, path: String, cacheName: String?, cachingLevel: CachingLevel) throws {
-        guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else {
-            return
-        }
+        let destinationURL = try self.destinationURL(for: path, cacheName: cacheName)
 
         if let unwrappedObject = object {
             switch cachingLevel {
