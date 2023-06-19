@@ -138,8 +138,8 @@ extension FakeRequestTests {
             let json = response.dictionaryBody
             let value = json["name"] as? String
             XCTAssertEqual(value, "Elvis")
-        case .failure:
-            XCTFail()
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
         }
     }
 
@@ -186,8 +186,8 @@ extension FakeRequestTests {
             let entry = json[0]
             let value = entry["title"] as? String
             XCTAssertEqual(value, "Entry 1")
-        case .failure:
-            XCTFail()
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
         }
     }
 
@@ -205,8 +205,8 @@ extension FakeRequestTests {
             let json = response.dictionaryBody
             let name = json["name"] as? String
             XCTAssertEqual(name, "Name 10")
-        case .failure:
-            XCTFail()
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
         }
 
         let result2 = try await networking.get("/users/20")
@@ -215,252 +215,238 @@ extension FakeRequestTests {
             let json = response.dictionaryBody
             let name = json["name"] as? String
             XCTAssertEqual(name, "Name 20")
-        case .failure:
-            XCTFail()
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
         }
     }
 }
 
 // POST tests
 extension FakeRequestTests {
-    func testFakePOST() {
+    func testFakePOST() async throws {
         let networking = Networking(baseURL: baseURL)
 
         networking.fakePOST("/story", response: [["name": "Elvis"]])
 
-        networking.post("/story", parameters: ["username": "jameson", "password": "secret"]) { result in
-            switch result {
-            case let .success(response):
-                let json = response.arrayBody
-                let value = json[0]["name"] as? String
-                XCTAssertEqual(value, "Elvis")
-            case .failure:
-                XCTFail()
-            }
+        let result = try await networking.post("/story", parameters: ["username": "jameson", "password": "secret"])
+        switch result {
+        case let .success(response):
+            let json = response.arrayBody
+            let value = json[0]["name"] as? String
+            XCTAssertEqual(value, "Elvis")
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
         }
     }
 
-    func testFakePOSTWithInvalidStatusCode() {
+    func testFakePOSTWithInvalidStatusCode() async throws {
         let networking = Networking(baseURL: baseURL)
 
         networking.fakePOST("/story", response: nil, statusCode: 401)
 
-        networking.post("/story") { result in
-            switch result {
-            case .success:
-                XCTFail()
-            case let .failure(response):
-                XCTAssertEqual(response.error.code, 401)
-            }
+        let result = try await networking.post("/story")
+        switch result {
+        case .success:
+            XCTFail()
+        case let .failure(response):
+            XCTAssertEqual(response.error.code, 401)
         }
     }
 
-    func testFakePOSTUsingFile() {
+    func testFakePOSTUsingFile() async throws {
         let networking = Networking(baseURL: baseURL)
 
         networking.fakePOST("/entries", fileName: "entries.json", bundle: .module)
 
-        networking.post("/entries") { result in
-            switch result {
-            case let .success(response):
-                let json = response.arrayBody
-                let entry = json[0]
-                let value = entry["title"] as? String
-                XCTAssertEqual(value, "Entry 1")
-            case .failure:
-                XCTFail()
-            }
+        let result = try await networking.post("/entries")
+        switch result {
+        case let .success(response):
+            let json = response.arrayBody
+            let entry = json[0]
+            let value = entry["title"] as? String
+            XCTAssertEqual(value, "Entry 1")
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
         }
     }
 }
 
 // PUT tests
 extension FakeRequestTests {
-    func testFakePUT() {
+    func testFakePUT() async throws {
         let networking = Networking(baseURL: baseURL)
 
         networking.fakePUT("/story", response: [["name": "Elvis"]])
 
-        networking.put("/story", parameters: ["username": "jameson", "password": "secret"]) { result in
-            switch result {
-            case let .success(response):
-                let json = response.arrayBody
-                let value = json[0]["name"] as? String
-                XCTAssertEqual(value, "Elvis")
-            case .failure:
-                XCTFail()
-            }
+        let result = try await networking.put("/story", parameters: ["username": "jameson", "password": "secret"])
+        switch result {
+        case let .success(response):
+            let json = response.arrayBody
+            let value = json[0]["name"] as? String
+            XCTAssertEqual(value, "Elvis")
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
         }
     }
 
-    func testFakePUTWithInvalidStatusCode() {
+    func testFakePUTWithInvalidStatusCode() async throws {
         let networking = Networking(baseURL: baseURL)
 
         networking.fakePUT("/story", response: nil, statusCode: 401)
 
-        networking.put("/story", parameters: nil) { result in
-            switch result {
-            case .success:
-                XCTFail()
-            case let .failure(response):
-                XCTAssertEqual(response.error.code, 401)
-            }
+        let result = try await networking.put("/story", parameters: nil)
+        switch result {
+        case .success:
+            XCTFail()
+        case let .failure(response):
+            XCTAssertEqual(response.error.code, 401)
         }
     }
 
-    func testFakePUTUsingFile() {
+    func testFakePUTUsingFile() async throws {
         let networking = Networking(baseURL: baseURL)
 
         networking.fakePUT("/entries", fileName: "entries.json", bundle: .module)
 
-        networking.put("/entries", parameters: nil) { result in
-            switch result {
-            case let .success(response):
-                let json = response.arrayBody
-                let entry = json[0]
-                let value = entry["title"] as? String
-                XCTAssertEqual(value, "Entry 1")
-            case .failure:
-                XCTFail()
-            }
+        let result = try await networking.put("/entries", parameters: nil)
+        switch result {
+        case let .success(response):
+            let json = response.arrayBody
+            let entry = json[0]
+            let value = entry["title"] as? String
+            XCTAssertEqual(value, "Entry 1")
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
         }
     }
 }
 
 // PATCH tests
 extension FakeRequestTests {
-    func testFakePATCH() {
+    func testFakePATCH() async throws {
         let networking = Networking(baseURL: baseURL)
 
         networking.fakePATCH("/story", response: [["name": "Elvis"]])
 
-        networking.patch("/story", parameters: ["username": "jameson", "password": "secret"]) { result in
-            switch result {
-            case let .success(response):
-                let json = response.arrayBody
-                let value = json[0]["name"] as? String
-                XCTAssertEqual(value, "Elvis")
-            case .failure:
-                XCTFail()
-            }
+        let result = try await networking.patch("/story", parameters: ["username": "jameson", "password": "secret"])
+        switch result {
+        case let .success(response):
+            let json = response.arrayBody
+            let value = json[0]["name"] as? String
+            XCTAssertEqual(value, "Elvis")
+        case .failure:
+            XCTFail()
         }
     }
 
-    func testFakePATCHWithInvalidStatusCode() {
+    func testFakePATCHWithInvalidStatusCode() async throws {
         let networking = Networking(baseURL: baseURL)
 
         networking.fakePATCH("/story", response: nil, statusCode: 401)
 
-        networking.patch("/story", parameters: nil) { result in
-            switch result {
-            case .success:
-                XCTFail()
-            case let .failure(response):
-                XCTAssertEqual(response.error.code, 401)
-            }
+        let result = try await networking.patch("/story", parameters: nil)
+        switch result {
+        case .success:
+            XCTFail()
+        case let .failure(response):
+            XCTAssertEqual(response.error.code, 401)
         }
     }
 
-    func testFakePATCHUsingFile() {
+    func testFakePATCHUsingFile() async throws {
         let networking = Networking(baseURL: baseURL)
 
         networking.fakePATCH("/entries", fileName: "entries.json", bundle: .module)
 
-        networking.patch("/entries", parameters: nil) { result in
-            switch result {
-            case let .success(response):
-                let json = response.arrayBody
-                let entry = json[0]
-                let value = entry["title"] as? String
-                XCTAssertEqual(value, "Entry 1")
-            case .failure:
-                XCTFail()
-            }
+        let result = try await networking.patch("/entries", parameters: nil)
+        switch result {
+        case let .success(response):
+            let json = response.arrayBody
+            let entry = json[0]
+            let value = entry["title"] as? String
+            XCTAssertEqual(value, "Entry 1")
+        case .failure:
+            XCTFail()
         }
     }
 }
 
 // DELETE tests
 extension FakeRequestTests {
-    func testFakeDELETE() {
+    func testFakeDELETE() async throws {
         let networking = Networking(baseURL: baseURL)
 
         networking.fakeDELETE("/stories", response: ["name": "Elvis"])
 
-        networking.delete("/stories") { result in
-            switch result {
-            case let .success(response):
-                let json = response.dictionaryBody
-                let value = json["name"] as? String
-                XCTAssertEqual(value, "Elvis")
-            case .failure:
-                XCTFail()
-            }
+        let result = try await networking.delete("/stories")
+        switch result {
+        case let .success(response):
+            let json = response.dictionaryBody
+            let value = json["name"] as? String
+            XCTAssertEqual(value, "Elvis")
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
         }
     }
 
-    func testFakeDELETEWithInvalidStatusCode() {
+    func testFakeDELETEWithInvalidStatusCode() async throws {
         let networking = Networking(baseURL: baseURL)
 
         networking.fakeDELETE("/story", response: nil, statusCode: 401)
 
-        networking.delete("/story") { result in
-            switch result {
-            case .success:
-                XCTFail()
-            case let .failure(response):
-                XCTAssertEqual(response.error.code, 401)
-            }
+        let result = try await networking.delete("/story")
+        switch result {
+        case .success:
+            XCTFail()
+        case let .failure(response):
+            XCTAssertEqual(response.error.code, 401)
         }
     }
 
-    func testFakeDELETEUsingFile() {
+    func testFakeDELETEUsingFile() async throws {
         let networking = Networking(baseURL: baseURL)
 
         networking.fakeDELETE("/entries", fileName: "entries.json", bundle: .module)
 
-        networking.delete("/entries") { result in
-            switch result {
-            case let .success(response):
-                let json = response.arrayBody
-                let entry = json[0]
-                let value = entry["title"] as? String
-                XCTAssertEqual(value, "Entry 1")
-            case .failure:
-                XCTFail()
-            }
+        let result = try await networking.delete("/entries")
+        switch result {
+        case let .success(response):
+            let json = response.arrayBody
+            let entry = json[0]
+            let value = entry["title"] as? String
+            XCTAssertEqual(value, "Entry 1")
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
         }
     }
 }
 
 // Image tests
 extension FakeRequestTests {
-    func testFakeImageDownload() {
+    func testFakeImageDownload() async throws {
         let networking = Networking(baseURL: baseURL)
         let pigImage = Image.find(named: "pig.png", inBundle: .module)
         networking.fakeImageDownload("/image/png", image: pigImage)
-        networking.downloadImage("/image/png") { result in
-            switch result {
-            case let .success(response):
-                let pigImageData = pigImage.pngData()
-                let imageData = response.image.pngData()
-                XCTAssertEqual(pigImageData, imageData)
-            case .failure:
-                XCTFail()
-            }
+        let result = try await networking.downloadImage("/image/png")
+        switch result {
+        case let .success(response):
+            let pigImageData = pigImage.pngData()
+            let imageData = response.image.pngData()
+            XCTAssertEqual(pigImageData, imageData)
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
         }
     }
 
-    func testFakeImageDownloadWithInvalidStatusCode() {
+    func testFakeImageDownloadWithInvalidStatusCode() async throws {
         let networking = Networking(baseURL: baseURL)
         networking.fakeImageDownload("/image/png", image: nil, statusCode: 401)
-        networking.downloadImage("/image/png") { result in
-            switch result {
-            case .success:
-                XCTFail()
-            case let .failure(response):
-                XCTAssertEqual(response.error.code, 401)
-            }
+        let result = try await networking.downloadImage("/image/png")
+        switch result {
+        case .success:
+            XCTFail()
+        case let .failure(response):
+            XCTAssertEqual(response.error.code, 401)
         }
     }
 }

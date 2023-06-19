@@ -3,15 +3,15 @@ import Foundation
 @available(macOS 12.0, *)
 extension Networking {
 
-    func objectFromCache(for path: String, cacheName: String?, cachingLevel: CachingLevel, responseType: ResponseType) -> Any? {
+    func objectFromCache(for path: String, cacheName: String?, cachingLevel: CachingLevel, responseType: ResponseType) throws -> Any? {
         /// Workaround: Remove URL parameters from path. That can lead to writing cached files with names longer than
         /// 255 characters, resulting in error. Another option to explore is to use a hash version of the url if it's
         /// longer than 255 characters.
-        guard let destinationURL = try? destinationURL(for: path, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(String(describing: cacheName))") }
+        let destinationURL = try destinationURL(for: path, cacheName: cacheName)
 
         switch cachingLevel {
         case .memory:
-            try? FileManager.default.remove(at: destinationURL)
+            try FileManager.default.remove(at: destinationURL)
             return cache.object(forKey: destinationURL.absoluteString as AnyObject)
         case .memoryAndFile:
             if let object = cache.object(forKey: destinationURL.absoluteString as AnyObject) {
@@ -35,7 +35,7 @@ extension Networking {
             }
         case .none:
             cache.removeObject(forKey: destinationURL.absoluteString as AnyObject)
-            try? FileManager.default.remove(at: destinationURL)
+            try FileManager.default.remove(at: destinationURL)
             return nil
         }
     }
@@ -58,35 +58,6 @@ extension Networking {
         fakeRequests[requestType] = requests
     }
 
-    func legacyHandleFakeRequest(_ fakeRequest: FakeRequest, path: String, cacheName: String?, cachingLevel: CachingLevel, completion: @escaping (_ body: Any?, _ response: HTTPURLResponse, _ error: NSError?) -> Void) -> String {
-        var error: NSError?
-        let url = try! composedURL(with: path)
-        let response = HTTPURLResponse(url: url, statusCode: fakeRequest.statusCode)
-
-        if let unauthorizedRequestCallback = unauthorizedRequestCallback, fakeRequest.statusCode == 403 || fakeRequest.statusCode == 401 {
-            TestCheck.testBlock(isSynchronous) {
-                unauthorizedRequestCallback()
-            }
-        } else {
-            if fakeRequest.statusCode.statusCodeType != .successful {
-                error = NSError(statusCode: fakeRequest.statusCode)
-            }
-
-            switch fakeRequest.responseType {
-            case .image:
-                cacheOrPurgeImage(data: fakeRequest.response as? Data, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
-            case .data:
-                cacheOrPurgeData(data: fakeRequest.response as? Data, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
-            case .json:
-                try? cacheOrPurgeJSON(object: fakeRequest.response, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
-            }
-            completion(fakeRequest.response, response, error)
-        }
-
-        let requestID = UUID().uuidString
-        return requestID
-    }
-
     func handleFakeRequest(_ fakeRequest: FakeRequest, path: String, cacheName: String?, cachingLevel: CachingLevel) throws -> (Any?, HTTPURLResponse, NSError?) {
         var error: NSError?
         let url = try composedURL(with: path)
@@ -102,9 +73,9 @@ extension Networking {
 
         switch fakeRequest.responseType {
         case .image:
-            cacheOrPurgeImage(data: fakeRequest.response as? Data, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
+            try cacheOrPurgeImage(data: fakeRequest.response as? Data, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
         case .data:
-            cacheOrPurgeData(data: fakeRequest.response as? Data, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
+            try cacheOrPurgeData(data: fakeRequest.response as? Data, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
         case .json:
             try cacheOrPurgeJSON(object: fakeRequest.response, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
         }
@@ -119,7 +90,7 @@ extension Networking {
         } else {
             switch cachingLevel {
             case .memory, .memoryAndFile:
-                if let object = objectFromCache(for: path, cacheName: nil, cachingLevel: cachingLevel, responseType: responseType) {
+                if let object = try objectFromCache(for: path, cacheName: nil, cachingLevel: cachingLevel, responseType: responseType) {
                     let url = try self.composedURL(with: path)
                     let response = HTTPURLResponse(url: url, statusCode: 200)
                     return JSONResult(body: object, response: response, error: nil)
@@ -127,7 +98,7 @@ extension Networking {
             default: break
             }
 
-            let (data, response) = try await asyncRequestData(requestType, path: path, cachingLevel: cachingLevel, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType)
+            let (data, response) = try await requestData(requestType, path: path, cachingLevel: cachingLevel, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType)
             var responseError: NSError?
             if response.statusCode.statusCodeType != .successful {
                 responseError = NSError(statusCode: response.statusCode)
@@ -136,232 +107,51 @@ extension Networking {
         }
     }
 
-    func legacyHandleJSONRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]? = nil, responseType: ResponseType, cachingLevel: CachingLevel, completion: @escaping (_ result: JSONResult) -> Void) -> String {
-
-        switch cachingLevel {
-        case .memory, .memoryAndFile:
-            if let object = objectFromCache(for: path, cacheName: nil, cachingLevel: cachingLevel, responseType: responseType) {
-                TestCheck.testBlock(isSynchronous) {
-                    let url = try! self.composedURL(with: path)
-                    let response = HTTPURLResponse(url: url, statusCode: 200)
-                    completion(JSONResult(body: object, response: response, error: nil))
-                }
-            }
-        default: break
-        }
-
-        if let fakeRequest = FakeRequest.find(ofType: requestType, forPath: path, in: fakeRequests) {
-            return legacyHandleFakeRequest(fakeRequest, path: path, cacheName: cacheName, cachingLevel: cachingLevel) { _, response, error in
-                completion(JSONResult(body: fakeRequest.response, response: response, error: error))
-            }
-        } else {
-            return requestData(requestType, path: path, cachingLevel: cachingLevel, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType) { data, response, error in
-                TestCheck.testBlock(self.isSynchronous) {
-                    completion(JSONResult(body: data, response: response, error: error))
-                }
-            }
-        }
-    }
-
-    func handleDataRequest(_ requestType: RequestType, path: String, cacheName: String?, cachingLevel: CachingLevel, responseType: ResponseType, completion: @escaping (_ result: DataResult) -> Void) -> String {
+    func handleDataRequest(_ requestType: RequestType, path: String, cacheName: String?, cachingLevel: CachingLevel, responseType: ResponseType) async throws -> DataResult {
         if let fakeRequests = fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
-            return legacyHandleFakeRequest(fakeRequest, path: path, cacheName: cacheName, cachingLevel: cachingLevel) { _, response, error in
-                completion(DataResult(body: fakeRequest.response, response: response, error: error))
-            }
+            let (_, response, error) = try handleFakeRequest(fakeRequest, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
+            return DataResult(body: fakeRequest.response, response: response, error: error)
         } else {
-            let object = objectFromCache(for: path, cacheName: cacheName, cachingLevel: cachingLevel, responseType: responseType)
+            let object = try objectFromCache(for: path, cacheName: cacheName, cachingLevel: cachingLevel, responseType: responseType)
             if let object = object {
-                TestCheck.testBlock(isSynchronous) {
-                    let url = try! self.composedURL(with: path)
-                    let response = HTTPURLResponse(url: url, statusCode: 200)
-                    completion(DataResult(body: object, response: response, error: nil))
-                }
-                let requestID = UUID().uuidString
-                return requestID
+                let url = try! self.composedURL(with: path)
+                let response = HTTPURLResponse(url: url, statusCode: 200)
+                return DataResult(body: object, response: response, error: nil)
             } else {
-                return requestData(requestType, path: path, cachingLevel: cachingLevel, parameterType: nil, parameters: nil, parts: nil, responseType: responseType) { data, response, error in
-                    self.cacheOrPurgeData(data: data, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
-
-                    TestCheck.testBlock(self.isSynchronous) {
-                        completion(DataResult(body: data, response: response, error: error))
-                    }
+                let (data, response) = try await requestData(requestType, path: path, cachingLevel: cachingLevel, parameterType: nil, parameters: nil, parts: nil, responseType: responseType)
+                try self.cacheOrPurgeData(data: data, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
+                var responseError: NSError?
+                if response.statusCode.statusCodeType != .successful {
+                    responseError = NSError(statusCode: response.statusCode)
                 }
+                return DataResult(body: data, response: response, error: responseError)
             }
         }
     }
 
-    func handleImageRequest(_ requestType: RequestType, path: String, cacheName: String?, cachingLevel: CachingLevel, responseType: ResponseType, completion: @escaping (_ result: ImageResult) -> Void) -> String {
+    func handleImageRequest(_ requestType: RequestType, path: String, cacheName: String?, cachingLevel: CachingLevel, responseType: ResponseType) async throws -> ImageResult {
         if let fakeRequests = fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
-            return legacyHandleFakeRequest(fakeRequest, path: path, cacheName: cacheName, cachingLevel: cachingLevel) { _, response, error in
-                completion(ImageResult(body: fakeRequest.response, response: response, error: error))
-            }
+            let (_, response, error) = try handleFakeRequest(fakeRequest, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
+            return ImageResult(body: fakeRequest.response, response: response, error: error)
         } else {
-            let object = objectFromCache(for: path, cacheName: cacheName, cachingLevel: cachingLevel, responseType: responseType)
+            let object = try objectFromCache(for: path, cacheName: cacheName, cachingLevel: cachingLevel, responseType: responseType)
             if let object = object {
-                TestCheck.testBlock(isSynchronous) {
-                    let url = try! self.composedURL(with: path)
-                    let response = HTTPURLResponse(url: url, statusCode: 200)
-                    completion(ImageResult(body: object, response: response, error: nil))
-                }
-
-                let requestID = UUID().uuidString
-                return requestID
+                let url = try self.composedURL(with: path)
+                let response = HTTPURLResponse(url: url, statusCode: 200)
+                return ImageResult(body: object, response: response, error: nil)
             } else {
-                return requestData(requestType, path: path, cachingLevel: cachingLevel, parameterType: nil, parameters: nil, parts: nil, responseType: responseType) { data, response, error in
-                    let returnedImage = self.cacheOrPurgeImage(data: data, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
-
-                    TestCheck.testBlock(self.isSynchronous) {
-                        completion(ImageResult(body: returnedImage, response: response, error: error))
-                    }
+                let (data, response) = try await requestData(requestType, path: path, cachingLevel: cachingLevel, parameterType: nil, parameters: nil, parts: nil, responseType: responseType)
+                let returnedImage = try self.cacheOrPurgeImage(data: data, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
+                var responseError: NSError?
+                if response.statusCode.statusCodeType != .successful {
+                    responseError = NSError(statusCode: response.statusCode)
                 }
+                return ImageResult(body: returnedImage, response: response, error: responseError)
             }
         }
     }
 
-    func requestData(_ requestType: RequestType, path: String, cachingLevel: CachingLevel, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType, completion: @escaping (_ response: Data?, _ response: HTTPURLResponse, _ error: NSError?) -> Void) -> String {
-        let requestID = UUID().uuidString
-        var request = URLRequest(url: try! composedURL(with: path), requestType: requestType, path: path, parameterType: parameterType, responseType: responseType, boundary: boundary, authorizationHeaderValue: authorizationHeaderValue, token: token, authorizationHeaderKey: authorizationHeaderKey, headerFields: headerFields)
-
-        var serializingError: NSError?
-        if let parameterType = parameterType {
-            switch parameterType {
-            case .none: break
-            case .json:
-                if let parameters = parameters {
-                    do {
-                        request.httpBody = try JSONSerialization.data(withJSONObject: parameters, options: [])
-                    } catch let error as NSError {
-                        serializingError = error
-                    }
-                }
-            case .formURLEncoded:
-                guard let parametersDictionary = parameters as? [String: Any] else { fatalError("Couldn't convert parameters to a dictionary: \(String(describing: parameters))") }
-                do {
-                    let formattedParameters = try parametersDictionary.urlEncodedString()
-                    switch requestType {
-                    case .get, .delete:
-                        let urlEncodedPath: String
-                        if path.contains("?") {
-                            if let lastCharacter = path.last, lastCharacter == "?" {
-                                urlEncodedPath = path + formattedParameters
-                            } else {
-                                urlEncodedPath = path + "&" + formattedParameters
-                            }
-                        } else {
-                            urlEncodedPath = path + "?" + formattedParameters
-                        }
-                        request.url = try! composedURL(with: urlEncodedPath)
-                    case .post, .put, .patch:
-                        request.httpBody = formattedParameters.data(using: .utf8)
-                    }
-                } catch let error as NSError {
-                    serializingError = error
-                }
-            case .multipartFormData:
-                var bodyData = Data()
-
-                if let parameters = parameters as? [String: Any] {
-                    for (key, value) in parameters {
-                        let usedValue: Any = value is NSNull ? "null" : value
-                        var body = ""
-                        body += "--\(boundary)\r\n"
-                        body += "Content-Disposition: form-data; name=\"\(key)\""
-                        body += "\r\n\r\n\(usedValue)\r\n"
-                        bodyData.append(body.data(using: .utf8)!)
-                    }
-                }
-
-                if let parts = parts {
-                    for var part in parts {
-                        part.boundary = boundary
-                        bodyData.append(part.formData as Data)
-                    }
-                }
-
-                bodyData.append("--\(boundary)--\r\n".data(using: .utf8)!)
-                request.httpBody = bodyData as Data
-            case .custom:
-                request.httpBody = parameters as? Data
-            }
-        }
-
-        if let serializingError = serializingError {
-            let url = try! composedURL(with: path)
-            let response = HTTPURLResponse(url: url, statusCode: serializingError.code)
-            completion(nil, response, serializingError)
-        } else {
-            var connectionError: Error?
-            let semaphore = DispatchSemaphore(value: 0)
-            var returnedResponse: URLResponse?
-            var returnedData: Data?
-
-            let session = self.session.dataTask(with: request) { data, response, error in
-                returnedResponse = response
-                connectionError = error
-                returnedData = data
-
-                if let httpResponse = response as? HTTPURLResponse {
-                    if httpResponse.statusCode >= 200 && httpResponse.statusCode < 300 {
-                        if let data = data, data.count > 0 {
-                            returnedData = data
-                        }
-                    } else {
-                        var errorCode = httpResponse.statusCode
-                        if let error = error as NSError?, error.code == URLError.cancelled.rawValue {
-                            errorCode = error.code
-                        }
-
-                        print("?!??!?!?!?!?")
-                        connectionError = NSError(domain: Networking.domain, code: errorCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode)])
-                    }
-                }
-
-                self.cacheOrPurgeData(data: data, path: path, cacheName: nil, cachingLevel: cachingLevel)
-
-                if TestCheck.isTesting && self.isSynchronous == false {
-                    semaphore.signal()
-                } else {                   
-                    self.logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request, response: returnedResponse, error: connectionError as NSError?)
-                    if let unauthorizedRequestCallback = self.unauthorizedRequestCallback, let error = connectionError as NSError?, error.code == 403 || error.code == 401 {
-                        unauthorizedRequestCallback()
-                    } else {
-                        if let response = returnedResponse as? HTTPURLResponse {
-                            completion(returnedData, response, connectionError as NSError?)
-                        } else {
-                            let url = try! self.composedURL(with: path)
-                            let errorCode = (connectionError as NSError?)?.code ?? 200
-                            let response = HTTPURLResponse(url: url, statusCode: errorCode)
-                            completion(returnedData, response, connectionError as NSError?)
-                        }
-                    }
-                }
-            }
-
-            session.taskDescription = requestID
-            session.resume()
-
-            if TestCheck.isTesting && isSynchronous == false {
-                _ = semaphore.wait(timeout: DispatchTime.now() + 60.0)
-                logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request as URLRequest, response: returnedResponse, error: connectionError as NSError?)
-                if let unauthorizedRequestCallback = unauthorizedRequestCallback, let error = connectionError as NSError?, error.code == 403 || error.code == 401 {
-                    unauthorizedRequestCallback()
-                } else {
-                    if let response = returnedResponse as? HTTPURLResponse {
-                        completion(returnedData, response, connectionError as NSError?)
-                    } else {
-                        let url = try! composedURL(with: path)
-                        let errorCode = (connectionError as NSError?)?.code ?? 200
-                        let response = HTTPURLResponse(url: url, statusCode: errorCode)
-                        completion(returnedData, response, connectionError as NSError?)
-                    }
-                }
-            }
-        }
-
-        return requestID
-    }
-
-    func asyncRequestData(_ requestType: RequestType, path: String, cachingLevel: CachingLevel, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType) async throws -> (Data, HTTPURLResponse) {
+    func requestData(_ requestType: RequestType, path: String, cachingLevel: CachingLevel, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]?, responseType: ResponseType) async throws -> (Data, HTTPURLResponse) {
         var request = URLRequest(url: try composedURL(with: path), requestType: requestType, path: path, parameterType: parameterType, responseType: responseType, boundary: boundary, authorizationHeaderValue: authorizationHeaderValue, token: token, authorizationHeaderKey: authorizationHeaderKey, headerFields: headerFields)
 
         if let parameterType = parameterType {
@@ -437,7 +227,7 @@ extension Networking {
                 }
             }
 
-            self.cacheOrPurgeData(data: data, path: path, cacheName: nil, cachingLevel: cachingLevel)
+            try self.cacheOrPurgeData(data: data, path: path, cacheName: nil, cachingLevel: cachingLevel)
 
             self.logError(parameterType: parameterType, parameters: parameters, data: returnedData, request: request, response: returnedResponse, error: nil)
             return (data, httpResponse)
@@ -450,21 +240,6 @@ extension Networking {
 
     func cancelRequest(_ sessionTaskType: SessionTaskType, requestType: RequestType, url: URL) async {
         let (dataTasks, uploadTasks, downloadTasks) = await session.tasks
-        cancelRequestHandler(dataTasks: dataTasks, uploadTasks: uploadTasks, downloadTasks: downloadTasks, sessionTaskType: sessionTaskType, requestType: requestType, url: url)
-    }
-
-    func legacyCancelRequest(_ sessionTaskType: SessionTaskType, requestType: RequestType, url: URL) {
-        let semaphore = DispatchSemaphore(value: 0)
-
-        session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
-            self.cancelRequestHandler(dataTasks: dataTasks, uploadTasks: uploadTasks, downloadTasks: downloadTasks, sessionTaskType: sessionTaskType, requestType: requestType, url: url)
-            semaphore.signal()
-        }
-
-        _ = semaphore.wait(timeout: DispatchTime.now() + 60.0)
-    }
-
-    func cancelRequestHandler(dataTasks: [URLSessionDataTask], uploadTasks: [URLSessionUploadTask], downloadTasks: [URLSessionDownloadTask], sessionTaskType: SessionTaskType, requestType: RequestType, url: URL) {
         var sessionTasks = [URLSessionTask]()
         switch sessionTaskType {
         case .data:
@@ -581,17 +356,15 @@ extension Networking {
         }
     }
 
-    func cacheOrPurgeData(data: Data?, path: String, cacheName: String?, cachingLevel: CachingLevel) {
-        guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else {
-            return
-        }
+    func cacheOrPurgeData(data: Data?, path: String, cacheName: String?, cachingLevel: CachingLevel) throws {
+        let destinationURL = try self.destinationURL(for: path, cacheName: cacheName)
 
         if let returnedData = data, returnedData.count > 0 {
             switch cachingLevel {
             case .memory:
                 self.cache.setObject(returnedData as AnyObject, forKey: destinationURL.absoluteString as AnyObject)
             case .memoryAndFile:
-                _ = try? returnedData.write(to: destinationURL, options: [.atomic])
+                _ = try returnedData.write(to: destinationURL, options: [.atomic])
                 self.cache.setObject(returnedData as AnyObject, forKey: destinationURL.absoluteString as AnyObject)
             case .none:
                 break
@@ -602,10 +375,8 @@ extension Networking {
     }
     
     @discardableResult
-    func cacheOrPurgeImage(data: Data?, path: String, cacheName: String?, cachingLevel: CachingLevel) -> Image? {
-        guard let destinationURL = try? self.destinationURL(for: path, cacheName: cacheName) else {
-            return nil
-        }
+    func cacheOrPurgeImage(data: Data?, path: String, cacheName: String?, cachingLevel: CachingLevel) throws -> Image? {
+        let destinationURL = try self.destinationURL(for: path, cacheName: cacheName)
 
         var image: Image?
         if let data = data, let nonOptionalImage = Image(data: data), data.count > 0 {
@@ -613,7 +384,7 @@ extension Networking {
             case .memory:
                 self.cache.setObject(nonOptionalImage, forKey: destinationURL.absoluteString as AnyObject)
             case .memoryAndFile:
-                _ = try? data.write(to: destinationURL, options: [.atomic])
+                _ = try data.write(to: destinationURL, options: [.atomic])
                 self.cache.setObject(nonOptionalImage, forKey: destinationURL.absoluteString as AnyObject)
             case .none:
                 break

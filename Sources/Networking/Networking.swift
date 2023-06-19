@@ -277,7 +277,7 @@ open class Networking {
     }
 
     /// Removes the stored credentials and cached data.
-    public func reset() {
+    public func reset() throws {
         cache.removeAllObjects()
         fakeRequests.removeAll()
         token = nil
@@ -285,16 +285,16 @@ open class Networking {
         authorizationHeaderKey = "Authorization"
         authorizationHeaderValue = nil
 
-        Networking.deleteCachedFiles()
+        try Networking.deleteCachedFiles()
     }
 
     /// Deletes the downloaded/cached files.
-    public static func deleteCachedFiles() {
+    public static func deleteCachedFiles() throws {
         let directory = FileManager.SearchPathDirectory.cachesDirectory
         if let cachesURL = FileManager.default.urls(for: directory, in: .userDomainMask).first {
             let folderURL = cachesURL.appendingPathComponent(URL(string: Networking.domain)!.absoluteString)
             if FileManager.default.exists(at: folderURL) {
-                _ = try? FileManager.default.remove(at: folderURL)
+                _ = try FileManager.default.remove(at: folderURL)
             }
         }
     }

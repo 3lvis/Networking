@@ -98,14 +98,12 @@ class JSONTests: XCTestCase {
     }
 
     func testFromFileNamedWithInvalidJSON() {
-        var failed = false
         do {
             _ = try FileManager.json(from: "invalid.json", bundle: .module)
-        } catch ParsingError.failed {
-            failed = true
-        } catch {}
-
-        XCTAssertTrue(failed)
+            XCTFail()
+        } catch let error as NSError {
+            XCTAssertEqual(error.code, 3840)
+        }
     }
 
     // MARK: - to JSON
