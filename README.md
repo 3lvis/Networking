@@ -1,17 +1,16 @@
 ![Networking](https://raw.githubusercontent.com/3lvis/Networking/1702d0e4575947ad12583b8f94a5ba1953804efc/.github/cover-v3.png)
 
-**Networking** was born out of the necessity of having a simple networking library that doesn't have crazy programming abstractions or uses the latest reactive programming techniques, but just a plain, simple and convenient wrapper around `NSURLSession` that supports common needs such as faking requests and caching images out of the box. A library that is small enough to read in one go but useful enough to include in any project. That's how **Networking** came to life, a fully tested library for iOS, tvOS, watchOS and OS X that will always be there for you.
+**Networking** was born out of the necessity of having a networking library that has a straightforward API that supports faking requests and caching images out of the box.
 
-- Super friendly API
+- Friendly API
 - Singleton free
 - No external dependencies
-- Optimized for unit testing
 - Minimal implementation
+- Fully unit tested
 - Simple request cancellation
 - Fake requests easily (mocking/stubbing)
-- Runs synchronously in automatic testing environments (less XCTestExpectations)
-- Image downloading and caching
-- Free
+- Flexible caching
+- Image downloading
 
 ## Table of Contents
 
@@ -41,13 +40,13 @@
 
 ## Choosing a configuration
 
-Initializing an instance of **Networking** means you have to select a [NSURLSessionConfiguration](https://developer.apple.com/documentation/foundation/nsurlsessionconfiguration). The available types are `Default`, `Ephemeral` and `Background`, if you don't provide any or don't have special needs then `Default` will be used.
+Initializing an instance of **Networking** means you have to select a [URLSessionConfiguration](https://developer.apple.com/documentation/foundation/urlsessionconfiguration). The available types are `.default`, `.ephemeral` and `.background`, if you don't provide any or don't have special needs then `default` will be used.
 
- - `Default`: The default session configuration uses a persistent disk-based cache (except when the result is downloaded to a file) and stores credentials in the user’s keychain. It also stores cookies (by default) in the same shared cookie store as the `NSURLConnection` and `NSURLDownload` classes.
+ - `.default`: The default session configuration uses a persistent disk-based cache (except when the result is downloaded to a file) and stores credentials in the user’s keychain.
 
-- `Ephemeral`: An ephemeral session configuration object is similar to a default session configuration object except that the corresponding session object does not store caches, credential stores, or any session-related data to disk. Instead, session-related data is stored in RAM. The only time an ephemeral session writes data to disk is when you tell it to write the contents of a URL to a file. The main advantage to using ephemeral sessions is privacy. By not writing potentially sensitive data to disk, you make it less likely that the data will be intercepted and used later. For this reason, ephemeral sessions are ideal for private browsing modes in web browsers and other similar situations.
+- `.ephemeral`: An ephemeral session configuration object is similar to a default session configuration object except that the corresponding session object does not store caches, credential stores, or any session-related data to disk. Instead, session-related data is stored in RAM. The only time an ephemeral session writes data to disk is when you tell it to write the contents of a URL to a file. The main advantage to using ephemeral sessions is privacy. By not writing potentially sensitive data to disk, you make it less likely that the data will be intercepted and used later. For this reason, ephemeral sessions are ideal for private browsing modes in web browsers and other similar situations.
 
-- `Background`: This configuration type is suitable for transferring data files while the app runs in the background. A session configured with this object hands control of the transfers over to the system, which handles the transfers in a separate process. In iOS, this configuration makes it possible for transfers to continue even when the app itself is suspended or terminated.
+- `.background`: This configuration type is suitable for transferring data files while the app runs in the background. A session configured with this object hands control of the transfers over to the system, which handles the transfers in a separate process. In iOS, this configuration makes it possible for transfers to continue even when the app itself is suspended or terminated.
 
 ```swift
 // Default
@@ -76,9 +75,8 @@ To authenticate using [basic authentication](http://www.w3.org/Protocols/HTTP/1.
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.setAuthorizationHeader(username: "aladdin", password: "opensesame")
-networking.get("/basic-auth/aladdin/opensesame") { result in
-    // Successfully authenticated!
-}
+let result = try await networking.get("/basic-auth/aladdin/opensesame")
+// Successfully authenticated!
 ```
 
 ### Bearer token
@@ -88,9 +86,8 @@ To authenticate using a [bearer token](https://tools.ietf.org/html/rfc6750) **"A
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.setAuthorizationHeader(token: "AAAFFAAAA3DAAAAAA")
-networking.get("/get") { result in
-    // Successfully authenticated!
-}
+let result = try await networking.get("/get")
+// Successfully authenticated!
 ```
 
 ### Custom authentication header
@@ -100,9 +97,8 @@ To authenticate using a custom authentication header, for example **"Token token
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.setAuthorizationHeader(headerValue: "Token token=AAAFFAAAA3DAAAAAA")
-networking.get("/get") { result in
-    // Successfully authenticated!
-}
+let result = try await networking.get("/get")
+// Successfully authenticated!
 ```
 
 Providing the following authentication header `Anonymous-Token: AAAFFAAAA3DAAAAAA` is also possible:
@@ -110,9 +106,8 @@ Providing the following authentication header `Anonymous-Token: AAAFFAAAA3DAAAAA
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.setAuthorizationHeader(headerKey: "Anonymous-Token", headerValue: "AAAFFAAAA3DAAAAAA")
-networking.get("/get") { result in
-    // Successfully authenticated!
-}
+let result = try await networking.get("/get")
+// Successfully authenticated!
 ```
 
 ## Making a request
@@ -125,14 +120,13 @@ Making a request is as simple as just calling `get`, `post`, `put`, or `delete`.
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-networking.get("/get") { result in
-    switch result {
-    case .success(let response):
-        let json = response.dictionaryBody
-        // Do something with JSON, you can also get arrayBody
-    case .failure(let response):
-        // Handle error
-    }
+let result = try await networking.get("/get")
+switch result {
+case .success(let response):
+    let json = response.dictionaryBody
+    // Do something with JSON, you can also get arrayBody
+case .failure(let response):
+    // Handle error
 }
 ```
 
@@ -140,7 +134,7 @@ networking.get("/get") { result in
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-networking.post("/post", parameters: ["username" : "jameson", "password" : "secret"]) { result in
+let result = try await networking.post("/post", parameters: ["username" : "jameson", "password" : "secret"])
     /*
     {
         "json" : {
@@ -165,68 +159,43 @@ You can get the response headers inside the success.
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-networking.get("/get") { result in
-    switch result {
-    case .success(let response):
-        let headers = response.allHeaderFields
-        // Do something with headers
-    case .failure(let response):
-        // Handle error
-    }
+let result = try await networking.get("/get")
+switch result {
+case .success(let response):
+    let headers = response.allHeaderFields
+    // Do something with headers
+case .failure(let response):
+    // Handle error
 }
 ```
 
-By default all the requests are asynchronous, you can make an instance of **Networking** to do all its request as synchronous by using `isSynchronous`.
+### The NetworkingResult type
 
-```swift
-let networking = Networking(baseURL: "http://httpbin.org")
-networking.isSynchronous = true
-```
-
-### The Result type
-
-If you aren't familiar with the [Result](https://github.com/3lvis/Networking/blob/master/Sources/Result.swift) type, is what most networking libraries are using these days to deal with the awful amount of optional and unwrappings that we have to deal when doing networking. Before the [Result](https://github.com/3lvis/Networking/blob/master/Sources/Result.swift) type we had this problem:
-
-```swift
-// The old way
-let networking = Networking(baseURL: "http://httpbin.org")
-networking.get("/get") { json, headers, error in // Both are optional
-    if let error = error {
-        // OK, now we can handle the error
-    } else if let jsonArray = json as? [[String: Any]] {
-        // A valid JSON! Yay!
-    } else {
-      // Oh god, this shouldn't be happening, what do we do?!
-    }
-}
-```
-
-Now, we don't have to do it like that, leveraging in the Result type fixes this problem, the [Result](https://github.com/3lvis/Networking/blob/master/Sources/Result.swift) type is an enum that has two cases: `success` and `failure`. The `success` case has a response, the `failure` case has an error and a response, none of these ones are optionals, no more unwrapping!
+The [NetworkingResult](https://github.com/3lvis/Networking/blob/master/Sources/NetworkingResult.swift) type is an enum that has two cases: `success` and `failure`. The `success` case has a response, the `failure` case has an error and a response, none of these ones are optionals.
 
 Here's how to use it:
 
 ```swift
 // The best way
 let networking = Networking(baseURL: "http://fakerecipes.com")
-networking.get("/recipes") { result in
-    switch result {
-    case .success(let response):
-        // We know we'll be receiving an array with the best recipes, so we can just do:
-        let recipes = response.arrayBody // BOOM, no optionals. [[String: Any]]
+let result = try await networking.get("/recipes")
+switch result {
+case .success(let response):
+    // We know we'll be receiving an array with the best recipes, so we can just do:
+    let recipes = response.arrayBody // BOOM, no optionals. [[String: Any]]
 
-        // If we need headers or response status code we can use the HTTPURLResponse for this.
-        let headers = response.headers // [String: Any]
-    case .failure(let response):
-        // Non-optional error ✨
-        let errorCode = response.error.code
+    // If we need headers or response status code we can use the HTTPURLResponse for this.
+    let headers = response.headers // [String: Any]
+case .failure(let response):
+    // Non-optional error ✨
+    let errorCode = response.error.code
 
-        // Our backend developer told us that they will send a json with some
-        // additional information on why the request failed, this will be a dictionary.
-        let json = response.dictionaryBody // BOOM, no optionals here [String: Any]
+    // Our backend developer told us that they will send a json with some
+    // additional information on why the request failed, this will be a dictionary.
+    let json = response.dictionaryBody // BOOM, no optionals here [String: Any]
 
-        // We want to know the headers of the failed response.
-        let headers = response.headers // [String: Any]
-    }
+    // We want to know the headers of the failed response.
+    let headers = response.headers // [String: Any]
 }
 ```
 
@@ -244,9 +213,8 @@ When sending JSON your parameters will be serialized to data using `NSJSONSerial
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-networking.post("/post", parameters: ["name" : "jameson"]) { result in
-   // Successfull post using `application/json` as `Content-Type`
-}
+let result = try await networking.post("/post", parameters: ["name" : "jameson"])
+// Successfull post using `application/json` as `Content-Type`
 ```
 
 ### URL-encoding
@@ -255,9 +223,8 @@ networking.post("/post", parameters: ["name" : "jameson"]) { result in
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-networking.post("/post", parameterType: .formURLEncoded, parameters: ["name" : "jameson"]) { result in
-   // Successfull post using `application/x-www-form-urlencoded` as `Content-Type`
-}
+let result = try await networking.post("/post", parameterType: .formURLEncoded, parameters: ["name" : "jameson"])
+// Successfull post using `application/x-www-form-urlencoded` as `Content-Type`
 ```
 
 ### Multipart
@@ -268,9 +235,8 @@ networking.post("/post", parameterType: .formURLEncoded, parameters: ["name" : "
 let networking = Networking(baseURL: "https://example.com")
 let imageData = UIImagePNGRepresentation(imageToUpload)!
 let part = FormDataPart(data: imageData, parameterName: "file", filename: "selfie.png")
-networking.post("/image/upload", part: part) { result in
-  // Successfull upload using `multipart/form-data` as `Content-Type`
-}
+let result = try await networking.post("/image/upload", part: part)
+// Successfull upload using `multipart/form-data` as `Content-Type`
 ```
 
 If you need to use several parts or append other parameters than aren't files, you can do it like this:
@@ -280,9 +246,8 @@ let networking = Networking(baseURL: "https://example.com")
 let part1 = FormDataPart(data: imageData1, parameterName: "file1", filename: "selfie1.png")
 let part2 = FormDataPart(data: imageData2, parameterName: "file2", filename: "selfie2.png")
 let parameters = ["username" : "3lvis"]
-networking.post("/image/upload", parts: [part1, part2], parameters: parameters) { result in
-    // Do something
-}
+let result = try await networking.post("/image/upload", parts: [part1, part2], parameters: parameters)
+// Do something
 ```
 
 **FormDataPart Content-Type**:
@@ -296,9 +261,8 @@ At the moment **Networking** supports four types of `ParameterType`s out of the 
 For example:
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-networking.post("/upload", parameterType: .Custom("application/octet-stream"), parameters: imageData) { result in
-   // Successfull upload using `application/octet-stream` as `Content-Type`
-}
+let result = try await networking.post("/upload", parameterType: .Custom("application/octet-stream"), parameters: imageData)
+// Successfull upload using `application/octet-stream` as `Content-Type`
 ```
 
 ## Cancelling a request
@@ -309,32 +273,11 @@ Cancelling any request for a specific path is really simple. Beware that cancell
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-networking.get("/get") { result in
-    // Cancelling a GET request returns an error with code URLError.cancelled which means cancelled request
-}
+let result = try await networking.get("/get")
+// Cancelling a GET request returns an error with code URLError.cancelled which means cancelled request
 
+// In another place
 networking.cancelGET("/get")
-```
-
-### Using request identifier
-
-Using `cancelPOST("/upload")` would cancel all POST request for the specific path, but in some cases this isn't what we want. For example if you're trying to upload two photos, but the user requests to cancel one of the uploads, using `cancelPOST("/upload") would cancell all the uploads, this is when ID based cancellation is useful.
-
-```swift
-let networking = Networking(baseURL: "http://httpbin.org")
-
-// Start first upload
-let firstRequestID = networking.post("/upload", parts: ...) { result in
-    //...
-}
-
-// Start second upload
-let secondRequestID = networking.post("/upload", parts: ...) { result in
-    //...
-}
-
-// Cancel only the first upload
-networking.cancel(firstRequestID)
 ```
 
 ## Faking a request
@@ -346,9 +289,8 @@ Faking a request means that after calling this method on a specific path, any ca
 ```swift
 let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
 networking.fakeGET("/stories", response: [["id" : 47333, "title" : "Site Design: Aquest"]])
-networking.get("/stories") { result in
-    // JSON containing stories
-}
+let result = try await networking.get("/stories")
+// JSON containing stories
 ```
 
 **Faking with contents of a file**:
@@ -358,9 +300,8 @@ If your file is not located in the main bundle you have to specify using the bun
 ```swift
 let networking = Networking(baseURL: baseURL)
 networking.fakeGET("/entries", fileName: "entries.json")
-networking.get("/entries") { result in
-    // JSON with the contents of entries.json
-}
+let result = try await networking.get("/entries")
+// JSON with the contents of entries.json
 ```
 
 **Faking with status code**:
@@ -370,9 +311,8 @@ If you do not provide a status code for this fake request, the default returned 
 ```swift
 let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
 networking.fakeGET("/stories", response: nil, statusCode: 500)
-networking.get("/stories") { result in
-    // error with status code 500
-}
+let result = try await networking.get("/stories")
+// error with status code 500
 ```
 
 ## Downloading and caching an image
@@ -381,18 +321,16 @@ networking.get("/stories") { result in
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-networking.downloadImage("/image/png") { result in
-   // Do something with the downloaded image
-}
+let result = try await networking.downloadImage("/image/png")
+// Do something with the downloaded image
 ```
 
 **Cancelling**:
 
 ```swift
 let networking = Networking(baseURL: baseURL)
-networking.downloadImage("/image/png") { result in
-    // Cancelling an image download returns an error with code URLError.cancelled which means cancelled request
-}
+let result = try await networking.downloadImage("/image/png")
+// Cancelling an image download returns an error with code URLError.cancelled which means cancelled request
 
 networking.cancelImageDownload("/image/png")
 ```
@@ -403,12 +341,11 @@ networking.cancelImageDownload("/image/png")
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-networking.downloadImage("/image/png") { result in
-   // Image from network
-   networking.downloadImage("/image/png") { result in
-       // Image from cache
-   }
-}
+let result = try await networking.downloadImage("/image/png")
+// Image from network
+   
+let result = try await networking.downloadImage("/image/png")
+// Image from cache
 ```
 
 If you want to remove the downloaded image you can do it like this:
@@ -427,9 +364,8 @@ if let path = destinationURL.path where NSFileManager.defaultManager().fileExist
 let networking = Networking(baseURL: baseURL)
 let pigImage = UIImage(named: "pig.png")!
 networking.fakeImageDownload("/image/png", image: pigImage)
-networking.downloadImage("/image/png") { result in
-   // Here you'll get the provided pig.png image
-}
+let result = try await networking.downloadImage("/image/png")
+// Here you'll get the provided pig.png image
 ```
 
 ## Logging errors
