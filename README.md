@@ -135,24 +135,23 @@ case .failure(let response):
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
 let result = try await networking.post("/post", parameters: ["username" : "jameson", "password" : "secret"])
-    /*
-    {
-        "json" : {
-            "username" : "jameson",
-            "password" : "secret"
-        },
-        "url" : "http://httpbin.org/post",
-        "data" : "{"password" : "secret","username" : "jameson"}",
-        "headers" : {
-            "Accept" : "application/json",
-            "Content-Type" : "application/json",
-            "Host" : "httpbin.org",
-            "Content-Length" : "44",
-            "Accept-Language" : "en-us"
-        }
-    }
-    */
-}
+ /*
+ {
+     "json" : {
+         "username" : "jameson",
+         "password" : "secret"
+     },
+     "url" : "http://httpbin.org/post",
+     "data" : "{"password" : "secret","username" : "jameson"}",
+     "headers" : {
+         "Accept" : "application/json",
+         "Content-Type" : "application/json",
+         "Host" : "httpbin.org",
+         "Content-Length" : "44",
+         "Accept-Language" : "en-us"
+     }
+ }
+ */
 ```
 
 You can get the response headers inside the success.
