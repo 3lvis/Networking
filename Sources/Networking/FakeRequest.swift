@@ -39,14 +39,19 @@ struct FakeRequest {
                         }
                     }
 
-                    var responseString = String(data: try JSONSerialization.data(withJSONObject: response, options: .prettyPrinted), encoding: .utf8)!
-                    for (key, value) in replacedValues {
-                        responseString = responseString.replacingOccurrences(of: key, with: value)
+                    if var responseString = String(data: try JSONSerialization.data(withJSONObject: response, options: .prettyPrinted), encoding: .utf8) {
+                        for (key, value) in replacedValues {
+                            responseString = responseString.replacingOccurrences(of: key, with: value)
+                        }
+                        if let stringData = responseString.data(using: .utf8) {
+                            let finalJSON = try JSONSerialization.jsonObject(with: stringData, options: [])
+                            return FakeRequest(response: finalJSON, responseType: fakeRequest.responseType, statusCode: fakeRequest.statusCode)
+                        } else {
+                            return nil
+                        }
+                    } else {
+                        return nil
                     }
-                    let stringData = responseString.data(using: .utf8)
-                    let finalJSON = try JSONSerialization.jsonObject(with: stringData!, options: [])
-
-                    return FakeRequest(response: finalJSON, responseType: fakeRequest.responseType, statusCode: fakeRequest.statusCode)
                 } else if originalFakedPath == path {
                     return fakeRequest
                 } else {
