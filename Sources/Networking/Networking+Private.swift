@@ -1,6 +1,6 @@
 import Foundation
 
-@available(macOS 12.0, *)
+@available(iOS 15.0, macOS 12.0, *)
 extension Networking {
 
     func objectFromCache(for path: String, cacheName: String?, cachingLevel: CachingLevel, responseType: ResponseType) throws -> Any? {
