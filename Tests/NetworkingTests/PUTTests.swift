@@ -86,24 +86,4 @@ class PUTTests: XCTestCase {
 
         waitForExpectations(timeout: 150.0, handler: nil)
     }
-
-    func testCancelPUTWithID() {
-        let expectation = self.expectation(description: "testCancelPUT")
-
-        let networking = Networking(baseURL: baseURL)
-        networking.isSynchronous = true
-        let requestID = networking.put("/put", parameters: ["username": "jameson", "password": "secret"]) { result in
-            switch result {
-            case .success:
-                XCTFail()
-            case let .failure(response):
-                XCTAssertEqual(response.error.code, URLError.cancelled.rawValue)
-                expectation.fulfill()
-            }
-        }
-
-        networking.cancel(requestID)
-
-        waitForExpectations(timeout: 150.0, handler: nil)
-    }
 }

@@ -74,36 +74,14 @@ class GETTests: XCTestCase {
     func testGETWithInvalidPathAndJSONError() {
     }
 
-    // Disabled because I'm not sure how to test cancelling
+    // Disabling since I don't know a reliable way to test cancellations in async/await
     /*
     func testCancelGETWithPath() async throws {
         let networking = Networking(baseURL: baseURL)
-
-        do {
-            _ = try await networking.get("/get")
-            XCTFail("Task should be cancelled.")
-        } catch let error as NSError {
-            XCTAssertTrue(Task.isCancelled, "Task should be cancelled.")
-            XCTAssertEqual(error.code, URLError.cancelled.rawValue)
-        }
-
+        _ = try await networking.get("/get")
         try await networking.cancelGET("/get")
-    }*/
-
-    // Disabled because I'm not sure how to test cancelling
-    /*
-    func testCancelGETWithID() async throws {
-        let networking = Networking(baseURL: baseURL)
-        let result = try await networking.get("/get")
-        switch result {
-        case .success:
-            XCTFail()
-        case let .failure(response):
-            XCTAssertEqual(response.error.code, URLError.cancelled.rawValue)
-        }
-
-        let requestID = ""
-        await networking.asyncCancel(requestID)
+        let (dataTasks, _, _) = await networking.session.tasks
+        XCTAssertTrue(dataTasks.isEmpty)
     }
      */
 

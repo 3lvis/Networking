@@ -12,7 +12,7 @@ public extension Networking {
     func get(_ path: String, parameters: Any? = nil, cachingLevel: CachingLevel = .none) async throws -> JSONResult {
         let parameterType: ParameterType = parameters != nil ? .formURLEncoded : .none
 
-        return try await asyncHandleJSONRequest(.get, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, responseType: .json, cachingLevel: cachingLevel)
+        return try await handleJSONRequest(.get, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, responseType: .json, cachingLevel: cachingLevel)
     }
 
     /// Registers a fake GET request for the specified path. After registering this, every GET request to the path, will return the registered response.
@@ -40,7 +40,7 @@ public extension Networking {
     /// - Parameter path: The path for the cancelled GET request
     func cancelGET(_ path: String) async throws {
         let url = try composedURL(with: path)
-        await asyncCancelPrivate(.data, requestType: .get, url: url)
+        await cancelRequest(.data, requestType: .get, url: url)
     }
 }
 
@@ -57,7 +57,7 @@ public extension Networking {
     /// - Returns: The request identifier.
     @discardableResult
     func patch(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
-        return handleJSONRequest(.patch, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, responseType: .json, cachingLevel: .none, completion: completion)
+        return legacyHandleJSONRequest(.patch, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, responseType: .json, cachingLevel: .none, completion: completion)
     }
 
     /// Registers a fake PATCH request for the specified path. After registering this, every PATCH request to the path, will return the registered response.
@@ -85,7 +85,7 @@ public extension Networking {
     /// - Parameter path: The path for the cancelled PATCH request.
     func cancelPATCH(_ path: String) {
         let url = try! composedURL(with: path)
-        cancelRequest(.data, requestType: .patch, url: url)
+        legacyCancelRequest(.data, requestType: .patch, url: url)
     }
 }
 
@@ -102,7 +102,7 @@ public extension Networking {
     /// - Returns: The request identifier.
     @discardableResult
     func put(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
-        return handleJSONRequest(.put, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, responseType: .json, cachingLevel: .none, completion: completion)
+        return legacyHandleJSONRequest(.put, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, responseType: .json, cachingLevel: .none, completion: completion)
     }
 
     /// Registers a fake PUT request for the specified path. After registering this, every PUT request to the path, will return the registered response.
@@ -130,7 +130,7 @@ public extension Networking {
     /// - Parameter path: The path for the cancelled PUT request.
     func cancelPUT(_ path: String) {
         let url = try! composedURL(with: path)
-        cancelRequest(.data, requestType: .put, url: url)
+        legacyCancelRequest(.data, requestType: .put, url: url)
     }
 }
 
@@ -147,7 +147,7 @@ public extension Networking {
     /// - Returns: The request identifier.
     @discardableResult
     func post(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
-        return handleJSONRequest(.post, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, responseType: .json, cachingLevel: .none, completion: completion)
+        return legacyHandleJSONRequest(.post, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, responseType: .json, cachingLevel: .none, completion: completion)
     }
 
     /// POST request to the specified path, using the provided parameters.
@@ -160,7 +160,7 @@ public extension Networking {
     /// - Returns: The request identifier.
     @discardableResult
     func post(_ path: String, parameters: Any? = nil, parts: [FormDataPart], completion: @escaping (_ result: JSONResult) -> Void) -> String {
-        return handleJSONRequest(.post, path: path, cacheName: nil, parameterType: .multipartFormData, parameters: parameters, parts: parts, responseType: .json, cachingLevel: .none, completion: completion)
+        return legacyHandleJSONRequest(.post, path: path, cacheName: nil, parameterType: .multipartFormData, parameters: parameters, parts: parts, responseType: .json, cachingLevel: .none, completion: completion)
     }
 
     /// Registers a fake POST request for the specified path. After registering this, every POST request to the path, will return the registered response.
@@ -188,7 +188,7 @@ public extension Networking {
     /// - Parameter path: The path for the cancelled POST request.
     func cancelPOST(_ path: String) {
         let url = try! composedURL(with: path)
-        cancelRequest(.data, requestType: .post, url: url)
+        legacyCancelRequest(.data, requestType: .post, url: url)
     }
 }
 
@@ -205,7 +205,7 @@ public extension Networking {
     @discardableResult
     func delete(_ path: String, parameters: Any? = nil, completion: @escaping (_ result: JSONResult) -> Void) -> String {
         let parameterType: ParameterType = parameters != nil ? .formURLEncoded : .none
-        return handleJSONRequest(.delete, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, responseType: .json, cachingLevel: .none, completion: completion)
+        return legacyHandleJSONRequest(.delete, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, responseType: .json, cachingLevel: .none, completion: completion)
     }
 
     /// Registers a fake DELETE request for the specified path. After registering this, every DELETE request to the path, will return the registered response.
@@ -233,7 +233,7 @@ public extension Networking {
     /// - Parameter path: The path for the cancelled DELETE request.
     func cancelDELETE(_ path: String) {
         let url = try! composedURL(with: path)
-        cancelRequest(.data, requestType: .delete, url: url)
+        legacyCancelRequest(.data, requestType: .delete, url: url)
     }
 }
 
@@ -270,7 +270,7 @@ public extension Networking {
     /// - Parameter path: The path for the cancelled image download request.
     func cancelImageDownload(_ path: String) {
         let url = try! composedURL(with: path)
-        cancelRequest(.data, requestType: .get, url: url)
+        legacyCancelRequest(.data, requestType: .get, url: url)
     }
 
     /// Registers a fake download image request with an image. After registering this, every download request to the path, will return the registered image.

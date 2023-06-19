@@ -58,7 +58,7 @@ extension Networking {
         fakeRequests[requestType] = requests
     }
 
-    func handleFakeRequest(_ fakeRequest: FakeRequest, path: String, cacheName: String?, cachingLevel: CachingLevel, completion: @escaping (_ body: Any?, _ response: HTTPURLResponse, _ error: NSError?) -> Void) -> String {
+    func legacyHandleFakeRequest(_ fakeRequest: FakeRequest, path: String, cacheName: String?, cachingLevel: CachingLevel, completion: @escaping (_ body: Any?, _ response: HTTPURLResponse, _ error: NSError?) -> Void) -> String {
         var error: NSError?
         let url = try! composedURL(with: path)
         let response = HTTPURLResponse(url: url, statusCode: fakeRequest.statusCode)
@@ -87,7 +87,7 @@ extension Networking {
         return requestID
     }
 
-    func asyncHandleFakeRequest(_ fakeRequest: FakeRequest, path: String, cacheName: String?, cachingLevel: CachingLevel) throws -> (Any?, HTTPURLResponse, NSError?) {
+    func handleFakeRequest(_ fakeRequest: FakeRequest, path: String, cacheName: String?, cachingLevel: CachingLevel) throws -> (Any?, HTTPURLResponse, NSError?) {
         var error: NSError?
         let url = try composedURL(with: path)
         let response = HTTPURLResponse(url: url, statusCode: fakeRequest.statusCode)
@@ -111,10 +111,10 @@ extension Networking {
         return (fakeRequest.response, response, error)
     }
 
-    func asyncHandleJSONRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]? = nil, responseType: ResponseType, cachingLevel: CachingLevel) async throws -> JSONResult {
+    func handleJSONRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]? = nil, responseType: ResponseType, cachingLevel: CachingLevel) async throws -> JSONResult {
 
         if let fakeRequest = FakeRequest.find(ofType: requestType, forPath: path, in: fakeRequests) {
-            let (_, response, error) = try asyncHandleFakeRequest(fakeRequest, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
+            let (_, response, error) = try handleFakeRequest(fakeRequest, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
             return JSONResult(body: fakeRequest.response, response: response, error: error)
         } else {
             switch cachingLevel {
@@ -136,7 +136,7 @@ extension Networking {
         }
     }
 
-    func handleJSONRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]? = nil, responseType: ResponseType, cachingLevel: CachingLevel, completion: @escaping (_ result: JSONResult) -> Void) -> String {
+    func legacyHandleJSONRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]? = nil, responseType: ResponseType, cachingLevel: CachingLevel, completion: @escaping (_ result: JSONResult) -> Void) -> String {
 
         switch cachingLevel {
         case .memory, .memoryAndFile:
@@ -151,7 +151,7 @@ extension Networking {
         }
 
         if let fakeRequest = FakeRequest.find(ofType: requestType, forPath: path, in: fakeRequests) {
-            return handleFakeRequest(fakeRequest, path: path, cacheName: cacheName, cachingLevel: cachingLevel) { _, response, error in
+            return legacyHandleFakeRequest(fakeRequest, path: path, cacheName: cacheName, cachingLevel: cachingLevel) { _, response, error in
                 completion(JSONResult(body: fakeRequest.response, response: response, error: error))
             }
         } else {
@@ -165,7 +165,7 @@ extension Networking {
 
     func handleDataRequest(_ requestType: RequestType, path: String, cacheName: String?, cachingLevel: CachingLevel, responseType: ResponseType, completion: @escaping (_ result: DataResult) -> Void) -> String {
         if let fakeRequests = fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
-            return handleFakeRequest(fakeRequest, path: path, cacheName: cacheName, cachingLevel: cachingLevel) { _, response, error in
+            return legacyHandleFakeRequest(fakeRequest, path: path, cacheName: cacheName, cachingLevel: cachingLevel) { _, response, error in
                 completion(DataResult(body: fakeRequest.response, response: response, error: error))
             }
         } else {
@@ -192,7 +192,7 @@ extension Networking {
 
     func handleImageRequest(_ requestType: RequestType, path: String, cacheName: String?, cachingLevel: CachingLevel, responseType: ResponseType, completion: @escaping (_ result: ImageResult) -> Void) -> String {
         if let fakeRequests = fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
-            return handleFakeRequest(fakeRequest, path: path, cacheName: cacheName, cachingLevel: cachingLevel) { _, response, error in
+            return legacyHandleFakeRequest(fakeRequest, path: path, cacheName: cacheName, cachingLevel: cachingLevel) { _, response, error in
                 completion(ImageResult(body: fakeRequest.response, response: response, error: error))
             }
         } else {
@@ -448,8 +448,23 @@ extension Networking {
         }
     }
 
-    func asyncCancelPrivate(_ sessionTaskType: SessionTaskType, requestType: RequestType, url: URL) async {
+    func cancelRequest(_ sessionTaskType: SessionTaskType, requestType: RequestType, url: URL) async {
         let (dataTasks, uploadTasks, downloadTasks) = await session.tasks
+        cancelRequestHandler(dataTasks: dataTasks, uploadTasks: uploadTasks, downloadTasks: downloadTasks, sessionTaskType: sessionTaskType, requestType: requestType, url: url)
+    }
+
+    func legacyCancelRequest(_ sessionTaskType: SessionTaskType, requestType: RequestType, url: URL) {
+        let semaphore = DispatchSemaphore(value: 0)
+
+        session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
+            self.cancelRequestHandler(dataTasks: dataTasks, uploadTasks: uploadTasks, downloadTasks: downloadTasks, sessionTaskType: sessionTaskType, requestType: requestType, url: url)
+            semaphore.signal()
+        }
+
+        _ = semaphore.wait(timeout: DispatchTime.now() + 60.0)
+    }
+
+    func cancelRequestHandler(dataTasks: [URLSessionDataTask], uploadTasks: [URLSessionUploadTask], downloadTasks: [URLSessionDownloadTask], sessionTaskType: SessionTaskType, requestType: RequestType, url: URL) {
         var sessionTasks = [URLSessionTask]()
         switch sessionTaskType {
         case .data:
@@ -466,33 +481,6 @@ extension Networking {
                 break
             }
         }
-    }
-
-    func cancelRequest(_ sessionTaskType: SessionTaskType, requestType: RequestType, url: URL) {
-        let semaphore = DispatchSemaphore(value: 0)
-
-        session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
-            var sessionTasks = [URLSessionTask]()
-            switch sessionTaskType {
-            case .data:
-                sessionTasks = dataTasks
-            case .download:
-                sessionTasks = downloadTasks
-            case .upload:
-                sessionTasks = uploadTasks
-            }
-
-            for sessionTask in sessionTasks {
-                if sessionTask.originalRequest?.httpMethod == requestType.rawValue && sessionTask.originalRequest?.url?.absoluteString == url.absoluteString {
-                    sessionTask.cancel()
-                    break
-                }
-            }
-
-            semaphore.signal()
-        }
-
-        _ = semaphore.wait(timeout: DispatchTime.now() + 60.0)
     }
 
     func logError(parameterType: ParameterType?, parameters: Any? = nil, data: Data?, request: URLRequest?, response: URLResponse?, error: NSError?) {

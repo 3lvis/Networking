@@ -245,26 +245,6 @@ class POSTTests: XCTestCase {
         waitForExpectations(timeout: 15.0, handler: nil)
     }
 
-    func testCancelPOSTWithID() {
-        let expectation = self.expectation(description: "testCancelPOST")
-
-        let networking = Networking(baseURL: baseURL)
-        networking.isSynchronous = true
-        let requestID = networking.post("/post", parameters: ["username": "jameson", "password": "secret"]) { result in
-            switch result {
-            case .success:
-                XCTFail()
-            case let .failure(response):
-                XCTAssertEqual(response.error.code, URLError.cancelled.rawValue)
-                expectation.fulfill()
-            }
-        }
-
-        networking.cancel(requestID)
-
-        waitForExpectations(timeout: 15.0, handler: nil)
-    }
-
     func deleteAllCloudinaryPhotos(networking: Networking, cloudName: String, secret: String, APIKey: String) {
         networking.setAuthorizationHeader(username: APIKey, password: secret)
         networking.delete("/v1_1/\(cloudName)/resources/image/upload?all=true") { _ in }

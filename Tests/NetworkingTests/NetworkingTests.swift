@@ -161,30 +161,6 @@ class NetworkingTests: XCTestCase {
 
     // I don't know how to test cancelling
     /*
-    func testCancelWithRequestID() async throws {
-        let networking = Networking(baseURL: baseURL)
-        networking.isSynchronous = true
-        var cancelledGET = false
-
-        let result = try await networking.get("/get")
-        switch result {
-        case .success:
-            XCTFail()
-        case let .failure(response):
-            cancelledGET = response.error.code == URLError.cancelled.rawValue
-            XCTAssertTrue(cancelledGET)
-
-            if cancelledGET {
-                // ?
-            }
-        }
-
-        let requestID = ""
-        await networking.asyncCancel(requestID)
-    }*/
-
-    // I don't know how to test cancelling
-    /*
     func testCancelAllRequests() async throws {
         let networking = Networking(baseURL: baseURL)
         networking.isSynchronous = true

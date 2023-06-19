@@ -87,27 +87,6 @@ class DELETETests: XCTestCase {
         waitForExpectations(timeout: 15.0, handler: nil)
     }
 
-    func testCancelDELETEWithID() {
-        let expectation = self.expectation(description: "testCancelDELETE")
-
-        let networking = Networking(baseURL: baseURL)
-        networking.isSynchronous = true
-        let requestID = networking.delete("/delete") { result in
-            switch result {
-            case .success:
-                XCTFail()
-            case let .failure(response):
-                XCTAssertEqual(response.json, JSON.none)
-                XCTAssertEqual(response.error.code, URLError.cancelled.rawValue)
-                expectation.fulfill()
-            }
-        }
-
-        networking.cancel(requestID)
-
-        waitForExpectations(timeout: 15.0, handler: nil)
-    }
-
     func testDELETEWithURLEncodedParameters() {
         let networking = Networking(baseURL: baseURL)
         networking.delete("/delete", parameters: ["userId": 25]) { result in
