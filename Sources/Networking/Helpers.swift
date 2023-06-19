@@ -111,7 +111,7 @@ extension HTTPURLResponse {
 }
 
 extension NSError {
-    convenience init(fakeRequest: FakeRequest) {
-        self.init(domain: Networking.domain, code: fakeRequest.statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: fakeRequest.statusCode)])
+    convenience init(statusCode: Int) {
+        self.init(domain: Networking.domain, code: statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: statusCode)])
     }
 }

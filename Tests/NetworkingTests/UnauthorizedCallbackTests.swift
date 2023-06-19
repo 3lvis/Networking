@@ -5,7 +5,7 @@ import XCTest
 class UnauthorizedCallbackTests: XCTestCase {
     let baseURL = "http://httpbin.org"
 
-    func testUnauthorizedCallback() {
+    func testUnauthorizedCallback() async throws {
         let networking = Networking(baseURL: baseURL)
         var callbackExecuted = false
 
@@ -13,16 +13,11 @@ class UnauthorizedCallbackTests: XCTestCase {
             callbackExecuted = true
         }
 
-        var ignoredCompletionBlock = true
-        networking.get("/basic-auth/user/passwd") { _ in
-            ignoredCompletionBlock = false
-        }
-
+        let _ = try await networking.get("/basic-auth/user/passwd")
         XCTAssertTrue(callbackExecuted)
-        XCTAssertTrue(ignoredCompletionBlock)
     }
 
-    func testCallbackWithFakedRequest() {
+    func testCallbackWithFakedRequest() async throws {
         let networking = Networking(baseURL: baseURL)
         var callbackExecuted = false
 
@@ -30,13 +25,8 @@ class UnauthorizedCallbackTests: XCTestCase {
             callbackExecuted = true
         }
 
-        var ignoredCompletionBlock = true
         networking.fakeGET("/hi-mom", response: nil, statusCode: 401)
-        networking.get("/hi-mom") { _ in
-            ignoredCompletionBlock = false
-        }
-
+        let _ = try await networking.get("/hi-mom")
         XCTAssertTrue(callbackExecuted)
-        XCTAssertTrue(ignoredCompletionBlock)
     }
 }

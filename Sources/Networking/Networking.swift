@@ -241,7 +241,7 @@ open class Networking {
     /// Cancels the request that matches the requestID.
     ///
     /// - Parameter requestID: The ID of the request to be cancelled.
-    public func cancel(_ requestID: String) {
+    public func legacyCancel(_ requestID: String) {
         let semaphore = DispatchSemaphore(value: 0)
         session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
             var tasks = [URLSessionTask]()
@@ -263,27 +263,21 @@ open class Networking {
     }
 
     /// Cancels all the current requests.
-    public func cancelAllRequests() {
-        let semaphore = DispatchSemaphore(value: 0)
-        session.getTasksWithCompletionHandler { dataTasks, uploadTasks, downloadTasks in
-            for sessionTask in dataTasks {
-                sessionTask.cancel()
-            }
-            for sessionTask in downloadTasks {
-                sessionTask.cancel()
-            }
-            for sessionTask in uploadTasks {
-                sessionTask.cancel()
-            }
-
-            semaphore.signal()
+    public func cancelAllRequests() async {
+        let (dataTasks, uploadTasks, downloadTasks) = await session.tasks
+        for sessionTask in dataTasks {
+            sessionTask.cancel()
         }
-
-        _ = semaphore.wait(timeout: DispatchTime.now() + 60.0)
+        for sessionTask in downloadTasks {
+            sessionTask.cancel()
+        }
+        for sessionTask in uploadTasks {
+            sessionTask.cancel()
+        }
     }
 
     /// Removes the stored credentials and cached data.
-    public func reset() {
+    public func reset() throws {
         cache.removeAllObjects()
         fakeRequests.removeAll()
         token = nil
@@ -291,16 +285,16 @@ open class Networking {
         authorizationHeaderKey = "Authorization"
         authorizationHeaderValue = nil
 
-        Networking.deleteCachedFiles()
+        try Networking.deleteCachedFiles()
     }
 
     /// Deletes the downloaded/cached files.
-    public static func deleteCachedFiles() {
+    public static func deleteCachedFiles() throws {
         let directory = FileManager.SearchPathDirectory.cachesDirectory
         if let cachesURL = FileManager.default.urls(for: directory, in: .userDomainMask).first {
             let folderURL = cachesURL.appendingPathComponent(URL(string: Networking.domain)!.absoluteString)
             if FileManager.default.exists(at: folderURL) {
-                _ = try? FileManager.default.remove(at: folderURL)
+                _ = try FileManager.default.remove(at: folderURL)
             }
         }
     }

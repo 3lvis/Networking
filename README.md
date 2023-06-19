@@ -417,7 +417,7 @@ If you want to remove the downloaded image you can do it like this:
 let networking = Networking(baseURL: "http://httpbin.org")
 let destinationURL = try networking.destinationURL(for: "/image/png")
 if let path = destinationURL.path where NSFileManager.defaultManager().fileExistsAtPath(path) {
-   try! NSFileManager.defaultManager().removeItemAtPath(path)
+   try NSFileManager.defaultManager().removeItemAtPath(path)
 }
 ```
 
