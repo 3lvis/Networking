@@ -424,19 +424,7 @@ networking.disableErrorLogging = true
 
 ## Installing
 
-**Networking** is available through [CocoaPods](http://cocoapods.org). To install
-it, simply add the following line to your Podfile:
-
-```ruby
-pod 'Networking', '~> 4'
-```
-
-**Networking** is also available through [Carthage](https://github.com/Carthage/Carthage). To install
-it, simply add the following line to your Cartfile:
-
-```ruby
-github "3lvis/Networking" ~> 4.4
-```
+**Networking** is available through Swift Package Manager.
 
 ## Author
 
@@ -451,7 +439,3 @@ This library was made with love by [@3lvis](https://twitter.com/3lvis).
 ## Attribution
 
 The logo typeface comes thanks to [Sanid Jusić](https://dribbble.com/shots/1049674-Free-Colorfull-Triangle-Typeface).
-
-
-## Chinese description
->使用简单、功能惊喜，基于 NSURLSession 的网络封装库。功能包括带身份验证请求，支持单元测试（mocking/stubbing），异步执行，图片下载及缓存等实用特性。
