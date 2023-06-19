@@ -5,7 +5,7 @@ struct FakeRequest {
     let responseType: Networking.ResponseType
     let statusCode: Int
 
-    static func find(ofType type: Networking.RequestType, forPath path: String, in collection: [Networking.RequestType: [String: FakeRequest]]) -> FakeRequest? {
+    static func find(ofType type: Networking.RequestType, forPath path: String, in collection: [Networking.RequestType: [String: FakeRequest]]) throws -> FakeRequest? {
         guard let requests = collection[type] else { return nil }
 
         guard path.count > 0 else { return nil }
@@ -39,12 +39,12 @@ struct FakeRequest {
                         }
                     }
 
-                    var responseString = String(data: try! JSONSerialization.data(withJSONObject: response, options: .prettyPrinted), encoding: .utf8)!
+                    var responseString = String(data: try JSONSerialization.data(withJSONObject: response, options: .prettyPrinted), encoding: .utf8)!
                     for (key, value) in replacedValues {
                         responseString = responseString.replacingOccurrences(of: key, with: value)
                     }
                     let stringData = responseString.data(using: .utf8)
-                    let finalJSON = try! JSONSerialization.jsonObject(with: stringData!, options: [])
+                    let finalJSON = try JSONSerialization.jsonObject(with: stringData!, options: [])
 
                     return FakeRequest(response: finalJSON, responseType: fakeRequest.responseType, statusCode: fakeRequest.statusCode)
                 } else if originalFakedPath == path {

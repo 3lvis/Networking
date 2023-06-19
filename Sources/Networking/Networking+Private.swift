@@ -84,16 +84,16 @@ extension Networking {
 
     func handleJSONRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]? = nil, responseType: ResponseType, cachingLevel: CachingLevel) async throws -> JSONResult {
 
-        if let fakeRequest = FakeRequest.find(ofType: requestType, forPath: path, in: fakeRequests) {
+        if let fakeRequest = try FakeRequest.find(ofType: requestType, forPath: path, in: fakeRequests) {
             let (_, response, error) = try handleFakeRequest(fakeRequest, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
-            return JSONResult(body: fakeRequest.response, response: response, error: error)
+            return try JSONResult(body: fakeRequest.response, response: response, error: error)
         } else {
             switch cachingLevel {
             case .memory, .memoryAndFile:
                 if let object = try objectFromCache(for: path, cacheName: nil, cachingLevel: cachingLevel, responseType: responseType) {
                     let url = try self.composedURL(with: path)
                     let response = HTTPURLResponse(url: url, statusCode: 200)
-                    return JSONResult(body: object, response: response, error: nil)
+                    return try JSONResult(body: object, response: response, error: nil)
                 }
             default: break
             }
@@ -103,7 +103,7 @@ extension Networking {
             if response.statusCode.statusCodeType != .successful {
                 responseError = NSError(statusCode: response.statusCode)
             }
-            return JSONResult(body: data, response: response, error: responseError)
+            return try JSONResult(body: data, response: response, error: responseError)
         }
     }
 
@@ -114,7 +114,7 @@ extension Networking {
         } else {
             let object = try objectFromCache(for: path, cacheName: cacheName, cachingLevel: cachingLevel, responseType: responseType)
             if let object = object {
-                let url = try! self.composedURL(with: path)
+                let url = try self.composedURL(with: path)
                 let response = HTTPURLResponse(url: url, statusCode: 200)
                 return DataResult(body: object, response: response, error: nil)
             } else {

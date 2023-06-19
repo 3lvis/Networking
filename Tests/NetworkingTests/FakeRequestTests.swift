@@ -33,21 +33,21 @@ class FakeRequestTests: XCTestCase {
         XCTAssertEqual(evaluated, "/user")
     }
 
-    func testFind() {
+    func testFind() throws {
         let request = FakeRequest(response: nil, responseType: .json, statusCode: 200)
         let existingRequests = [Networking.RequestType.get: ["/companies": request]]
 
-        XCTAssertNil(FakeRequest.find(ofType: .get, forPath: "/users", in: existingRequests))
-        XCTAssertNil(FakeRequest.find(ofType: .get, forPath: "/users", in: [:]))
+        XCTAssertNil(try FakeRequest.find(ofType: .get, forPath: "/users", in: existingRequests))
+        XCTAssertNil(try FakeRequest.find(ofType: .get, forPath: "/users", in: [:]))
     }
 
-    func testOneLevelFind() {
+    func testOneLevelFind() throws {
         let json = [
             "name": "Name {userID}"
         ]
         let request = FakeRequest(response: json, responseType: .json, statusCode: 200)
         let existingRequests = [Networking.RequestType.get: ["/users/{userID}": request]]
-        let result = FakeRequest.find(ofType: .get, forPath: "/users/10", in: existingRequests)
+        let result = try FakeRequest.find(ofType: .get, forPath: "/users/10", in: existingRequests)
 
         let expected = [
             "name": "Name 10"
@@ -56,14 +56,14 @@ class FakeRequestTests: XCTestCase {
         XCTAssertEqual(result?.response as? NSDictionary, expected as NSDictionary)
     }
 
-    func testTwoLevelFind() {
+    func testTwoLevelFind() throws {
         let json = [
             "user": "User {userID}",
             "company": "Company {companyID}"
         ]
         let request = FakeRequest(response: json, responseType: .json, statusCode: 200)
         let existingRequests = [Networking.RequestType.get: ["/users/{userID}/companies/{companyID}": request]]
-        let result = FakeRequest.find(ofType: .get, forPath: "/users/10/companies/20", in: existingRequests)
+        let result = try FakeRequest.find(ofType: .get, forPath: "/users/10/companies/20", in: existingRequests)
 
         let expected = [
             "user": "User 10",
@@ -73,7 +73,7 @@ class FakeRequestTests: XCTestCase {
         XCTAssertEqual(result?.response as? NSDictionary, expected as NSDictionary)
     }
 
-    func testThreeLevelFind() {
+    func testThreeLevelFind() throws {
         let json = [
             "user": "User {userID}",
             "company": "Company {companyID}",
@@ -81,7 +81,7 @@ class FakeRequestTests: XCTestCase {
         ]
         let request = FakeRequest(response: json, responseType: .json, statusCode: 200)
         let existingRequests = [Networking.RequestType.get: ["/users/{userID}/companies/{companyID}/products/{productID}": request]]
-        let result = FakeRequest.find(ofType: .get, forPath: "/users/10/companies/20/products/30", in: existingRequests)
+        let result = try FakeRequest.find(ofType: .get, forPath: "/users/10/companies/20/products/30", in: existingRequests)
 
         let expected = [
             "user": "User 10",
@@ -92,7 +92,7 @@ class FakeRequestTests: XCTestCase {
         XCTAssertEqual(result?.response as? NSDictionary, expected as NSDictionary)
     }
 
-    func testTenLevelFind() {
+    func testTenLevelFind() throws {
         let json = [
             "resource1": "Resource {resourceID1}",
             "resource2": "Resource {resourceID2}",
@@ -108,7 +108,7 @@ class FakeRequestTests: XCTestCase {
 
         let request = FakeRequest(response: json, responseType: .json, statusCode: 200)
         let existingRequests = [Networking.RequestType.get: ["resource1/{resourceID1}/resource2/{resourceID2}/resource3/{resourceID3}/resource4/{resourceID4}/resource5/{resourceID5}/resource6/{resourceID6}/resource7/{resourceID7}/resource8/{resourceID8}/resource9/{resourceID9}/resource10/{resourceID10}": request]]
-        let result = FakeRequest.find(ofType: .get, forPath: "resource1/1/resource2/2/resource3/3/resource4/4/resource5/5/resource6/6/resource7/7/resource8/8/resource9/9/resource10/10", in: existingRequests)
+        let result = try FakeRequest.find(ofType: .get, forPath: "resource1/1/resource2/2/resource3/3/resource4/4/resource5/5/resource6/6/resource7/7/resource8/8/resource9/9/resource10/10", in: existingRequests)
         let expected = [
             "resource1": "Resource 1",
             "resource2": "Resource 2",

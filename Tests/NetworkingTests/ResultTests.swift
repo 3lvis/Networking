@@ -10,9 +10,9 @@ class ResultTests: XCTestCase {
         return urlResponse
     }
 
-    func testJSONResultDictionary() {
+    func testJSONResultDictionary() throws {
         let body = ["a": 12]
-        let result = JSONResult(body: body, response: response, error: nil)
+        let result = try JSONResult(body: body, response: response, error: nil)
         switch result {
         case let .success(value):
             XCTAssertEqual(value.dictionaryBody.debugDescription, body.debugDescription)
@@ -30,9 +30,9 @@ class ResultTests: XCTestCase {
         }
     }
 
-    func testJSONResultArray() {
+    func testJSONResultArray() throws {
         let expectedBody = [["a": 12]]
-        let result = JSONResult(body: expectedBody, response: response, error: nil)
+        let result = try JSONResult(body: expectedBody, response: response, error: nil)
         switch result {
         case let .success(value):
             XCTAssertEqual(value.dictionaryBody.debugDescription, [String: Any]().debugDescription)
@@ -51,10 +51,10 @@ class ResultTests: XCTestCase {
         }
     }
 
-    func testJSONResultDictionaryData() {
+    func testJSONResultDictionaryData() throws {
         let expectedBody = ["a": 12]
-        let expectedBodyData = try! JSONSerialization.data(withJSONObject: expectedBody, options: [])
-        let result = JSONResult(body: expectedBodyData, response: response, error: nil)
+        let expectedBodyData = try JSONSerialization.data(withJSONObject: expectedBody, options: [])
+        let result = try JSONResult(body: expectedBodyData, response: response, error: nil)
         switch result {
         case let .success(value):
             XCTAssertEqual(value.dictionaryBody.debugDescription, expectedBody.debugDescription)
@@ -73,10 +73,10 @@ class ResultTests: XCTestCase {
         }
     }
 
-    func testJSONResultArrayData() {
+    func testJSONResultArrayData() throws {
         let expectedBody = [["a": 12]]
-        let expectedBodyData = try! JSONSerialization.data(withJSONObject: expectedBody, options: [])
-        let result = JSONResult(body: expectedBodyData, response: response, error: nil)
+        let expectedBodyData = try JSONSerialization.data(withJSONObject: expectedBody, options: [])
+        let result = try JSONResult(body: expectedBodyData, response: response, error: nil)
         switch result {
         case let .success(value):
             XCTAssertEqual(value.dictionaryBody.debugDescription, [String: Any]().debugDescription)
@@ -95,8 +95,8 @@ class ResultTests: XCTestCase {
         }
     }
 
-    func testJSONResultNone() {
-        let result = JSONResult(body: nil, response: response, error: nil)
+    func testJSONResultNone() throws {
+        let result = try JSONResult(body: nil, response: response, error: nil)
         switch result {
         case let .success(value):
             XCTAssertEqual(value.dictionaryBody.debugDescription, [String: Any]().debugDescription)
@@ -138,15 +138,15 @@ class ResultTests: XCTestCase {
         }
     }
 
-    func testJSONResponseError() {
+    func testJSONResponseError() throws {
         let body = [String: Any]()
-        let bodyData = try! JSONSerialization.data(withJSONObject: body, options: [])
+        let bodyData = try JSONSerialization.data(withJSONObject: body, options: [])
 
-        let nilErrorResult = JSONResult(body: bodyData, response: response, error: nil)
+        let nilErrorResult = try JSONResult(body: bodyData, response: response, error: nil)
         XCTAssertNil(nilErrorResult.error)
 
         let error = NSError(domain: "", code: 0, userInfo: nil)
-        let errorResult = JSONResult(body: bodyData, response: response, error: error)
+        let errorResult = try JSONResult(body: bodyData, response: response, error: error)
         XCTAssertNotNil(errorResult.error)
     }
 }

@@ -1,7 +1,7 @@
 import Foundation
 
 public protocol NetworkingResult {
-    init(body: Any?, response: HTTPURLResponse, error: NSError?)
+    init(body: Any?, response: HTTPURLResponse, error: NSError?) throws
 }
 
 public enum GenericResult<T> {
@@ -28,27 +28,18 @@ public enum JSONResult: NetworkingResult {
         }
     }
 
-    public init(body: Any?, response: HTTPURLResponse, error: NSError?) {
-        var returnedError = error
+    public init(body: Any?, response: HTTPURLResponse, error: NSError?) throws {
         var json = JSON.none
 
         if let dictionary = body as? [String: Any] {
-            json = JSON(dictionary)
+            json = try JSON(dictionary)
         } else if let array = body as? [[String: Any]] {
-            json = JSON(array)
+            json = try JSON(array)
         } else if let data = body as? Data, data.count > 0 {
-            do {
-                let str = String(decoding: data, as: UTF8.self)
-                print(str)
-                json = try JSON(data)
-            } catch let JSONParsingError as NSError {
-                if returnedError == nil {
-                    returnedError = JSONParsingError
-                }
-            }
+            json = try JSON(data)
         }
 
-        if let finalError = returnedError {
+        if let finalError = error {
             self = .failure(FailureJSONResponse(json: json, response: response, error: finalError))
         } else {
             self = .success(SuccessJSONResponse(json: json, response: response, body: body))

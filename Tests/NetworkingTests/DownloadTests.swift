@@ -230,7 +230,7 @@ class DownloadTests: XCTestCase {
             let destinationURL = try networking.destinationURL(for: path)
             let absoluteString = destinationURL.absoluteString
             cache.removeObject(forKey: absoluteString as AnyObject)
-            try! Helper.removeFileIfNeeded(networking, path: path)
+            try Helper.removeFileIfNeeded(networking, path: path)
             let image = try networking.imageFromCache(path)
             XCTAssertNil(image)
         case let .failure(response):

@@ -81,15 +81,15 @@ class NetworkingTests: XCTestCase {
         }
     }
 
-    func testURLForPath() {
+    func testURLForPath() throws {
         let networking = Networking(baseURL: baseURL)
-        let url = try! networking.composedURL(with: "/hello")
+        let url = try networking.composedURL(with: "/hello")
         XCTAssertEqual(url.absoluteString, "http://httpbin.org/hello")
     }
 
-    func testURLForPathWithFullPath() {
+    func testURLForPathWithFullPath() throws {
         let networking = Networking()
-        let url = try! networking.composedURL(with: "http://httpbin.org/hello")
+        let url = try networking.composedURL(with: "http://httpbin.org/hello")
         XCTAssertEqual(url.absoluteString, "http://httpbin.org/hello")
     }
 

@@ -42,14 +42,14 @@ enum JSON: Equatable {
         }
     }
 
-    init(_ dictionary: [String: Any]) {
-        let data = try! JSONSerialization.data(withJSONObject: dictionary, options: [])
+    init(_ dictionary: [String: Any]) throws {
+        let data = try JSONSerialization.data(withJSONObject: dictionary, options: [])
 
         self = .dictionary(data, dictionary)
     }
 
-    init(_ array: [[String: Any]]) {
-        let data = try! JSONSerialization.data(withJSONObject: array, options: [])
+    init(_ array: [[String: Any]]) throws {
+        let data = try JSONSerialization.data(withJSONObject: array, options: [])
 
         self = .array(data, array)
     }
