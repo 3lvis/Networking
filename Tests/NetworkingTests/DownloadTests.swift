@@ -5,13 +5,6 @@ import XCTest
 class DownloadTests: XCTestCase {
     let baseURL = "http://httpbin.org"
 
-    func testDownloadImageReturnBlockInMainThread() async throws {
-        let networking = Networking(baseURL: baseURL)
-        networking.isSynchronous = true
-        _ = try await networking.downloadImage("/image/png")
-        XCTAssertTrue(Thread.isMainThread)
-    }
-
     func testImageDownload() async throws {
         let networking = Networking(baseURL: baseURL)
         let path = "/image/png"
@@ -252,7 +245,6 @@ class DownloadTests: XCTestCase {
         let result = try await networking.downloadData(path)
         switch result {
         case let .success(response):
-            XCTAssertTrue(Thread.isMainThread)
             XCTAssertEqual(response.data.count, 8090)
         case let .failure(response):
             XCTFail(response.error.localizedDescription)

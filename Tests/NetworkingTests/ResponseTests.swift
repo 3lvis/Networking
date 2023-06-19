@@ -11,7 +11,7 @@ class ResponseTest: XCTestCase {
         let result = try await networking.get("/user-agent")
         switch result {
         case let .success(response):
-            XCTAssertEqual(response.data.toStringStringDictionary().debugDescription, expectedBody.debugDescription)
+            XCTAssertEqual(try response.data.toStringStringDictionary().debugDescription, expectedBody.debugDescription)
         case .failure:
             XCTFail()
         }

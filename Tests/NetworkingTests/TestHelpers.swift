@@ -4,7 +4,7 @@ import Foundation
 struct Helper {
 
     static func removeFileIfNeeded(_ networking: Networking, path: String, cacheName: String? = nil) throws {
-        guard let destinationURL = try? networking.destinationURL(for: path, cacheName: cacheName) else { fatalError("Couldn't get destination URL for path: \(path) and cacheName: \(String(describing: cacheName))") }
+        let destinationURL = try networking.destinationURL(for: path, cacheName: cacheName)
         if FileManager.default.exists(at: destinationURL) {
             try FileManager.default.remove(at: destinationURL)
         }
@@ -12,8 +12,8 @@ struct Helper {
 }
 
 extension Data {
-    func toStringStringDictionary() -> [String: String] {
-        let json = try? JSONSerialization.jsonObject(with: self, options: [])
+    func toStringStringDictionary() throws -> [String: String] {
+        let json = try JSONSerialization.jsonObject(with: self, options: [])
         if let receivedBody = json as? [String: String] {
             return receivedBody
         } else {
@@ -21,8 +21,8 @@ extension Data {
         }
     }
 
-    func toStringStringArray() -> [[String: String]] {
-        let json = try? JSONSerialization.jsonObject(with: self, options: [])
+    func toStringStringArray() throws -> [[String: String]] {
+        let json = try JSONSerialization.jsonObject(with: self, options: [])
         if let receivedBody = json as? [[String: String]] {
             return receivedBody
         } else {
