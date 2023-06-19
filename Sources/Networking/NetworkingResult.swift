@@ -29,17 +29,24 @@ public enum JSONResult: NetworkingResult {
     }
 
     public init(body: Any?, response: HTTPURLResponse, error: NSError?) throws {
+        var returnedError = error
         var json = JSON.none
 
-        if let dictionary = body as? [String: Any] {
-            json = try JSON(dictionary)
-        } else if let array = body as? [[String: Any]] {
-            json = try JSON(array)
-        } else if let data = body as? Data, data.count > 0 {
-            json = try JSON(data)
+        do {
+            if let dictionary = body as? [String: Any] {
+                json = try JSON(dictionary)
+            } else if let array = body as? [[String: Any]] {
+                json = try JSON(array)
+            } else if let data = body as? Data, data.count > 0 {
+                json = try JSON(data)
+            }
+        } catch let JSONParsingError as NSError {
+            if returnedError == nil {
+                returnedError = JSONParsingError
+            }
         }
 
-        if let finalError = error {
+        if let finalError = returnedError {
             self = .failure(FailureJSONResponse(json: json, response: response, error: finalError))
         } else {
             self = .success(SuccessJSONResponse(json: json, response: response, body: body))
