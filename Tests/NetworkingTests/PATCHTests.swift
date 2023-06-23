@@ -17,8 +17,8 @@ class PATCHTests: XCTestCase {
 
             guard let headers = json["headers"] as? [String: String] else { XCTFail(); return }
             XCTAssertEqual(headers["Content-Type"], "application/json")
-        case .failure:
-            XCTFail()
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
         }
     }
 

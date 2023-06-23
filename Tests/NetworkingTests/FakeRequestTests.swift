@@ -334,8 +334,8 @@ extension FakeRequestTests {
             let json = response.arrayBody
             let value = json[0]["name"] as? String
             XCTAssertEqual(value, "Elvis")
-        case .failure:
-            XCTFail()
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
         }
     }
 
@@ -365,8 +365,8 @@ extension FakeRequestTests {
             let entry = json[0]
             let value = entry["title"] as? String
             XCTAssertEqual(value, "Entry 1")
-        case .failure:
-            XCTFail()
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
         }
     }
 }

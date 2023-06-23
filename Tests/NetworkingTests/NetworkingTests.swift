@@ -16,8 +16,8 @@ class NetworkingTests: XCTestCase {
             let authenticated = json["authenticated"] as? Bool
             XCTAssertEqual(user, "user")
             XCTAssertEqual(authenticated, true)
-        case .failure:
-            XCTFail()
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
         }
     }
 
