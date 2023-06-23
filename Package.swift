@@ -5,6 +5,9 @@ import PackageDescription
 
 let package = Package(
     name: "Networking",
+    platforms: [
+         .iOS(.v15), .macOS(.v12), .tvOS(.v15), .watchOS(.v8)
+    ],
     products: [
         .library(
             name: "Networking",
@@ -21,8 +24,5 @@ let package = Package(
             dependencies: ["Networking"],
             resources: [.process("Resources")]
         )
-    ],
-    platforms: [
-         .iOS(.v15), .macOS(.v12), .tvOS(.v15), .watchOS(.v8)
     ],
 )
