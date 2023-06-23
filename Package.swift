@@ -21,5 +21,8 @@ let package = Package(
             dependencies: ["Networking"],
             resources: [.process("Resources")]
         )
-    ]
+    ],
+    platforms: [
+         .iOS(.v15), .macOS(.v12), .tvOS(.v15), .watchOS(.v8)
+    ],
 )
