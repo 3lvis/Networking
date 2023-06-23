@@ -24,5 +24,5 @@ let package = Package(
             dependencies: ["Networking"],
             resources: [.process("Resources")]
         )
-    ],
+    ]
 )
