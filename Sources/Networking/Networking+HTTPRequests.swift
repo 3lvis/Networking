@@ -1,6 +1,6 @@
 import Foundation
 
-@available(iOS 15.0, macOS 12.0, *)
+@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
 public extension Networking {
     /// GET request to the specified path.
     ///
@@ -42,7 +42,7 @@ public extension Networking {
     }
 }
 
-@available(iOS 15.0, macOS 12.0, *)
+@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
 public extension Networking {
 
     /// PATCH request to the specified path, using the provided parameters.
@@ -84,7 +84,7 @@ public extension Networking {
     }
 }
 
-@available(iOS 15.0, macOS 12.0, *)
+@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
 public extension Networking {
 
     /// PUT request to the specified path, using the provided parameters.
@@ -126,7 +126,7 @@ public extension Networking {
     }
 }
 
-@available(iOS 15.0, macOS 12.0, *)
+@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
 public extension Networking {
 
     /// POST request to the specified path, using the provided parameters.
@@ -178,7 +178,7 @@ public extension Networking {
     }
 }
 
-@available(iOS 15.0, macOS 12.0, *)
+@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
 public extension Networking {
 
     /// DELETE request to the specified path, using the provided parameters.
@@ -220,7 +220,7 @@ public extension Networking {
     }
 }
 
-@available(iOS 15.0, macOS 12.0, *)
+@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
 public extension Networking {
 
     /// Retrieves an image from the cache or from the filesystem.

@@ -12,8 +12,8 @@ class ResponseTest: XCTestCase {
         switch result {
         case let .success(response):
             XCTAssertEqual(try response.data.toStringStringDictionary().debugDescription, expectedBody.debugDescription)
-        case .failure:
-            XCTFail()
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
         }
     }
 }

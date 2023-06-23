@@ -18,8 +18,8 @@ class GETTests: XCTestCase {
             guard let headers = json["headers"] as? [String: String] else { XCTFail(); return }
             let contentType = headers["Content-Type"]
             XCTAssertNil(contentType)
-        case .failure:
-            XCTFail()
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
         }
     }
 
@@ -36,8 +36,8 @@ class GETTests: XCTestCase {
             guard let headers = json["headers"] as? [String: String] else { XCTFail(); return }
             let contentType = headers["Content-Type"]
             XCTAssertNil(contentType)
-        case .failure:
-            XCTFail()
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
         }
     }
 
@@ -54,8 +54,8 @@ class GETTests: XCTestCase {
             guard let connection = headers["Connection"] as? String else { XCTFail(); return }
             XCTAssertEqual(connection, "keep-alive")
             XCTAssertEqual(headers["Content-Type"] as? String, "application/json")
-        case .failure:
-            XCTFail()
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
         }
     }
 
@@ -91,8 +91,8 @@ class GETTests: XCTestCase {
         switch result200 {
         case let .success(response):
             XCTAssertEqual(response.statusCode, 200)
-        case .failure:
-            XCTFail()
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
         }
 
         var statusCode = 300
@@ -123,8 +123,8 @@ class GETTests: XCTestCase {
         case let .success(response):
             let json = response.dictionaryBody
             XCTAssertEqual(json["url"] as? String, "http://httpbin.org/get?count=25")
-        case .failure:
-            XCTFail()
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
         }
     }
 
@@ -135,8 +135,8 @@ class GETTests: XCTestCase {
         case let .success(response):
             let json = response.dictionaryBody
             XCTAssertEqual(json["url"] as? String, "http://httpbin.org/get?accountId=123&userId=5")
-        case .failure:
-            XCTFail()
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
         }
     }
 
@@ -147,8 +147,8 @@ class GETTests: XCTestCase {
         case let .success(response):
             let json = response.dictionaryBody
             XCTAssertEqual(json["url"] as? String, "http://httpbin.org/get?name=Elvis Nuñez")
-        case .failure:
-            XCTFail()
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
         }
     }
 
@@ -161,8 +161,8 @@ class GETTests: XCTestCase {
         case let .success(response):
             let json = response.dictionaryBody
             XCTAssertEqual(json["key"] as? String, "value1")
-        case .failure:
-            XCTFail()
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
         }
 
         networking.fakeGET("/get", response: ["key": "value2"])
@@ -172,8 +172,8 @@ class GETTests: XCTestCase {
         case let .success(response):
             let json = response.dictionaryBody
             XCTAssertEqual(json["key"] as? String, "value2")
-        case .failure:
-            XCTFail()
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
         }
     }
 
@@ -196,8 +196,8 @@ class GETTests: XCTestCase {
         case let .success(response):
             let json = response.dictionaryBody
             XCTAssertEqual(json["key"] as? String, "value2")
-        case .failure:
-            XCTFail()
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
         }
     }
 
@@ -220,8 +220,8 @@ class GETTests: XCTestCase {
         case let .success(response):
             let json = response.dictionaryBody
             XCTAssertEqual(json["key"] as? String, "value2")
-        case .failure:
-            XCTFail()
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
         }
     }
 

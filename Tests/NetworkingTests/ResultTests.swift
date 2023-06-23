@@ -25,8 +25,8 @@ class ResultTests: XCTestCase {
             case .array(_, _), .none:
                 XCTFail()
             }
-        case .failure:
-            XCTFail()
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
         }
     }
 
@@ -46,8 +46,8 @@ class ResultTests: XCTestCase {
             case .dictionary(_, _), .none:
                 XCTFail()
             }
-        case .failure:
-            XCTFail()
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
         }
     }
 
@@ -68,8 +68,8 @@ class ResultTests: XCTestCase {
             case .array(_, _), .none:
                 XCTFail()
             }
-        case .failure:
-            XCTFail()
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
         }
     }
 
@@ -90,8 +90,8 @@ class ResultTests: XCTestCase {
             case .dictionary(_, _), .none:
                 XCTFail()
             }
-        case .failure:
-            XCTFail()
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
         }
     }
 
@@ -109,8 +109,8 @@ class ResultTests: XCTestCase {
             case .none:
                 break
             }
-        case .failure:
-            XCTFail()
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
         }
     }
 
