@@ -18,11 +18,13 @@ let package = Package(
     targets: [
         .target(
             name: "Networking",
-            dependencies: []),
+            dependencies: [],
+            path: "Sources"),
         .testTarget(
             name: "NetworkingTests",
             dependencies: ["Networking"],
-            resources: [.process("Resources")]
+            path: "Tests",
+            resources: [.process("NetworkingTests/Resources")]
         )
     ]
 )
