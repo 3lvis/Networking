@@ -19,8 +19,8 @@ public extension Networking {
     ///   - path: The path for the faked GET request.
     ///   - response: An `Any` that will be returned when a GET request is made to the specified path.
     ///   - statusCode: By default it's 200, if you provide any status code that is between 200 and 299 the response object will be returned, otherwise we will return an error containig the provided status code.
-    func fakeGET(_ path: String, response: Any?, statusCode: Int = 200) {
-        registerFake(requestType: .get, path: path, response: response, responseType: .json, statusCode: statusCode)
+    func fakeGET(_ path: String, response: Any?, headerFields: [String: String]? = nil, statusCode: Int = 200) {
+        registerFake(requestType: .get, path: path, headerFields: headerFields, response: response, responseType: .json, statusCode: statusCode)
     }
 
     /// Registers a fake GET request for the specified path using the contents of a file. After registering this, every GET request to the path, will return the contents of the registered file.
@@ -61,8 +61,8 @@ public extension Networking {
     ///   - path: The path for the faked PATCH request.
     ///   - response: An `Any` that will be returned when a PATCH request is made to the specified path.
     ///   - statusCode: By default it's 200, if you provide any status code that is between 200 and 299 the response object will be returned, otherwise we will return an error containig the provided status code.
-    func fakePATCH(_ path: String, response: Any?, statusCode: Int = 200) {
-        registerFake(requestType: .patch, path: path, response: response, responseType: .json, statusCode: statusCode)
+    func fakePATCH(_ path: String, response: Any?, headerFields: [String: String]? = nil, statusCode: Int = 200) {
+        registerFake(requestType: .patch, path: path, headerFields: headerFields, response: response, responseType: .json, statusCode: statusCode)
     }
 
     /// Registers a fake PATCH request to the specified path using the contents of a file. After registering this, every PATCH request to the path, will return the contents of the registered file.
@@ -103,8 +103,8 @@ public extension Networking {
     ///   - path: The path for the faked PUT request.
     ///   - response: An `Any` that will be returned when a PUT request is made to the specified path.
     ///   - statusCode: By default it's 200, if you provide any status code that is between 200 and 299 the response object will be returned, otherwise we will return an error containig the provided status code.
-    func fakePUT(_ path: String, response: Any?, statusCode: Int = 200) {
-        registerFake(requestType: .put, path: path, response: response, responseType: .json, statusCode: statusCode)
+    func fakePUT(_ path: String, response: Any?, headerFields: [String: String]? = nil, statusCode: Int = 200) {
+        registerFake(requestType: .put, path: path, headerFields: headerFields, response: response, responseType: .json, statusCode: statusCode)
     }
 
     /// Registers a fake PUT request to the specified path using the contents of a file. After registering this, every PUT request to the path, will return the contents of the registered file.
@@ -155,8 +155,8 @@ public extension Networking {
     ///   - path: The path for the faked POST request.
     ///   - response: An `Any` that will be returned when a POST request is made to the specified path.
     ///   - statusCode: By default it's 200, if you provide any status code that is between 200 and 299 the response object will be returned, otherwise we will return an error containig the provided status code.
-    func fakePOST(_ path: String, response: Any?, statusCode: Int = 200) {
-        registerFake(requestType: .post, path: path, response: response, responseType: .json, statusCode: statusCode)
+    func fakePOST(_ path: String, response: Any?, headerFields: [String: String]? = nil, statusCode: Int = 200) {
+        registerFake(requestType: .post, path: path, headerFields: headerFields, response: response, responseType: .json, statusCode: statusCode)
     }
 
     /// Registers a fake POST request to the specified path using the contents of a file. After registering this, every POST request to the path, will return the contents of the registered file.
@@ -197,8 +197,8 @@ public extension Networking {
     ///   - path: The path for the faked DELETE request.
     ///   - response: An `Any` that will be returned when a DELETE request is made to the specified path.
     ///   - statusCode: By default it's 200, if you provide any status code that is between 200 and 299 the response object will be returned, otherwise we will return an error containig the provided status code.
-    func fakeDELETE(_ path: String, response: Any?, statusCode: Int = 200) {
-        registerFake(requestType: .delete, path: path, response: response, responseType: .json, statusCode: statusCode)
+    func fakeDELETE(_ path: String, response: Any?, headerFields: [String: String]? = nil, statusCode: Int = 200) {
+        registerFake(requestType: .delete, path: path, headerFields: headerFields, response: response, responseType: .json, statusCode: statusCode)
     }
 
     /// Registers a fake DELETE request to the specified path using the contents of a file. After registering this, every DELETE request to the path, will return the contents of the registered file.
@@ -259,8 +259,8 @@ public extension Networking {
     ///   - path: The path for the faked image download request.
     ///   - image: An image that will be returned when there's a request to the registered path.
     ///   - statusCode: The status code to be used when faking the request.
-    func fakeImageDownload(_ path: String, image: Image?, statusCode: Int = 200) {
-        registerFake(requestType: .get, path: path, response: image, responseType: .image, statusCode: statusCode)
+    func fakeImageDownload(_ path: String, image: Image, headerFields: [String: String]? = nil, statusCode: Int = 200) {
+        registerFake(requestType: .get, path: path, headerFields: headerFields, response: image, responseType: .image, statusCode: statusCode)
     }
 
     /// Downloads data from a URL, caching the result.

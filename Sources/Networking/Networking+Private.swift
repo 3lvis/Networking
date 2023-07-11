@@ -43,7 +43,7 @@ extension Networking {
     func registerFake(requestType: RequestType, path: String, fileName: String, bundle: Bundle) {
         do {
             if let result = try FileManager.json(from: fileName, bundle: bundle) {
-                registerFake(requestType: requestType, path: path, response: result, responseType: .json, statusCode: 200)
+                registerFake(requestType: requestType, path: path, headerFields: nil, response: result, responseType: .json, statusCode: 200)
             }
         } catch ParsingError.notFound {
             fatalError("We couldn't find \(fileName), are you sure is there?")
@@ -52,16 +52,16 @@ extension Networking {
         }
     }
 
-    func registerFake(requestType: RequestType, path: String, response: Any?, responseType: ResponseType, statusCode: Int) {
+    func registerFake(requestType: RequestType, path: String, headerFields: [String: String]?, response: Any?, responseType: ResponseType, statusCode: Int) {
         var requests = fakeRequests[requestType] ?? [String: FakeRequest]()
-        requests[path] = FakeRequest(response: response, responseType: responseType, statusCode: statusCode)
+        requests[path] = FakeRequest(response: response, responseType: responseType, headerFields: headerFields, statusCode: statusCode)
         fakeRequests[requestType] = requests
     }
 
     func handleFakeRequest(_ fakeRequest: FakeRequest, path: String, cacheName: String?, cachingLevel: CachingLevel) throws -> (Any?, HTTPURLResponse, NSError?) {
         var error: NSError?
         let url = try composedURL(with: path)
-        let response = HTTPURLResponse(url: url, statusCode: fakeRequest.statusCode)
+        let response = HTTPURLResponse(url: url, headerFields: fakeRequest.headerFields, statusCode: fakeRequest.statusCode)
 
         if let unauthorizedRequestCallback = unauthorizedRequestCallback, fakeRequest.statusCode == 403 || fakeRequest.statusCode == 401 {
             unauthorizedRequestCallback()

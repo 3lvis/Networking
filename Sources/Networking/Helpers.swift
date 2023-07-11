@@ -105,8 +105,8 @@ extension URL {
 }
 
 extension HTTPURLResponse {
-    convenience init(url: URL, statusCode: Int) {
-        self.init(url: url, statusCode: statusCode, httpVersion: nil, headerFields: nil)!
+    convenience init(url: URL, headerFields: [String : String]? = nil, statusCode: Int) {
+        self.init(url: url, statusCode: statusCode, httpVersion: nil, headerFields: headerFields)!
     }
 }
 

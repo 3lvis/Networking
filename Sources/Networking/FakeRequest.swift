@@ -3,6 +3,7 @@ import Foundation
 struct FakeRequest {
     let response: Any?
     let responseType: Networking.ResponseType
+    let headerFields: [String: String]?
     let statusCode: Int
 
     static func find(ofType type: Networking.RequestType, forPath path: String, in collection: [Networking.RequestType: [String: FakeRequest]]) throws -> FakeRequest? {
@@ -45,7 +46,7 @@ struct FakeRequest {
                         }
                         if let stringData = responseString.data(using: .utf8) {
                             let finalJSON = try JSONSerialization.jsonObject(with: stringData, options: [])
-                            return FakeRequest(response: finalJSON, responseType: fakeRequest.responseType, statusCode: fakeRequest.statusCode)
+                            return FakeRequest(response: finalJSON, responseType: fakeRequest.responseType, headerFields: fakeRequest.headerFields, statusCode: fakeRequest.statusCode)
                         } else {
                             return nil
                         }
