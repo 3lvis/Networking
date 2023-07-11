@@ -34,7 +34,7 @@ class FakeRequestTests: XCTestCase {
     }
 
     func testFind() throws {
-        let request = FakeRequest(response: nil, responseType: .json, statusCode: 200)
+        let request = FakeRequest(response: nil, responseType: .json, headerFields: nil, statusCode: 200)
         let existingRequests = [Networking.RequestType.get: ["/companies": request]]
 
         XCTAssertNil(try FakeRequest.find(ofType: .get, forPath: "/users", in: existingRequests))
@@ -45,7 +45,7 @@ class FakeRequestTests: XCTestCase {
         let json = [
             "name": "Name {userID}"
         ]
-        let request = FakeRequest(response: json, responseType: .json, statusCode: 200)
+        let request = FakeRequest(response: json, responseType: .json, headerFields: nil, statusCode: 200)
         let existingRequests = [Networking.RequestType.get: ["/users/{userID}": request]]
         let result = try FakeRequest.find(ofType: .get, forPath: "/users/10", in: existingRequests)
 
@@ -61,7 +61,7 @@ class FakeRequestTests: XCTestCase {
             "user": "User {userID}",
             "company": "Company {companyID}"
         ]
-        let request = FakeRequest(response: json, responseType: .json, statusCode: 200)
+        let request = FakeRequest(response: json, responseType: .json, headerFields: nil, statusCode: 200)
         let existingRequests = [Networking.RequestType.get: ["/users/{userID}/companies/{companyID}": request]]
         let result = try FakeRequest.find(ofType: .get, forPath: "/users/10/companies/20", in: existingRequests)
 
@@ -79,7 +79,7 @@ class FakeRequestTests: XCTestCase {
             "company": "Company {companyID}",
             "product": "Product {productID}"
         ]
-        let request = FakeRequest(response: json, responseType: .json, statusCode: 200)
+        let request = FakeRequest(response: json, responseType: .json, headerFields: nil, statusCode: 200)
         let existingRequests = [Networking.RequestType.get: ["/users/{userID}/companies/{companyID}/products/{productID}": request]]
         let result = try FakeRequest.find(ofType: .get, forPath: "/users/10/companies/20/products/30", in: existingRequests)
 
@@ -106,7 +106,7 @@ class FakeRequestTests: XCTestCase {
             "resource10": "Resource {resourceID10}",
         ]
 
-        let request = FakeRequest(response: json, responseType: .json, statusCode: 200)
+        let request = FakeRequest(response: json, responseType: .json, headerFields: nil, statusCode: 200)
         let existingRequests = [Networking.RequestType.get: ["resource1/{resourceID1}/resource2/{resourceID2}/resource3/{resourceID3}/resource4/{resourceID4}/resource5/{resourceID5}/resource6/{resourceID6}/resource7/{resourceID7}/resource8/{resourceID8}/resource9/{resourceID9}/resource10/{resourceID10}": request]]
         let result = try FakeRequest.find(ofType: .get, forPath: "resource1/1/resource2/2/resource3/3/resource4/4/resource5/5/resource6/6/resource7/7/resource8/8/resource9/9/resource10/10", in: existingRequests)
         let expected = [
@@ -265,6 +265,21 @@ extension FakeRequestTests {
             let entry = json[0]
             let value = entry["title"] as? String
             XCTAssertEqual(value, "Entry 1")
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
+        }
+    }
+
+    func testFakeGETUsingHeader() async throws {
+        let networking = Networking(baseURL: baseURL)
+
+        networking.fakePOST("/story", response: nil, headerFields: ["uid": "12345678"])
+
+        let result = try await networking.post("/story")
+        switch result {
+        case let .success(response):
+            let headers = response.headers
+            XCTAssertEqual(headers["uid"] as! String, "12345678")
         case let .failure(response):
             XCTFail(response.error.localizedDescription)
         }
