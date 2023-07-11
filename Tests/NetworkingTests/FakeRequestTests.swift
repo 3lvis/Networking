@@ -219,6 +219,21 @@ extension FakeRequestTests {
             XCTFail(response.error.localizedDescription)
         }
     }
+
+    func testFakeGETUsingHeader() async throws {
+        let networking = Networking(baseURL: baseURL)
+
+        networking.fakeGET("/story", response: nil, headerFields: ["uid": "12345678"])
+
+        let result = try await networking.get("/story")
+        switch result {
+        case let .success(response):
+            let headers = response.headers
+            XCTAssertEqual(headers["uid"] as! String, "12345678")
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
+        }
+    }
 }
 
 // POST tests
@@ -270,7 +285,7 @@ extension FakeRequestTests {
         }
     }
 
-    func testFakeGETUsingHeader() async throws {
+    func testFakePOSTUsingHeader() async throws {
         let networking = Networking(baseURL: baseURL)
 
         networking.fakePOST("/story", response: nil, headerFields: ["uid": "12345678"])
@@ -334,6 +349,21 @@ extension FakeRequestTests {
             XCTFail(response.error.localizedDescription)
         }
     }
+
+    func testFakePUTUsingHeader() async throws {
+        let networking = Networking(baseURL: baseURL)
+
+        networking.fakePUT("/story", response: nil, headerFields: ["uid": "12345678"])
+
+        let result = try await networking.put("/story")
+        switch result {
+        case let .success(response):
+            let headers = response.headers
+            XCTAssertEqual(headers["uid"] as! String, "12345678")
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
+        }
+    }
 }
 
 // PATCH tests
@@ -380,6 +410,21 @@ extension FakeRequestTests {
             let entry = json[0]
             let value = entry["title"] as? String
             XCTAssertEqual(value, "Entry 1")
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
+        }
+    }
+
+    func testFakePATCHUsingHeader() async throws {
+        let networking = Networking(baseURL: baseURL)
+
+        networking.fakePATCH("/story", response: nil, headerFields: ["uid": "12345678"])
+
+        let result = try await networking.patch("/story")
+        switch result {
+        case let .success(response):
+            let headers = response.headers
+            XCTAssertEqual(headers["uid"] as! String, "12345678")
         case let .failure(response):
             XCTFail(response.error.localizedDescription)
         }
@@ -434,6 +479,21 @@ extension FakeRequestTests {
             XCTFail(response.error.localizedDescription)
         }
     }
+
+    func testFakeDELETEUsingHeader() async throws {
+        let networking = Networking(baseURL: baseURL)
+
+        networking.fakeDELETE("/story", response: nil, headerFields: ["uid": "12345678"])
+
+        let result = try await networking.delete("/story")
+        switch result {
+        case let .success(response):
+            let headers = response.headers
+            XCTAssertEqual(headers["uid"] as! String, "12345678")
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
+        }
+    }
 }
 
 // Image tests
@@ -455,13 +515,32 @@ extension FakeRequestTests {
 
     func testFakeImageDownloadWithInvalidStatusCode() async throws {
         let networking = Networking(baseURL: baseURL)
-        networking.fakeImageDownload("/image/png", image: nil, statusCode: 401)
+        let pigImage = Image.find(named: "pig.png", inBundle: .module)
+        networking.fakeImageDownload("/image/png", image: pigImage, statusCode: 401)
         let result = try await networking.downloadImage("/image/png")
         switch result {
         case .success:
             XCTFail()
         case let .failure(response):
             XCTAssertEqual(response.error.code, 401)
+        }
+    }
+
+    func testFakeImageDownloadUsingHeader() async throws {
+        let networking = Networking(baseURL: baseURL)
+        let pigImage = Image.find(named: "pig.png", inBundle: .module)
+        networking.fakeImageDownload("/image/png", image: pigImage, headerFields: ["uid": "12345678"])
+        let result = try await networking.downloadImage("/image/png")
+        switch result {
+        case let .success(response):
+            let pigImageData = pigImage.pngData()
+            let imageData = response.image.pngData()
+            XCTAssertEqual(pigImageData, imageData)
+
+            let headers = response.headers
+            XCTAssertEqual(headers["uid"] as! String, "12345678")
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
         }
     }
 }

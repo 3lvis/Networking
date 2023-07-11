@@ -259,7 +259,7 @@ public extension Networking {
     ///   - path: The path for the faked image download request.
     ///   - image: An image that will be returned when there's a request to the registered path.
     ///   - statusCode: The status code to be used when faking the request.
-    func fakeImageDownload(_ path: String, image: Image?, headerFields: [String: String]? = nil, statusCode: Int = 200) {
+    func fakeImageDownload(_ path: String, image: Image, headerFields: [String: String]? = nil, statusCode: Int = 200) {
         registerFake(requestType: .get, path: path, headerFields: headerFields, response: image, responseType: .image, statusCode: statusCode)
     }
 
