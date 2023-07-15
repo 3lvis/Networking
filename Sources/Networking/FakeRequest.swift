@@ -8,61 +8,54 @@ struct FakeRequest {
 
     static func find(ofType type: Networking.RequestType, forPath path: String, in collection: [Networking.RequestType: [String: FakeRequest]]) throws -> FakeRequest? {
         guard let requests = collection[type] else { return nil }
-
         guard path.count > 0 else { return nil }
-        var evaluatedPath = path
-        evaluatedPath.removeFirstLetterIfDash()
-        evaluatedPath.removeLastLetterIfDash()
-        let lookupPathParts = evaluatedPath.components(separatedBy: "/")
 
-        for (originalFakedPath, fakeRequest) in requests {
-            switch fakeRequest.responseType {
-            case .data, .image:
-                if originalFakedPath == path {
-                    return fakeRequest
-                } else {
-                    continue
-                }
-            case .json:
-                if let response = fakeRequest.response {
-                    var fakedPath = originalFakedPath
-                    fakedPath.removeFirstLetterIfDash()
-                    fakedPath.removeLastLetterIfDash()
-                    let fakePathParts = fakedPath.components(separatedBy: "/")
-                    guard lookupPathParts.count == fakePathParts.count else { continue }
-                    guard lookupPathParts.first == fakePathParts.first else { continue }
-                    guard lookupPathParts.count != 1 && fakePathParts.count != 1 else { return requests[originalFakedPath] }
+        if let result = requests[path] {
+            return result
+        } else {
+            var evaluatedPath = path
+            evaluatedPath.removeFirstLetterIfDash()
+            evaluatedPath.removeLastLetterIfDash()
+            let lookupPathParts = evaluatedPath.components(separatedBy: "/")
 
-                    var replacedValues = [String: String]()
-                    for (index, fakePathPart) in fakePathParts.enumerated() {
-                        if fakePathPart.contains("{") {
-                            replacedValues[fakePathPart] = lookupPathParts[index]
-                        }
+            for (originalFakedPath, fakeRequest) in requests {
+                guard originalFakedPath.contains("{") else { continue }
+
+                var fakedPath = originalFakedPath
+                fakedPath.removeFirstLetterIfDash()
+                fakedPath.removeLastLetterIfDash()
+                let fakePathParts = fakedPath.components(separatedBy: "/")
+
+                guard lookupPathParts.count == fakePathParts.count else { continue }
+                guard lookupPathParts.first == fakePathParts.first else { continue }
+                guard lookupPathParts.count != 1 && fakePathParts.count != 1 else { continue }
+
+                var replacedValues = [String: String]()
+                for (index, fakePathPart) in fakePathParts.enumerated() {
+                    if fakePathPart.contains("{") {
+                        replacedValues[fakePathPart] = lookupPathParts[index]
                     }
-
-                    if var responseString = String(data: try JSONSerialization.data(withJSONObject: response, options: .prettyPrinted), encoding: .utf8) {
-                        for (key, value) in replacedValues {
-                            responseString = responseString.replacingOccurrences(of: key, with: value)
-                        }
-                        if let stringData = responseString.data(using: .utf8) {
-                            let finalJSON = try JSONSerialization.jsonObject(with: stringData, options: [])
-                            return FakeRequest(response: finalJSON, responseType: fakeRequest.responseType, headerFields: fakeRequest.headerFields, statusCode: fakeRequest.statusCode)
-                        } else {
-                            continue
-                        }
-                    } else {
-                        continue
-                    }
-                } else if originalFakedPath == path {
-                    return fakeRequest
-                } else {
-                    continue
                 }
+
+                var replacedPath = originalFakedPath
+                for (key, value) in replacedValues {
+                    replacedPath = replacedPath.replacingOccurrences(of: key, with: value)
+                }
+                guard replacedPath == path else { continue }
+                guard let response = fakeRequest.response else { continue }
+                guard var responseString = String(data: try JSONSerialization.data(withJSONObject: response, options: .prettyPrinted), encoding: .utf8) else { continue }
+
+                for (key, value) in replacedValues {
+                    responseString = responseString.replacingOccurrences(of: key, with: value)
+                }
+
+                guard let stringData = responseString.data(using: .utf8) else { continue }
+                let finalJSON = try JSONSerialization.jsonObject(with: stringData, options: [])
+                return FakeRequest(response: finalJSON, responseType: fakeRequest.responseType, headerFields: fakeRequest.headerFields, statusCode: fakeRequest.statusCode)
             }
         }
 
-        let result = requests[path]
-        return result
+        return nil
     }
 }
 
