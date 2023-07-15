@@ -56,6 +56,30 @@ class FakeRequestTests: XCTestCase {
         XCTAssertEqual(result?.response as? NSDictionary, expected as NSDictionary)
     }
 
+    func testOneLevelFindFailureBecauseOfDictionary() throws {
+        let json = [
+            "name": "Name {userID}"
+        ]
+        let request = FakeRequest(response: json, responseType: .json, headerFields: nil, statusCode: 200)
+        let existingRequests = [
+            Networking.RequestType.get: [
+                "/users/ados": request,
+                "/users/bedos": request,
+                "/users/cedos": request,
+                "/users/tedos": request,
+                "/users/melos": request,
+                "/users/{userID}": request
+            ]
+        ]
+        let result = try FakeRequest.find(ofType: .get, forPath: "/users/10", in: existingRequests)
+
+        let expected = [
+            "name": "Name 10"
+        ]
+
+        XCTAssertEqual(result?.response as? NSDictionary, expected as NSDictionary)
+    }
+
     func testTwoLevelFind() throws {
         let json = [
             "user": "User {userID}",
@@ -80,7 +104,16 @@ class FakeRequestTests: XCTestCase {
             "product": "Product {productID}"
         ]
         let request = FakeRequest(response: json, responseType: .json, headerFields: nil, statusCode: 200)
-        let existingRequests = [Networking.RequestType.get: ["/users/{userID}/companies/{companyID}/products/{productID}": request]]
+        let existingRequests = [Networking.RequestType.get: [
+            "/users/{userID}/companies/{companyID}/products/a": request,
+            "/users/{userID}/companies/{companyID}/products/b": request,
+            "/users/{userID}/companies/{companyID}/products/c": request,
+            "/users/{userID}/companies/{companyID}/products/d": request,
+            "/users/{userID}/companies/{companyID}/products/{productID}": request,
+            "/users/{userID}/companies/{companyID}/products/e": request,
+            "/users/{userID}/companies/{companyID}/products/f": request,
+            "/users/{userID}/companies/{companyID}/products/g": request,
+        ]]
         let result = try FakeRequest.find(ofType: .get, forPath: "/users/10/companies/20/products/30", in: existingRequests)
 
         let expected = [
@@ -197,6 +230,12 @@ extension FakeRequestTests {
         let json = [
             "name": "Name {userID}"
         ]
+
+        networking.fakeGET("/users/ados", response: json, statusCode: 200)
+        networking.fakeGET("/users/bedos", response: json, statusCode: 200)
+        networking.fakeGET("/users/cedos", response: json, statusCode: 200)
+        networking.fakeGET("/users/tedos", response: json, statusCode: 200)
+        networking.fakeGET("/users/melos", response: json, statusCode: 200)
         networking.fakeGET("/users/{userID}", response: json, statusCode: 200)
 
         let result = try await networking.get("/users/10")
@@ -295,6 +334,31 @@ extension FakeRequestTests {
         case let .success(response):
             let headers = response.headers
             XCTAssertEqual(headers["uid"] as! String, "12345678")
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
+        }
+    }
+
+    func testFakePOSTMultiple() async throws {
+        let networking = Networking(baseURL: baseURL)
+
+        networking.fakeGET("/g/1/1", response: ["id":"2"])
+        networking.fakeGET("/g/2/2", response: ["id":"2"])
+        networking.fakePOST("/g/1/e", response: ["id":"2"])
+        networking.fakePOST("/g/1/b", response: ["id":"5"])
+        networking.fakePOST("/g/5/f", response: nil)
+        networking.fakePUT("/g/2/2", response: ["id":"2"])
+        networking.fakePOST("/g/x/o", response: ["id":"3"])
+        networking.fakePOST("/g/1/b", response: ["id":"4"])
+        networking.fakeDELETE("/g/2/2", response: nil)
+        networking.fakePOST("/g/1/b", response: ["id":"1"])
+
+        let result = try await networking.post("/g/1/b", parameters: ["ignored": true])
+        switch result {
+        case let .success(response):
+            let json = response.dictionaryBody
+            let value = json["id"] as! String
+            XCTAssertEqual(value, "1")
         case let .failure(response):
             XCTFail(response.error.localizedDescription)
         }
