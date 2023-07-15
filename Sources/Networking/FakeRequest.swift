@@ -21,7 +21,7 @@ struct FakeRequest {
                 if originalFakedPath == path {
                     return fakeRequest
                 } else {
-                    return nil
+                    continue
                 }
             case .json:
                 if let response = fakeRequest.response {
@@ -48,21 +48,20 @@ struct FakeRequest {
                             let finalJSON = try JSONSerialization.jsonObject(with: stringData, options: [])
                             return FakeRequest(response: finalJSON, responseType: fakeRequest.responseType, headerFields: fakeRequest.headerFields, statusCode: fakeRequest.statusCode)
                         } else {
-                            return nil
+                            continue
                         }
                     } else {
-                        return nil
+                        continue
                     }
                 } else if originalFakedPath == path {
                     return fakeRequest
                 } else {
-                    return nil
+                    continue
                 }
             }
         }
 
         let result = requests[path]
-
         return result
     }
 }
