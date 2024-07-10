@@ -34,7 +34,7 @@ class FakeRequestTests: XCTestCase {
     }
 
     func testFind() throws {
-        let request = FakeRequest(response: nil, responseType: .json, headerFields: nil, statusCode: 200)
+        let request = FakeRequest(response: nil, responseType: .json, headerFields: nil, statusCode: 200, delay: 0)
         let existingRequests = [Networking.RequestType.get: ["/companies": request]]
 
         XCTAssertNil(try FakeRequest.find(ofType: .get, forPath: "/users", in: existingRequests))
@@ -45,7 +45,7 @@ class FakeRequestTests: XCTestCase {
         let json = [
             "name": "Name {userID}"
         ]
-        let request = FakeRequest(response: json, responseType: .json, headerFields: nil, statusCode: 200)
+        let request = FakeRequest(response: json, responseType: .json, headerFields: nil, statusCode: 200, delay: 0)
         let existingRequests = [Networking.RequestType.get: ["/users/{userID}": request]]
         let result = try FakeRequest.find(ofType: .get, forPath: "/users/10", in: existingRequests)
 
@@ -60,7 +60,7 @@ class FakeRequestTests: XCTestCase {
         let json = [
             "name": "Name {userID}"
         ]
-        let request = FakeRequest(response: json, responseType: .json, headerFields: nil, statusCode: 200)
+        let request = FakeRequest(response: json, responseType: .json, headerFields: nil, statusCode: 200, delay: 0)
         let existingRequests = [
             Networking.RequestType.get: [
                 "/users/ados": request,
@@ -85,7 +85,7 @@ class FakeRequestTests: XCTestCase {
             "user": "User {userID}",
             "company": "Company {companyID}"
         ]
-        let request = FakeRequest(response: json, responseType: .json, headerFields: nil, statusCode: 200)
+        let request = FakeRequest(response: json, responseType: .json, headerFields: nil, statusCode: 200, delay: 0)
         let existingRequests = [Networking.RequestType.get: ["/users/{userID}/companies/{companyID}": request]]
         let result = try FakeRequest.find(ofType: .get, forPath: "/users/10/companies/20", in: existingRequests)
 
@@ -103,7 +103,7 @@ class FakeRequestTests: XCTestCase {
             "company": "Company {companyID}",
             "product": "Product {productID}"
         ]
-        let request = FakeRequest(response: json, responseType: .json, headerFields: nil, statusCode: 200)
+        let request = FakeRequest(response: json, responseType: .json, headerFields: nil, statusCode: 200, delay: 0)
         let existingRequests = [Networking.RequestType.get: [
             "/users/{userID}/companies/{companyID}/products/a": request,
             "/users/{userID}/companies/{companyID}/products/b": request,
@@ -139,7 +139,7 @@ class FakeRequestTests: XCTestCase {
             "resource10": "Resource {resourceID10}",
         ]
 
-        let request = FakeRequest(response: json, responseType: .json, headerFields: nil, statusCode: 200)
+        let request = FakeRequest(response: json, responseType: .json, headerFields: nil, statusCode: 200, delay: 0)
         let existingRequests = [Networking.RequestType.get: ["resource1/{resourceID1}/resource2/{resourceID2}/resource3/{resourceID3}/resource4/{resourceID4}/resource5/{resourceID5}/resource6/{resourceID6}/resource7/{resourceID7}/resource8/{resourceID8}/resource9/{resourceID9}/resource10/{resourceID10}": request]]
         let result = try FakeRequest.find(ofType: .get, forPath: "resource1/1/resource2/2/resource3/3/resource4/4/resource5/5/resource6/6/resource7/7/resource8/8/resource9/9/resource10/10", in: existingRequests)
         let expected = [
@@ -171,6 +171,27 @@ extension FakeRequestTests {
             let json = response.dictionaryBody
             let value = json["name"] as? String
             XCTAssertEqual(value, "Elvis")
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
+        }
+    }
+
+    func testGETWithDelay() async throws {
+        let networking = Networking(baseURL: baseURL)
+        let delay: Double = 2.0
+
+        let startTime1 = Date()
+        networking.fakeGET("/stories", response: ["name": "Elvis"], delay: delay)
+
+        let firstResult = try await networking.get("/stories")
+        let endTime1 = Date()
+        let elapsedTime1 = endTime1.timeIntervalSince(startTime1)
+        XCTAssertGreaterThanOrEqual(elapsedTime1, delay, "The delay was not correctly applied")
+
+        switch firstResult {
+        case let .success(response):
+            let json = response.dictionaryBody
+            XCTAssertEqual(json["name"] as? String, "Elvis")
         case let .failure(response):
             XCTFail(response.error.localizedDescription)
         }
@@ -599,6 +620,29 @@ extension FakeRequestTests {
         let pigImage = Image.find(named: "pig.png", inBundle: .module)
         networking.fakeImageDownload("/image/png", image: pigImage)
         let result = try await networking.downloadImage("/image/png")
+        switch result {
+        case let .success(response):
+            let pigImageData = pigImage.pngData()
+            let imageData = response.image.pngData()
+            XCTAssertEqual(pigImageData, imageData)
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
+        }
+    }
+
+    func testFakeImageDownloadWithDelay() async throws {
+        let networking = Networking(baseURL: baseURL)
+        let pigImage = Image.find(named: "pig.png", inBundle: .module)
+        let delay: Double = 2.0
+
+        let startTime = Date()
+        networking.fakeImageDownload("/image/png", image: pigImage, delay: delay)
+
+        let result = try await networking.downloadImage("/image/png")
+        let endTime = Date()
+        let elapsedTime = endTime.timeIntervalSince(startTime)
+        XCTAssertGreaterThanOrEqual(elapsedTime, delay, "The delay was not correctly applied")
+
         switch result {
         case let .success(response):
             let pigImageData = pigImage.pngData()

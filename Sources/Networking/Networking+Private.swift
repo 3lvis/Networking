@@ -40,10 +40,10 @@ extension Networking {
         }
     }
 
-    func registerFake(requestType: RequestType, path: String, fileName: String, bundle: Bundle) {
+    func registerFake(requestType: RequestType, path: String, fileName: String, bundle: Bundle, delay: Double) {
         do {
             if let result = try FileManager.json(from: fileName, bundle: bundle) {
-                registerFake(requestType: requestType, path: path, headerFields: nil, response: result, responseType: .json, statusCode: 200)
+                registerFake(requestType: requestType, path: path, headerFields: nil, response: result, responseType: .json, statusCode: 200, delay: delay)
             }
         } catch ParsingError.notFound {
             fatalError("We couldn't find \(fileName), are you sure is there?")
@@ -52,9 +52,9 @@ extension Networking {
         }
     }
 
-    func registerFake(requestType: RequestType, path: String, headerFields: [String: String]?, response: Any?, responseType: ResponseType, statusCode: Int) {
+    func registerFake(requestType: RequestType, path: String, headerFields: [String: String]?, response: Any?, responseType: ResponseType, statusCode: Int, delay: Double) {
         var requests = fakeRequests[requestType] ?? [String: FakeRequest]()
-        requests[path] = FakeRequest(response: response, responseType: responseType, headerFields: headerFields, statusCode: statusCode)
+        requests[path] = FakeRequest(response: response, responseType: responseType, headerFields: headerFields, statusCode: statusCode, delay: delay)
         fakeRequests[requestType] = requests
     }
 
@@ -86,6 +86,10 @@ extension Networking {
 
         if let fakeRequest = try FakeRequest.find(ofType: requestType, forPath: path, in: fakeRequests) {
             let (_, response, error) = try handleFakeRequest(fakeRequest, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
+            if fakeRequest.delay > 0 {
+                let nanoseconds = UInt64(fakeRequest.delay * 1_000_000_000)
+                try? await Task.sleep(nanoseconds: nanoseconds)
+            }
             return try JSONResult(body: fakeRequest.response, response: response, error: error)
         } else {
             switch cachingLevel {
@@ -110,6 +114,10 @@ extension Networking {
     func handleDataRequest(_ requestType: RequestType, path: String, cacheName: String?, cachingLevel: CachingLevel, responseType: ResponseType) async throws -> DataResult {
         if let fakeRequests = fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
             let (_, response, error) = try handleFakeRequest(fakeRequest, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
+            if fakeRequest.delay > 0 {
+                let nanoseconds = UInt64(fakeRequest.delay * 1_000_000_000)
+                try? await Task.sleep(nanoseconds: nanoseconds)
+            }
             return DataResult(body: fakeRequest.response, response: response, error: error)
         } else {
             let object = try objectFromCache(for: path, cacheName: cacheName, cachingLevel: cachingLevel, responseType: responseType)
@@ -132,6 +140,10 @@ extension Networking {
     func handleImageRequest(_ requestType: RequestType, path: String, cacheName: String?, cachingLevel: CachingLevel, responseType: ResponseType) async throws -> ImageResult {
         if let fakeRequests = fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
             let (_, response, error) = try handleFakeRequest(fakeRequest, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
+            if fakeRequest.delay > 0 {
+                let nanoseconds = UInt64(fakeRequest.delay * 1_000_000_000)
+                try? await Task.sleep(nanoseconds: nanoseconds)
+            }
             return ImageResult(body: fakeRequest.response, response: response, error: error)
         } else {
             let object = try objectFromCache(for: path, cacheName: cacheName, cachingLevel: cachingLevel, responseType: responseType)
