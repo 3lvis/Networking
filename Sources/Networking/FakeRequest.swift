@@ -5,6 +5,15 @@ struct FakeRequest {
     let responseType: Networking.ResponseType
     let headerFields: [String: String]?
     let statusCode: Int
+    let delay: Double
+
+    init(response: Any?, responseType: Networking.ResponseType, headerFields: [String : String]?, statusCode: Int, delay: Double = 0) {
+        self.response = response
+        self.responseType = responseType
+        self.headerFields = headerFields
+        self.statusCode = statusCode
+        self.delay = delay
+    }
 
     static func find(ofType type: Networking.RequestType, forPath path: String, in collection: [Networking.RequestType: [String: FakeRequest]]) throws -> FakeRequest? {
         guard let requests = collection[type] else { return nil }
@@ -51,7 +60,7 @@ struct FakeRequest {
 
                 guard let stringData = responseString.data(using: .utf8) else { continue }
                 let finalJSON = try JSONSerialization.jsonObject(with: stringData, options: [])
-                return FakeRequest(response: finalJSON, responseType: fakeRequest.responseType, headerFields: fakeRequest.headerFields, statusCode: fakeRequest.statusCode)
+                return FakeRequest(response: finalJSON, responseType: fakeRequest.responseType, headerFields: fakeRequest.headerFields, statusCode: fakeRequest.statusCode, delay: fakeRequest.delay)
             }
         }
 

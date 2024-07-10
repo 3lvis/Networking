@@ -40,10 +40,10 @@ extension Networking {
         }
     }
 
-    func registerFake(requestType: RequestType, path: String, fileName: String, bundle: Bundle) {
+    func registerFake(requestType: RequestType, path: String, fileName: String, bundle: Bundle, delay: Double = 0) {
         do {
             if let result = try FileManager.json(from: fileName, bundle: bundle) {
-                registerFake(requestType: requestType, path: path, headerFields: nil, response: result, responseType: .json, statusCode: 200)
+                registerFake(requestType: requestType, path: path, headerFields: nil, response: result, responseType: .json, statusCode: 200, delay: delay)
             }
         } catch ParsingError.notFound {
             fatalError("We couldn't find \(fileName), are you sure is there?")
@@ -52,9 +52,9 @@ extension Networking {
         }
     }
 
-    func registerFake(requestType: RequestType, path: String, headerFields: [String: String]?, response: Any?, responseType: ResponseType, statusCode: Int) {
+    func registerFake(requestType: RequestType, path: String, headerFields: [String: String]?, response: Any?, responseType: ResponseType, statusCode: Int, delay: Double = 0) {
         var requests = fakeRequests[requestType] ?? [String: FakeRequest]()
-        requests[path] = FakeRequest(response: response, responseType: responseType, headerFields: headerFields, statusCode: statusCode)
+        requests[path] = FakeRequest(response: response, responseType: responseType, headerFields: headerFields, statusCode: statusCode, delay: delay)
         fakeRequests[requestType] = requests
     }
 
@@ -86,6 +86,10 @@ extension Networking {
 
         if let fakeRequest = try FakeRequest.find(ofType: requestType, forPath: path, in: fakeRequests) {
             let (_, response, error) = try handleFakeRequest(fakeRequest, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
+            if fakeRequest.delay > 0 {
+                let nanoseconds = UInt64(fakeRequest.delay * 1_000_000_000)
+                try? await Task.sleep(nanoseconds: nanoseconds)
+            }
             return try JSONResult(body: fakeRequest.response, response: response, error: error)
         } else {
             switch cachingLevel {

@@ -177,6 +177,87 @@ class GETTests: XCTestCase {
         }
     }
 
+    func testGETWithDelay() throws {
+        let cache = NSCache<AnyObject, AnyObject>()
+        let networking = Networking(baseURL: baseURL, configuration: .default, cache: cache)
+
+        let delay: Double = 2.0
+
+        // First fakeGET call with delay
+        let expectation1 = expectation(description: "Wait for get request 1")
+
+        // Measure the start time
+        let startTime1 = Date()
+
+        // Use fakeGET with a delay
+        networking.fakeGET("/get", response: ["key": "value1"], delay: delay)
+
+        // Proceed with the rest of your test inside a Task
+        Task {
+            do {
+                let firstResult = try await networking.get("/get", cachingLevel: .memory)
+                // Measure the end time
+                let endTime1 = Date()
+
+                // Calculate the elapsed time
+                let elapsedTime1 = endTime1.timeIntervalSince(startTime1)
+
+                // Assert that the elapsed time is greater than or equal to the delay
+                XCTAssertGreaterThanOrEqual(elapsedTime1, delay, "The delay was not correctly applied")
+
+                switch firstResult {
+                case let .success(response):
+                    let json = response.dictionaryBody
+                    XCTAssertEqual(json["key"] as? String, "value1")
+                case let .failure(response):
+                    XCTFail(response.error.localizedDescription)
+                }
+            } catch {
+                XCTFail("Request failed: \(error)")
+            }
+            expectation1.fulfill()
+        }
+
+        wait(for: [expectation1], timeout: delay + 1.0)
+
+        // Second fakeGET call with delay
+        let expectation2 = expectation(description: "Wait for get request 2")
+
+        // Measure the start time
+        let startTime2 = Date()
+
+        // Use fakeGET with a delay
+        networking.fakeGET("/get", response: ["key": "value2"], delay: delay)
+
+        // Proceed with the rest of your test inside a Task
+        Task {
+            do {
+                let secondResult = try await networking.get("/get", cachingLevel: .memory)
+                // Measure the end time
+                let endTime2 = Date()
+
+                // Calculate the elapsed time
+                let elapsedTime2 = endTime2.timeIntervalSince(startTime2)
+
+                // Assert that the elapsed time is greater than or equal to the delay
+                XCTAssertGreaterThanOrEqual(elapsedTime2, delay, "The delay was not correctly applied")
+
+                switch secondResult {
+                case let .success(response):
+                    let json = response.dictionaryBody
+                    XCTAssertEqual(json["key"] as? String, "value2")
+                case let .failure(response):
+                    XCTFail(response.error.localizedDescription)
+                }
+            } catch {
+                XCTFail("Request failed: \(error)")
+            }
+            expectation2.fulfill()
+        }
+
+        wait(for: [expectation2], timeout: delay + 1.0)
+    }
+
     func testGETCachedFromFile() async throws {
         let cache = NSCache<AnyObject, AnyObject>()
         let networking = Networking(baseURL: baseURL, configuration: .default, cache: cache)
