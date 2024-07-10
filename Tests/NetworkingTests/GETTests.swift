@@ -177,39 +177,6 @@ class GETTests: XCTestCase {
         }
     }
 
-    func testGETWithDelay() throws {
-        let networking = Networking(baseURL: baseURL)
-        let delay: Double = 2.0
-
-        let expectation = expectation(description: "Wait for both get requests")
-
-        Task {
-            let startTime1 = Date()
-            networking.fakeGET("/get", response: ["key": "value1"], delay: delay)
-
-            do {
-                let firstResult = try await networking.get("/get", cachingLevel: .memory)
-                let endTime1 = Date()
-                let elapsedTime1 = endTime1.timeIntervalSince(startTime1)
-                XCTAssertGreaterThanOrEqual(elapsedTime1, delay, "The delay was not correctly applied")
-
-                switch firstResult {
-                case let .success(response):
-                    let json = response.dictionaryBody
-                    XCTAssertEqual(json["key"] as? String, "value1")
-                case let .failure(response):
-                    XCTFail(response.error.localizedDescription)
-                }
-            } catch {
-                XCTFail("Request failed: \(error)")
-            }
-
-            expectation.fulfill()
-        }
-
-        wait(for: [expectation], timeout: delay * 2 + 2.0)
-    }
-
     func testGETCachedFromFile() async throws {
         let cache = NSCache<AnyObject, AnyObject>()
         let networking = Networking(baseURL: baseURL, configuration: .default, cache: cache)

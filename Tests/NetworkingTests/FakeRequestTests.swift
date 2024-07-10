@@ -176,6 +176,27 @@ extension FakeRequestTests {
         }
     }
 
+    func testGETWithDelay() async throws {
+        let networking = Networking(baseURL: baseURL)
+        let delay: Double = 2.0
+
+        let startTime1 = Date()
+        networking.fakeGET("/stories", response: ["name": "Elvis"], delay: delay)
+
+        let firstResult = try await networking.get("/stories")
+        let endTime1 = Date()
+        let elapsedTime1 = endTime1.timeIntervalSince(startTime1)
+        XCTAssertGreaterThanOrEqual(elapsedTime1, delay, "The delay was not correctly applied")
+
+        switch firstResult {
+        case let .success(response):
+            let json = response.dictionaryBody
+            XCTAssertEqual(json["name"] as? String, "Elvis")
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
+        }
+    }
+
     func testFakeGETWithInvalidStatusCode() async throws {
         let networking = Networking(baseURL: baseURL)
 
@@ -599,6 +620,29 @@ extension FakeRequestTests {
         let pigImage = Image.find(named: "pig.png", inBundle: .module)
         networking.fakeImageDownload("/image/png", image: pigImage)
         let result = try await networking.downloadImage("/image/png")
+        switch result {
+        case let .success(response):
+            let pigImageData = pigImage.pngData()
+            let imageData = response.image.pngData()
+            XCTAssertEqual(pigImageData, imageData)
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
+        }
+    }
+
+    func testFakeImageDownloadWithDelay() async throws {
+        let networking = Networking(baseURL: baseURL)
+        let pigImage = Image.find(named: "pig.png", inBundle: .module)
+        let delay: Double = 2.0
+
+        let startTime = Date()
+        networking.fakeImageDownload("/image/png", image: pigImage, delay: delay)
+
+        let result = try await networking.downloadImage("/image/png")
+        let endTime = Date()
+        let elapsedTime = endTime.timeIntervalSince(startTime)
+        XCTAssertGreaterThanOrEqual(elapsedTime, delay, "The delay was not correctly applied")
+
         switch result {
         case let .success(response):
             let pigImageData = pigImage.pngData()
