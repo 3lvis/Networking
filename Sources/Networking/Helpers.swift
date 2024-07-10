@@ -38,17 +38,11 @@ public extension Dictionary where Key: ExpressibleByStringLiteral {
 extension String {
 
     func encodeUTF8() -> String? {
-        if let _ = URL(string: self) {
+        if let url = URL(string: self), url.host != nil {
             return self
         }
 
-        var components = self.components(separatedBy: "/")
-        guard let lastComponent = components.popLast(),
-            let endcodedLastComponent = lastComponent.addingPercentEncoding(withAllowedCharacters: .urlQueryParametersAllowed) else {
-            return nil
-        }
-
-        return (components + [endcodedLastComponent]).joined(separator: "/")
+        return self.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)
     }
 }
 
