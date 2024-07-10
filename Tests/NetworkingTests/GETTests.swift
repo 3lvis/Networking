@@ -180,29 +180,18 @@ class GETTests: XCTestCase {
     func testGETWithDelay() throws {
         let cache = NSCache<AnyObject, AnyObject>()
         let networking = Networking(baseURL: baseURL, configuration: .default, cache: cache)
-
         let delay: Double = 2.0
 
         // First fakeGET call with delay
         let expectation1 = expectation(description: "Wait for get request 1")
-
-        // Measure the start time
         let startTime1 = Date()
-
-        // Use fakeGET with a delay
         networking.fakeGET("/get", response: ["key": "value1"], delay: delay)
 
-        // Proceed with the rest of your test inside a Task
         Task {
             do {
                 let firstResult = try await networking.get("/get", cachingLevel: .memory)
-                // Measure the end time
                 let endTime1 = Date()
-
-                // Calculate the elapsed time
                 let elapsedTime1 = endTime1.timeIntervalSince(startTime1)
-
-                // Assert that the elapsed time is greater than or equal to the delay
                 XCTAssertGreaterThanOrEqual(elapsedTime1, delay, "The delay was not correctly applied")
 
                 switch firstResult {
@@ -222,24 +211,14 @@ class GETTests: XCTestCase {
 
         // Second fakeGET call with delay
         let expectation2 = expectation(description: "Wait for get request 2")
-
-        // Measure the start time
         let startTime2 = Date()
-
-        // Use fakeGET with a delay
         networking.fakeGET("/get", response: ["key": "value2"], delay: delay)
 
-        // Proceed with the rest of your test inside a Task
         Task {
             do {
                 let secondResult = try await networking.get("/get", cachingLevel: .memory)
-                // Measure the end time
                 let endTime2 = Date()
-
-                // Calculate the elapsed time
                 let elapsedTime2 = endTime2.timeIntervalSince(startTime2)
-
-                // Assert that the elapsed time is greater than or equal to the delay
                 XCTAssertGreaterThanOrEqual(elapsedTime2, delay, "The delay was not correctly applied")
 
                 switch secondResult {
