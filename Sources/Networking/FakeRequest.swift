@@ -7,7 +7,7 @@ struct FakeRequest {
     let statusCode: Int
     let delay: Double
 
-    init(response: Any?, responseType: Networking.ResponseType, headerFields: [String : String]?, statusCode: Int, delay: Double = 0) {
+    init(response: Any?, responseType: Networking.ResponseType, headerFields: [String : String]?, statusCode: Int, delay: Double) {
         self.response = response
         self.responseType = responseType
         self.headerFields = headerFields
