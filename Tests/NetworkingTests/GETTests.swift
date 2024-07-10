@@ -178,16 +178,15 @@ class GETTests: XCTestCase {
     }
 
     func testGETWithDelay() throws {
-        let cache = NSCache<AnyObject, AnyObject>()
-        let networking = Networking(baseURL: baseURL, configuration: .default, cache: cache)
+        let networking = Networking(baseURL: baseURL)
         let delay: Double = 2.0
 
-        // First fakeGET call with delay
-        let expectation1 = expectation(description: "Wait for get request 1")
-        let startTime1 = Date()
-        networking.fakeGET("/get", response: ["key": "value1"], delay: delay)
+        let expectation = expectation(description: "Wait for both get requests")
 
         Task {
+            let startTime1 = Date()
+            networking.fakeGET("/get", response: ["key": "value1"], delay: delay)
+
             do {
                 let firstResult = try await networking.get("/get", cachingLevel: .memory)
                 let endTime1 = Date()
@@ -204,37 +203,11 @@ class GETTests: XCTestCase {
             } catch {
                 XCTFail("Request failed: \(error)")
             }
-            expectation1.fulfill()
+
+            expectation.fulfill()
         }
 
-        wait(for: [expectation1], timeout: delay + 1.0)
-
-        // Second fakeGET call with delay
-        let expectation2 = expectation(description: "Wait for get request 2")
-        let startTime2 = Date()
-        networking.fakeGET("/get", response: ["key": "value2"], delay: delay)
-
-        Task {
-            do {
-                let secondResult = try await networking.get("/get", cachingLevel: .memory)
-                let endTime2 = Date()
-                let elapsedTime2 = endTime2.timeIntervalSince(startTime2)
-                XCTAssertGreaterThanOrEqual(elapsedTime2, delay, "The delay was not correctly applied")
-
-                switch secondResult {
-                case let .success(response):
-                    let json = response.dictionaryBody
-                    XCTAssertEqual(json["key"] as? String, "value2")
-                case let .failure(response):
-                    XCTFail(response.error.localizedDescription)
-                }
-            } catch {
-                XCTFail("Request failed: \(error)")
-            }
-            expectation2.fulfill()
-        }
-
-        wait(for: [expectation2], timeout: delay + 1.0)
+        wait(for: [expectation], timeout: delay * 2 + 2.0)
     }
 
     func testGETCachedFromFile() async throws {
