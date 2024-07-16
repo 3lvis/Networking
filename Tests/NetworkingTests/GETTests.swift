@@ -232,7 +232,9 @@ class GETTests: XCTestCase {
 
     func testNewGET() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result = await networking.get("/get", responseType: Friend.self)
+
+        let result: Result<Friend, NetworkingError> = await networking.newGet("/get")
+
         switch result {
         case .success(let success):
             print("worked")
@@ -240,4 +242,18 @@ class GETTests: XCTestCase {
             print(failure.localizedDescription)
         }
     }
+
+    func testNewPOST() async throws {
+        let networking = Networking(baseURL: baseURL)
+
+        let result: Result<Void, NetworkingError> = await networking.newPost("/get", parameters: ["String": "String"])
+
+        switch result {
+        case .success(let success):
+            print("worked")
+        case .failure(let failure):
+            print(failure.localizedDescription)
+        }
+    }
+
 }

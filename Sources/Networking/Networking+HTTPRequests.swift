@@ -41,15 +41,25 @@ public extension Networking {
         await cancelRequest(.data, requestType: .get, url: url)
     }
 
-    func get<T: Decodable>(_ path: String, responseType: T.Type) async -> Result<T, NetworkingError> {
+    func newGet<T: Decodable>(_ path: String) async -> Result<T, NetworkingError> {
         return await handle(.get, path: path, parameters: nil)
     }
 
-    func post<T: Decodable>(_ path: String, parameters: [String: Any]) async -> Result<T, NetworkingError> {
+    func newPost<T: Decodable>(_ path: String, parameters: [String: Any]) async -> Result<T, NetworkingError> {
         return await handle(.post, path: path, parameters: parameters)
     }
 
-    func put<T: Decodable>(_ path: String, parameters: [String: Any]) async -> Result<T, NetworkingError> {
+    func newPost(_ path: String, parameters: [String: Any]) async -> Result<Void, NetworkingError> {
+        let result: Result<Data, NetworkingError> = await handle(.post, path: path, parameters: parameters)
+        switch result {
+        case .success:
+            return .success(())
+        case .failure(let error):
+            return .failure(error)
+        }
+    }
+
+    func newPut<T: Decodable>(_ path: String, parameters: [String: Any]) async -> Result<T, NetworkingError> {
         return await handle(.put, path: path, parameters: parameters)
     }
 
