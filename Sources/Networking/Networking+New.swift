@@ -33,7 +33,9 @@ extension Networking {
 
             let statusCode = httpResponse.statusCode
             if (200...299).contains(statusCode) {
-                let decodedResponse = try JSONDecoder().decode(T.self, from: data)
+                let decoder = JSONDecoder()
+                decoder.dateDecodingStrategy = .iso8601
+                let decodedResponse = try decoder.decode(T.self, from: data)
                 return .success(decodedResponse)
             } else {
                 let errorMessage = HTTPURLResponse.localizedString(forStatusCode: statusCode)
