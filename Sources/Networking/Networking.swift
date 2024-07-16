@@ -1,5 +1,56 @@
 import Foundation
 
+public enum NetworkingError: Error {
+    case invalidURL
+    case invalidResponse
+    case clientError(statusCode: Int, message: String)
+    case serverError(statusCode: Int, message: String, details: [String: Any]?)
+    case unexpectedError(statusCode: Int?, message: String)
+
+    var message: String {
+        switch self {
+        case .invalidURL:
+            return "We're sorry, but the URL for this request is invalid. Please verify the URL format."
+        case .invalidResponse:
+            return "We're sorry, but we received an invalid response from the server. Please check the server's response format and try again."
+        case .clientError(let statusCode, let message):
+            return "We're sorry, but a client error occurred (code: \(statusCode)). \(message). Please try again or contact support if this issue persists."
+        case .serverError(let statusCode, let message, let details):
+            var detailsString = ""
+            if let details = details {
+                detailsString = details.map { "\($0.key): \($0.value)" }.joined(separator: ", ")
+            }
+            return "We're sorry, but a server error occurred (code: \(statusCode)). \(message). Additional info: \(detailsString). Please try again or contact support if this issue persists."
+        case .unexpectedError(let statusCode, let message):
+            let statusCodeMessage = statusCode != nil ? "(code: \(statusCode!)) " : ""
+            return "We're sorry, but an unexpected error occurred \(statusCodeMessage)\(message). Please try again, and if the problem persists, reach out to our support team."
+        }
+    }
+}
+
+public struct ErrorResponse: Decodable {
+    let error: String?
+    let message: String?
+    let errors: [String: [String]]?
+
+    var combinedMessage: String {
+        var messages = [String]()
+        if let error = error {
+            messages.append(error)
+        }
+        if let message = message {
+            messages.append(message)
+        }
+        if let errors = errors {
+            for (field, messagesArray) in errors {
+                let combinedFieldMessages = messagesArray.joined(separator: ", ")
+                messages.append("\(field): \(combinedFieldMessages)")
+            }
+        }
+        return messages.joined(separator: "; ")
+    }
+}
+
 public extension Int {
 
     /// Categorizes a status code.
@@ -90,7 +141,7 @@ open class Networking {
         case informational, successful, redirection, clientError, serverError, cancelled, unknown
     }
 
-    fileprivate let baseURL: String
+    let baseURL: String
     var fakeRequests = [RequestType: [String: FakeRequest]]()
     var token: String?
     var authorizationHeaderValue: String?

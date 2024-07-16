@@ -40,6 +40,28 @@ public extension Networking {
         let url = try composedURL(with: path)
         await cancelRequest(.data, requestType: .get, url: url)
     }
+
+    func get<T: Decodable>(_ path: String) async -> Result<T, NetworkingError> {
+        return await handle(.get, path: path, parameters: nil)
+    }
+
+    func post<T: Decodable>(_ path: String, parameters: [String: Any]) async -> Result<T, NetworkingError> {
+        return await handle(.post, path: path, parameters: parameters)
+    }
+
+    func put<T: Decodable>(_ path: String, parameters: [String: Any]) async -> Result<T, NetworkingError> {
+        return await handle(.put, path: path, parameters: parameters)
+    }
+
+    func newDelete(_ path: String) async -> Result<Void, NetworkingError> {
+        let result: Result<Data, NetworkingError> = await handle(.delete, path: path, parameters: nil)
+        switch result {
+        case .success:
+            return .success(())
+        case .failure(let error):
+            return .failure(error)
+        }
+    }
 }
 
 @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
