@@ -2,6 +2,11 @@ import Foundation
 import XCTest
 @testable import Networking
 
+struct Friend: Decodable {
+    let id: UUID
+    let title: String
+}
+
 class GETTests: XCTestCase {
     let baseURL = "http://httpbin.org"
 
@@ -225,4 +230,14 @@ class GETTests: XCTestCase {
         }
     }
 
+    func testNewGET() async throws {
+        let networking = Networking(baseURL: baseURL)
+        let result = await networking.get("/get", responseType: Friend.self)
+        switch result {
+        case .success(let success):
+            print("worked")
+        case .failure(let failure):
+            print(failure.localizedDescription)
+        }
+    }
 }
