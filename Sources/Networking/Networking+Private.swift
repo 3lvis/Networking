@@ -82,6 +82,52 @@ extension Networking {
         return (fakeRequest.response, response, error)
     }
 
+    func handle<T: Decodable>(_ requestType: RequestType, path: String, parameters: Any?) async -> Result<T, NetworkingError> {
+        guard let url = URL(string: baseURL + path) else {
+            return .failure(.invalidURL)
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = requestType.rawValue
+
+        if let parameters = parameters {
+            do {
+                request.httpBody = try JSONSerialization.data(withJSONObject: parameters, options: [])
+                request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            } catch {
+                return .failure(.unexpectedError(message: "Failed to encode parameters"))
+            }
+        }
+
+        do {
+            let (data, response) = try await session.data(for: request)
+            guard let httpResponse = response as? HTTPURLResponse else {
+                return .failure(.invalidResponse)
+            }
+
+            let statusCode = httpResponse.statusCode
+            if (200...299).contains(statusCode) {
+                let decodedResponse = try JSONDecoder().decode(T.self, from: data)
+                return .success(decodedResponse)
+            } else {
+                let errorMessage = HTTPURLResponse.localizedString(forStatusCode: statusCode)
+                var message = errorMessage
+                var errorDetails: [String: Any]? = nil
+
+                if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
+                    message = errorResponse.combinedMessage
+                    errorDetails = ["error": errorResponse.error ?? "",
+                                    "message": errorResponse.message ?? "",
+                                    "errors": errorResponse.errors ?? [:]]
+                }
+
+                return .failure(.serverError(statusCode: statusCode, message: message, details: errorDetails))
+            }
+        } catch {
+            return .failure(.unexpectedError(message: error.localizedDescription))
+        }
+    }
+
     func handleJSONRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]? = nil, responseType: ResponseType, cachingLevel: CachingLevel) async throws -> JSONResult {
 
         if let fakeRequest = try FakeRequest.find(ofType: requestType, forPath: path, in: fakeRequests) {

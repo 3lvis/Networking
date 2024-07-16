@@ -1,5 +1,71 @@
 import Foundation
 
+public enum NetworkingError: Error {
+    case invalidURL
+    case invalidResponse
+    case serverError(statusCode: Int, message: String, details: [String: Any]?)
+    case unexpectedError(message: String)
+
+    var message: String {
+        switch self {
+        case .invalidURL:
+            return "We're sorry, but the URL for this request is invalid. Please verify the URL format."
+        case .invalidResponse:
+            return "We're sorry, but we received an invalid response from the server. Please check the server's response format and try again."
+        case .serverError(let statusCode, let message, let details):
+            var detailsString = ""
+            if let details = details {
+                detailsString = details.map { "\($0.key): \($0.value)" }.joined(separator: ", ")
+            }
+
+            let statusCodeDescription: String
+            switch statusCode.statusCodeType {
+            case .informational:
+                statusCodeDescription = "Informational response"
+            case .successful:
+                statusCodeDescription = "Successful response"
+            case .redirection:
+                statusCodeDescription = "Redirection response"
+            case .clientError:
+                statusCodeDescription = "App error"
+            case .serverError:
+                statusCodeDescription = "Server error"
+            case .cancelled:
+                statusCodeDescription = "Cancelled request"
+            case .unknown:
+                statusCodeDescription = "Unknown status code"
+            }
+
+            return "We're sorry, but a server error occurred (code: \(statusCode), \(statusCodeDescription)). \(message). Additional info: \(detailsString). Please try again or contact support if this issue persists."
+        case .unexpectedError(let message):
+            return "We're sorry, but something went wrong: \(message). Please try again, and if the problem persists, reach out to our support team."
+        }
+    }
+}
+
+public struct ErrorResponse: Decodable {
+    let error: String?
+    let message: String?
+    let errors: [String: [String]]?
+
+    var combinedMessage: String {
+        var messages = [String]()
+        if let error = error {
+            messages.append(error)
+        }
+        if let message = message {
+            messages.append(message)
+        }
+        if let errors = errors {
+            for (field, messagesArray) in errors {
+                let combinedFieldMessages = messagesArray.joined(separator: ", ")
+                messages.append("\(field): \(combinedFieldMessages)")
+            }
+        }
+        return messages.joined(separator: "; ")
+    }
+}
+
 public extension Int {
 
     /// Categorizes a status code.
@@ -90,7 +156,7 @@ open class Networking {
         case informational, successful, redirection, clientError, serverError, cancelled, unknown
     }
 
-    fileprivate let baseURL: String
+    let baseURL: String
     var fakeRequests = [RequestType: [String: FakeRequest]]()
     var token: String?
     var authorizationHeaderValue: String?
