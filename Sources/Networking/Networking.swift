@@ -7,7 +7,7 @@ public enum NetworkingError: Error {
     case serverError(statusCode: Int, message: String, details: [String: Any]?)
     case unexpectedError(statusCode: Int?, message: String)
 
-    var message: String {
+    public var message: String {
         switch self {
         case .invalidURL:
             return "We're sorry, but the URL for this request is invalid. Please verify the URL format."
