@@ -3,8 +3,9 @@ import Foundation
 public enum NetworkingError: Error {
     case invalidURL
     case invalidResponse
+    case clientError(statusCode: Int, message: String)
     case serverError(statusCode: Int, message: String, details: [String: Any]?)
-    case unexpectedError(message: String)
+    case unexpectedError(statusCode: Int?, message: String)
 
     var message: String {
         switch self {
@@ -12,33 +13,17 @@ public enum NetworkingError: Error {
             return "We're sorry, but the URL for this request is invalid. Please verify the URL format."
         case .invalidResponse:
             return "We're sorry, but we received an invalid response from the server. Please check the server's response format and try again."
+        case .clientError(let statusCode, let message):
+            return "We're sorry, but a client error occurred (code: \(statusCode)). \(message). Please try again or contact support if this issue persists."
         case .serverError(let statusCode, let message, let details):
             var detailsString = ""
             if let details = details {
                 detailsString = details.map { "\($0.key): \($0.value)" }.joined(separator: ", ")
             }
-
-            let statusCodeDescription: String
-            switch statusCode.statusCodeType {
-            case .informational:
-                statusCodeDescription = "Informational response"
-            case .successful:
-                statusCodeDescription = "Successful response"
-            case .redirection:
-                statusCodeDescription = "Redirection response"
-            case .clientError:
-                statusCodeDescription = "App error"
-            case .serverError:
-                statusCodeDescription = "Server error"
-            case .cancelled:
-                statusCodeDescription = "Cancelled request"
-            case .unknown:
-                statusCodeDescription = "Unknown status code"
-            }
-
-            return "We're sorry, but a server error occurred (code: \(statusCode), \(statusCodeDescription)). \(message). Additional info: \(detailsString). Please try again or contact support if this issue persists."
-        case .unexpectedError(let message):
-            return "We're sorry, but something went wrong: \(message). Please try again, and if the problem persists, reach out to our support team."
+            return "We're sorry, but a server error occurred (code: \(statusCode)). \(message). Additional info: \(detailsString). Please try again or contact support if this issue persists."
+        case .unexpectedError(let statusCode, let message):
+            let statusCodeMessage = statusCode != nil ? "(code: \(statusCode!)) " : ""
+            return "We're sorry, but an unexpected error occurred \(statusCodeMessage)\(message). Please try again, and if the problem persists, reach out to our support team."
         }
     }
 }

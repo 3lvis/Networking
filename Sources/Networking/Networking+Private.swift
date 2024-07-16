@@ -2,7 +2,6 @@ import Foundation
 
 @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
 extension Networking {
-
     func objectFromCache(for path: String, cacheName: String?, cachingLevel: CachingLevel, responseType: ResponseType) throws -> Any? {
         /// Workaround: Remove URL parameters from path. That can lead to writing cached files with names longer than
         /// 255 characters, resulting in error. Another option to explore is to use a hash version of the url if it's
@@ -80,52 +79,6 @@ extension Networking {
             try cacheOrPurgeJSON(object: fakeRequest.response, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
         }
         return (fakeRequest.response, response, error)
-    }
-
-    func handle<T: Decodable>(_ requestType: RequestType, path: String, parameters: Any?) async -> Result<T, NetworkingError> {
-        guard let url = URL(string: baseURL + path) else {
-            return .failure(.invalidURL)
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = requestType.rawValue
-
-        if let parameters = parameters {
-            do {
-                request.httpBody = try JSONSerialization.data(withJSONObject: parameters, options: [])
-                request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            } catch {
-                return .failure(.unexpectedError(message: "Failed to encode parameters"))
-            }
-        }
-
-        do {
-            let (data, response) = try await session.data(for: request)
-            guard let httpResponse = response as? HTTPURLResponse else {
-                return .failure(.invalidResponse)
-            }
-
-            let statusCode = httpResponse.statusCode
-            if (200...299).contains(statusCode) {
-                let decodedResponse = try JSONDecoder().decode(T.self, from: data)
-                return .success(decodedResponse)
-            } else {
-                let errorMessage = HTTPURLResponse.localizedString(forStatusCode: statusCode)
-                var message = errorMessage
-                var errorDetails: [String: Any]? = nil
-
-                if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
-                    message = errorResponse.combinedMessage
-                    errorDetails = ["error": errorResponse.error ?? "",
-                                    "message": errorResponse.message ?? "",
-                                    "errors": errorResponse.errors ?? [:]]
-                }
-
-                return .failure(.serverError(statusCode: statusCode, message: message, details: errorDetails))
-            }
-        } catch {
-            return .failure(.unexpectedError(message: error.localizedDescription))
-        }
     }
 
     func handleJSONRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]? = nil, responseType: ResponseType, cachingLevel: CachingLevel) async throws -> JSONResult {
