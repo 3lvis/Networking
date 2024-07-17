@@ -42,21 +42,17 @@ extension Networking {
             switch statusCode.statusCodeType {
             case .informational, .successful:
                 logger.info("Received successful response with status code \(statusCode) from \(path, privacy: .public)")
-                let decoder = JSONDecoder()
-                decoder.dateDecodingStrategy = .iso8601
-
                 if T.self == NetworkingJSON.self {
-                    let headers = httpResponse.allHeaderFields.reduce(into: [String: AnyCodable]()) { (result, item) in
-                        if let key = item.key as? String {
-                            result[key] = AnyCodable(item.value)
-                        }
-                    }
+                    let headers = Dictionary(uniqueKeysWithValues: httpResponse.allHeaderFields.compactMap { key, value in
+                        (key as? String).map { ($0, AnyCodable(value)) }
+                    })
                     let body = try JSONDecoder().decode([String: AnyCodable].self, from: responseData)
                     let networkingJSON = NetworkingJSON(headers: headers, body: body)
                     return .success(networkingJSON as! T)
                 } else {
+                    let decoder = JSONDecoder()
+                    decoder.dateDecodingStrategy = .iso8601
                     let decodedResponse = try decoder.decode(T.self, from: responseData)
-                    logger.info("Successfully decoded response from \(path, privacy: .public)")
                     return .success(decodedResponse)
                 }
             case .redirection:
