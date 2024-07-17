@@ -1,18 +1,18 @@
 import Foundation
 
 public struct NetworkingJSON: Decodable {
-    let headers: [String: AnyCodable]
-    let body: [String: AnyCodable]
+    public let headers: [String: AnyCodable]
+    public let body: [String: AnyCodable]
 }
 
-struct AnyCodable: Decodable {
+public struct AnyCodable: Decodable {
     let value: Any
 
     init(_ value: Any) {
         self.value = value
     }
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
 
         if let value = try? container.decode(Bool.self) {
@@ -50,11 +50,11 @@ struct AnyCodable: Decodable {
 }
 
 extension AnyCodable: Hashable {
-    static func == (lhs: AnyCodable, rhs: AnyCodable) -> Bool {
+    public static func == (lhs: AnyCodable, rhs: AnyCodable) -> Bool {
         return String(describing: lhs.value) == String(describing: rhs.value)
     }
 
-    func hash(into hasher: inout Hasher) {
+    public func hash(into hasher: inout Hasher) {
         hasher.combine(String(describing: value))
     }
 }
