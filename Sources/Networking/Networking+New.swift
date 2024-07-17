@@ -2,6 +2,7 @@ import Foundation
 
 extension Networking {
     func handle<T: Decodable>(_ requestType: RequestType, path: String, parameters: Any?) async -> Result<T, NetworkingError> {
+        var data: Data?
         do {
             logger.info("Starting \(requestType.rawValue) request to \(path, privacy: .public)")
 
@@ -30,7 +31,8 @@ extension Networking {
                 request.httpBody = try JSONSerialization.data(withJSONObject: parameters, options: [])
             }
 
-            let (data, response) = try await session.data(for: request)
+            let (responseData, response) = try await session.data(for: request)
+            data = responseData
             guard let httpResponse = response as? HTTPURLResponse else {
                 logger.error("Invalid response received from \(path, privacy: .public)")
                 return .failure(.invalidResponse)
@@ -42,7 +44,7 @@ extension Networking {
                 logger.info("Received successful response with status code \(statusCode) from \(path, privacy: .public)")
                 let decoder = JSONDecoder()
                 decoder.dateDecodingStrategy = .iso8601
-                let decodedResponse = try decoder.decode(T.self, from: data)
+                let decodedResponse = try decoder.decode(T.self, from: responseData)
                 logger.info("Successfully decoded response from \(path, privacy: .public)")
                 return .success(decodedResponse)
             case .redirection:
@@ -50,7 +52,10 @@ extension Networking {
                 return .failure(.unexpectedError(statusCode: statusCode, message: "Redirection occurred."))
             case .clientError:
                 let errorMessage = HTTPURLResponse.localizedString(forStatusCode: statusCode)
-                if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
+                if let jsonString = String(data: responseData, encoding: .utf8) {
+                    logger.warning("Client error: \(jsonString, privacy: .public) with status code \(statusCode) from \(path, privacy: .public)")
+                }
+                if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: responseData) {
                     logger.warning("Client error: \(errorResponse.combinedMessage, privacy: .public) with status code \(statusCode) from \(path, privacy: .public)")
                     return .failure(.clientError(statusCode: statusCode, message: errorResponse.combinedMessage))
                 } else {
@@ -60,7 +65,10 @@ extension Networking {
             case .serverError:
                 let errorMessage = HTTPURLResponse.localizedString(forStatusCode: statusCode)
                 var errorDetails: [String: Any]? = nil
-                if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
+                if let jsonString = String(data: responseData, encoding: .utf8) {
+                    logger.error("Server error: \(jsonString, privacy: .public) with status code \(statusCode) from \(path, privacy: .public)")
+                }
+                if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: responseData) {
                     errorDetails = ["error": errorResponse.error ?? "",
                                     "message": errorResponse.message ?? "",
                                     "errors": errorResponse.errors ?? [:]]
@@ -78,7 +86,11 @@ extension Networking {
                 return .failure(.unexpectedError(statusCode: statusCode, message: "An unexpected error occurred."))
             }
         } catch let error as NSError {
-            logger.error("Unexpected error occurred: \(error.localizedDescription, privacy: .public)")
+            if let data = data, let jsonString = String(data: data, encoding: .utf8) {
+                logger.error("Unexpected error occurred: \(error.localizedDescription, privacy: .public). Response data: \(jsonString, privacy: .public)")
+            } else {
+                logger.error("Unexpected error occurred: \(error.localizedDescription, privacy: .public)")
+            }
             return .failure(.unexpectedError(statusCode: nil, message: "Failed to process request (error: \(error.localizedDescription))."))
         }
     }
