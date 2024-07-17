@@ -58,3 +58,21 @@ extension AnyCodable: Hashable {
         hasher.combine(String(describing: value))
     }
 }
+
+extension Dictionary where Key == String, Value == AnyCodable {
+    public func string(for key: String) -> String? {
+        return self[key]?.value as? String
+    }
+
+    public func int(for key: String) -> Int? {
+        return self[key]?.value as? Int
+    }
+
+    public func double(for key: String) -> Double? {
+        return self[key]?.value as? Double
+    }
+
+    public func bool(for key: String) -> Bool? {
+        return self[key]?.value as? Bool
+    }
+}
