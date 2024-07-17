@@ -42,9 +42,9 @@ public struct ErrorResponse: Decodable {
             messages.append(message)
         }
         if let errors = errors {
-            for (field, messagesArray) in errors {
+            for (_, messagesArray) in errors {
                 let combinedFieldMessages = messagesArray.joined(separator: ", ")
-                messages.append("\(field): \(combinedFieldMessages)")
+                messages.append(combinedFieldMessages)
             }
         }
         return messages.joined(separator: "; ")
