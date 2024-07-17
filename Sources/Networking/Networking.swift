@@ -10,20 +10,20 @@ public enum NetworkingError: Error {
     public var message: String {
         switch self {
         case .invalidURL:
-            return "We're sorry, but the URL for this request is invalid. Please verify the URL format."
+            return "We're sorry, but the URL for this request is invalid."
         case .invalidResponse:
-            return "We're sorry, but we received an invalid response from the server. Please check the server's response format and try again."
+            return "We're sorry, but we received an invalid response from the server."
         case .clientError(let statusCode, let message):
-            return "We're sorry, but a client error occurred (code: \(statusCode)). \(message). Please try again or contact support if this issue persists."
+            return "We're sorry, but a client error occurred. Code: \(statusCode), \(message)."
         case .serverError(let statusCode, let message, let details):
             var detailsString = ""
             if let details = details {
                 detailsString = details.map { "\($0.key): \($0.value)" }.joined(separator: ", ")
             }
-            return "We're sorry, but a server error occurred (code: \(statusCode)). \(message). Additional info: \(detailsString). Please try again or contact support if this issue persists."
+            return "We're sorry, but a server error occurred. Code: \(statusCode) \(message). Additional info: \(detailsString)"
         case .unexpectedError(let statusCode, let message):
-            let statusCodeMessage = statusCode != nil ? "(code: \(statusCode!)) " : ""
-            return "We're sorry, but an unexpected error occurred \(statusCodeMessage)\(message). Please try again, and if the problem persists, reach out to our support team."
+            let statusCodeMessage = statusCode != nil ? "Code: \(statusCode!). " : ""
+            return "We're sorry, but an unexpected error occurred. \(statusCodeMessage)\(message)"
         }
     }
 }
