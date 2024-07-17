@@ -1,4 +1,5 @@
 import Foundation
+import os.log
 
 public enum NetworkingError: Error {
     case invalidURL
@@ -156,7 +157,7 @@ open class Networking {
     public var isErrorLoggingEnabled = true
 
     /// The boundary used for multipart requests.
-    let boundary = String(format: "net.3lvis.networking.%08x%08x", arc4random(), arc4random())
+    let boundary = String(format: "com.elvisnunez.networking.%08x%08x", arc4random(), arc4random())
 
     lazy var session: URLSession = {
         URLSession(configuration: self.configuration)
@@ -169,16 +170,19 @@ open class Networking {
         case none
     }
 
+    var logger = Logger(subsystem: "com.elvisnunez.networking", category: "network")
+
     /// Base initializer, it creates an instance of `Networking`.
     ///
     /// - Parameters:
     ///   - baseURL: The base URL for HTTP requests under `Networking`.
     ///   - configuration: The URLSessionConfiguration configuration to be used
     ///   - cache: The NSCache to use, it has a built-in default one.
-    public init(baseURL: String = "", configuration: URLSessionConfiguration = .default, cache: NSCache<AnyObject, AnyObject>? = nil) {
+    public init(baseURL: String = "", configuration: URLSessionConfiguration = .default, cache: NSCache<AnyObject, AnyObject>? = nil, logger: Logger) {
         self.baseURL = baseURL
         self.configuration = configuration
         self.cache = cache ?? NSCache()
+        self.logger = logger
     }
 
     /// Authenticates using Basic Authentication, it converts username:password to Base64 then sets the Authorization header to "Basic \(Base64(username:password))".
