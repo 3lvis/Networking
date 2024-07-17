@@ -37,35 +37,45 @@ extension Networking {
             }
 
             let statusCode = httpResponse.statusCode
-            if (200...299).contains(statusCode) {
+            switch statusCode.statusCodeType {
+            case .informational, .successful:
                 logger.info("Received successful response with status code \(statusCode) from \(path, privacy: .public)")
                 let decoder = JSONDecoder()
                 decoder.dateDecodingStrategy = .iso8601
                 let decodedResponse = try decoder.decode(T.self, from: data)
                 logger.info("Successfully decoded response from \(path, privacy: .public)")
                 return .success(decodedResponse)
-            } else {
+            case .redirection:
+                logger.warning("Redirection response with status code \(statusCode) from \(path, privacy: .public)")
+                return .failure(.unexpectedError(statusCode: statusCode, message: "Redirection occurred."))
+            case .clientError:
                 let errorMessage = HTTPURLResponse.localizedString(forStatusCode: statusCode)
-                var message = errorMessage
-                var errorDetails: [String: Any]? = nil
-
                 if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
-                    message = errorResponse.combinedMessage
+                    logger.warning("Client error: \(errorResponse.combinedMessage, privacy: .public) with status code \(statusCode) from \(path, privacy: .public)")
+                    return .failure(.clientError(statusCode: statusCode, message: errorResponse.combinedMessage))
+                } else {
+                    logger.warning("Client error: \(errorMessage, privacy: .public) with status code \(statusCode) from \(path, privacy: .public)")
+                    return .failure(.clientError(statusCode: statusCode, message: errorMessage))
+                }
+            case .serverError:
+                let errorMessage = HTTPURLResponse.localizedString(forStatusCode: statusCode)
+                var errorDetails: [String: Any]? = nil
+                if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
                     errorDetails = ["error": errorResponse.error ?? "",
                                     "message": errorResponse.message ?? "",
                                     "errors": errorResponse.errors ?? [:]]
-                }
-
-                if (400...499).contains(statusCode) {
-                    logger.warning("Client error: \(message, privacy: .public) with status code \(statusCode) from \(path, privacy: .public)")
-                    return .failure(.clientError(statusCode: statusCode, message: message))
-                } else if (500...599).contains(statusCode) {
-                    logger.error("Server error: \(message, privacy: .public) with status code \(statusCode) from \(path, privacy: .public)")
-                    return .failure(.serverError(statusCode: statusCode, message: message, details: errorDetails))
+                    logger.error("Server error: \(errorResponse.combinedMessage, privacy: .public) with status code \(statusCode) from \(path, privacy: .public)")
+                    return .failure(.serverError(statusCode: statusCode, message: errorResponse.combinedMessage, details: errorDetails))
                 } else {
-                    logger.error("Unexpected error with status code \(statusCode) from \(path, privacy: .public)")
-                    return .failure(.unexpectedError(statusCode: statusCode, message: "An unexpected error occurred."))
+                    logger.error("Server error: \(errorMessage, privacy: .public) with status code \(statusCode) from \(path, privacy: .public)")
+                    return .failure(.serverError(statusCode: statusCode, message: errorMessage, details: errorDetails))
                 }
+            case .cancelled:
+                logger.info("Request cancelled with status code \(statusCode) from \(path, privacy: .public)")
+                return .failure(.unexpectedError(statusCode: statusCode, message: "Request was cancelled."))
+            case .unknown:
+                logger.error("Unexpected error with status code \(statusCode) from \(path, privacy: .public)")
+                return .failure(.unexpectedError(statusCode: statusCode, message: "An unexpected error occurred."))
             }
         } catch let error as NSError {
             logger.error("Unexpected error occurred: \(error.localizedDescription, privacy: .public)")
