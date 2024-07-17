@@ -170,19 +170,20 @@ open class Networking {
         case none
     }
 
-    var logger = Logger(subsystem: "com.elvisnunez.networking", category: "network")
+    private static let defaultLogger = Logger(subsystem: "com.elvisnunez.networking", category: "network")
 
+    let logger: Logger
     /// Base initializer, it creates an instance of `Networking`.
     ///
     /// - Parameters:
     ///   - baseURL: The base URL for HTTP requests under `Networking`.
     ///   - configuration: The URLSessionConfiguration configuration to be used
     ///   - cache: The NSCache to use, it has a built-in default one.
-    public init(baseURL: String = "", configuration: URLSessionConfiguration = .default, cache: NSCache<AnyObject, AnyObject>? = nil, logger: Logger) {
+    public init(baseURL: String = "", configuration: URLSessionConfiguration = .default, cache: NSCache<AnyObject, AnyObject>? = nil, logger: Logger? = nil) {
         self.baseURL = baseURL
         self.configuration = configuration
         self.cache = cache ?? NSCache()
-        self.logger = logger
+        self.logger = logger ?? Networking.defaultLogger
     }
 
     /// Authenticates using Basic Authentication, it converts username:password to Base64 then sets the Authorization header to "Basic \(Base64(username:password))".
