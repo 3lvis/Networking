@@ -15,9 +15,14 @@ extension Networking {
                 let result = try JSONResult(body: fakeRequest.response, response: response, error: error)
                 switch result {
                 case .success(let response):
-                    let decodedResponse = try JSONDecoder().decode(T.self, from: response.data)
-                    logger.info("Successfully decoded response from fake request to \(path, privacy: .public)")
-                    return .success(decodedResponse)
+                    if T.self == Void.self {
+                        logger.info("Successfully processed fake request to \(path, privacy: .public)")
+                        return .success(() as! T)
+                    } else {
+                        let decodedResponse = try JSONDecoder().decode(T.self, from: response.data)
+                        logger.info("Successfully decoded response from fake request to \(path, privacy: .public)")
+                        return .success(decodedResponse)
+                    }
                 case .failure(let response):
                     logger.error("Failed to process fake request to \(path, privacy: .public): \(response.error.localizedDescription, privacy: .public)")
                     return .failure(.unexpectedError(statusCode: nil, message: "Failed to process fake request (error: \(response.error.localizedDescription))."))
@@ -42,7 +47,9 @@ extension Networking {
             switch statusCode.statusCodeType {
             case .informational, .successful:
                 logger.info("Received successful response with status code \(statusCode) from \(path, privacy: .public)")
-                if T.self == NetworkingResponse.self {
+                if T.self == Void.self {
+                    return .success(() as! T)
+                } else if T.self == NetworkingResponse.self {
                     let headers = Dictionary(uniqueKeysWithValues: httpResponse.allHeaderFields.compactMap { key, value in
                         (key as? String).map { ($0, AnyCodable(value)) }
                     })
