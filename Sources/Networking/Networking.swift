@@ -7,8 +7,10 @@ public enum NetworkingError: Error {
     case clientError(statusCode: Int, message: String)
     case serverError(statusCode: Int, message: String, details: [String: Any]?)
     case unexpectedError(statusCode: Int?, message: String)
+}
 
-    public var message: String {
+extension NetworkingError: LocalizedError {
+    public var errorDescription: String? {
         switch self {
         case .invalidURL:
             return "We're sorry, but the URL for this request is invalid."
