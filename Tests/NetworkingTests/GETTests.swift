@@ -259,7 +259,7 @@ class GETTests: XCTestCase {
     func testNetworkingJSON() async throws {
         let networking = Networking(baseURL: baseURL)
 
-        let result: Result<NetworkingJSON, NetworkingError> = await networking.newGet("/auth")
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.newGet("/auth")
         switch result {
         case .success(let success):
             let header = success.headers.string(for: "access-token")

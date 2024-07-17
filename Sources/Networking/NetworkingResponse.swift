@@ -1,6 +1,6 @@
 import Foundation
 
-public struct NetworkingJSON: Decodable {
+public struct NetworkingResponse: Decodable {
     public let headers: [String: AnyCodable]
     public let body: [String: AnyCodable]
 }
