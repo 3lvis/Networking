@@ -15,7 +15,7 @@ extension Networking {
                 let result = try JSONResult(body: fakeRequest.response, response: response, error: error)
                 switch result {
                 case .success(let response):
-                    if T.self == Void.self {
+                    if T.self == Data.self {
                         logger.info("Successfully processed fake request to \(path, privacy: .public)")
                         return .success(() as! T)
                     } else {
@@ -47,8 +47,8 @@ extension Networking {
             switch statusCode.statusCodeType {
             case .informational, .successful:
                 logger.info("Received successful response with status code \(statusCode) from \(path, privacy: .public)")
-                if T.self == Void.self {
-                    return .success(() as! T)
+                if T.self == Data.self {
+                    return .success(Data() as! T)
                 } else if T.self == NetworkingResponse.self {
                     let headers = Dictionary(uniqueKeysWithValues: httpResponse.allHeaderFields.compactMap { key, value in
                         (key as? String).map { ($0, AnyCodable(value)) }

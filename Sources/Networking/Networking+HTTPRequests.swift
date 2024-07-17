@@ -63,6 +63,16 @@ public extension Networking {
         return await handle(.put, path: path, parameters: parameters)
     }
 
+    func newPut(_ path: String, parameters: [String: Any]) async -> Result<Void, NetworkingError> {
+        let result: Result<Data, NetworkingError> = await handle(.put, path: path, parameters: parameters)
+        switch result {
+        case .success:
+            return .success(())
+        case .failure(let error):
+            return .failure(error)
+        }
+    }
+
     func newDelete(_ path: String) async -> Result<Void, NetworkingError> {
         let result: Result<Data, NetworkingError> = await handle(.delete, path: path, parameters: nil)
         switch result {
