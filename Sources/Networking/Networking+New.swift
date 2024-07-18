@@ -103,6 +103,8 @@ extension Networking {
         } catch let error as NSError {
             if let data = data, let jsonString = String(data: data, encoding: .utf8) {
                 logger.error("Unexpected error occurred: \(error.localizedDescription, privacy: .public). Response data: \(jsonString, privacy: .public)")
+            } else if let decodingError = error as? DecodingError {
+                logger.error("Unexpected error occurred: \(decodingError.detailedMessage, privacy: .public)")
             } else {
                 logger.error("Unexpected error occurred: \(error.localizedDescription, privacy: .public)")
             }

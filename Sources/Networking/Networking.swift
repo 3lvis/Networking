@@ -1,59 +1,6 @@
 import Foundation
 import os.log
 
-public enum NetworkingError: Error {
-    case invalidURL
-    case invalidResponse
-    case clientError(statusCode: Int, message: String)
-    case serverError(statusCode: Int, message: String, details: [String: Any]?)
-    case unexpectedError(statusCode: Int?, message: String)
-}
-
-extension NetworkingError: LocalizedError {
-    public var errorDescription: String? {
-        switch self {
-        case .invalidURL:
-            return "We're sorry, but the URL for this request is invalid."
-        case .invalidResponse:
-            return "We're sorry, but we received an invalid response from the server."
-        case .clientError(let statusCode, let message):
-            return "We're sorry, but a client error occurred. Code: \(statusCode), \(message)."
-        case .serverError(let statusCode, let message, let details):
-            var detailsString = ""
-            if let details = details {
-                detailsString = details.map { "\($0.key): \($0.value)" }.joined(separator: ", ")
-            }
-            return "We're sorry, but a server error occurred. Code: \(statusCode) \(message). Additional info: \(detailsString)"
-        case .unexpectedError(let statusCode, let message):
-            let statusCodeMessage = statusCode != nil ? "Code: \(statusCode!). " : ""
-            return "We're sorry, but an unexpected error occurred. \(statusCodeMessage)\(message)"
-        }
-    }
-}
-
-public struct ErrorResponse: Decodable {
-    let error: String?
-    let message: String?
-    let errors: [String: [String]]?
-
-    var combinedMessage: String {
-        var messages = [String]()
-        if let error = error {
-            messages.append(error)
-        }
-        if let message = message {
-            messages.append(message)
-        }
-        if let errors = errors {
-            for (_, messagesArray) in errors {
-                let combinedFieldMessages = messagesArray.joined(separator: ", ")
-                messages.append(combinedFieldMessages)
-            }
-        }
-        return messages.joined(separator: "; ")
-    }
-}
-
 public extension Int {
 
     /// Categorizes a status code.
