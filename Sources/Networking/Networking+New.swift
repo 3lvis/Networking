@@ -19,7 +19,9 @@ extension Networking {
                         logger.info("Successfully processed fake request to \(path, privacy: .public)")
                         return .success(() as! T)
                     } else {
-                        let decodedResponse = try JSONDecoder().decode(T.self, from: response.data)
+                        let decoder = JSONDecoder()
+                        decoder.dateDecodingStrategy = .iso8601
+                        let decodedResponse = try decoder.decode(T.self, from: response.data)
                         logger.info("Successfully decoded response from fake request to \(path, privacy: .public)")
                         return .success(decodedResponse)
                     }
