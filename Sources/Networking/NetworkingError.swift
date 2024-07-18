@@ -42,7 +42,7 @@ extension DecodingError {
                 errorMessage += " Coding path: \(codingPath)."
             }
             if !context.debugDescription.isEmpty {
-                errorMessage += " Debug description: \(context.debugDescription)."
+                errorMessage += " Debug description: \(context.debugDescription)"
             }
         case .valueNotFound(let type, let context):
             errorMessage += "Value not found for type \(type)."
@@ -51,7 +51,7 @@ extension DecodingError {
                 errorMessage += " Coding path: \(codingPath)."
             }
             if !context.debugDescription.isEmpty {
-                errorMessage += " Debug description: \(context.debugDescription)."
+                errorMessage += " Debug description: \(context.debugDescription)"
             }
         case .keyNotFound(let key, let context):
             errorMessage += "Key '\(key.stringValue)' not found."
@@ -60,7 +60,7 @@ extension DecodingError {
                 errorMessage += " Coding path: \(codingPath)."
             }
             if !context.debugDescription.isEmpty {
-                errorMessage += " Debug description: \(context.debugDescription)."
+                errorMessage += " Debug description: \(context.debugDescription)"
             }
         case .dataCorrupted(let context):
             errorMessage += "Data corrupted."
@@ -69,7 +69,7 @@ extension DecodingError {
                 errorMessage += " Coding path: \(codingPath)."
             }
             if !context.debugDescription.isEmpty {
-                errorMessage += " Debug description: \(context.debugDescription)."
+                errorMessage += " Debug description: \(context.debugDescription)"
             }
         @unknown default:
             errorMessage += "Unknown decoding error occurred."
