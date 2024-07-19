@@ -17,7 +17,7 @@ extension Networking {
                 case .success(let response):
                     if T.self == Data.self {
                         logger.info("Successfully processed fake request to \(path, privacy: .public)")
-                        return .success(() as! T)
+                        return .success(Data() as! T)
                     } else {
                         let decoder = JSONDecoder()
                         decoder.dateDecodingStrategy = .iso8601
