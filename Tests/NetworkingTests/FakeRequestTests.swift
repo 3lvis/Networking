@@ -683,4 +683,37 @@ extension FakeRequestTests {
             XCTFail(response.error.localizedDescription)
         }
     }
+
+    func testNewPostWithFakeHeaders() async {
+        let networking = Networking(baseURL: baseURL)
+
+        networking.fakePOST("/auth/verify_confirmation_code", response: [
+            "phone_number": "phoneNumber"
+        ], headerFields: [
+            "client": "aClient",
+            "access-token": "anAccessToken",
+            "uid": "aUID",
+            "Authorization": "authorization",
+        ])
+
+        let parameters: [String: Any] = [
+            "phone_number": "phoneNumber",
+            "confirmation_code": "confirmationCode"
+        ]
+
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.newPost("/auth/verify_confirmation_code", parameters: parameters)
+        switch result {
+        case .success(let response):
+            let headers = response.headers
+            XCTAssertEqual(headers.string(for: "access-token"), "anAccessToken")
+            XCTAssertEqual(headers.string(for: "client"), "aClient")
+            XCTAssertEqual(headers.string(for: "uid"), "aUID")
+            XCTAssertEqual(headers.string(for: "Authorization"), "authorization")
+
+            let body = response.body
+            XCTAssertEqual(body.string(for: "phone_number"), "phoneNumber")
+        case .failure (let response):
+            XCTFail(response.localizedDescription)
+        }
+    }
 }

@@ -18,6 +18,13 @@ extension Networking {
                     if T.self == Data.self {
                         logger.info("Successfully processed fake request to \(path, privacy: .public)")
                         return .success(Data() as! T)
+                    } else if T.self == NetworkingResponse.self {
+                        let headers = Dictionary(uniqueKeysWithValues: response.headers.compactMap { key, value in
+                            (key as? String).map { ($0, AnyCodable(value)) }
+                        })
+                        let body = try JSONDecoder().decode([String: AnyCodable].self, from: response.data)
+                        let networkingJSON = NetworkingResponse(headers: headers, body: body)
+                        return .success(networkingJSON as! T)
                     } else {
                         let decoder = JSONDecoder()
                         decoder.dateDecodingStrategy = .iso8601
