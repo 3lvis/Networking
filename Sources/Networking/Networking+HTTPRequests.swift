@@ -29,8 +29,8 @@ public extension Networking {
     ///   - path: The path for the faked GET request.
     ///   - fileName: The name of the file, whose contents will be registered as a reponse.
     ///   - bundle: The Bundle where the file is located.
-    func fakeGET(_ path: String, fileName: String, bundle: Bundle = Bundle.main, delay: Double = 0) {
-        registerFake(requestType: .get, path: path, fileName: fileName, bundle: bundle, delay: delay)
+    func fakeGET(_ path: String, fileName: String, bundle: Bundle = Bundle.main, statusCode: Int = 200, delay: Double = 0) {
+        registerFake(requestType: .get, path: path, fileName: fileName, bundle: bundle, statusCode: statusCode, delay: delay)
     }
 
     /// Cancels the GET request for the specified path. This causes the request to complete with error code URLError.cancelled.
@@ -127,8 +127,8 @@ public extension Networking {
     ///   - path: The path for the faked PATCH request.
     ///   - fileName: The name of the file, whose contents will be registered as a reponse.
     ///   - bundle: The Bundle where the file is located.
-    func fakePATCH(_ path: String, fileName: String, bundle: Bundle = Bundle.main, delay: Double = 0) {
-        registerFake(requestType: .patch, path: path, fileName: fileName, bundle: bundle, delay: delay)
+    func fakePATCH(_ path: String, fileName: String, bundle: Bundle = Bundle.main, statusCode: Int = 200, delay: Double = 0) {
+        registerFake(requestType: .patch, path: path, fileName: fileName, bundle: bundle, statusCode: statusCode, delay: delay)
     }
 
     /// Cancels the PATCH request for the specified path. This causes the request to complete with error code URLError.cancelled.
@@ -169,8 +169,8 @@ public extension Networking {
     ///   - path: The path for the faked PUT request.
     ///   - fileName: The name of the file, whose contents will be registered as a reponse.
     ///   - bundle: The Bundle where the file is located.
-    func fakePUT(_ path: String, fileName: String, bundle: Bundle = Bundle.main, delay: Double = 0) {
-        registerFake(requestType: .put, path: path, fileName: fileName, bundle: bundle, delay: delay)
+    func fakePUT(_ path: String, fileName: String, bundle: Bundle = Bundle.main, statusCode: Int = 200, delay: Double = 0) {
+        registerFake(requestType: .put, path: path, fileName: fileName, bundle: bundle, statusCode: statusCode, delay: delay)
     }
 
     /// Cancels the PUT request for the specified path. This causes the request to complete with error code URLError.cancelled.
@@ -221,8 +221,8 @@ public extension Networking {
     ///   - path: The path for the faked POST request.
     ///   - fileName: The name of the file, whose contents will be registered as a reponse.
     ///   - bundle: The Bundle where the file is located.
-    func fakePOST(_ path: String, fileName: String, bundle: Bundle = Bundle.main, delay: Double = 0) {
-        registerFake(requestType: .post, path: path, fileName: fileName, bundle: bundle, delay: delay)
+    func fakePOST(_ path: String, fileName: String, bundle: Bundle = Bundle.main, statusCode: Int = 200, delay: Double = 0) {
+        registerFake(requestType: .post, path: path, fileName: fileName, bundle: bundle, statusCode: statusCode, delay: delay)
     }
 
     /// Cancels the POST request for the specified path. This causes the request to complete with error code URLError.cancelled.
@@ -263,8 +263,8 @@ public extension Networking {
     ///   - path: The path for the faked DELETE request.
     ///   - fileName: The name of the file, whose contents will be registered as a reponse.
     ///   - bundle: The Bundle where the file is located.
-    func fakeDELETE(_ path: String, fileName: String, bundle: Bundle = Bundle.main, delay: Double = 0) {
-        registerFake(requestType: .delete, path: path, fileName: fileName, bundle: bundle, delay: delay)
+    func fakeDELETE(_ path: String, fileName: String, bundle: Bundle = Bundle.main, statusCode: Int = 200, delay: Double = 0) {
+        registerFake(requestType: .delete, path: path, fileName: fileName, bundle: bundle, statusCode: statusCode, delay: delay)
     }
 
     /// Cancels the DELETE request for the specified path. This causes the request to complete with error code URLError.cancelled.
