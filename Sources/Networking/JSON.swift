@@ -6,7 +6,7 @@ enum ParsingError: Error {
 }
 
 enum JSON: Equatable {
-    case none(Data)
+    case data(Data)
 
     case dictionary(Data, [String: Any])
 
@@ -36,7 +36,7 @@ enum JSON: Equatable {
             return data
         case let .array(data, _):
             return data
-        case let .none(data):
+        case let .data(data):
             return data
         }
     }
@@ -49,7 +49,7 @@ enum JSON: Equatable {
         } else if let array = body as? [[String: Any]] {
             self = .array(data, array)
         } else {
-            self = .none(data)
+            self = .data(data)
         }
     }
 

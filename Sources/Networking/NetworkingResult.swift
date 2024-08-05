@@ -37,7 +37,7 @@ public enum JSONResult: NetworkingResult {
 
     public init(body: Any?, response: HTTPURLResponse, error: NSError?) throws {
         var returnedError = error
-        var json = JSON.none(Data())
+        var json = JSON.data(Data())
 
         do {
             if let dictionary = body as? [String: Any] {

@@ -44,7 +44,7 @@ public class JSONResponse: Response {
             return value
         case let .dictionary(value, _):
             return value
-        case .none:
+        case .data:
             return Data()
         }
     }

@@ -26,7 +26,7 @@ class JSONTests: XCTestCase {
     }
 
     func testEqualNone() {
-        XCTAssertNotEqual(JSON.none(Data()), try JSON(["hello": "value"]))
+        XCTAssertNotEqual(JSON.data(Data()), try JSON(["hello": "value"]))
     }
 
     // MARKL - Accessors

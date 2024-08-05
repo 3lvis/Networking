@@ -22,7 +22,7 @@ class ResultTests: XCTestCase {
             switch value.json {
             case let .dictionary(_, valueBody):
                 XCTAssertEqual(body.debugDescription, valueBody.debugDescription)
-            case .array(_, _), .none:
+            case .array(_, _), .data:
                 XCTFail()
             }
         case let .failure(response):
@@ -43,7 +43,7 @@ class ResultTests: XCTestCase {
             case let .array(_, valueBody):
                 XCTAssertEqual(expectedBody.debugDescription, valueBody.debugDescription)
                 // XCTAssertEqual(dataBody.hashValue, expectedBody.hashValue)
-            case .dictionary(_, _), .none:
+            case .dictionary(_, _), .data:
                 XCTFail()
             }
         case let .failure(response):
@@ -65,7 +65,7 @@ class ResultTests: XCTestCase {
             case let .dictionary(dataBody, valueBody):
                 XCTAssertEqual(dataBody.hashValue, expectedBodyData.hashValue)
                 XCTAssertEqual(valueBody.debugDescription, expectedBody.debugDescription)
-            case .array(_, _), .none:
+            case .array(_, _), .data:
                 XCTFail()
             }
         case let .failure(response):
@@ -87,7 +87,7 @@ class ResultTests: XCTestCase {
             case let .array(dataBody, valueBody):
                 XCTAssertEqual(dataBody.hashValue, expectedBodyData.hashValue)
                 XCTAssertEqual(valueBody.debugDescription, expectedBody.debugDescription)
-            case .dictionary(_, _), .none:
+            case .dictionary(_, _), .data:
                 XCTFail()
             }
         case let .failure(response):
@@ -106,7 +106,7 @@ class ResultTests: XCTestCase {
             switch value.json {
             case .dictionary(_, _), .array:
                 XCTFail()
-            case .none:
+            case .data:
                 break
             }
         case let .failure(response):
