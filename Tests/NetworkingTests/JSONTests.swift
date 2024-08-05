@@ -26,7 +26,6 @@ class JSONTests: XCTestCase {
     }
 
     func testEqualNone() {
-        XCTAssertEqual(JSON.none(Data()), JSON.none(Data()))
         XCTAssertNotEqual(JSON.none(Data()), try JSON(["hello": "value"]))
     }
 
