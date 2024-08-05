@@ -39,10 +39,10 @@ extension Networking {
         }
     }
 
-    func registerFake(requestType: RequestType, path: String, fileName: String, bundle: Bundle, delay: Double) {
+    func registerFake(requestType: RequestType, path: String, fileName: String, bundle: Bundle, statusCode: Int, delay: Double) {
         do {
             if let result = try FileManager.json(from: fileName, bundle: bundle) {
-                registerFake(requestType: requestType, path: path, headerFields: nil, response: result, responseType: .json, statusCode: 200, delay: delay)
+                registerFake(requestType: requestType, path: path, headerFields: nil, response: result, responseType: .json, statusCode: statusCode, delay: delay)
             }
         } catch ParsingError.notFound {
             fatalError("We couldn't find \(fileName), are you sure is there?")

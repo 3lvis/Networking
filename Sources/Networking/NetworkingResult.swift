@@ -19,6 +19,13 @@ public enum JSONResult: NetworkingResult {
 
     case failure(FailureJSONResponse)
 
+    public var data: Data {
+        switch self {
+        case .success(let response): return response.json.data
+        case .failure(let response): return response.json.data
+        }
+    }
+
     public var error: NSError? {
         switch self {
         case .success:
@@ -30,7 +37,7 @@ public enum JSONResult: NetworkingResult {
 
     public init(body: Any?, response: HTTPURLResponse, error: NSError?) throws {
         var returnedError = error
-        var json = JSON.none
+        var json = JSON.data(Data())
 
         do {
             if let dictionary = body as? [String: Any] {

@@ -229,43 +229,4 @@ class GETTests: XCTestCase {
             XCTFail(response.error.localizedDescription)
         }
     }
-
-    func testNewGET() async throws {
-        let networking = Networking(baseURL: baseURL)
-
-        let result: Result<Friend, NetworkingError> = await networking.newGet("/get")
-
-        switch result {
-        case .success(let success):
-            print("worked")
-        case .failure(let failure):
-            print(failure.localizedDescription)
-        }
-    }
-
-    func testNewPOST() async throws {
-        let networking = Networking(baseURL: baseURL)
-
-        let result: Result<Void, NetworkingError> = await networking.newPost("/get", parameters: ["String": "String"])
-
-        switch result {
-        case .success(let success):
-            print("worked")
-        case .failure(let failure):
-            print(failure.localizedDescription)
-        }
-    }
-
-    func testNetworkingJSON() async throws {
-        let networking = Networking(baseURL: baseURL)
-
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.newGet("/auth")
-        switch result {
-        case .success(let success):
-            let header = success.headers.string(for: "access-token")
-            let body = success.body.string(for: "id")
-        case .failure(let failure):
-            print(failure.localizedDescription)
-        }
-    }
 }
