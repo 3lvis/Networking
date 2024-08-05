@@ -12,29 +12,80 @@ extension Networking {
                     let nanoseconds = UInt64(fakeRequest.delay * 1_000_000_000)
                     try? await Task.sleep(nanoseconds: nanoseconds)
                 }
-                let result = try JSONResult(body: fakeRequest.response, response: response, error: error)
-                switch result {
-                case .success(let response):
-                    if T.self == Data.self {
-                        logger.info("Successfully processed fake request to \(path, privacy: .public)")
-                        return .success(Data() as! T)
-                    } else if T.self == NetworkingResponse.self {
-                        let headers = Dictionary(uniqueKeysWithValues: response.headers.compactMap { key, value in
-                            (key as? String).map { ($0, AnyCodable(value)) }
-                        })
-                        let body = try JSONDecoder().decode([String: AnyCodable].self, from: response.data)
-                        let networkingJSON = NetworkingResponse(headers: headers, body: body)
-                        return .success(networkingJSON as! T)
-                    } else {
-                        let decoder = JSONDecoder()
-                        decoder.dateDecodingStrategy = .iso8601
-                        let decodedResponse = try decoder.decode(T.self, from: response.data)
-                        logger.info("Successfully decoded response from fake request to \(path, privacy: .public)")
-                        return .success(decodedResponse)
+                let statusCode = response.statusCode
+
+                var data: Data?
+                if let dictionary = fakeRequest.response as? [String: Any] {
+                    data = try JSONSerialization.data(withJSONObject: dictionary, options: [])
+                } else if let array = fakeRequest.response as? [[String: Any]] {
+                    data = try JSONSerialization.data(withJSONObject: array, options: [])
+                } else if let fakeData = fakeRequest.response as? Data, fakeData.count > 0 {
+                    data = fakeData
+                }
+
+                switch statusCode.statusCodeType {
+                case .informational, .successful:
+                    let result = try JSONResult(body: fakeRequest.response, response: response, error: error)
+                    switch result {
+                    case .success(let response):
+                        if T.self == Data.self {
+                            logger.info("Successfully processed fake request to \(path, privacy: .public)")
+                            return .success(Data() as! T)
+                        } else if T.self == NetworkingResponse.self {
+                            let headers = Dictionary(uniqueKeysWithValues: response.headers.compactMap { key, value in
+                                (key as? String).map { ($0, AnyCodable(value)) }
+                            })
+                            let body = try JSONDecoder().decode([String: AnyCodable].self, from: response.data)
+                            let networkingJSON = NetworkingResponse(headers: headers, body: body)
+                            return .success(networkingJSON as! T)
+                        } else {
+                            let decoder = JSONDecoder()
+                            decoder.dateDecodingStrategy = .iso8601
+                            let decodedResponse = try decoder.decode(T.self, from: response.data)
+                            logger.info("Successfully decoded response from fake request to \(path, privacy: .public)")
+                            return .success(decodedResponse)
+                        }
+                    case .failure(let response):
+                        logger.error("Failed to process fake request to \(path, privacy: .public): \(response.error.localizedDescription, privacy: .public)")
+                        return .failure(.unexpectedError(statusCode: nil, message: "Failed to process fake request (error: \(response.error.localizedDescription))."))
                     }
-                case .failure(let response):
-                    logger.error("Failed to process fake request to \(path, privacy: .public): \(response.error.localizedDescription, privacy: .public)")
-                    return .failure(.unexpectedError(statusCode: nil, message: "Failed to process fake request (error: \(response.error.localizedDescription))."))
+                case .redirection:
+                    logger.warning("Redirection response with status code \(statusCode) from \(path, privacy: .public)")
+                    return .failure(.unexpectedError(statusCode: statusCode, message: "Redirection occurred."))
+                case .clientError:
+                    let errorMessage = HTTPURLResponse.localizedString(forStatusCode: statusCode)
+                    if let aData = data, let jsonString = String(data: aData, encoding: .utf8) {
+                        logger.warning("Client error: \(jsonString, privacy: .public) with status code \(statusCode) from \(path, privacy: .public)")
+                    }
+                    if let aData = data, let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: aData) {
+                        logger.warning("Client error: \(errorResponse.combinedMessage, privacy: .public) with status code \(statusCode) from \(path, privacy: .public)")
+                        return .failure(.clientError(statusCode: statusCode, message: errorResponse.combinedMessage))
+                    } else {
+                        logger.warning("Client error: \(errorMessage, privacy: .public) with status code \(statusCode) from \(path, privacy: .public)")
+                        return .failure(.clientError(statusCode: statusCode, message: errorMessage))
+                    }
+                case .serverError:
+                    let errorMessage = HTTPURLResponse.localizedString(forStatusCode: statusCode)
+                    var errorDetails: [String: Any]? = nil
+                    if let aData = data, let jsonString = String(data: aData, encoding: .utf8) {
+                        logger.error("Server error: \(jsonString, privacy: .public) with status code \(statusCode) from \(path, privacy: .public)")
+                    }
+                    if let aData = data, let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: aData) {
+                        errorDetails = ["error": errorResponse.error ?? "",
+                                        "message": errorResponse.message ?? "",
+                                        "errors": errorResponse.errors ?? [:]]
+                        logger.error("Server error: \(errorResponse.combinedMessage, privacy: .public) with status code \(statusCode) from \(path, privacy: .public)")
+                        return .failure(.serverError(statusCode: statusCode, message: errorResponse.combinedMessage, details: errorDetails))
+                    } else {
+                        logger.error("Server error: \(errorMessage, privacy: .public) with status code \(statusCode) from \(path, privacy: .public)")
+                        return .failure(.serverError(statusCode: statusCode, message: errorMessage, details: errorDetails))
+                    }
+                case .cancelled:
+                    logger.info("Request cancelled with status code \(statusCode) from \(path, privacy: .public)")
+                    return .failure(.unexpectedError(statusCode: statusCode, message: "Request was cancelled."))
+                case .unknown:
+                    logger.error("Unexpected error with status code \(statusCode) from \(path, privacy: .public)")
+                    return .failure(.unexpectedError(statusCode: statusCode, message: "An unexpected error occurred."))
                 }
             }
 
