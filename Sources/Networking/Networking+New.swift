@@ -30,10 +30,35 @@ extension Networking {
     }
 
     private func createRequest(path: String, requestType: RequestType, parameters: Any?) throws -> URLRequest {
-        let parameterType: Networking.ParameterType? = parameters != nil ? .json : nil
-        var request = URLRequest(url: try composedURL(with: path), requestType: requestType, path: path, parameterType: parameterType, responseType: .json, boundary: boundary, authorizationHeaderValue: authorizationHeaderValue, token: token, authorizationHeaderKey: authorizationHeaderKey, headerFields: headerFields)
+        guard var urlComponents = URLComponents(string: try composedURL(with: path).absoluteString) else {
+            throw URLError(.badURL)
+        }
 
-        if let parameters = parameters {
+        if requestType == .get, let queryParameters = parameters as? [String: Any] {
+            urlComponents.queryItems = queryParameters.map { key, value in
+                URLQueryItem(name: key, value: "\(value)")
+            }
+        }
+
+        guard let url = urlComponents.url else {
+            throw URLError(.badURL)
+        }
+
+        let parameterType: Networking.ParameterType? = (requestType == .get || parameters == nil) ? nil : .json
+        var request = URLRequest(
+            url: url,
+            requestType: requestType,
+            path: path,
+            parameterType: parameterType,
+            responseType: .json,
+            boundary: boundary,
+            authorizationHeaderValue: authorizationHeaderValue,
+            token: token,
+            authorizationHeaderKey: authorizationHeaderKey,
+            headerFields: headerFields
+        )
+
+        if requestType != .get, let parameters = parameters {
             request.httpBody = try JSONSerialization.data(withJSONObject: parameters, options: [])
         }
 
