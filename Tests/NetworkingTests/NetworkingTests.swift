@@ -8,7 +8,7 @@ class NetworkingTests: XCTestCase {
     func testSetAuthorizationHeaderWithUsernameAndPassword() async throws {
         let networking = Networking(baseURL: baseURL)
         networking.setAuthorizationHeader(username: "user", password: "passwd")
-        let result = try await networking.get("/basic-auth/user/passwd")
+        let result = try await networking.oldGet("/basic-auth/user/passwd")
         switch result {
         case let .success(response):
             let json = response.dictionaryBody
@@ -25,7 +25,7 @@ class NetworkingTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         let token = "hi-mom"
         networking.setAuthorizationHeader(token: token)
-        let result = try await networking.post("/post")
+        let result = try await networking.oldPost("/post")
         switch result {
         case let .success(response):
             let json = response.dictionaryBody
@@ -40,7 +40,7 @@ class NetworkingTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         let value = "hi-mom"
         networking.setAuthorizationHeader(headerValue: value)
-        let result = try await networking.post("/post")
+        let result = try await networking.oldPost("/post")
         switch result {
         case let .success(response):
             let json = response.dictionaryBody
@@ -56,7 +56,7 @@ class NetworkingTests: XCTestCase {
         let key = "Anonymous-Token"
         let value = "hi-mom"
         networking.setAuthorizationHeader(headerKey: key, headerValue: value)
-        let result = try await networking.post("/post")
+        let result = try await networking.oldPost("/post")
         switch result {
         case let .success(response):
             let json = response.dictionaryBody
@@ -70,7 +70,7 @@ class NetworkingTests: XCTestCase {
     func testHeaderField() async throws {
         let networking = Networking(baseURL: baseURL)
         networking.headerFields = ["HeaderKey": "HeaderValue"]
-        let result = try await networking.post("/post")
+        let result = try await networking.oldPost("/post")
         switch result {
         case let .success(response):
             let json = response.dictionaryBody
@@ -163,7 +163,7 @@ class NetworkingTests: XCTestCase {
         var cancelledGET = false
         var cancelledPOST = false
 
-        let result = try await networking.get("/get")
+        let result = try await networking.oldGet("/get")
         switch result {
         case .success:
             XCTFail()
@@ -176,7 +176,7 @@ class NetworkingTests: XCTestCase {
             }
         }
 
-        networking.post("/post") { result in
+        networking.oldPost("/post") { result in
             switch result {
             case .success:
                 XCTFail()
@@ -198,7 +198,7 @@ class NetworkingTests: XCTestCase {
     func testCancelRequestsReturnInMainThread() async throws {
         let networking = Networking(baseURL: baseURL)
         networking.isSynchronous = true
-        let result = try await networking.get("/get")
+        let result = try await networking.oldGet("/get")
         switch result {
         case .success:
             XCTFail()

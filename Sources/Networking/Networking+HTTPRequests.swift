@@ -7,7 +7,7 @@ public extension Networking {
     /// - Parameters:
     ///   - path: The path for the GET request.
     ///   - parameters: The parameters to be used, they will be serialized using Percent-encoding and appended to the URL.
-    func get(_ path: String, parameters: Any? = nil, cachingLevel: CachingLevel = .none) async throws -> JSONResult {
+    func oldGet(_ path: String, parameters: Any? = nil, cachingLevel: CachingLevel = .none) async throws -> JSONResult {
         let parameterType: ParameterType = parameters != nil ? .formURLEncoded : .none
 
         return try await handleJSONRequest(.get, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, responseType: .json, cachingLevel: cachingLevel)
@@ -36,20 +36,20 @@ public extension Networking {
     /// Cancels the GET request for the specified path. This causes the request to complete with error code URLError.cancelled.
     ///
     /// - Parameter path: The path for the cancelled GET request
-    func cancelGET(_ path: String) async throws {
+    func cancelOldGET(_ path: String) async throws {
         let url = try composedURL(with: path)
         await cancelRequest(.data, requestType: .get, url: url)
     }
 
-    func newGet<T: Decodable>(_ path: String, parameters: Any? = nil) async -> Result<T, NetworkingError> {
+    func get<T: Decodable>(_ path: String, parameters: Any? = nil) async -> Result<T, NetworkingError> {
         return await handle(.get, path: path, parameters: parameters)
     }
 
-    func newPost<T: Decodable>(_ path: String, parameters: [String: Any]) async -> Result<T, NetworkingError> {
+    func post<T: Decodable>(_ path: String, parameters: [String: Any]) async -> Result<T, NetworkingError> {
         return await handle(.post, path: path, parameters: parameters)
     }
 
-    func newPost(_ path: String, parameters: [String: Any]) async -> Result<Void, NetworkingError> {
+    func post(_ path: String, parameters: [String: Any]) async -> Result<Void, NetworkingError> {
         let result: Result<Data, NetworkingError> = await handle(.post, path: path, parameters: parameters)
         switch result {
         case .success:
@@ -59,11 +59,11 @@ public extension Networking {
         }
     }
 
-    func newPut<T: Decodable>(_ path: String, parameters: [String: Any]) async -> Result<T, NetworkingError> {
+    func put<T: Decodable>(_ path: String, parameters: [String: Any]) async -> Result<T, NetworkingError> {
         return await handle(.put, path: path, parameters: parameters)
     }
 
-    func newPut(_ path: String, parameters: [String: Any]) async -> Result<Void, NetworkingError> {
+    func put(_ path: String, parameters: [String: Any]) async -> Result<Void, NetworkingError> {
         let result: Result<Data, NetworkingError> = await handle(.put, path: path, parameters: parameters)
         switch result {
         case .success:
@@ -73,11 +73,11 @@ public extension Networking {
         }
     }
 
-    func newPatch<T: Decodable>(_ path: String, parameters: [String: Any]) async -> Result<T, NetworkingError> {
+    func patch<T: Decodable>(_ path: String, parameters: [String: Any]) async -> Result<T, NetworkingError> {
         return await handle(.patch, path: path, parameters: parameters)
     }
 
-    func newPatch(_ path: String, parameters: [String: Any]) async -> Result<Void, NetworkingError> {
+    func patch(_ path: String, parameters: [String: Any]) async -> Result<Void, NetworkingError> {
         let result: Result<Data, NetworkingError> = await handle(.patch, path: path, parameters: parameters)
         switch result {
         case .success:
@@ -87,7 +87,7 @@ public extension Networking {
         }
     }
 
-    func newDelete(_ path: String) async -> Result<Void, NetworkingError> {
+    func delete(_ path: String) async -> Result<Void, NetworkingError> {
         let result: Result<Data, NetworkingError> = await handle(.delete, path: path, parameters: nil)
         switch result {
         case .success:
@@ -107,7 +107,7 @@ public extension Networking {
     ///   - path: The path for the PATCH request.
     ///   - parameterType: The parameters type to be used, by default is JSON.
     ///   - parameters: The parameters to be used, they will be serialized using the ParameterType, by default this is JSON.
-    func patch(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil) async throws -> JSONResult {
+    func oldPatch(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil) async throws -> JSONResult {
         return try await handleJSONRequest(.patch, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, responseType: .json, cachingLevel: .none)
     }
 
@@ -134,7 +134,7 @@ public extension Networking {
     /// Cancels the PATCH request for the specified path. This causes the request to complete with error code URLError.cancelled.
     ///
     /// - Parameter path: The path for the cancelled PATCH request.
-    func cancelPATCH(_ path: String) async throws {
+    func cancelOldPATCH(_ path: String) async throws {
         let url = try composedURL(with: path)
         await cancelRequest(.data, requestType: .patch, url: url)
     }
@@ -149,7 +149,7 @@ public extension Networking {
     ///   - path: The path for the PUT request.
     ///   - parameterType: The parameters type to be used, by default is JSON.
     ///   - parameters: The parameters to be used, they will be serialized using the ParameterType, by default this is JSON.
-    func put(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil) async throws -> JSONResult {
+    func oldPut(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil) async throws -> JSONResult {
         return try await handleJSONRequest(.put, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, responseType: .json, cachingLevel: .none)
     }
 
@@ -176,7 +176,7 @@ public extension Networking {
     /// Cancels the PUT request for the specified path. This causes the request to complete with error code URLError.cancelled.
     ///
     /// - Parameter path: The path for the cancelled PUT request.
-    func cancelPUT(_ path: String) async throws {
+    func cancelOldPUT(_ path: String) async throws {
         let url = try composedURL(with: path)
         await cancelRequest(.data, requestType: .put, url: url)
     }
@@ -191,7 +191,7 @@ public extension Networking {
     ///   - path: The path for the POST request.
     ///   - parameterType: The parameters type to be used, by default is JSON.
     ///   - parameters: The parameters to be used, they will be serialized using the ParameterType, by default this is JSON.
-    func post(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil) async throws -> JSONResult {
+    func oldPost(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil) async throws -> JSONResult {
         return try await handleJSONRequest(.post, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, responseType: .json, cachingLevel: .none)
     }
 
@@ -201,7 +201,7 @@ public extension Networking {
     ///   - path: The path for the POST request.
     ///   - parameters: The parameters to be used, they will be serialized using the ParameterType, by default this is JSON.
     ///   - parts: The list of form data parts that will be sent in the request.
-    func post(_ path: String, parameters: Any? = nil, parts: [FormDataPart]) async throws -> JSONResult {
+    func oldPost(_ path: String, parameters: Any? = nil, parts: [FormDataPart]) async throws -> JSONResult {
         return try await handleJSONRequest(.post, path: path, cacheName: nil, parameterType: .multipartFormData, parameters: parameters, parts: parts, responseType: .json, cachingLevel: .none)
     }
 
@@ -228,7 +228,7 @@ public extension Networking {
     /// Cancels the POST request for the specified path. This causes the request to complete with error code URLError.cancelled.
     ///
     /// - Parameter path: The path for the cancelled POST request.
-    func cancelPOST(_ path: String) async throws {
+    func cancelOldPOST(_ path: String) async throws {
         let url = try composedURL(with: path)
         await cancelRequest(.data, requestType: .post, url: url)
     }
@@ -242,7 +242,7 @@ public extension Networking {
     /// - Parameters:
     ///   - path: The path for the DELETE request.
     ///   - parameters: The parameters to be used, they will be serialized using Percent-encoding and appended to the URL.
-    func delete(_ path: String, parameters: Any? = nil) async throws -> JSONResult {
+    func oldDelete(_ path: String, parameters: Any? = nil) async throws -> JSONResult {
         let parameterType: ParameterType = parameters != nil ? .formURLEncoded : .none
         return try await handleJSONRequest(.delete, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, responseType: .json, cachingLevel: .none)
     }
@@ -270,7 +270,7 @@ public extension Networking {
     /// Cancels the DELETE request for the specified path. This causes the request to complete with error code URLError.cancelled.
     ///
     /// - Parameter path: The path for the cancelled DELETE request.
-    func cancelDELETE(_ path: String) async throws {
+    func cancelOldDELETE(_ path: String) async throws {
         let url = try composedURL(with: path)
         await cancelRequest(.data, requestType: .delete, url: url)
     }

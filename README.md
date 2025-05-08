@@ -75,7 +75,7 @@ To authenticate using [basic authentication](http://www.w3.org/Protocols/HTTP/1.
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.setAuthorizationHeader(username: "aladdin", password: "opensesame")
-let result = try await networking.get("/basic-auth/aladdin/opensesame")
+let result = try await networking.oldGet("/basic-auth/aladdin/opensesame")
 // Successfully authenticated!
 ```
 
@@ -86,7 +86,7 @@ To authenticate using a [bearer token](https://tools.ietf.org/html/rfc6750) **"A
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.setAuthorizationHeader(token: "AAAFFAAAA3DAAAAAA")
-let result = try await networking.get("/get")
+let result = try await networking.oldGet("/get")
 // Successfully authenticated!
 ```
 
@@ -97,7 +97,7 @@ To authenticate using a custom authentication header, for example **"Token token
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.setAuthorizationHeader(headerValue: "Token token=AAAFFAAAA3DAAAAAA")
-let result = try await networking.get("/get")
+let result = try await networking.oldGet("/get")
 // Successfully authenticated!
 ```
 
@@ -106,7 +106,7 @@ Providing the following authentication header `Anonymous-Token: AAAFFAAAA3DAAAAA
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.setAuthorizationHeader(headerKey: "Anonymous-Token", headerValue: "AAAFFAAAA3DAAAAAA")
-let result = try await networking.get("/get")
+let result = try await networking.oldGet("/get")
 // Successfully authenticated!
 ```
 
@@ -120,7 +120,7 @@ Making a request is as simple as just calling `get`, `post`, `put`, or `delete`.
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-let result = try await networking.get("/get")
+let result = try await networking.oldGet("/get")
 switch result {
 case .success(let response):
     let json = response.dictionaryBody
@@ -134,7 +134,7 @@ case .failure(let response):
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-let result = try await networking.post("/post", parameters: ["username" : "jameson", "password" : "secret"])
+let result = try await networking.oldPost("/post", parameters: ["username" : "jameson", "password" : "secret"])
  /*
  {
      "json" : {
@@ -158,7 +158,7 @@ You can get the response headers inside the success.
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-let result = try await networking.get("/get")
+let result = try await networking.oldGet("/get")
 switch result {
 case .success(let response):
     let headers = response.allHeaderFields
@@ -177,7 +177,7 @@ Here's how to use it:
 ```swift
 // The best way
 let networking = Networking(baseURL: "http://fakerecipes.com")
-let result = try await networking.get("/recipes")
+let result = try await networking.oldGet("/recipes")
 switch result {
 case .success(let response):
     // We know we'll be receiving an array with the best recipes, so we can just do:
@@ -212,7 +212,7 @@ When sending JSON your parameters will be serialized to data using `NSJSONSerial
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-let result = try await networking.post("/post", parameters: ["name" : "jameson"])
+let result = try await networking.oldPost("/post", parameters: ["name" : "jameson"])
 // Successfull post using `application/json` as `Content-Type`
 ```
 
@@ -222,7 +222,7 @@ let result = try await networking.post("/post", parameters: ["name" : "jameson"]
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-let result = try await networking.post("/post", parameterType: .formURLEncoded, parameters: ["name" : "jameson"])
+let result = try await networking.oldPost("/post", parameterType: .formURLEncoded, parameters: ["name" : "jameson"])
 // Successfull post using `application/x-www-form-urlencoded` as `Content-Type`
 ```
 
@@ -234,7 +234,7 @@ let result = try await networking.post("/post", parameterType: .formURLEncoded, 
 let networking = Networking(baseURL: "https://example.com")
 let imageData = UIImagePNGRepresentation(imageToUpload)!
 let part = FormDataPart(data: imageData, parameterName: "file", filename: "selfie.png")
-let result = try await networking.post("/image/upload", part: part)
+let result = try await networking.oldPost("/image/upload", part: part)
 // Successfull upload using `multipart/form-data` as `Content-Type`
 ```
 
@@ -245,7 +245,7 @@ let networking = Networking(baseURL: "https://example.com")
 let part1 = FormDataPart(data: imageData1, parameterName: "file1", filename: "selfie1.png")
 let part2 = FormDataPart(data: imageData2, parameterName: "file2", filename: "selfie2.png")
 let parameters = ["username" : "3lvis"]
-let result = try await networking.post("/image/upload", parts: [part1, part2], parameters: parameters)
+let result = try await networking.oldPost("/image/upload", parts: [part1, part2], parameters: parameters)
 // Do something
 ```
 
@@ -260,7 +260,7 @@ At the moment **Networking** supports four types of `ParameterType`s out of the 
 For example:
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-let result = try await networking.post("/upload", parameterType: .Custom("application/octet-stream"), parameters: imageData)
+let result = try await networking.oldPost("/upload", parameterType: .Custom("application/octet-stream"), parameters: imageData)
 // Successfull upload using `application/octet-stream` as `Content-Type`
 ```
 
@@ -272,7 +272,7 @@ Cancelling any request for a specific path is really simple. Beware that cancell
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-let result = try await networking.get("/get")
+let result = try await networking.oldGet("/get")
 // Cancelling a GET request returns an error with code URLError.cancelled which means cancelled request
 
 // In another place
@@ -288,7 +288,7 @@ Faking a request means that after calling this method on a specific path, any ca
 ```swift
 let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
 networking.fakeGET("/stories", response: [["id" : 47333, "title" : "Site Design: Aquest"]])
-let result = try await networking.get("/stories")
+let result = try await networking.oldGet("/stories")
 // JSON containing stories
 ```
 
@@ -299,7 +299,7 @@ If your file is not located in the main bundle you have to specify using the bun
 ```swift
 let networking = Networking(baseURL: baseURL)
 networking.fakeGET("/entries", fileName: "entries.json")
-let result = try await networking.get("/entries")
+let result = try await networking.oldGet("/entries")
 // JSON with the contents of entries.json
 ```
 
@@ -310,7 +310,7 @@ If you do not provide a status code for this fake request, the default returned 
 ```swift
 let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
 networking.fakeGET("/stories", response: nil, statusCode: 500)
-let result = try await networking.get("/stories")
+let result = try await networking.oldGet("/stories")
 // error with status code 500
 ```
 

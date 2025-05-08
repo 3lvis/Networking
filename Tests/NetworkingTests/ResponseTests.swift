@@ -8,7 +8,7 @@ class ResponseTest: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         let expectedBody = ["user-agent": "hi mom!"]
         networking.headerFields = expectedBody
-        let result = try await networking.get("/user-agent")
+        let result = try await networking.oldGet("/user-agent")
         switch result {
         case let .success(response):
             XCTAssertEqual(try response.data.toStringStringDictionary().debugDescription, expectedBody.debugDescription)

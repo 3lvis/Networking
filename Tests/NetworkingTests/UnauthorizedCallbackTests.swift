@@ -13,7 +13,7 @@ class UnauthorizedCallbackTests: XCTestCase {
             callbackExecuted = true
         }
 
-        let _ = try await networking.get("/basic-auth/user/passwd")
+        let _ = try await networking.oldGet("/basic-auth/user/passwd")
         XCTAssertTrue(callbackExecuted)
     }
 
@@ -26,7 +26,7 @@ class UnauthorizedCallbackTests: XCTestCase {
         }
 
         networking.fakeGET("/hi-mom", response: nil, statusCode: 401)
-        let _ = try await networking.get("/hi-mom")
+        let _ = try await networking.oldGet("/hi-mom")
         XCTAssertTrue(callbackExecuted)
     }
 }

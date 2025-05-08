@@ -7,7 +7,7 @@ class POSTTests: XCTestCase {
 
     func testPOSTWithoutParameters() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result = try await networking.post("/post", parameters: nil)
+        let result = try await networking.oldPost("/post", parameters: nil)
         switch result {
         case let .success(response):
             let json = response.dictionaryBody
@@ -27,7 +27,7 @@ class POSTTests: XCTestCase {
             "double": 20.0,
             "bool": true,
         ] as [String: Any]
-        let result = try await networking.post("/post", parameters: parameters)
+        let result = try await networking.oldPost("/post", parameters: parameters)
         switch result {
         case let .success(response):
             let json = response.dictionaryBody
@@ -47,7 +47,7 @@ class POSTTests: XCTestCase {
 
     func testPOSTWithHeaders() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result = try await networking.post("/post")
+        let result = try await networking.oldPost("/post")
         switch result {
         case let .success(response):
             let json = response.dictionaryBody
@@ -65,7 +65,7 @@ class POSTTests: XCTestCase {
 
     func testPOSTWithNoParameters() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result = try await networking.post("/post")
+        let result = try await networking.oldPost("/post")
         switch result {
         case let .success(response):
             let JSONResponse = response.dictionaryBody
@@ -84,7 +84,7 @@ class POSTTests: XCTestCase {
             "bool": true,
             "date": "2016-11-02T13:55:28+01:00",
         ] as [String: Any]
-        let result = try await networking.post("/post", parameterType: .formURLEncoded, parameters: parameters)
+        let result = try await networking.oldPost("/post", parameterType: .formURLEncoded, parameters: parameters)
         switch result {
         case let .success(response):
             let json = response.dictionaryBody
@@ -112,7 +112,7 @@ class POSTTests: XCTestCase {
             "double": 20.0,
             "bool": true,
         ] as [String: Any]
-        let result = try await networking.post("/post", parameters: parameters, parts: [part1, part2])
+        let result = try await networking.oldPost("/post", parameters: parameters, parts: [part1, part2])
         switch result {
         case let .success(response):
             let json = response.dictionaryBody
@@ -140,7 +140,7 @@ class POSTTests: XCTestCase {
 
         let item1 = "FIRSTDATA"
         let part1 = FormDataPart(data: item1.data(using: .utf8)!, parameterName: item1, filename: "\(item1).png")
-        let result = try await networking.post("/post", parameters: nil, parts: [part1])
+        let result = try await networking.oldPost("/post", parameters: nil, parts: [part1])
         switch result {
         case let .success(response):
             let json = response.dictionaryBody
@@ -179,7 +179,7 @@ class POSTTests: XCTestCase {
         parameters["api_key"] = CloudinaryAPIKey
         parameters["signature"] = signature
 
-        networking.post("/v1_1/\(CloudinaryCloudName)/image/upload", parameters: parameters, parts: [pngPart]) { result in
+        networking.oldPost("/v1_1/\(CloudinaryCloudName)/image/upload", parameters: parameters, parts: [pngPart]) { result in
             switch result {
             case let .success(response):
                 let JSONResponse = response.dictionaryBody
@@ -195,7 +195,7 @@ class POSTTests: XCTestCase {
 
     func testPOSTWithIvalidPath() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result = try await networking.post("/posdddddt", parameters: ["username": "jameson", "password": "secret"])
+        let result = try await networking.oldPost("/posdddddt", parameters: ["username": "jameson", "password": "secret"])
         switch result {
         case .success:
             XCTFail()
@@ -213,7 +213,7 @@ class POSTTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.isSynchronous = true
         var completed = false
-        networking.post("/post", parameters: ["username": "jameson", "password": "secret"]) { result in
+        networking.oldPost("/post", parameters: ["username": "jameson", "password": "secret"]) { result in
             switch result {
             case .success:
                 XCTFail()
@@ -232,6 +232,6 @@ class POSTTests: XCTestCase {
 
     func deleteAllCloudinaryPhotos(networking: Networking, cloudName: String, secret: String, APIKey: String) async throws {
         networking.setAuthorizationHeader(username: APIKey, password: secret)
-        _ = try await networking.delete("/v1_1/\(cloudName)/resources/image/upload?all=true")
+        _ = try await networking.oldDelete("/v1_1/\(cloudName)/resources/image/upload?all=true")
     }
 }
