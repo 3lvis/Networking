@@ -71,6 +71,12 @@ extension Networking {
         }
 
         let statusCode = httpResponse.statusCode
+
+        if (statusCode == 401 || statusCode == 403),
+           let callback = unauthorizedRequestCallback {
+            callback()
+        }
+
         switch statusCode.statusCodeType {
         case .informational, .successful:
             return try handleSuccessfulResponse(responseData: responseData, path: path, httpResponse: httpResponse)
