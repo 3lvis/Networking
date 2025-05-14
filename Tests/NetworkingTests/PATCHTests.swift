@@ -7,7 +7,7 @@ class PATCHTests: XCTestCase {
 
     func testPATCH() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result = try await networking.patch("/patch", parameters: ["username": "jameson", "password": "secret"])
+        let result = try await networking.oldPatch("/patch", parameters: ["username": "jameson", "password": "secret"])
         switch result {
         case let .success(response):
             let json = response.dictionaryBody
@@ -24,7 +24,7 @@ class PATCHTests: XCTestCase {
 
     func testPATCHWithHeaders() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result = try await networking.patch("/patch")
+        let result = try await networking.oldPatch("/patch")
         switch result {
         case let .success(response):
             let json = response.dictionaryBody
@@ -42,7 +42,7 @@ class PATCHTests: XCTestCase {
 
     func testPATCHWithIvalidPath() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result = try await networking.patch("/posdddddt", parameters: ["username": "jameson", "password": "secret"])
+        let result = try await networking.oldPatch("/posdddddt", parameters: ["username": "jameson", "password": "secret"])
         switch result {
         case .success:
             XCTFail()
@@ -57,7 +57,7 @@ class PATCHTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.isSynchronous = true
         var completed = false
-        let result = try await networking.patch("/patch", parameters: ["username": "jameson", "password": "secret"])
+        let result = try await networking.oldPatch("/patch", parameters: ["username": "jameson", "password": "secret"])
         switch result {
         case .success:
             XCTFail()

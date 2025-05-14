@@ -9,7 +9,7 @@ class NewNetworkingTests: XCTestCase {
     func testNewGET() async throws {
         let networking = Networking(baseURL: baseURL)
 
-        let result: Result<Friend, NetworkingError> = await networking.newGet("/get")
+        let result: Result<Friend, NetworkingError> = await networking.get("/get")
 
         switch result {
         case .success(_):
@@ -32,7 +32,7 @@ class NewNetworkingTests: XCTestCase {
             "delivery_longitude": deliveryCoordinate.longitude
         ]
 
-        let result: Result<Friend, NetworkingError> = await networking.newGet("/get", parameters: parameters)
+        let result: Result<Friend, NetworkingError> = await networking.get("/get", parameters: parameters)
 
         switch result {
         case .success(_):
@@ -45,7 +45,7 @@ class NewNetworkingTests: XCTestCase {
     func testNewPOST() async throws {
         let networking = Networking(baseURL: baseURL)
 
-        let result: Result<Void, NetworkingError> = await networking.newPost("/get", parameters: ["String": "String"])
+        let result: Result<Void, NetworkingError> = await networking.post("/get", parameters: ["String": "String"])
 
         switch result {
         case .success(_):
@@ -58,7 +58,7 @@ class NewNetworkingTests: XCTestCase {
     func testNetworkingJSON() async throws {
         let networking = Networking(baseURL: baseURL)
 
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.newGet("/auth")
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.get("/auth")
         switch result {
         case .success(let success):
             _ = success.headers.string(for: "access-token")
@@ -78,7 +78,7 @@ class NewNetworkingTests: XCTestCase {
         ]
         networking.fakePOST("/auth", response: response, statusCode: 422)
 
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.newPost("/auth", parameters: [:])
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/auth", parameters: [:])
         switch result {
         case .success(_): break
         case .failure(let response):

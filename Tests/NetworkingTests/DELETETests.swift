@@ -7,7 +7,7 @@ class DELETETests: XCTestCase {
 
     func testDELETE() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result = try await networking.delete("/delete")
+        let result = try await networking.oldDelete("/delete")
         switch result {
         case let .success(response):
             let json = response.dictionaryBody
@@ -24,7 +24,7 @@ class DELETETests: XCTestCase {
 
     func testDELETEWithHeaders() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result = try await networking.delete("/delete")
+        let result = try await networking.oldDelete("/delete")
         switch result {
         case let .success(response):
             let json = response.dictionaryBody
@@ -40,7 +40,7 @@ class DELETETests: XCTestCase {
 
     func testDELETEWithInvalidPath() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result = try await networking.delete("/invalidpath")
+        let result = try await networking.oldDelete("/invalidpath")
         switch result {
         case .success:
             XCTFail()
@@ -57,7 +57,7 @@ class DELETETests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.isSynchronous = true
         var completed = false
-        networking.delete("/delete") { result in
+        networking.oldDelete("/delete") { result in
             switch result {
             case .success:
                 XCTFail()
@@ -79,7 +79,7 @@ class DELETETests: XCTestCase {
     /*
     func testDELETEWithURLEncodedParameters() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result = try await networking.delete("/delete", parameters: ["userId": 25])
+        let result = try await networking.oldDelete("/delete", parameters: ["userId": 25])
         switch result {
         case let .success(response):
             let json = response.dictionaryBody

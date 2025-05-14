@@ -12,7 +12,7 @@ class GETTests: XCTestCase {
 
     func testGET() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result = try await networking.get("/get")
+        let result = try await networking.oldGet("/get")
         switch result {
         case let .success(response):
             let json = response.dictionaryBody
@@ -30,7 +30,7 @@ class GETTests: XCTestCase {
 
     func testGETWithFullPath() async throws {
         let networking = Networking()
-        let result = try await networking.get("http://httpbin.org/get")
+        let result = try await networking.oldGet("http://httpbin.org/get")
         switch result {
         case let .success(response):
             let json = response.dictionaryBody
@@ -48,7 +48,7 @@ class GETTests: XCTestCase {
 
     func testGETWithHeaders() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result = try await networking.get("/get")
+        let result = try await networking.oldGet("/get")
         switch result {
         case let .success(response):
             let json = response.dictionaryBody
@@ -66,7 +66,7 @@ class GETTests: XCTestCase {
 
     func testGETWithInvalidPath() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result = try await networking.get("/invalidpath")
+        let result = try await networking.oldGet("/invalidpath")
         switch result {
         case .success:
             XCTFail()
@@ -83,7 +83,7 @@ class GETTests: XCTestCase {
     /*
     func testCancelGETWithPath() async throws {
         let networking = Networking(baseURL: baseURL)
-        _ = try await networking.get("/get")
+        _ = try await networking.oldGet("/get")
         try await networking.cancelGET("/get")
         let (dataTasks, _, _) = await networking.session.tasks
         XCTAssertTrue(dataTasks.isEmpty)
@@ -92,7 +92,7 @@ class GETTests: XCTestCase {
 
     func testStatusCodes() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result200 = try await networking.get("/status/200")
+        let result200 = try await networking.oldGet("/status/200")
         switch result200 {
         case let .success(response):
             XCTAssertEqual(response.statusCode, 200)
@@ -101,7 +101,7 @@ class GETTests: XCTestCase {
         }
 
         var statusCode = 300
-        let result300 = try await networking.get("/status/\(statusCode)")
+        let result300 = try await networking.oldGet("/status/\(statusCode)")
         switch result300 {
         case .success:
             XCTFail()
@@ -111,7 +111,7 @@ class GETTests: XCTestCase {
         }
 
         statusCode = 400
-        let result400 = try await networking.get("/status/\(statusCode)")
+        let result400 = try await networking.oldGet("/status/\(statusCode)")
         switch result400 {
         case .success:
             XCTFail()
@@ -123,7 +123,7 @@ class GETTests: XCTestCase {
 
 //    func testGETWithURLEncodedParameters() async throws {
 //        let networking = Networking(baseURL: baseURL)
-//        let result = try await networking.get("/get", parameters: ["count": 25])
+//        let result = try await networking.oldGet("/get", parameters: ["count": 25])
 //        switch result {
 //        case let .success(response):
 //            let json = response.dictionaryBody
@@ -135,7 +135,7 @@ class GETTests: XCTestCase {
 
 //    func testGETWithURLEncodedParametersWithExistingQuery() async throws {
 //        let networking = Networking(baseURL: baseURL)
-//        let result = try await networking.get("/get?accountId=123", parameters: ["userId": 5])
+//        let result = try await networking.oldGet("/get?accountId=123", parameters: ["userId": 5])
 //        switch result {
 //        case let .success(response):
 //            let json = response.dictionaryBody
@@ -147,7 +147,7 @@ class GETTests: XCTestCase {
 
 //    func testGETWithURLEncodedParametersWithPercentEncoding() async throws {
 //        let networking = Networking(baseURL: baseURL)
-//        let result = try await networking.get("/get", parameters: ["name": "Elvis Nuñez"])
+//        let result = try await networking.oldGet("/get", parameters: ["name": "Elvis Nuñez"])
 //        switch result {
 //        case let .success(response):
 //            let json = response.dictionaryBody
@@ -161,7 +161,7 @@ class GETTests: XCTestCase {
         let cache = NSCache<AnyObject, AnyObject>()
         let networking = Networking(baseURL: baseURL, configuration: .default, cache: cache)
         networking.fakeGET("/get", response: ["key": "value1"])
-        let firstResult = try await networking.get("/get", cachingLevel: .memory)
+        let firstResult = try await networking.oldGet("/get", cachingLevel: .memory)
         switch firstResult {
         case let .success(response):
             let json = response.dictionaryBody
@@ -172,7 +172,7 @@ class GETTests: XCTestCase {
 
         networking.fakeGET("/get", response: ["key": "value2"])
 
-        let secondResult = try await networking.get("/get", cachingLevel: .memory)
+        let secondResult = try await networking.oldGet("/get", cachingLevel: .memory)
         switch secondResult {
         case let .success(response):
             let json = response.dictionaryBody
@@ -186,7 +186,7 @@ class GETTests: XCTestCase {
         let cache = NSCache<AnyObject, AnyObject>()
         let networking = Networking(baseURL: baseURL, configuration: .default, cache: cache)
         networking.fakeGET("/get", response: ["key": "value1"])
-        let firstResult = try await networking.get("/get", cachingLevel: .memoryAndFile)
+        let firstResult = try await networking.oldGet("/get", cachingLevel: .memoryAndFile)
         switch firstResult {
         case let .success(response):
             let json = response.dictionaryBody
@@ -196,7 +196,7 @@ class GETTests: XCTestCase {
         }
 
         networking.fakeGET("/get", response: ["key": "value2"])
-        let secondResult = try await networking.get("/get", cachingLevel: .memoryAndFile)
+        let secondResult = try await networking.oldGet("/get", cachingLevel: .memoryAndFile)
         switch secondResult {
         case let .success(response):
             let json = response.dictionaryBody
@@ -210,7 +210,7 @@ class GETTests: XCTestCase {
         let cache = NSCache<AnyObject, AnyObject>()
         let networking = Networking(baseURL: baseURL, configuration: .default, cache: cache)
         networking.fakeGET("/get", response: ["key": "value1"])
-        let firstResult = try await networking.get("/get", cachingLevel: .none)
+        let firstResult = try await networking.oldGet("/get", cachingLevel: .none)
         switch firstResult {
         case let .success(response):
             let json = response.dictionaryBody
@@ -220,7 +220,7 @@ class GETTests: XCTestCase {
         }
 
         networking.fakeGET("/get", response: ["key": "value2"])
-        let secondResult = try await networking.get("/get", cachingLevel: .none)
+        let secondResult = try await networking.oldGet("/get", cachingLevel: .none)
         switch secondResult {
         case let .success(response):
             let json = response.dictionaryBody

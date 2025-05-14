@@ -7,7 +7,7 @@ class PUTTests: XCTestCase {
 
     func testPUT() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result = try await networking.put("/put", parameters: ["username": "jameson", "password": "secret"])
+        let result = try await networking.oldPut("/put", parameters: ["username": "jameson", "password": "secret"])
         switch result {
         case let .success(response):
             let json = response.dictionaryBody
@@ -24,7 +24,7 @@ class PUTTests: XCTestCase {
 
     func testPUTWithHeaders() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result = try await networking.put("/put")
+        let result = try await networking.oldPut("/put")
         switch result {
         case let .success(response):
             let json = response.dictionaryBody
@@ -42,7 +42,7 @@ class PUTTests: XCTestCase {
 
     func testPUTWithIvalidPath() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result = try await networking.put("/posdddddt", parameters: ["username": "jameson", "password": "secret"])
+        let result = try await networking.oldPut("/posdddddt", parameters: ["username": "jameson", "password": "secret"])
         switch result {
         case .success:
             XCTFail()
@@ -57,7 +57,7 @@ class PUTTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         networking.isSynchronous = true
         var completed = false
-        let result = try await networking.put("/put", parameters: ["username": "jameson", "password": "secret"])
+        let result = try await networking.oldPut("/put", parameters: ["username": "jameson", "password": "secret"])
         switch result {
         case .success:
             XCTFail()
