@@ -72,17 +72,17 @@ extension Networking {
 
         let statusCode = httpResponse.statusCode
 
-        if (statusCode == 401 || statusCode == 403),
-           let callback = unauthorizedRequestCallback {
-            callback()
-        }
-
         switch statusCode.statusCodeType {
         case .informational, .successful:
             return try handleSuccessfulResponse(responseData: responseData, path: path, httpResponse: httpResponse)
         case .redirection:
             return .failure(.unexpectedError(statusCode: statusCode, message: "Redirection occurred."))
         case .clientError:
+            if (statusCode == 401 || statusCode == 403),
+               let callback = unauthorizedRequestCallback {
+                callback()
+            }
+
             return try handleClientError(responseData: responseData, statusCode: statusCode, path: path)
         case .serverError:
             return try handleServerError(responseData: responseData, statusCode: statusCode, path: path)
