@@ -1,3 +1,6 @@
+# github.com/aeipitek
+<aripitek09@gmail.com>
+<aripitek90@gmail.com>
 ![Networking](https://raw.githubusercontent.com/3lvis/Networking/1702d0e4575947ad12583b8f94a5ba1953804efc/.github/cover-v3.png)
 
 **Networking** was born out of the necessity of having a networking library that has a straightforward API that supports faking requests and caching images out of the box.
