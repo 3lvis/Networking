@@ -2,7 +2,7 @@ import Foundation
 import XCTest
 @testable import Networking
 
-class DELETETests: XCTestCase {
+class DELETEIntegrationTests: XCTestCase {
     let baseURL = "http://httpbin.org"
 
     func testDELETE() async throws {

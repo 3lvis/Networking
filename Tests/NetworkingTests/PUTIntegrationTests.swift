@@ -2,12 +2,12 @@ import Foundation
 import XCTest
 @testable import Networking
 
-class PATCHTests: XCTestCase {
+class PUTIntegrationTests: XCTestCase {
     let baseURL = "http://httpbin.org"
 
-    func testPATCH() async throws {
+    func testPUT() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result = try await networking.oldPatch("/patch", parameters: ["username": "jameson", "password": "secret"])
+        let result = try await networking.oldPut("/put", parameters: ["username": "jameson", "password": "secret"])
         switch result {
         case let .success(response):
             let json = response.dictionaryBody
@@ -22,14 +22,14 @@ class PATCHTests: XCTestCase {
         }
     }
 
-    func testPATCHWithHeaders() async throws {
+    func testPUTWithHeaders() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result = try await networking.oldPatch("/patch")
+        let result = try await networking.oldPut("/put")
         switch result {
         case let .success(response):
             let json = response.dictionaryBody
             guard let url = json["url"] as? String else { XCTFail(); return }
-            XCTAssertEqual(url, "http://httpbin.org/patch")
+            XCTAssertEqual(url, "http://httpbin.org/put")
 
             let headers = response.headers
             guard let connection = headers["Connection"] as? String else { XCTFail(); return }
@@ -40,9 +40,9 @@ class PATCHTests: XCTestCase {
         }
     }
 
-    func testPATCHWithIvalidPath() async throws {
+    func testPUTWithIvalidPath() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result = try await networking.oldPatch("/posdddddt", parameters: ["username": "jameson", "password": "secret"])
+        let result = try await networking.oldPut("/posdddddt", parameters: ["username": "jameson", "password": "secret"])
         switch result {
         case .success:
             XCTFail()
@@ -51,23 +51,25 @@ class PATCHTests: XCTestCase {
         }
     }
 
-    // Disabling since I don't have a reliable wait to test this works
+    // Disabling because I haven't found a way to test cancel
     /*
-    func testCancelPATCHWithPath() async throws {
+    func testCancelPUTWithPath() async throws {
         let networking = Networking(baseURL: baseURL)
         networking.isSynchronous = true
         var completed = false
-        let result = try await networking.oldPatch("/patch", parameters: ["username": "jameson", "password": "secret"])
+        let result = try await networking.oldPut("/put", parameters: ["username": "jameson", "password": "secret"])
         switch result {
         case .success:
             XCTFail()
         case let .failure(response):
             XCTAssertTrue(completed)
             XCTAssertEqual(response.error.code, URLError.cancelled.rawValue)
+            expectation.fulfill()
         }
 
-        networking.cancelPATCH("/patch")
+        networking.cancelPUT("/put")
         completed = true
+
+        waitForExpectations(timeout: 150.0, handler: nil)
     }*/
 }
-

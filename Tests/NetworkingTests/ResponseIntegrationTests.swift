@@ -1,7 +1,7 @@
 import XCTest
 @testable import Networking
 
-class ResponseTest: XCTestCase {
+class ResponseIntegrationTests: XCTestCase {
     let baseURL = "http://httpbin.org"
 
     func testDataAccessor() async throws {

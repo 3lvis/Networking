@@ -25,9 +25,9 @@ jobs:
       - name: Build
         run: swift build -v
 
-      # The full suite includes integration tests that hit the live http://httpbin.org,
-      # which rate-limits under load (HTTP 503) and makes CI nondeterministic. CI runs the
-      # offline unit + faked-request tests only; run `swift test` locally for the live
-      # httpbin integration coverage.
+      # Integration tests live in *IntegrationTests classes and hit live hosts
+      # (http://httpbin.org et al.), which rate-limit under load (HTTP 503) and make CI
+      # nondeterministic. CI runs the offline suite only; run the full `swift test`
+      # locally for live integration coverage.
       - name: Test (offline suite)
-        run: swift test -v --filter 'String_UTF8Tests|Dictionary_FormURLEncodedTests|JSONTests|ResultTests|ResponseTests|FakeRequestTests'
+        run: swift test -v --skip 'IntegrationTests'

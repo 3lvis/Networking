@@ -2,7 +2,7 @@ import Foundation
 import XCTest
 @testable import Networking
 
-class POSTTests: XCTestCase {
+class POSTIntegrationTests: XCTestCase {
     let baseURL = "http://httpbin.org"
 
     func testPOSTWithoutParameters() async throws {

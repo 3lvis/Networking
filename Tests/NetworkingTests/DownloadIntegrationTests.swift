@@ -2,7 +2,7 @@ import Foundation
 import XCTest
 @testable import Networking
 
-class DownloadTests: XCTestCase {
+class DownloadIntegrationTests: XCTestCase {
     let baseURL = "http://httpbin.org"
 
     func testImageDownload() async throws {

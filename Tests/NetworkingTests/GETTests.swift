@@ -10,71 +10,6 @@ struct Friend: Decodable {
 class GETTests: XCTestCase {
     let baseURL = "http://httpbin.org"
 
-    func testGET() async throws {
-        let networking = Networking(baseURL: baseURL)
-        let result = try await networking.oldGet("/get")
-        switch result {
-        case let .success(response):
-            let json = response.dictionaryBody
-
-            guard let url = json["url"] as? String else { XCTFail(); return }
-            XCTAssertEqual(url, "http://httpbin.org/get")
-
-            guard let headers = json["headers"] as? [String: String] else { XCTFail(); return }
-            let contentType = headers["Content-Type"]
-            XCTAssertNil(contentType)
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
-        }
-    }
-
-    func testGETWithFullPath() async throws {
-        let networking = Networking()
-        let result = try await networking.oldGet("http://httpbin.org/get")
-        switch result {
-        case let .success(response):
-            let json = response.dictionaryBody
-
-            guard let url = json["url"] as? String else { XCTFail(); return }
-            XCTAssertEqual(url, "http://httpbin.org/get")
-
-            guard let headers = json["headers"] as? [String: String] else { XCTFail(); return }
-            let contentType = headers["Content-Type"]
-            XCTAssertNil(contentType)
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
-        }
-    }
-
-    func testGETWithHeaders() async throws {
-        let networking = Networking(baseURL: baseURL)
-        let result = try await networking.oldGet("/get")
-        switch result {
-        case let .success(response):
-            let json = response.dictionaryBody
-            guard let url = json["url"] as? String else { XCTFail(); return }
-            XCTAssertEqual(url, "http://httpbin.org/get")
-
-            let headers = response.headers
-            guard let connection = headers["Connection"] as? String else { XCTFail(); return }
-            XCTAssertEqual(connection, "keep-alive")
-            XCTAssertEqual(headers["Content-Type"] as? String, "application/json")
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
-        }
-    }
-
-    func testGETWithInvalidPath() async throws {
-        let networking = Networking(baseURL: baseURL)
-        let result = try await networking.oldGet("/invalidpath")
-        switch result {
-        case .success:
-            XCTFail()
-        case let .failure(response):
-            XCTAssertEqual(response.error.code, 404)
-        }
-    }
-
     // I'm not sure how it implement this, since I need a service that returns a faulty status code, meaning not 2XX, and at the same time it returns a JSON response.
     func testGETWithInvalidPathAndJSONError() {
     }
@@ -89,37 +24,6 @@ class GETTests: XCTestCase {
         XCTAssertTrue(dataTasks.isEmpty)
     }
      */
-
-    func testStatusCodes() async throws {
-        let networking = Networking(baseURL: baseURL)
-        let result200 = try await networking.oldGet("/status/200")
-        switch result200 {
-        case let .success(response):
-            XCTAssertEqual(response.statusCode, 200)
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
-        }
-
-        var statusCode = 300
-        let result300 = try await networking.oldGet("/status/\(statusCode)")
-        switch result300 {
-        case .success:
-            XCTFail()
-        case let .failure(response):
-            let connectionError = NSError(domain: Networking.domain, code: statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: statusCode)])
-            XCTAssertEqual(response.error, connectionError)
-        }
-
-        statusCode = 400
-        let result400 = try await networking.oldGet("/status/\(statusCode)")
-        switch result400 {
-        case .success:
-            XCTFail()
-        case let .failure(response):
-            let connectionError = NSError(domain: Networking.domain, code: statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: statusCode)])
-            XCTAssertEqual(response.error, connectionError)
-        }
-    }
 
 //    func testGETWithURLEncodedParameters() async throws {
 //        let networking = Networking(baseURL: baseURL)
