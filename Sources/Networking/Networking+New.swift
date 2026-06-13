@@ -10,13 +10,13 @@ extension Networking {
             }
 
             let request = try createRequest(path: path, requestType: requestType, parameters: parameters)
-            // Key the cache by the request's effective, percent-encoded path + query so requests
-            // that differ only by parameter encoding don't collide (e.g. ["a": "1&b=2"] vs
-            // ["a": 1, "b": 2]). Kept relative — destinationURL re-prepends the baseURL to derive
-            // the cache filename and rejects an absolute URL here.
+            // Key the cache by the request's full effective URL (scheme/host/path/query) so no two
+            // distinct requests collide — neither different hosts (full-URL GETs) nor parameters
+            // that differ only by encoding (["a": "1&b=2"] vs ["a": 1, "b": 2]). Passed as the
+            // cacheName so destinationURL uses it verbatim instead of re-prepending the baseURL.
             let cacheKey = cacheKey(for: request, fallbackPath: path)
             if cachingLevel != .none,
-                let cachedData = try objectFromCache(for: cacheKey, cacheName: nil, cachingLevel: cachingLevel, responseType: .json) as? Data,
+                let cachedData = try objectFromCache(for: path, cacheName: cacheKey, cachingLevel: cachingLevel, responseType: .json) as? Data,
                 let cached = try? JSONDecoder().decode(CachedResponse.self, from: cachedData),
                 let url = request.url,
                 let cachedResponse = HTTPURLResponse(url: url, statusCode: cached.statusCode, httpVersion: nil, headerFields: cached.headers) {
@@ -31,7 +31,7 @@ extension Networking {
                 })
                 let envelope = CachedResponse(statusCode: httpResponse.statusCode, headers: headers, body: responseData)
                 if let encoded = try? JSONEncoder().encode(envelope) {
-                    try? cacheOrPurgeData(data: encoded, path: cacheKey, cacheName: nil, cachingLevel: cachingLevel)
+                    try? cacheOrPurgeData(data: encoded, path: path, cacheName: cacheKey, cachingLevel: cachingLevel)
                 }
             }
             return result
@@ -51,14 +51,15 @@ extension Networking {
 
     private func cacheKey(for request: URLRequest, fallbackPath: String) -> String {
         guard let url = request.url,
-              let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+              var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
             return fallbackPath
         }
         // Sort the *encoded* query components so parameter order doesn't change the key (a cache
         // miss) while distinct encodings still produce distinct keys (no collision).
-        let query = components.percentEncodedQuery
-            .map { "?" + $0.split(separator: "&").sorted().joined(separator: "&") } ?? ""
-        return components.percentEncodedPath + query
+        if let query = components.percentEncodedQuery {
+            components.percentEncodedQuery = query.split(separator: "&").sorted().joined(separator: "&")
+        }
+        return components.string ?? url.absoluteString
     }
 
     private func handleFakeRequest<T: Decodable>(_ fakeRequest: FakeRequest, path: String, requestType: RequestType) async throws -> Result<T, NetworkingError> {

@@ -186,6 +186,35 @@ class GETIntegrationTests: XCTestCase {
         XCTAssertTrue(url.contains("a=1") && url.contains("b=2"), "the second request must reflect its own parameters, got: \(url)")
     }
 
+    // Full-URL GETs to different hosts but the same path must not collide. A key built from only
+    // path + query drops the host, so a second host could be served the first host's cached body.
+    func testGETCacheKeyDistinguishesHost() async throws {
+        let base = TestConfig.httpbinBaseURL
+        let aliasHost: String
+        let alias: String
+        if base.contains("127.0.0.1") {
+            aliasHost = "localhost"
+            alias = base.replacingOccurrences(of: "127.0.0.1", with: "localhost")
+        } else if base.contains("localhost") {
+            aliasHost = "127.0.0.1"
+            alias = base.replacingOccurrences(of: "localhost", with: "127.0.0.1")
+        } else {
+            throw XCTSkip("needs a host with a local alias (127.0.0.1/localhost)")
+        }
+
+        let cache = NSCache<AnyObject, AnyObject>()
+        let networking = Networking(cache: cache)
+
+        let _: Result<NetworkingResponse, NetworkingError> = await networking.get("\(base)/get", cachingLevel: .memory)
+        let second: Result<NetworkingResponse, NetworkingError> = await networking.get("\(alias)/get", cachingLevel: .memory)
+
+        guard case let .success(secondResponse) = second else {
+            return XCTFail("expected the second request to succeed")
+        }
+        let url = secondResponse.body.string(for: "url") ?? ""
+        XCTAssertTrue(url.contains(aliasHost), "a request to a different host must not receive the first host's cached body, got: \(url)")
+    }
+
     // A cache hit must carry the original response's status code and headers, not fabricated ones.
     func testGETCachePreservesResponseMetadata() async throws {
         let cache = NSCache<AnyObject, AnyObject>()
