@@ -154,42 +154,34 @@ class POSTIntegrationTests: XCTestCase {
         }
     }
 
-    /*
-    func testUploadingAnImageWithMultipartFormData() {
-        guard let path = .module.path(forResource: "Keys", ofType: "plist") else { return }
-        guard let dictionary = NSDictionary(contentsOfFile: path) else { return }
-        guard let CloudinaryCloudName = dictionary["CloudinaryCloudName"] as? String, CloudinaryCloudName.count > 0 else { return }
-        guard let CloudinarySecret = dictionary["CloudinarySecret"] as? String, CloudinarySecret.count > 0 else { return }
-        guard let CloudinaryAPIKey = dictionary["CloudinaryAPIKey"] as? String, CloudinaryAPIKey.count > 0 else { return }
+    func testUploadingAnImageWithMultipartFormData() async throws {
+        let networking = Networking(baseURL: baseURL)
 
-        let networking = Networking(baseURL: "https://api.cloudinary.com")
-        let timestamp = "\(Int(Date().timeIntervalSince1970))"
+        let imageURL = try XCTUnwrap(Bundle.module.url(forResource: "pig", withExtension: "png"))
+        let imageData = try Data(contentsOf: imageURL)
+        let imagePart = FormDataPart(data: imageData, parameterName: "file", filename: "pig.png")
 
-        let pngImage = Image.find(named: "pig.png", inBundle: .module)
-        let pngImageData = pngImage.pngData()!
-        let pngPart = FormDataPart(data: pngImageData, parameterName: "file", filename: "\(timestamp).png")
+        let result = try await networking.oldPost("/post", parameters: ["public_id": "pig"], parts: [imagePart])
+        switch result {
+        case let .success(response):
+            let json = response.dictionaryBody
+            XCTAssertEqual(json["url"] as? String, "\(TestConfig.httpbinBaseURL)/post")
 
-        var parameters = [
-            "timestamp": timestamp,
-            "public_id": timestamp,
-        ]
-        let signature = SHA1.signature(usingParameters: parameters, secret: CloudinarySecret)
-        parameters["api_key"] = CloudinaryAPIKey
-        parameters["signature"] = signature
+            let headers = httpbinEchoedMap(json, "headers")
+            XCTAssertEqual(headers["Content-Type"], "multipart/form-data; boundary=\(networking.boundary)")
 
-        networking.oldPost("/v1_1/\(CloudinaryCloudName)/image/upload", parameters: parameters, parts: [pngPart]) { result in
-            switch result {
-            case let .success(response):
-                let JSONResponse = response.dictionaryBody
-                XCTAssertEqual(timestamp, JSONResponse["original_filename"] as? String)
+            // The image arrived as a multipart file part. httpbin echoes file content as a
+            // (lossy) JSON string, so assert the PNG signature crossed the wire rather than
+            // byte-equality.
+            let files = httpbinEchoedMap(json, "files")
+            XCTAssertTrue(files["file"]?.contains("PNG") ?? false)
 
-                self.deleteAllCloudinaryPhotos(networking: networking, cloudName: CloudinaryCloudName, secret: CloudinarySecret, APIKey: CloudinaryAPIKey)
-            case let .failure(response):
-                XCTFail(response.error.localizedDescription)
-            }
+            let form = httpbinEchoedMap(json, "form")
+            XCTAssertEqual(form["public_id"], "pig")
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
         }
     }
-    */
 
     func testPOSTWithIvalidPath() async throws {
         let networking = Networking(baseURL: baseURL)

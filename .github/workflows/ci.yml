@@ -36,10 +36,7 @@ jobs:
       - name: Build
         run: swift build -v
 
-      # Two tests hit other live third-party services (a CDN image and a Cloudinary
-      # upload) that go-httpbin can't emulate; they're skipped here and stay runnable
-      # locally via the full `swift test`.
       - name: Test
         env:
           HTTPBIN_BASE_URL: http://127.0.0.1:8080
-        run: swift test -v --skip 'testUploadingAnImageWithMultipartFormData|testImageDownloadWithWeirdCharacters'
+        run: swift test -v
