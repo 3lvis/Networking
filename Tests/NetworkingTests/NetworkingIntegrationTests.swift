@@ -22,28 +22,26 @@ class NetworkingIntegrationTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         let token = "hi-mom"
         networking.setAuthorizationHeader(token: token)
-        let result = try await networking.oldPost("/post")
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/post")
         switch result {
         case let .success(response):
-            let json = response.dictionaryBody
-            let headers = httpbinEchoedMap(json, "headers")
+            let headers = httpbinEchoedMap(response, "headers")
             XCTAssertEqual("Bearer \(token)", headers["Authorization"])
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
     }
 
     func testHeaderField() async throws {
         let networking = Networking(baseURL: baseURL)
         networking.headerFields = ["HeaderKey": "HeaderValue"]
-        let result = try await networking.oldPost("/post")
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/post")
         switch result {
         case let .success(response):
-            let json = response.dictionaryBody
-            let headers = httpbinEchoedMap(json, "headers")
+            let headers = httpbinEchoedMap(response, "headers")
             XCTAssertEqual("HeaderValue", headers["Headerkey"])
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
     }
 

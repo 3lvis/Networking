@@ -9,14 +9,13 @@ class NetworkingTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         let value = "hi-mom"
         networking.setAuthorizationHeader(headerValue: value)
-        let result = try await networking.oldPost("/post")
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/post")
         switch result {
         case let .success(response):
-            let json = response.dictionaryBody
-            let headers = json["headers"] as? [String: Any]
-            XCTAssertEqual(value, headers?["Authorization"] as? String)
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
+            let headers = httpbinEchoedMap(response, "headers")
+            XCTAssertEqual(value, headers["Authorization"])
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
     }
 
@@ -25,14 +24,13 @@ class NetworkingTests: XCTestCase {
         let key = "Anonymous-Token"
         let value = "hi-mom"
         networking.setAuthorizationHeader(headerKey: key, headerValue: value)
-        let result = try await networking.oldPost("/post")
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/post")
         switch result {
         case let .success(response):
-            let json = response.dictionaryBody
-            let headers = json["headers"] as? [String: Any]
-            XCTAssertEqual(value, headers?[key] as? String)
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
+            let headers = httpbinEchoedMap(response, "headers")
+            XCTAssertEqual(value, headers[key])
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
     }
 

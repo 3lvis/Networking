@@ -296,14 +296,12 @@ extension FakeRequestTests {
 
         networking.fakePOST("/story", response: [["name": "Elvis"]])
 
-        let result = try await networking.oldPost("/story", parameters: ["username": "jameson", "password": "secret"])
+        let result: Result<[[String: AnyCodable]], NetworkingError> = await networking.post("/story", parameters: ["username": "jameson", "password": "secret"])
         switch result {
-        case let .success(response):
-            let json = response.arrayBody
-            let value = json[0]["name"] as? String
-            XCTAssertEqual(value, "Elvis")
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
+        case let .success(stories):
+            XCTAssertEqual(stories.first?.string(for: "name"), "Elvis")
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
     }
 
@@ -312,12 +310,15 @@ extension FakeRequestTests {
 
         networking.fakePOST("/story", response: nil, statusCode: 401)
 
-        let result = try await networking.oldPost("/story")
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/story")
         switch result {
         case .success:
             XCTFail()
-        case let .failure(response):
-            XCTAssertEqual(response.error.code, 401)
+        case let .failure(error):
+            guard case let .clientError(statusCode, _) = error else {
+                return XCTFail("expected a client error, got \(error)")
+            }
+            XCTAssertEqual(statusCode, 401)
         }
     }
 
@@ -326,30 +327,26 @@ extension FakeRequestTests {
 
         networking.fakePOST("/entries", fileName: "entries.json", bundle: .module)
 
-        let result = try await networking.oldPost("/entries")
+        let result: Result<[[String: AnyCodable]], NetworkingError> = await networking.post("/entries")
         switch result {
-        case let .success(response):
-            let json = response.arrayBody
-            let entry = json[0]
-            let value = entry["title"] as? String
-            XCTAssertEqual(value, "Entry 1")
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
+        case let .success(entries):
+            XCTAssertEqual(entries.first?.string(for: "title"), "Entry 1")
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
     }
 
     func testFakePOSTUsingHeader() async throws {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakePOST("/story", response: nil, headerFields: ["uid": "12345678"])
+        networking.fakePOST("/story", response: ["ok": true], headerFields: ["uid": "12345678"])
 
-        let result = try await networking.oldPost("/story")
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/story")
         switch result {
         case let .success(response):
-            let headers = response.headers
-            XCTAssertEqual(headers["uid"] as! String, "12345678")
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
+            XCTAssertEqual(response.headers.string(for: "uid"), "12345678")
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
     }
 
@@ -367,14 +364,12 @@ extension FakeRequestTests {
         networking.fakeDELETE("/g/2/2", response: nil)
         networking.fakePOST("/g/1/b", response: ["id":"1"])
 
-        let result = try await networking.oldPost("/g/1/b", parameters: ["ignored": true])
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/g/1/b", parameters: ["ignored": true])
         switch result {
         case let .success(response):
-            let json = response.dictionaryBody
-            let value = json["id"] as! String
-            XCTAssertEqual(value, "1")
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
+            XCTAssertEqual(response.body.string(for: "id"), "1")
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
     }
 }

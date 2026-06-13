@@ -31,7 +31,7 @@ Foundation (this PR):
 Then, one verb per PR — migrate the `old*` test call sites to the new API and delete that verb's `old*`/`cancelOld*`:
 
 - [x] `oldGet` → `get` (incl. the 3 GET cache tests); removed `oldGet`/`cancelOldGET`; updated README GET/auth/cancellation/faking examples.
-- [ ] `oldPost` → `post`.
+- [x] `oldPost` → `post`. Extended the async `post`/`handle()` to full parity — optional params, `parameterType:` (form-URL-encoded/custom), and multipart `parts:` (new `httpBody(...)` serializer in the async path) — then migrated all sites and removed `oldPost`/`cancelOldPOST`; updated README POST examples.
 - [ ] `oldPut` → `put`.
 - [ ] `oldPatch` → `patch`.
 - [ ] `oldDelete` → `delete`.
