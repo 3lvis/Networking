@@ -168,6 +168,24 @@ class GETIntegrationTests: XCTestCase {
         XCTAssertEqual(secondResponse.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/get?value=2")
     }
 
+    // Two requests that differ only by parameter encoding must not collide. A naive key built by
+    // raw "key=value" interpolation collapses ["a": "1&b=2"] and ["a": 1, "b": 2] to the same
+    // string, even though their real URLs differ (a=1%26b%3D2 vs a=1&b=2).
+    func testGETCacheKeyDistinguishesEncodedParameters() async throws {
+        let cache = NSCache<AnyObject, AnyObject>()
+        let networking = Networking(baseURL: baseURL, cache: cache)
+
+        let _: Result<NetworkingResponse, NetworkingError> = await networking.get("/get", parameters: ["a": "1&b=2"], cachingLevel: .memory)
+        let second: Result<NetworkingResponse, NetworkingError> = await networking.get("/get", parameters: ["a": 1, "b": 2], cachingLevel: .memory)
+
+        guard case let .success(secondResponse) = second else {
+            return XCTFail("expected the second request to succeed")
+        }
+        let url = secondResponse.body.string(for: "url") ?? ""
+        XCTAssertFalse(url.contains("%26"), "the second request must not be served the first request's cached body")
+        XCTAssertTrue(url.contains("a=1") && url.contains("b=2"), "the second request must reflect its own parameters, got: \(url)")
+    }
+
     // A cache hit must carry the original response's status code and headers, not fabricated ones.
     func testGETCachePreservesResponseMetadata() async throws {
         let cache = NSCache<AnyObject, AnyObject>()

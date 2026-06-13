@@ -9,16 +9,20 @@ extension Networking {
                 return try await handleFakeRequest(fakeRequest, path: path, requestType: requestType)
             }
 
-            let cacheKey = cacheKey(path: path, parameters: parameters)
+            let request = try createRequest(path: path, requestType: requestType, parameters: parameters)
+            // Key the cache by the request's effective, percent-encoded path + query so requests
+            // that differ only by parameter encoding don't collide (e.g. ["a": "1&b=2"] vs
+            // ["a": 1, "b": 2]). Kept relative — destinationURL re-prepends the baseURL to derive
+            // the cache filename and rejects an absolute URL here.
+            let cacheKey = cacheKey(for: request, fallbackPath: path)
             if cachingLevel != .none,
                 let cachedData = try objectFromCache(for: cacheKey, cacheName: nil, cachingLevel: cachingLevel, responseType: .json) as? Data,
                 let cached = try? JSONDecoder().decode(CachedResponse.self, from: cachedData),
-                let url = try? composedURL(with: path),
+                let url = request.url,
                 let cachedResponse = HTTPURLResponse(url: url, statusCode: cached.statusCode, httpVersion: nil, headerFields: cached.headers) {
                 return try handleSuccessfulResponse(responseData: cached.body, path: path, httpResponse: cachedResponse)
             }
 
-            let request = try createRequest(path: path, requestType: requestType, parameters: parameters)
             let (responseData, response) = try await session.data(for: request)
             let result: Result<T, NetworkingError> = try handleResponse(responseData: responseData, response: response, path: path)
             if cachingLevel != .none, case .success = result, let httpResponse = response as? HTTPURLResponse {
@@ -45,20 +49,16 @@ extension Networking {
         let body: Data
     }
 
-    // Cache key that incorporates the query (both any query embedded in the path and the
-    // `parameters`), sorted for determinism — so requests differing only by parameters don't collide.
-    private func cacheKey(path: String, parameters: Any?) -> String {
-        let components = path.split(separator: "?", maxSplits: 1, omittingEmptySubsequences: false)
-        let basePath = String(components[0])
-        var query: [String] = []
-        if components.count > 1, !components[1].isEmpty {
-            query.append(contentsOf: components[1].split(separator: "&").map(String.init))
+    private func cacheKey(for request: URLRequest, fallbackPath: String) -> String {
+        guard let url = request.url,
+              let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+            return fallbackPath
         }
-        if let parameters = parameters as? [String: Any] {
-            query.append(contentsOf: parameters.map { "\($0.key)=\($0.value)" })
-        }
-        guard !query.isEmpty else { return basePath }
-        return basePath + "?" + query.sorted().joined(separator: "&")
+        // Sort the *encoded* query components so parameter order doesn't change the key (a cache
+        // miss) while distinct encodings still produce distinct keys (no collision).
+        let query = components.percentEncodedQuery
+            .map { "?" + $0.split(separator: "&").sorted().joined(separator: "&") } ?? ""
+        return components.percentEncodedPath + query
     }
 
     private func handleFakeRequest<T: Decodable>(_ fakeRequest: FakeRequest, path: String, requestType: RequestType) async throws -> Result<T, NetworkingError> {
