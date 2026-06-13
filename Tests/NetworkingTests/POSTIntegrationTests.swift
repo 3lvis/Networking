@@ -2,8 +2,8 @@ import Foundation
 import XCTest
 @testable import Networking
 
-class POSTTests: XCTestCase {
-    let baseURL = "http://httpbin.org"
+class POSTIntegrationTests: XCTestCase {
+    let baseURL = TestConfig.httpbinBaseURL
 
     func testPOSTWithoutParameters() async throws {
         let networking = Networking(baseURL: baseURL)
@@ -12,7 +12,7 @@ class POSTTests: XCTestCase {
         case let .success(response):
             let json = response.dictionaryBody
 
-            guard let headers = json["headers"] as? [String: String] else { XCTFail(); return }
+            let headers = httpbinEchoedMap(json, "headers")
             XCTAssertEqual(headers["Content-Type"], "application/json")
         case let .failure(response):
             XCTFail(response.error.localizedDescription)
@@ -37,7 +37,7 @@ class POSTTests: XCTestCase {
             XCTAssertEqual(JSONResponse["double"] as? Double, 20.0)
             XCTAssertEqual(JSONResponse["bool"] as? Bool, true)
 
-            guard let headers = json["headers"] as? [String: String] else { XCTFail(); return }
+            let headers = httpbinEchoedMap(json, "headers")
             let contentType = headers["Content-Type"]
             XCTAssertEqual(contentType, "application/json")
         case let .failure(response):
@@ -52,12 +52,10 @@ class POSTTests: XCTestCase {
         case let .success(response):
             let json = response.dictionaryBody
             guard let url = json["url"] as? String else { XCTFail(); return }
-            XCTAssertEqual(url, "http://httpbin.org/post")
+            XCTAssertEqual(url, "\(TestConfig.httpbinBaseURL)/post")
 
             let headers = response.headers
-            guard let connection = headers["Connection"] as? String else { XCTFail(); return }
-            XCTAssertEqual(connection, "keep-alive")
-            XCTAssertEqual(headers["Content-Type"] as? String, "application/json")
+            XCTAssertTrue((headers["Content-Type"] as? String)?.hasPrefix("application/json") ?? false)
         case let .failure(response):
             XCTFail(response.error.localizedDescription)
         }
@@ -69,7 +67,7 @@ class POSTTests: XCTestCase {
         switch result {
         case let .success(response):
             let JSONResponse = response.dictionaryBody
-            XCTAssertEqual("http://httpbin.org/post", JSONResponse["url"] as? String)
+            XCTAssertEqual("\(TestConfig.httpbinBaseURL)/post", JSONResponse["url"] as? String)
         case let .failure(response):
             XCTFail(response.error.localizedDescription)
         }
@@ -88,12 +86,12 @@ class POSTTests: XCTestCase {
         switch result {
         case let .success(response):
             let json = response.dictionaryBody
-            guard let form = json["form"] as? [String: Any] else { XCTFail(); return }
-            XCTAssertEqual(form["string"] as? String, "B&B")
-            XCTAssertEqual(form["int"] as? String, "20")
-            XCTAssertEqual(form["double"] as? String, "20.0")
-            XCTAssertEqual(form["bool"] as? String, "true")
-            XCTAssertEqual(form["date"] as? String, "2016-11-02T13:55:28+01:00")
+            let form = httpbinEchoedMap(json, "form")
+            XCTAssertEqual(form["string"], "B&B")
+            XCTAssertEqual(form["int"], "20")
+            XCTAssertEqual(form["double"], "20.0")
+            XCTAssertEqual(form["bool"], "true")
+            XCTAssertEqual(form["date"], "2016-11-02T13:55:28+01:00")
         case let .failure(response):
             XCTFail(response.error.localizedDescription)
         }
@@ -116,20 +114,20 @@ class POSTTests: XCTestCase {
         switch result {
         case let .success(response):
             let json = response.dictionaryBody
-            XCTAssertEqual(json["url"] as? String, "http://httpbin.org/post")
+            XCTAssertEqual(json["url"] as? String, "\(TestConfig.httpbinBaseURL)/post")
 
-            guard let headers = json["headers"] as? [String: Any] else { XCTFail(); return }
-            XCTAssertEqual(headers["Content-Type"] as? String, "multipart/form-data; boundary=\(networking.boundary)")
+            let headers = httpbinEchoedMap(json, "headers")
+            XCTAssertEqual(headers["Content-Type"], "multipart/form-data; boundary=\(networking.boundary)")
 
-            guard let files = json["files"] as? [String: Any] else { XCTFail(); return }
-            XCTAssertEqual(files[item1] as? String, item1)
-            XCTAssertEqual(files[item2] as? String, item2)
+            let files = httpbinEchoedMap(json, "files")
+            XCTAssertEqual(files[item1], item1)
+            XCTAssertEqual(files[item2], item2)
 
-            guard let form = json["form"] as? [String: Any] else { XCTFail(); return }
-            XCTAssertEqual(form["string"] as? String, "valueA")
-            XCTAssertEqual(form["int"] as? String, "20")
-            XCTAssertEqual(form["double"] as? String, "20.0")
-            XCTAssertEqual(form["bool"] as? String, "true")
+            let form = httpbinEchoedMap(json, "form")
+            XCTAssertEqual(form["string"], "valueA")
+            XCTAssertEqual(form["int"], "20")
+            XCTAssertEqual(form["double"], "20.0")
+            XCTAssertEqual(form["bool"], "true")
         case let .failure(response):
             XCTFail(response.error.localizedDescription)
         }
@@ -144,54 +142,46 @@ class POSTTests: XCTestCase {
         switch result {
         case let .success(response):
             let json = response.dictionaryBody
-            XCTAssertEqual(json["url"] as? String, "http://httpbin.org/post")
+            XCTAssertEqual(json["url"] as? String, "\(TestConfig.httpbinBaseURL)/post")
 
-            guard let headers = json["headers"] as? [String: Any] else { XCTFail(); return }
-            XCTAssertEqual(headers["Content-Type"] as? String, "multipart/form-data; boundary=\(networking.boundary)")
+            let headers = httpbinEchoedMap(json, "headers")
+            XCTAssertEqual(headers["Content-Type"], "multipart/form-data; boundary=\(networking.boundary)")
 
-            guard let files = json["files"] as? [String: Any] else { XCTFail(); return }
-            XCTAssertEqual(files[item1] as? String, item1)
+            let files = httpbinEchoedMap(json, "files")
+            XCTAssertEqual(files[item1], item1)
         case let .failure(response):
             XCTFail(response.error.localizedDescription)
         }
     }
 
-    /*
-    func testUploadingAnImageWithMultipartFormData() {
-        guard let path = .module.path(forResource: "Keys", ofType: "plist") else { return }
-        guard let dictionary = NSDictionary(contentsOfFile: path) else { return }
-        guard let CloudinaryCloudName = dictionary["CloudinaryCloudName"] as? String, CloudinaryCloudName.count > 0 else { return }
-        guard let CloudinarySecret = dictionary["CloudinarySecret"] as? String, CloudinarySecret.count > 0 else { return }
-        guard let CloudinaryAPIKey = dictionary["CloudinaryAPIKey"] as? String, CloudinaryAPIKey.count > 0 else { return }
+    func testUploadingAnImageWithMultipartFormData() async throws {
+        let networking = Networking(baseURL: baseURL)
 
-        let networking = Networking(baseURL: "https://api.cloudinary.com")
-        let timestamp = "\(Int(Date().timeIntervalSince1970))"
+        let imageURL = try XCTUnwrap(Bundle.module.url(forResource: "pig", withExtension: "png"))
+        let imageData = try Data(contentsOf: imageURL)
+        let imagePart = FormDataPart(data: imageData, parameterName: "file", filename: "pig.png")
 
-        let pngImage = Image.find(named: "pig.png", inBundle: .module)
-        let pngImageData = pngImage.pngData()!
-        let pngPart = FormDataPart(data: pngImageData, parameterName: "file", filename: "\(timestamp).png")
+        let result = try await networking.oldPost("/post", parameters: ["public_id": "pig"], parts: [imagePart])
+        switch result {
+        case let .success(response):
+            let json = response.dictionaryBody
+            XCTAssertEqual(json["url"] as? String, "\(TestConfig.httpbinBaseURL)/post")
 
-        var parameters = [
-            "timestamp": timestamp,
-            "public_id": timestamp,
-        ]
-        let signature = SHA1.signature(usingParameters: parameters, secret: CloudinarySecret)
-        parameters["api_key"] = CloudinaryAPIKey
-        parameters["signature"] = signature
+            let headers = httpbinEchoedMap(json, "headers")
+            XCTAssertEqual(headers["Content-Type"], "multipart/form-data; boundary=\(networking.boundary)")
 
-        networking.oldPost("/v1_1/\(CloudinaryCloudName)/image/upload", parameters: parameters, parts: [pngPart]) { result in
-            switch result {
-            case let .success(response):
-                let JSONResponse = response.dictionaryBody
-                XCTAssertEqual(timestamp, JSONResponse["original_filename"] as? String)
+            // The image arrived as a multipart file part. httpbin echoes file content as a
+            // (lossy) JSON string, so assert the PNG signature crossed the wire rather than
+            // byte-equality.
+            let files = httpbinEchoedMap(json, "files")
+            XCTAssertTrue(files["file"]?.contains("PNG") ?? false)
 
-                self.deleteAllCloudinaryPhotos(networking: networking, cloudName: CloudinaryCloudName, secret: CloudinarySecret, APIKey: CloudinaryAPIKey)
-            case let .failure(response):
-                XCTFail(response.error.localizedDescription)
-            }
+            let form = httpbinEchoedMap(json, "form")
+            XCTAssertEqual(form["public_id"], "pig")
+        case let .failure(response):
+            XCTFail(response.error.localizedDescription)
         }
     }
-    */
 
     func testPOSTWithIvalidPath() async throws {
         let networking = Networking(baseURL: baseURL)

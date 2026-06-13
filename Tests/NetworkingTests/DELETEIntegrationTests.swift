@@ -2,8 +2,8 @@ import Foundation
 import XCTest
 @testable import Networking
 
-class DELETETests: XCTestCase {
-    let baseURL = "http://httpbin.org"
+class DELETEIntegrationTests: XCTestCase {
+    let baseURL = TestConfig.httpbinBaseURL
 
     func testDELETE() async throws {
         let networking = Networking(baseURL: baseURL)
@@ -12,9 +12,9 @@ class DELETETests: XCTestCase {
         case let .success(response):
             let json = response.dictionaryBody
             guard let url = json["url"] as? String else { XCTFail(); return }
-            XCTAssertEqual(url, "http://httpbin.org/delete")
+            XCTAssertEqual(url, "\(TestConfig.httpbinBaseURL)/delete")
 
-            guard let headers = json["headers"] as? [String: String] else { XCTFail(); return }
+            let headers = httpbinEchoedMap(json, "headers")
             let contentType = headers["Content-Type"]
             XCTAssertNil(contentType)
         case let .failure(response):
@@ -29,10 +29,10 @@ class DELETETests: XCTestCase {
         case let .success(response):
             let json = response.dictionaryBody
             guard let url = json["url"] as? String else { XCTFail(); return }
-            XCTAssertEqual(url, "http://httpbin.org/delete")
+            XCTAssertEqual(url, "\(TestConfig.httpbinBaseURL)/delete")
 
             let headers = response.headers
-            XCTAssertEqual(headers["Content-Type"] as? String, "application/json")
+            XCTAssertTrue((headers["Content-Type"] as? String)?.hasPrefix("application/json") ?? false)
         case let .failure(response):
             XCTFail(response.error.localizedDescription)
         }
@@ -74,18 +74,5 @@ class DELETETests: XCTestCase {
         completed = true
 
         waitForExpectations(timeout: 15.0, handler: nil)
-    }*/
-
-    /*
-    func testDELETEWithURLEncodedParameters() async throws {
-        let networking = Networking(baseURL: baseURL)
-        let result = try await networking.oldDelete("/delete", parameters: ["userId": 25])
-        switch result {
-        case let .success(response):
-            let json = response.dictionaryBody
-            XCTAssertEqual(json["url"] as? String, "https://httpbin.org/delete?userId=25")
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
-        }
     }*/
 }

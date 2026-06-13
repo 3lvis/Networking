@@ -2,8 +2,8 @@ import Foundation
 import XCTest
 @testable import Networking
 
-class DownloadTests: XCTestCase {
-    let baseURL = "http://httpbin.org"
+class DownloadIntegrationTests: XCTestCase {
+    let baseURL = TestConfig.httpbinBaseURL
 
     func testImageDownload() async throws {
         let networking = Networking(baseURL: baseURL)
@@ -22,28 +22,6 @@ class DownloadTests: XCTestCase {
             XCTFail(response.error.localizedDescription)
         }
     }
-
-    // Find a new source for this test
-    /*
-    func testImageDownloadWithWeirdCharacters() {
-        let networking = Networking(baseURL: "https://rescuejuice.com")
-        let path = "/wp-content/uploads/2015/11/døgnvillburgere.jpg"
-
-        try! Helper.removeFileIfNeeded(networking, path: path)
-
-        networking.downloadImage(path) { result in
-            switch result {
-            case let .success(response):
-                let pigImage = Image.find(named: "døgnvillburgere.jpg", inBundle: .module)
-                let pigImageData = pigImage.pngData()
-                let imageData = response.image.pngData()
-                XCTAssertEqual(pigImageData, imageData)
-            case let .failure(response):
-                XCTFail(response.error.localizedDescription)
-            }
-        }
-    }
-    */
 
     func testDownloadedImageInFile() async throws {
         let networking = Networking(baseURL: baseURL)
@@ -253,8 +231,9 @@ class DownloadTests: XCTestCase {
 
     func testDataFromCache() async throws {
         let cache = NSCache<AnyObject, AnyObject>()
-        let networking = Networking(baseURL: "http://via.placeholder.com", cache: cache)
-        let path = "/350x150"
+        let networking = Networking(baseURL: baseURL, cache: cache)
+        let path = "/image/png"
+        try Helper.removeFileIfNeeded(networking, path: path)
 
         let result = try await networking.downloadData(path)
         switch result {

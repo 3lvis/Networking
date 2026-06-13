@@ -2,10 +2,10 @@ import Foundation
 import XCTest
 @testable import Networking
 
-class UnauthorizedCallbackTests: XCTestCase {
-    let baseURL = "http://httpbin.org"
+class UnauthorizedCallbackIntegrationTests: XCTestCase {
+    let baseURL = TestConfig.httpbinBaseURL
 
-    func testCallbackWithFakedRequest() async throws {
+    func testUnauthorizedCallback() async throws {
         let networking = Networking(baseURL: baseURL)
         var callbackExecuted = false
 
@@ -13,8 +13,7 @@ class UnauthorizedCallbackTests: XCTestCase {
             callbackExecuted = true
         }
 
-        networking.fakeGET("/hi-mom", response: nil, statusCode: 401)
-        let _ = try await networking.oldGet("/hi-mom")
+        let _ = try await networking.oldGet("/basic-auth/user/passwd")
         XCTAssertTrue(callbackExecuted)
     }
 }
