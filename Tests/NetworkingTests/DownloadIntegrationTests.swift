@@ -231,8 +231,9 @@ class DownloadIntegrationTests: XCTestCase {
 
     func testDataFromCache() async throws {
         let cache = NSCache<AnyObject, AnyObject>()
-        let networking = Networking(baseURL: "http://via.placeholder.com", cache: cache)
-        let path = "/350x150"
+        let networking = Networking(baseURL: baseURL, cache: cache)
+        let path = "/image/png"
+        try Helper.removeFileIfNeeded(networking, path: path)
 
         let result = try await networking.downloadData(path)
         switch result {
