@@ -49,25 +49,4 @@ class PUTIntegrationTests: XCTestCase {
         }
     }
 
-    // Disabling because I haven't found a way to test cancel
-    /*
-    func testCancelPUTWithPath() async throws {
-        let networking = Networking(baseURL: baseURL)
-        networking.isSynchronous = true
-        var completed = false
-        let result = try await networking.oldPut("/put", parameters: ["username": "jameson", "password": "secret"])
-        switch result {
-        case .success:
-            XCTFail()
-        case let .failure(response):
-            XCTAssertTrue(completed)
-            XCTAssertEqual(response.error.code, URLError.cancelled.rawValue)
-            expectation.fulfill()
-        }
-
-        networking.cancelPUT("/put")
-        completed = true
-
-        waitForExpectations(timeout: 150.0, handler: nil)
-    }*/
 }

@@ -6,6 +6,7 @@ public enum NetworkingError: Error {
     case clientError(statusCode: Int, message: String)
     case serverError(statusCode: Int, message: String, details: [String: Any]?)
     case unexpectedError(statusCode: Int?, message: String)
+    case cancelled
 }
 
 extension NetworkingError: LocalizedError {
@@ -26,6 +27,8 @@ extension NetworkingError: LocalizedError {
         case .unexpectedError(let statusCode, let message):
             let statusCodeMessage = statusCode != nil ? "Code: \(statusCode!). " : ""
             return "We're sorry, but an unexpected error occurred. \(statusCodeMessage)\(message)"
+        case .cancelled:
+            return "The request was cancelled."
         }
     }
 }

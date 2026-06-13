@@ -10,17 +10,6 @@ struct Friend: Decodable {
 class GETTests: XCTestCase {
     let baseURL = "http://httpbin.org"
 
-    // Disabling since I don't know a reliable way to test cancellations in async/await
-    /*
-    func testCancelGETWithPath() async throws {
-        let networking = Networking(baseURL: baseURL)
-        _ = try await networking.oldGet("/get")
-        try await networking.cancelGET("/get")
-        let (dataTasks, _, _) = await networking.session.tasks
-        XCTAssertTrue(dataTasks.isEmpty)
-    }
-     */
-
     func testGETCachedFromMemory() async throws {
         let cache = NSCache<AnyObject, AnyObject>()
         let networking = Networking(baseURL: baseURL, configuration: .default, cache: cache)

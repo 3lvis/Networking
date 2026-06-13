@@ -195,30 +195,6 @@ class POSTIntegrationTests: XCTestCase {
 
     }
 
-    // Disabling because I haven't found a way to test cancel
-    /*
-    func testCancelPOSTWithPath() {
-        let expectation = self.expectation(description: "testCancelPOST")
-
-        let networking = Networking(baseURL: baseURL)
-        networking.isSynchronous = true
-        var completed = false
-        networking.oldPost("/post", parameters: ["username": "jameson", "password": "secret"]) { result in
-            switch result {
-            case .success:
-                XCTFail()
-            case let .failure(response):
-                XCTAssertTrue(completed)
-                XCTAssertEqual(response.error.code, URLError.cancelled.rawValue)
-                expectation.fulfill()
-            }
-        }
-
-        networking.cancelPOST("/post")
-        completed = true
-
-        waitForExpectations(timeout: 15.0, handler: nil)
-    }*/
 
     func deleteAllCloudinaryPhotos(networking: Networking, cloudName: String, secret: String, APIKey: String) async throws {
         networking.setAuthorizationHeader(username: APIKey, password: secret)
