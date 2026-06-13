@@ -102,9 +102,6 @@ public actor Networking {
     fileprivate var configuration: URLSessionConfiguration
     nonisolated(unsafe) let cache: NSCache<AnyObject, AnyObject>
 
-    /// Flag used to indicate synchronous request.
-    public var isSynchronous = false
-
     /// Flag used to disable error logging. Useful when want to disable log before release build.
     public var isErrorLoggingEnabled = true
 
