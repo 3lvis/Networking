@@ -7,13 +7,13 @@ class UnauthorizedCallbackIntegrationTests: XCTestCase {
 
     func testUnauthorizedCallback() async throws {
         let networking = Networking(baseURL: baseURL)
-        var callbackExecuted = false
+        let callbackExecuted = Box(false)
 
-        networking.unauthorizedRequestCallback = {
-            callbackExecuted = true
+        await networking.setUnauthorizedRequestCallback {
+            callbackExecuted.value = true
         }
 
         let _: Result<JSONResponse, NetworkingError> = await networking.get("/basic-auth/user/passwd")
-        XCTAssertTrue(callbackExecuted)
+        XCTAssertTrue(callbackExecuted.value)
     }
 }

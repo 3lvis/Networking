@@ -7,7 +7,7 @@ class ResponseIntegrationTests: XCTestCase {
     func testReflectsRequestHeaderInBody() async throws {
         let networking = Networking(baseURL: baseURL)
         let expectedUserAgent = "hi mom!"
-        networking.headerFields = ["user-agent": expectedUserAgent]
+        await networking.setHeaderFields(["user-agent": expectedUserAgent])
         let result: Result<JSONResponse, NetworkingError> = await networking.get("/user-agent")
         switch result {
         case let .success(response):

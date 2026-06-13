@@ -14,7 +14,7 @@ class NewNetworkingTests: XCTestCase {
                 "phone_number": ["has already been taken"]
             ]
         ]
-        networking.fakePOST("/auth", response: response, statusCode: 422)
+        await networking.fakePOST("/auth", response: response, statusCode: 422)
 
         let result: Result<JSONResponse, NetworkingError> = await networking.post("/auth", parameters: [:])
         switch result {

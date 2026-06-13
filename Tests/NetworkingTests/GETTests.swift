@@ -13,7 +13,7 @@ class GETTests: XCTestCase {
     func testGETCachedFromMemory() async throws {
         let cache = NSCache<AnyObject, AnyObject>()
         let networking = Networking(baseURL: baseURL, configuration: .default, cache: cache)
-        networking.fakeGET("/get", response: ["key": "value1"])
+        await networking.fakeGET("/get", response: ["key": "value1"])
         let firstResult: Result<JSONResponse, NetworkingError> = await networking.get("/get", cachingLevel: .memory)
         switch firstResult {
         case let .success(response):
@@ -22,7 +22,7 @@ class GETTests: XCTestCase {
             XCTFail(error.localizedDescription)
         }
 
-        networking.fakeGET("/get", response: ["key": "value2"])
+        await networking.fakeGET("/get", response: ["key": "value2"])
 
         let secondResult: Result<JSONResponse, NetworkingError> = await networking.get("/get", cachingLevel: .memory)
         switch secondResult {
@@ -36,7 +36,7 @@ class GETTests: XCTestCase {
     func testGETCachedFromFile() async throws {
         let cache = NSCache<AnyObject, AnyObject>()
         let networking = Networking(baseURL: baseURL, configuration: .default, cache: cache)
-        networking.fakeGET("/get", response: ["key": "value1"])
+        await networking.fakeGET("/get", response: ["key": "value1"])
         let firstResult: Result<JSONResponse, NetworkingError> = await networking.get("/get", cachingLevel: .memoryAndFile)
         switch firstResult {
         case let .success(response):
@@ -45,7 +45,7 @@ class GETTests: XCTestCase {
             XCTFail(error.localizedDescription)
         }
 
-        networking.fakeGET("/get", response: ["key": "value2"])
+        await networking.fakeGET("/get", response: ["key": "value2"])
         let secondResult: Result<JSONResponse, NetworkingError> = await networking.get("/get", cachingLevel: .memoryAndFile)
         switch secondResult {
         case let .success(response):
@@ -58,7 +58,7 @@ class GETTests: XCTestCase {
     func testGETCachedNone() async throws {
         let cache = NSCache<AnyObject, AnyObject>()
         let networking = Networking(baseURL: baseURL, configuration: .default, cache: cache)
-        networking.fakeGET("/get", response: ["key": "value1"])
+        await networking.fakeGET("/get", response: ["key": "value1"])
         let firstResult: Result<JSONResponse, NetworkingError> = await networking.get("/get", cachingLevel: .none)
         switch firstResult {
         case let .success(response):
@@ -67,7 +67,7 @@ class GETTests: XCTestCase {
             XCTFail(error.localizedDescription)
         }
 
-        networking.fakeGET("/get", response: ["key": "value2"])
+        await networking.fakeGET("/get", response: ["key": "value2"])
         let secondResult: Result<JSONResponse, NetworkingError> = await networking.get("/get", cachingLevel: .none)
         switch secondResult {
         case let .success(response):

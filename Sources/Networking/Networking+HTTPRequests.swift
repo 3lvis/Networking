@@ -175,7 +175,7 @@ public extension Networking {
     ///   - path: The path where the image is located.
     ///   - cacheName: The cache name used to identify the downloaded image, by default the path is used.
     /// - Returns: The cached image.
-    func imageFromCache(_ path: String, cacheName: String? = nil) throws -> Image? {
+    nonisolated func imageFromCache(_ path: String, cacheName: String? = nil) throws -> Image? {
         let object = try objectFromCache(for: path, cacheName: cacheName, cachingLevel: .memoryAndFile, responseType: .image)
 
         return object as? Image
@@ -225,7 +225,7 @@ public extension Networking {
     ///   - path: The path where the image is located.
     ///   - cacheName: The cache name used to identify the downloaded data, by default the path is used.
     /// - Returns: The cached data.
-    func dataFromCache(_ path: String, cacheName: String? = nil) throws -> Data? {
+    nonisolated func dataFromCache(_ path: String, cacheName: String? = nil) throws -> Data? {
         let object = try objectFromCache(for: path, cacheName: cacheName, cachingLevel: .memoryAndFile, responseType: .data)
 
         return object as? Data

@@ -1,6 +1,13 @@
 import Foundation
 @testable import Networking
 
+/// A reference box so `@Sendable` callbacks can write a flag the test reads afterward.
+/// @unchecked: the callback fires synchronously inside the awaited request, before the test reads it.
+final class Box<T>: @unchecked Sendable {
+    var value: T
+    init(_ value: T) { self.value = value }
+}
+
 enum TestConfig {
     /// Base URL for httpbin-backed integration tests. Defaults to a local go-httpbin on :8080;
     /// CI sets HTTPBIN_BASE_URL to the same. Run one with `docker run -p 8080:8080 mccutchen/go-httpbin`.

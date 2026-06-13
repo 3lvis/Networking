@@ -163,7 +163,7 @@ extension FakeRequestTests {
     func testFakeGET() async throws {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakeGET("/stories", response: ["name": "Elvis"])
+        await networking.fakeGET("/stories", response: ["name": "Elvis"])
 
         let result: Result<JSONResponse, NetworkingError> = await networking.get("/stories")
         switch result {
@@ -179,7 +179,7 @@ extension FakeRequestTests {
         let delay: Double = 2.0
 
         let startTime1 = Date()
-        networking.fakeGET("/stories", response: ["name": "Elvis"], delay: delay)
+        await networking.fakeGET("/stories", response: ["name": "Elvis"], delay: delay)
 
         let firstResult: Result<JSONResponse, NetworkingError> = await networking.get("/stories")
         let endTime1 = Date()
@@ -197,7 +197,7 @@ extension FakeRequestTests {
     func testFakeGETWithInvalidStatusCode() async throws {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakeGET("/stories", response: nil, statusCode: 401)
+        await networking.fakeGET("/stories", response: nil, statusCode: 401)
 
         let result: Result<JSONResponse, NetworkingError> = await networking.get("/stories")
         switch result {
@@ -214,7 +214,7 @@ extension FakeRequestTests {
     func testFakeGETWithInvalidPathAndJSONError() async throws {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakeGET("/stories", response: ["error": "Shit went down"], statusCode: 401)
+        await networking.fakeGET("/stories", response: ["error": "Shit went down"], statusCode: 401)
 
         let result: Result<JSONResponse, NetworkingError> = await networking.get("/stories")
         switch result {
@@ -232,7 +232,7 @@ extension FakeRequestTests {
     func testFakeGETUsingFile() async throws {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakeGET("/entries", fileName: "entries.json", bundle: .module)
+        await networking.fakeGET("/entries", fileName: "entries.json", bundle: .module)
 
         let result: Result<[[String: AnyCodable]], NetworkingError> = await networking.get("/entries")
         switch result {
@@ -250,12 +250,12 @@ extension FakeRequestTests {
             "name": "Name {userID}"
         ]
 
-        networking.fakeGET("/users/ados", response: json, statusCode: 200)
-        networking.fakeGET("/users/bedos", response: json, statusCode: 200)
-        networking.fakeGET("/users/cedos", response: json, statusCode: 200)
-        networking.fakeGET("/users/tedos", response: json, statusCode: 200)
-        networking.fakeGET("/users/melos", response: json, statusCode: 200)
-        networking.fakeGET("/users/{userID}", response: json, statusCode: 200)
+        await networking.fakeGET("/users/ados", response: json, statusCode: 200)
+        await networking.fakeGET("/users/bedos", response: json, statusCode: 200)
+        await networking.fakeGET("/users/cedos", response: json, statusCode: 200)
+        await networking.fakeGET("/users/tedos", response: json, statusCode: 200)
+        await networking.fakeGET("/users/melos", response: json, statusCode: 200)
+        await networking.fakeGET("/users/{userID}", response: json, statusCode: 200)
 
         let result: Result<JSONResponse, NetworkingError> = await networking.get("/users/10")
         switch result {
@@ -277,7 +277,7 @@ extension FakeRequestTests {
     func testFakeGETUsingHeader() async throws {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakeGET("/story", response: ["ok": true], headerFields: ["uid": "12345678"])
+        await networking.fakeGET("/story", response: ["ok": true], headerFields: ["uid": "12345678"])
 
         let result: Result<JSONResponse, NetworkingError> = await networking.get("/story")
         switch result {
@@ -294,7 +294,7 @@ extension FakeRequestTests {
     func testFakePOST() async throws {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakePOST("/story", response: [["name": "Elvis"]])
+        await networking.fakePOST("/story", response: [["name": "Elvis"]])
 
         let result: Result<[[String: AnyCodable]], NetworkingError> = await networking.post("/story", parameters: ["username": "jameson", "password": "secret"])
         switch result {
@@ -308,7 +308,7 @@ extension FakeRequestTests {
     func testFakePOSTWithInvalidStatusCode() async throws {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakePOST("/story", response: nil, statusCode: 401)
+        await networking.fakePOST("/story", response: nil, statusCode: 401)
 
         let result: Result<JSONResponse, NetworkingError> = await networking.post("/story")
         switch result {
@@ -325,7 +325,7 @@ extension FakeRequestTests {
     func testFakePOSTUsingFile() async throws {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakePOST("/entries", fileName: "entries.json", bundle: .module)
+        await networking.fakePOST("/entries", fileName: "entries.json", bundle: .module)
 
         let result: Result<[[String: AnyCodable]], NetworkingError> = await networking.post("/entries")
         switch result {
@@ -339,7 +339,7 @@ extension FakeRequestTests {
     func testFakePOSTUsingHeader() async throws {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakePOST("/story", response: nil, headerFields: ["uid": "12345678"])
+        await networking.fakePOST("/story", response: nil, headerFields: ["uid": "12345678"])
 
         let result: Result<JSONResponse, NetworkingError> = await networking.post("/story")
         switch result {
@@ -353,16 +353,16 @@ extension FakeRequestTests {
     func testFakePOSTMultiple() async throws {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakeGET("/g/1/1", response: ["id":"2"])
-        networking.fakeGET("/g/2/2", response: ["id":"2"])
-        networking.fakePOST("/g/1/e", response: ["id":"2"])
-        networking.fakePOST("/g/1/b", response: ["id":"5"])
-        networking.fakePOST("/g/5/f", response: nil)
-        networking.fakePUT("/g/2/2", response: ["id":"2"])
-        networking.fakePOST("/g/x/o", response: ["id":"3"])
-        networking.fakePOST("/g/1/b", response: ["id":"4"])
-        networking.fakeDELETE("/g/2/2", response: nil)
-        networking.fakePOST("/g/1/b", response: ["id":"1"])
+        await networking.fakeGET("/g/1/1", response: ["id":"2"])
+        await networking.fakeGET("/g/2/2", response: ["id":"2"])
+        await networking.fakePOST("/g/1/e", response: ["id":"2"])
+        await networking.fakePOST("/g/1/b", response: ["id":"5"])
+        await networking.fakePOST("/g/5/f", response: nil)
+        await networking.fakePUT("/g/2/2", response: ["id":"2"])
+        await networking.fakePOST("/g/x/o", response: ["id":"3"])
+        await networking.fakePOST("/g/1/b", response: ["id":"4"])
+        await networking.fakeDELETE("/g/2/2", response: nil)
+        await networking.fakePOST("/g/1/b", response: ["id":"1"])
 
         let result: Result<JSONResponse, NetworkingError> = await networking.post("/g/1/b", parameters: ["ignored": true])
         switch result {
@@ -379,7 +379,7 @@ extension FakeRequestTests {
     func testFakePUT() async throws {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakePUT("/story", response: [["name": "Elvis"]])
+        await networking.fakePUT("/story", response: [["name": "Elvis"]])
 
         let result: Result<[[String: AnyCodable]], NetworkingError> = await networking.put("/story", parameters: ["username": "jameson", "password": "secret"])
         switch result {
@@ -393,7 +393,7 @@ extension FakeRequestTests {
     func testFakePUTWithInvalidStatusCode() async throws {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakePUT("/story", response: nil, statusCode: 401)
+        await networking.fakePUT("/story", response: nil, statusCode: 401)
 
         let result: Result<JSONResponse, NetworkingError> = await networking.put("/story")
         switch result {
@@ -410,7 +410,7 @@ extension FakeRequestTests {
     func testFakePUTUsingFile() async throws {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakePUT("/entries", fileName: "entries.json", bundle: .module)
+        await networking.fakePUT("/entries", fileName: "entries.json", bundle: .module)
 
         let result: Result<[[String: AnyCodable]], NetworkingError> = await networking.put("/entries")
         switch result {
@@ -424,7 +424,7 @@ extension FakeRequestTests {
     func testFakePUTUsingHeader() async throws {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakePUT("/story", response: nil, headerFields: ["uid": "12345678"])
+        await networking.fakePUT("/story", response: nil, headerFields: ["uid": "12345678"])
 
         let result: Result<JSONResponse, NetworkingError> = await networking.put("/story")
         switch result {
@@ -441,7 +441,7 @@ extension FakeRequestTests {
     func testFakePATCH() async throws {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakePATCH("/story", response: [["name": "Elvis"]])
+        await networking.fakePATCH("/story", response: [["name": "Elvis"]])
 
         let result: Result<[[String: AnyCodable]], NetworkingError> = await networking.patch("/story", parameters: ["username": "jameson", "password": "secret"])
         switch result {
@@ -455,7 +455,7 @@ extension FakeRequestTests {
     func testFakePATCHWithInvalidStatusCode() async throws {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakePATCH("/story", response: nil, statusCode: 401)
+        await networking.fakePATCH("/story", response: nil, statusCode: 401)
 
         let result: Result<JSONResponse, NetworkingError> = await networking.patch("/story")
         switch result {
@@ -472,7 +472,7 @@ extension FakeRequestTests {
     func testFakePATCHUsingFile() async throws {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakePATCH("/entries", fileName: "entries.json", bundle: .module)
+        await networking.fakePATCH("/entries", fileName: "entries.json", bundle: .module)
 
         let result: Result<[[String: AnyCodable]], NetworkingError> = await networking.patch("/entries")
         switch result {
@@ -486,7 +486,7 @@ extension FakeRequestTests {
     func testFakePATCHUsingHeader() async throws {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakePATCH("/story", response: nil, headerFields: ["uid": "12345678"])
+        await networking.fakePATCH("/story", response: nil, headerFields: ["uid": "12345678"])
 
         let result: Result<JSONResponse, NetworkingError> = await networking.patch("/story")
         switch result {
@@ -503,7 +503,7 @@ extension FakeRequestTests {
     func testFakeDELETE() async throws {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakeDELETE("/stories", response: ["name": "Elvis"])
+        await networking.fakeDELETE("/stories", response: ["name": "Elvis"])
 
         let result: Result<JSONResponse, NetworkingError> = await networking.delete("/stories")
         switch result {
@@ -517,17 +517,17 @@ extension FakeRequestTests {
     func testFakeDELETEMultiple() async {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakeDELETE("/a/1/b/1", response: nil)
-        networking.fakeDELETE("/a/1/b/2", response: nil)
-        networking.fakeDELETE("/a/1/b/3", response: nil)
-        networking.fakeDELETE("/a/1/b/4", response: nil)
-        networking.fakeDELETE("/a/1/b/5", response: nil)
-        networking.fakeDELETE("/a/1/b/6", response: nil)
-        networking.fakeDELETE("/a/1/b/7", response: nil)
-        networking.fakeDELETE("/a/1/b/8", response: nil)
-        networking.fakeDELETE("/a/1/b/9", response: nil)
-        networking.fakeDELETE("/a/1/b/10", response: nil)
-        networking.fakeDELETE("/a/1/b/11", response: nil)
+        await networking.fakeDELETE("/a/1/b/1", response: nil)
+        await networking.fakeDELETE("/a/1/b/2", response: nil)
+        await networking.fakeDELETE("/a/1/b/3", response: nil)
+        await networking.fakeDELETE("/a/1/b/4", response: nil)
+        await networking.fakeDELETE("/a/1/b/5", response: nil)
+        await networking.fakeDELETE("/a/1/b/6", response: nil)
+        await networking.fakeDELETE("/a/1/b/7", response: nil)
+        await networking.fakeDELETE("/a/1/b/8", response: nil)
+        await networking.fakeDELETE("/a/1/b/9", response: nil)
+        await networking.fakeDELETE("/a/1/b/10", response: nil)
+        await networking.fakeDELETE("/a/1/b/11", response: nil)
 
         let result: Result<JSONResponse, NetworkingError> = await networking.delete("/a/1/b/5")
         switch result {
@@ -541,7 +541,7 @@ extension FakeRequestTests {
     func testFakeDELETEWithInvalidStatusCode() async throws {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakeDELETE("/story", response: nil, statusCode: 401)
+        await networking.fakeDELETE("/story", response: nil, statusCode: 401)
 
         let result: Result<JSONResponse, NetworkingError> = await networking.delete("/story")
         switch result {
@@ -558,7 +558,7 @@ extension FakeRequestTests {
     func testFakeDELETEUsingFile() async throws {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakeDELETE("/entries", fileName: "entries.json", bundle: .module)
+        await networking.fakeDELETE("/entries", fileName: "entries.json", bundle: .module)
 
         let result: Result<[[String: AnyCodable]], NetworkingError> = await networking.delete("/entries")
         switch result {
@@ -572,7 +572,7 @@ extension FakeRequestTests {
     func testFakeDELETEUsingHeader() async throws {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakeDELETE("/story", response: nil, headerFields: ["uid": "12345678"])
+        await networking.fakeDELETE("/story", response: nil, headerFields: ["uid": "12345678"])
 
         let result: Result<JSONResponse, NetworkingError> = await networking.delete("/story")
         switch result {
@@ -589,7 +589,7 @@ extension FakeRequestTests {
     func testFakeImageDownload() async throws {
         let networking = Networking(baseURL: baseURL)
         let pigImage = Image.find(named: "pig.png", inBundle: .module)
-        networking.fakeImageDownload("/image/png", image: pigImage)
+        await networking.fakeImageDownload("/image/png", image: pigImage)
         let result: Result<Image, NetworkingError> = await networking.downloadImage("/image/png")
         switch result {
         case let .success(image):
@@ -605,7 +605,7 @@ extension FakeRequestTests {
         let delay: Double = 2.0
 
         let startTime = Date()
-        networking.fakeImageDownload("/image/png", image: pigImage, delay: delay)
+        await networking.fakeImageDownload("/image/png", image: pigImage, delay: delay)
 
         let result: Result<Image, NetworkingError> = await networking.downloadImage("/image/png")
         let endTime = Date()
@@ -623,7 +623,7 @@ extension FakeRequestTests {
     func testFakeImageDownloadWithInvalidStatusCode() async throws {
         let networking = Networking(baseURL: baseURL)
         let pigImage = Image.find(named: "pig.png", inBundle: .module)
-        networking.fakeImageDownload("/image/png", image: pigImage, statusCode: 401)
+        await networking.fakeImageDownload("/image/png", image: pigImage, statusCode: 401)
         let result: Result<Image, NetworkingError> = await networking.downloadImage("/image/png")
         switch result {
         case .success:
@@ -640,7 +640,7 @@ extension FakeRequestTests {
     func testFakeImageDownloadUsingHeader() async throws {
         let networking = Networking(baseURL: baseURL)
         let pigImage = Image.find(named: "pig.png", inBundle: .module)
-        networking.fakeImageDownload("/image/png", image: pigImage, headerFields: ["uid": "12345678"])
+        await networking.fakeImageDownload("/image/png", image: pigImage, headerFields: ["uid": "12345678"])
         let result: Result<ImageResponse, NetworkingError> = await networking.downloadImage("/image/png")
         switch result {
         case let .success(response):
@@ -654,7 +654,7 @@ extension FakeRequestTests {
     func testNewPostWithFakeHeaders() async {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakePOST("/auth/verify_confirmation_code", response: [
+        await networking.fakePOST("/auth/verify_confirmation_code", response: [
             "phone_number": "phoneNumber"
         ], headerFields: [
             "client": "aClient",

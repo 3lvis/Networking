@@ -7,14 +7,14 @@ class UnauthorizedCallbackTests: XCTestCase {
 
     func testCallbackWithFakedRequest() async throws {
         let networking = Networking(baseURL: baseURL)
-        var callbackExecuted = false
+        let callbackExecuted = Box(false)
 
-        networking.unauthorizedRequestCallback = {
-            callbackExecuted = true
+        await networking.setUnauthorizedRequestCallback {
+            callbackExecuted.value = true
         }
 
-        networking.fakeGET("/hi-mom", response: nil, statusCode: 401)
+        await networking.fakeGET("/hi-mom", response: nil, statusCode: 401)
         let _: Result<JSONResponse, NetworkingError> = await networking.get("/hi-mom")
-        XCTAssertTrue(callbackExecuted)
+        XCTAssertTrue(callbackExecuted.value)
     }
 }

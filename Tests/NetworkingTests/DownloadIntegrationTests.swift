@@ -2,6 +2,9 @@ import Foundation
 import XCTest
 @testable import Networking
 
+// @MainActor so the local `NSCache` (non-Sendable) used across the `downloadImage` await stays on
+// one actor and doesn't trip strict-concurrency "sending" checks.
+@MainActor
 class DownloadIntegrationTests: XCTestCase {
     let baseURL = TestConfig.httpbinBaseURL
 
@@ -135,8 +138,7 @@ class DownloadIntegrationTests: XCTestCase {
 
     // Test `imageFromCache` using path, expecting image from file
     func testImageFromCacheForPathInFile() async throws {
-        let cache = NSCache<AnyObject, AnyObject>()
-        let networking = Networking(baseURL: baseURL, cache: cache)
+        let networking = Networking(baseURL: baseURL)
         let path = "/image/png"
         try Helper.removeFileIfNeeded(networking, path: path)
         let result: Result<Image, NetworkingError> = await networking.downloadImage(path)
@@ -144,7 +146,7 @@ class DownloadIntegrationTests: XCTestCase {
         case .success:
             let destinationURL = try networking.destinationURL(for: path)
             let absoluteString = destinationURL.absoluteString
-            cache.removeObject(forKey: absoluteString as AnyObject)
+            networking.cache.removeObject(forKey: absoluteString as AnyObject)
             guard let image = try networking.imageFromCache(path) else { XCTFail(); return }
             let pigImage = Image.find(named: "pig.png", inBundle: .module)
             XCTAssertEqual(pigImage.pngData(), image.pngData())
@@ -155,8 +157,7 @@ class DownloadIntegrationTests: XCTestCase {
 
     // Test `imageFromCache` using cacheName instead of path, expecting image from file
     func testImageFromCacheForCustomCacheNameInFile() async throws {
-        let cache = NSCache<AnyObject, AnyObject>()
-        let networking = Networking(baseURL: baseURL, cache: cache)
+        let networking = Networking(baseURL: baseURL)
         let path = "/image/png"
         let cacheName = "hello"
         try Helper.removeFileIfNeeded(networking, path: path, cacheName: cacheName)
@@ -165,7 +166,7 @@ class DownloadIntegrationTests: XCTestCase {
         case .success:
             let destinationURL = try networking.destinationURL(for: path, cacheName: cacheName)
             let absoluteString = destinationURL.absoluteString
-            cache.removeObject(forKey: absoluteString as AnyObject)
+            networking.cache.removeObject(forKey: absoluteString as AnyObject)
             guard let image = try networking.imageFromCache(path, cacheName: cacheName) else { XCTFail(); return }
             let pigImage = Image.find(named: "pig.png", inBundle: .module)
             XCTAssertEqual(pigImage.pngData(), image.pngData())
@@ -176,8 +177,7 @@ class DownloadIntegrationTests: XCTestCase {
 
     // Test `imageFromCache` using path, but then clearing cache, and removing files, expecting nil
     func testImageFromCacheNilImage() async throws {
-        let cache = NSCache<AnyObject, AnyObject>()
-        let networking = Networking(baseURL: baseURL, cache: cache)
+        let networking = Networking(baseURL: baseURL)
         let path = "/image/png"
         try Helper.removeFileIfNeeded(networking, path: path)
         let result: Result<Image, NetworkingError> = await networking.downloadImage(path)
@@ -185,7 +185,7 @@ class DownloadIntegrationTests: XCTestCase {
         case .success:
             let destinationURL = try networking.destinationURL(for: path)
             let absoluteString = destinationURL.absoluteString
-            cache.removeObject(forKey: absoluteString as AnyObject)
+            networking.cache.removeObject(forKey: absoluteString as AnyObject)
             try Helper.removeFileIfNeeded(networking, path: path)
             let image = try networking.imageFromCache(path)
             XCTAssertNil(image)
@@ -223,8 +223,7 @@ class DownloadIntegrationTests: XCTestCase {
     }
 
     func testDataFromCache() async throws {
-        let cache = NSCache<AnyObject, AnyObject>()
-        let networking = Networking(baseURL: baseURL, cache: cache)
+        let networking = Networking(baseURL: baseURL)
         let path = "/image/png"
         try Helper.removeFileIfNeeded(networking, path: path)
 
