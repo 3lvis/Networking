@@ -14,7 +14,7 @@ class UnauthorizedCallbackTests: XCTestCase {
         }
 
         networking.fakeGET("/hi-mom", response: nil, statusCode: 401)
-        let _ = try await networking.oldGet("/hi-mom")
+        let _: Result<NetworkingResponse, NetworkingError> = await networking.get("/hi-mom")
         XCTAssertTrue(callbackExecuted)
     }
 }

@@ -7,96 +7,74 @@ class GETIntegrationTests: XCTestCase {
 
     func testGET() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result = try await networking.oldGet("/get")
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.get("/get")
         switch result {
         case let .success(response):
-            let json = response.dictionaryBody
-
-            guard let url = json["url"] as? String else { XCTFail(); return }
-            XCTAssertEqual(url, "\(TestConfig.httpbinBaseURL)/get")
-
-            let headers = httpbinEchoedMap(json, "headers")
-            let contentType = headers["Content-Type"]
-            XCTAssertNil(contentType)
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
+            XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/get")
+            XCTAssertNil(httpbinEchoedMap(response, "headers")["Content-Type"])
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
     }
 
     func testGETWithFullPath() async throws {
         let networking = Networking()
-        let result = try await networking.oldGet("\(TestConfig.httpbinBaseURL)/get")
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.get("\(TestConfig.httpbinBaseURL)/get")
         switch result {
         case let .success(response):
-            let json = response.dictionaryBody
-
-            guard let url = json["url"] as? String else { XCTFail(); return }
-            XCTAssertEqual(url, "\(TestConfig.httpbinBaseURL)/get")
-
-            let headers = httpbinEchoedMap(json, "headers")
-            let contentType = headers["Content-Type"]
-            XCTAssertNil(contentType)
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
+            XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/get")
+            XCTAssertNil(httpbinEchoedMap(response, "headers")["Content-Type"])
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
     }
 
     func testGETWithHeaders() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result = try await networking.oldGet("/get")
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.get("/get")
         switch result {
         case let .success(response):
-            let json = response.dictionaryBody
-            guard let url = json["url"] as? String else { XCTFail(); return }
-            XCTAssertEqual(url, "\(TestConfig.httpbinBaseURL)/get")
-
-            let headers = response.headers
-            XCTAssertTrue((headers["Content-Type"] as? String)?.hasPrefix("application/json") ?? false)
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
+            XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/get")
+            XCTAssertTrue(response.headers.string(for: "Content-Type")?.hasPrefix("application/json") ?? false)
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
     }
 
     func testGETWithInvalidPath() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result = try await networking.oldGet("/invalidpath")
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.get("/invalidpath")
         switch result {
         case .success:
             XCTFail()
-        case let .failure(response):
-            XCTAssertEqual(response.error.code, 404)
+        case let .failure(error):
+            guard case let .clientError(statusCode, _) = error else {
+                return XCTFail("expected a client error, got \(error)")
+            }
+            XCTAssertEqual(statusCode, 404)
         }
     }
 
     func testStatusCodes() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result200 = try await networking.oldGet("/status/200")
-        switch result200 {
-        case let .success(response):
-            XCTAssertEqual(response.statusCode, 200)
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
-        }
 
-        var statusCode = 300
-        let result300 = try await networking.oldGet("/status/\(statusCode)")
-        switch result300 {
-        case .success:
-            XCTFail()
-        case let .failure(response):
-            let connectionError = NSError(domain: Networking.domain, code: statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: statusCode)])
-            XCTAssertEqual(response.error, connectionError)
-        }
+        // 2xx succeeds (empty body, so decode as Data).
+        let ok: Result<Data, NetworkingError> = await networking.get("/status/200")
+        if case let .failure(error) = ok { XCTFail("200 should succeed, got \(error)") }
 
-        statusCode = 400
-        let result400 = try await networking.oldGet("/status/\(statusCode)")
-        switch result400 {
-        case .success:
-            XCTFail()
-        case let .failure(response):
-            let connectionError = NSError(domain: Networking.domain, code: statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: statusCode)])
-            XCTAssertEqual(response.error, connectionError)
+        // 4xx -> clientError carrying the status code.
+        let clientError: Result<Data, NetworkingError> = await networking.get("/status/404")
+        guard case let .failure(.clientError(clientStatus, _)) = clientError else {
+            return XCTFail("expected a client error")
         }
+        XCTAssertEqual(clientStatus, 404)
+
+        // 5xx -> serverError carrying the status code.
+        let serverError: Result<Data, NetworkingError> = await networking.get("/status/500")
+        guard case let .failure(.serverError(serverStatus, _, _)) = serverError else {
+            return XCTFail("expected a server error")
+        }
+        XCTAssertEqual(serverStatus, 500)
     }
 
     func testGETWithURLEncodedParameters() async throws {

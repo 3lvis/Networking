@@ -8,16 +8,13 @@ class NetworkingIntegrationTests: XCTestCase {
     func testSetAuthorizationHeaderWithUsernameAndPassword() async throws {
         let networking = Networking(baseURL: baseURL)
         networking.setAuthorizationHeader(username: "user", password: "passwd")
-        let result = try await networking.oldGet("/basic-auth/user/passwd")
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.get("/basic-auth/user/passwd")
         switch result {
         case let .success(response):
-            let json = response.dictionaryBody
-            let user = json["user"] as? String
-            let authenticated = json["authenticated"] as? Bool
-            XCTAssertEqual(user, "user")
-            XCTAssertEqual(authenticated, true)
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
+            XCTAssertEqual(response.body.string(for: "user"), "user")
+            XCTAssertEqual(response.body.bool(for: "authenticated"), true)
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
     }
 

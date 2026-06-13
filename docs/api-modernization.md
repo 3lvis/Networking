@@ -24,7 +24,7 @@ Foundation (this PR):
 
 Then, one verb per PR — migrate the `old*` test call sites to the new API and delete that verb's `old*`/`cancelOld*`:
 
-- [ ] `oldGet` → `get` (incl. the 3 GET cache tests).
+- [x] `oldGet` → `get` (incl. the 3 GET cache tests); removed `oldGet`/`cancelOldGET`.
 - [ ] `oldPost` → `post`.
 - [ ] `oldPut` → `put`.
 - [ ] `oldPatch` → `patch`.

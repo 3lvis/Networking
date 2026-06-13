@@ -14,24 +14,22 @@ class GETTests: XCTestCase {
         let cache = NSCache<AnyObject, AnyObject>()
         let networking = Networking(baseURL: baseURL, configuration: .default, cache: cache)
         networking.fakeGET("/get", response: ["key": "value1"])
-        let firstResult = try await networking.oldGet("/get", cachingLevel: .memory)
+        let firstResult: Result<NetworkingResponse, NetworkingError> = await networking.get("/get", cachingLevel: .memory)
         switch firstResult {
         case let .success(response):
-            let json = response.dictionaryBody
-            XCTAssertEqual(json["key"] as? String, "value1")
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
+            XCTAssertEqual(response.body.string(for: "key"), "value1")
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
 
         networking.fakeGET("/get", response: ["key": "value2"])
 
-        let secondResult = try await networking.oldGet("/get", cachingLevel: .memory)
+        let secondResult: Result<NetworkingResponse, NetworkingError> = await networking.get("/get", cachingLevel: .memory)
         switch secondResult {
         case let .success(response):
-            let json = response.dictionaryBody
-            XCTAssertEqual(json["key"] as? String, "value2")
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
+            XCTAssertEqual(response.body.string(for: "key"), "value2")
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
     }
 
@@ -39,23 +37,21 @@ class GETTests: XCTestCase {
         let cache = NSCache<AnyObject, AnyObject>()
         let networking = Networking(baseURL: baseURL, configuration: .default, cache: cache)
         networking.fakeGET("/get", response: ["key": "value1"])
-        let firstResult = try await networking.oldGet("/get", cachingLevel: .memoryAndFile)
+        let firstResult: Result<NetworkingResponse, NetworkingError> = await networking.get("/get", cachingLevel: .memoryAndFile)
         switch firstResult {
         case let .success(response):
-            let json = response.dictionaryBody
-            XCTAssertEqual(json["key"] as? String, "value1")
-        case .failure(let response):
-            XCTFail("Error: \(response.error)")
+            XCTAssertEqual(response.body.string(for: "key"), "value1")
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
 
         networking.fakeGET("/get", response: ["key": "value2"])
-        let secondResult = try await networking.oldGet("/get", cachingLevel: .memoryAndFile)
+        let secondResult: Result<NetworkingResponse, NetworkingError> = await networking.get("/get", cachingLevel: .memoryAndFile)
         switch secondResult {
         case let .success(response):
-            let json = response.dictionaryBody
-            XCTAssertEqual(json["key"] as? String, "value2")
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
+            XCTAssertEqual(response.body.string(for: "key"), "value2")
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
     }
 
@@ -63,23 +59,21 @@ class GETTests: XCTestCase {
         let cache = NSCache<AnyObject, AnyObject>()
         let networking = Networking(baseURL: baseURL, configuration: .default, cache: cache)
         networking.fakeGET("/get", response: ["key": "value1"])
-        let firstResult = try await networking.oldGet("/get", cachingLevel: .none)
+        let firstResult: Result<NetworkingResponse, NetworkingError> = await networking.get("/get", cachingLevel: .none)
         switch firstResult {
         case let .success(response):
-            let json = response.dictionaryBody
-            XCTAssertEqual(json["key"] as? String, "value1")
-        case .failure(let response):
-            XCTFail("Error: \(response.error)")
+            XCTAssertEqual(response.body.string(for: "key"), "value1")
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
 
         networking.fakeGET("/get", response: ["key": "value2"])
-        let secondResult = try await networking.oldGet("/get", cachingLevel: .none)
+        let secondResult: Result<NetworkingResponse, NetworkingError> = await networking.get("/get", cachingLevel: .none)
         switch secondResult {
         case let .success(response):
-            let json = response.dictionaryBody
-            XCTAssertEqual(json["key"] as? String, "value2")
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
+            XCTAssertEqual(response.body.string(for: "key"), "value2")
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
     }
 }

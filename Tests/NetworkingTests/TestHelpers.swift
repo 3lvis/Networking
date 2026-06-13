@@ -23,6 +23,20 @@ func httpbinEchoedMap(_ json: [String: Any], _ key: String) -> [String: String] 
     return result
 }
 
+/// Same normalization for the new API's `NetworkingResponse`, whose body holds `AnyCodable` values.
+func httpbinEchoedMap(_ response: NetworkingResponse, _ key: String) -> [String: String] {
+    guard let raw = response.body[key]?.value as? [String: AnyCodable] else { return [:] }
+    var result: [String: String] = [:]
+    for (mapKey, value) in raw {
+        if let string = value.value as? String {
+            result[mapKey] = string
+        } else if let array = value.value as? [AnyCodable], let first = array.first?.value as? String {
+            result[mapKey] = first
+        }
+    }
+    return result
+}
+
 struct Helper {
 
     static func removeFileIfNeeded(_ networking: Networking, path: String, cacheName: String? = nil) throws {
