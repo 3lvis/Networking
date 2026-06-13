@@ -1,6 +1,5 @@
 import Foundation
 
-@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
 public extension Networking {
     /// Registers a fake GET request for the specified path. After registering this, every GET request to the path, will return the registered response.
     ///
@@ -72,7 +71,6 @@ public extension Networking {
     }
 }
 
-@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
 public extension Networking {
 
     /// Registers a fake PATCH request for the specified path. After registering this, every PATCH request to the path, will return the registered response.
@@ -97,7 +95,6 @@ public extension Networking {
 
 }
 
-@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
 public extension Networking {
 
     /// Registers a fake PUT request for the specified path. After registering this, every PUT request to the path, will return the registered response.
@@ -122,7 +119,6 @@ public extension Networking {
 
 }
 
-@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
 public extension Networking {
 
     /// Registers a fake POST request for the specified path. After registering this, every POST request to the path, will return the registered response.
@@ -147,7 +143,6 @@ public extension Networking {
 
 }
 
-@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
 public extension Networking {
 
     /// Registers a fake DELETE request for the specified path. After registering this, every DELETE request to the path, will return the registered response.
@@ -172,7 +167,6 @@ public extension Networking {
 
 }
 
-@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
 public extension Networking {
 
     /// Retrieves an image from the cache or from the filesystem.

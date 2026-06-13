@@ -1,6 +1,5 @@
 import Foundation
 
-@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
 extension Networking {
     func objectFromCache(for path: String, cacheName: String?, cachingLevel: CachingLevel, responseType: ResponseType) throws -> Any? {
         /// Workaround: Remove URL parameters from path. That can lead to writing cached files with names longer than
