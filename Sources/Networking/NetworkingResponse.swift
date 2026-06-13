@@ -15,7 +15,9 @@ public struct AnyCodable: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
 
-        if let value = try? container.decode(Bool.self) {
+        if container.decodeNil() {
+            self.value = NSNull()
+        } else if let value = try? container.decode(Bool.self) {
             self.value = value
         } else if let value = try? container.decode(Int.self) {
             self.value = value
@@ -35,7 +37,9 @@ public struct AnyCodable: Decodable {
     func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
 
-        if let value = self.value as? Bool {
+        if self.value is NSNull {
+            try container.encodeNil()
+        } else if let value = self.value as? Bool {
             try container.encode(value)
         } else if let value = self.value as? Int {
             try container.encode(value)

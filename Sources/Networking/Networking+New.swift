@@ -30,21 +30,35 @@ extension Networking {
     }
 
     private func createRequest(path: String, requestType: RequestType, parameters: Any?) throws -> URLRequest {
-        guard var urlComponents = URLComponents(string: try composedURL(with: path).absoluteString) else {
+        // Split a query embedded in the path so it survives URL building instead of being
+        // percent-encoded into the path (encodeUTF8 uses .urlPathAllowed, which escapes "?").
+        let pathParts = path.split(separator: "?", maxSplits: 1, omittingEmptySubsequences: false)
+        let rawPath = String(pathParts[0])
+        let pathQuery = pathParts.count > 1 ? String(pathParts[1]) : nil
+
+        guard var urlComponents = URLComponents(string: try composedURL(with: rawPath).absoluteString) else {
             throw URLError(.badURL)
         }
 
-        if requestType == .get, let queryParameters = parameters as? [String: Any] {
-            urlComponents.queryItems = queryParameters.map { key, value in
-                URLQueryItem(name: key, value: "\(value)")
-            }
+        // GET and DELETE carry parameters in the query string; merge them onto any query the
+        // path already had rather than replacing it.
+        let carriesQueryParameters = requestType == .get || requestType == .delete
+        var queryItems = [URLQueryItem]()
+        if let pathQuery, let parsed = URLComponents(string: "?\(pathQuery)")?.queryItems {
+            queryItems.append(contentsOf: parsed)
+        }
+        if carriesQueryParameters, let queryParameters = parameters as? [String: Any] {
+            queryItems.append(contentsOf: queryParameters.map { URLQueryItem(name: $0, value: "\($1)") })
+        }
+        if !queryItems.isEmpty {
+            urlComponents.queryItems = queryItems
         }
 
         guard let url = urlComponents.url else {
             throw URLError(.badURL)
         }
 
-        let parameterType: Networking.ParameterType? = (requestType == .get || parameters == nil) ? nil : .json
+        let parameterType: Networking.ParameterType? = (carriesQueryParameters || parameters == nil) ? nil : .json
         var request = URLRequest(
             url: url,
             requestType: requestType,
@@ -58,7 +72,7 @@ extension Networking {
             headerFields: headerFields
         )
 
-        if requestType != .get, let parameters = parameters {
+        if !carriesQueryParameters, let parameters = parameters {
             request.httpBody = try JSONSerialization.data(withJSONObject: parameters, options: [])
         }
 

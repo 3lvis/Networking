@@ -49,6 +49,17 @@ class DELETEIntegrationTests: XCTestCase {
         }
     }
 
+    func testDELETEWithURLEncodedParameters() async throws {
+        let networking = Networking(baseURL: baseURL)
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.delete("/delete", parameters: ["userId": 25])
+        switch result {
+        case let .success(response):
+            XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/delete?userId=25")
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
+        }
+    }
+
     // Disabling because I haven't found a way to test cancel
     /*
     func testCancelDELETEWithPath() {

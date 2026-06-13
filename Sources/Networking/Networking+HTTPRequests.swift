@@ -96,6 +96,10 @@ public extension Networking {
             return .failure(error)
         }
     }
+
+    func delete<T: Decodable>(_ path: String, parameters: [String: Any]) async -> Result<T, NetworkingError> {
+        return await handle(.delete, path: path, parameters: parameters)
+    }
 }
 
 @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
