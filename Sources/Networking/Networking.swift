@@ -269,24 +269,6 @@ open class Networking {
 
 @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
 public extension Networking {
-    /// Cancels the request that matches the requestID.
-    ///
-    /// - Parameter requestID: The ID of the request to be cancelled.
-    func cancel(_ requestID: String) async {
-        let (dataTasks, uploadTasks, downloadTasks) = await session.tasks
-        var tasks = [URLSessionTask]()
-        tasks.append(contentsOf: dataTasks as [URLSessionTask])
-        tasks.append(contentsOf: uploadTasks as [URLSessionTask])
-        tasks.append(contentsOf: downloadTasks as [URLSessionTask])
-
-        for task in tasks {
-            if task.taskDescription == requestID {
-                task.cancel()
-                break
-            }
-        }
-    }
-
     /// Cancels all the current requests.
     func cancelAllRequests() async {
         let (dataTasks, uploadTasks, downloadTasks) = await session.tasks

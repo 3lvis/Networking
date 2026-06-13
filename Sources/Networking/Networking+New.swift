@@ -121,7 +121,6 @@ extension Networking {
         return request
     }
 
-    // Intentional duplicate of the legacy requestData(...) body serialization; that copy goes away with the old* API.
     private func httpBody(parameterType: ParameterType, parameters: Any?, parts: [FormDataPart]?) throws -> Data? {
         switch parameterType {
         case .none:
