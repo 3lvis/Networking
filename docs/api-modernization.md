@@ -13,6 +13,24 @@ and the test work that depends on it. CI runs the full suite against a local
 - [x] Add `delete(_:parameters:)` to the new API (DELETE params routed to the query, matching GET) + test.
 - [x] Revive the cancellation suite on the new API (`CancellationIntegrationTests`): GET/POST/PUT/PATCH/DELETE via `Task.cancel()`, image download (thrown `URLError.cancelled`), and `cancelAllRequests()`, all deterministic via go-httpbin `/delay`. Added a `NetworkingError.cancelled` case so cancellation surfaces cleanly instead of as a generic `.unexpectedError`. Retired `testCancelRequestsReturnInMainThread` — "callback returns on the main thread" is an old-callback concept with no async/await equivalent.
 
+## Removing the legacy `old*` API
+
+Decisions: add caching + statusCode to the new API; migrate per-verb in separate PRs.
+
+Foundation (this PR):
+
+- [x] Add `statusCode` to `NetworkingResponse` (populated from the HTTP response).
+- [x] Add `cachingLevel:` to the new `get` and wire response caching into the async `handle()` path (+ real cache-hit test; fixed a latent `remove(at:)` cache-miss bug).
+
+Then, one verb per PR — migrate the `old*` test call sites to the new API and delete that verb's `old*`/`cancelOld*`:
+
+- [ ] `oldGet` → `get` (incl. the 3 GET cache tests).
+- [ ] `oldPost` → `post`.
+- [ ] `oldPut` → `put`.
+- [ ] `oldPatch` → `patch`.
+- [ ] `oldDelete` → `delete`.
+- [ ] Remove `cancel(_ requestID:)` and any now-unused private helpers (`handleJSONRequest`, `JSONResult`, `cacheOrPurgeJSON`…), keeping what downloads use.
+
 ## Open items
 
 - [ ] **Remove `cancel(_ requestID:)`** (recommended). History (`git show 3b35350`, 2016): request methods returned a `UUID` that was stamped onto `URLSessionTask.taskDescription`, and `cancel(requestID:)` matched on it — its purpose was cancelling *one* of several concurrent requests to the *same URL*, which path-based cancel can't disambiguate. The async/await migration (#268) removed the ID-returning API and the `taskDescription` writer; a later commit re-added only the matcher, so it's been dead code (nothing sets `taskDescription`). The capability it provided is now covered natively by holding each request's `Task` and calling `.cancel()` — proven by `CancellationIntegrationTests.testCancelOneOfTwoConcurrentRequestsToSameURL`. Re-wiring `taskDescription` would just duplicate what `Task` already gives, so remove the method during the `old*` cleanup.

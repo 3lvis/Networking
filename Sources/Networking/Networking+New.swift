@@ -1,7 +1,7 @@
 import Foundation
 
 extension Networking {
-    func handle<T: Decodable>(_ requestType: RequestType, path: String, parameters: Any?) async -> Result<T, NetworkingError> {
+    func handle<T: Decodable>(_ requestType: RequestType, path: String, parameters: Any?, cachingLevel: CachingLevel = .none) async -> Result<T, NetworkingError> {
         do {
             logger.info("Starting \(requestType.rawValue) request to \(path, privacy: .public)")
 
@@ -9,9 +9,20 @@ extension Networking {
                 return try await handleFakeRequest(fakeRequest, path: path, requestType: requestType)
             }
 
+            if cachingLevel != .none,
+                let cachedData = try objectFromCache(for: path, cacheName: nil, cachingLevel: cachingLevel, responseType: .json) as? Data,
+                let url = try? composedURL(with: path) {
+                let cachedResponse = HTTPURLResponse(url: url, statusCode: 200)
+                return try handleSuccessfulResponse(responseData: cachedData, path: path, httpResponse: cachedResponse)
+            }
+
             let request = try createRequest(path: path, requestType: requestType, parameters: parameters)
             let (responseData, response) = try await session.data(for: request)
-            return try handleResponse(responseData: responseData, response: response, path: path)
+            let result: Result<T, NetworkingError> = try handleResponse(responseData: responseData, response: response, path: path)
+            if cachingLevel != .none, case .success = result {
+                try? cacheOrPurgeData(data: responseData, path: path, cacheName: nil, cachingLevel: cachingLevel)
+            }
+            return result
 
         } catch {
             return handleRequestError(error: error)
@@ -115,7 +126,7 @@ extension Networking {
                 (key as? String).map { ($0, AnyCodable(value)) }
             })
             let body = try JSONDecoder().decode([String: AnyCodable].self, from: responseData)
-            let networkingJSON = NetworkingResponse(headers: headers, body: body)
+            let networkingJSON = NetworkingResponse(statusCode: httpResponse.statusCode, headers: headers, body: body)
             return .success(networkingJSON as! T)
         } else {
             let decoder = JSONDecoder()
