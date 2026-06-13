@@ -75,7 +75,7 @@ To authenticate using [basic authentication](http://www.w3.org/Protocols/HTTP/1.
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.setAuthorizationHeader(username: "aladdin", password: "opensesame")
-let result = try await networking.oldGet("/basic-auth/aladdin/opensesame")
+let result: Result<NetworkingResponse, NetworkingError> = await networking.get("/basic-auth/aladdin/opensesame")
 // Successfully authenticated!
 ```
 
@@ -86,7 +86,7 @@ To authenticate using a [bearer token](https://tools.ietf.org/html/rfc6750) **"A
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.setAuthorizationHeader(token: "AAAFFAAAA3DAAAAAA")
-let result = try await networking.oldGet("/get")
+let result: Result<NetworkingResponse, NetworkingError> = await networking.get("/get")
 // Successfully authenticated!
 ```
 
@@ -97,7 +97,7 @@ To authenticate using a custom authentication header, for example **"Token token
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.setAuthorizationHeader(headerValue: "Token token=AAAFFAAAA3DAAAAAA")
-let result = try await networking.oldGet("/get")
+let result: Result<NetworkingResponse, NetworkingError> = await networking.get("/get")
 // Successfully authenticated!
 ```
 
@@ -106,7 +106,7 @@ Providing the following authentication header `Anonymous-Token: AAAFFAAAA3DAAAAA
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.setAuthorizationHeader(headerKey: "Anonymous-Token", headerValue: "AAAFFAAAA3DAAAAAA")
-let result = try await networking.oldGet("/get")
+let result: Result<NetworkingResponse, NetworkingError> = await networking.get("/get")
 // Successfully authenticated!
 ```
 
@@ -120,12 +120,12 @@ Making a request is as simple as just calling `get`, `post`, `put`, or `delete`.
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-let result = try await networking.oldGet("/get")
+let result: Result<NetworkingResponse, NetworkingError> = await networking.get("/get")
 switch result {
 case .success(let response):
-    let json = response.dictionaryBody
-    // Do something with JSON, you can also get arrayBody
-case .failure(let response):
+    let body = response.body // [String: AnyCodable]
+    let statusCode = response.statusCode
+case .failure(let error):
     // Handle error
 }
 ```
@@ -154,51 +154,42 @@ let result = try await networking.oldPost("/post", parameters: ["username" : "ja
  */
 ```
 
-You can get the response headers inside the success.
+You can get the response headers and status code inside the success.
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-let result = try await networking.oldGet("/get")
+let result: Result<NetworkingResponse, NetworkingError> = await networking.get("/get")
 switch result {
 case .success(let response):
-    let headers = response.allHeaderFields
-    // Do something with headers
-case .failure(let response):
+    let headers = response.headers // [String: AnyCodable]
+    let statusCode = response.statusCode // Int
+case .failure(let error):
     // Handle error
 }
 ```
 
-### The NetworkingResult type
+### The Result type
 
-The [NetworkingResult](https://github.com/3lvis/Networking/blob/master/Sources/NetworkingResult.swift) type is an enum that has two cases: `success` and `failure`. The `success` case has a response, the `failure` case has an error and a response, none of these ones are optionals.
+`get` returns Swift's [Result](https://developer.apple.com/documentation/swift/result) with two cases: `.success(let response)` and `.failure(let error)`. The success carries the decoded value, the failure a `NetworkingError`.
 
-Here's how to use it:
+`get` is generic over any `Decodable`, so you can decode straight into your own model — no manual JSON digging:
 
 ```swift
-// The best way
+struct Recipe: Decodable { let title: String }
+
 let networking = Networking(baseURL: "http://fakerecipes.com")
-let result = try await networking.oldGet("/recipes")
+let result: Result<[Recipe], NetworkingError> = await networking.get("/recipes")
 switch result {
-case .success(let response):
-    // We know we'll be receiving an array with the best recipes, so we can just do:
-    let recipes = response.arrayBody // BOOM, no optionals. [[String: Any]]
-
-    // If we need headers or response status code we can use the HTTPURLResponse for this.
-    let headers = response.headers // [String: Any]
-case .failure(let response):
-    // Non-optional error ✨
-    let errorCode = response.error.code
-
-    // Our backend developer told us that they will send a json with some
-    // additional information on why the request failed, this will be a dictionary.
-    let json = response.dictionaryBody // BOOM, no optionals here [String: Any]
-
-    // We want to know the headers of the failed response.
-    let headers = response.headers // [String: Any]
+case .success(let recipes):
+    // recipes is [Recipe] — fully typed, no optionals
+    print(recipes.map(\.title))
+case .failure(let error):
+    // error is a NetworkingError carrying the status code and message
+    print(error.localizedDescription)
 }
 ```
 
-And that's how we do things in **Networking** without optionals.
+Use `NetworkingResponse` as the type when you want the raw `statusCode`, `headers`, and `body` instead of a model.
 
 ## Choosing a Content or Parameter Type
 
@@ -266,17 +257,17 @@ let result = try await networking.oldPost("/upload", parameterType: .Custom("app
 
 ## Cancelling a request
 
-### Using path
-
-Cancelling any request for a specific path is really simple. Beware that cancelling a request will cause the request to return with an error with status code URLError.cancelled.
+Hold the `Task` running the request and call `cancel()` on it. A cancelled request fails with `NetworkingError.cancelled`.
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-let result = try await networking.oldGet("/get")
-// Cancelling a GET request returns an error with code URLError.cancelled which means cancelled request
+let task = Task {
+    let result: Result<NetworkingResponse, NetworkingError> = await networking.get("/get")
+    // On cancellation this is .failure(.cancelled)
+}
 
 // In another place
-networking.cancelGET("/get")
+task.cancel()
 ```
 
 ## Faking a request
@@ -286,10 +277,12 @@ Faking a request means that after calling this method on a specific path, any ca
 **Faking with successfull response**:
 
 ```swift
+struct Story: Decodable { let id: Int; let title: String }
+
 let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
 networking.fakeGET("/stories", response: [["id" : 47333, "title" : "Site Design: Aquest"]])
-let result = try await networking.oldGet("/stories")
-// JSON containing stories
+let result: Result<[Story], NetworkingError> = await networking.get("/stories")
+// .success carrying the stories
 ```
 
 **Faking with contents of a file**:
@@ -299,8 +292,8 @@ If your file is not located in the main bundle you have to specify using the bun
 ```swift
 let networking = Networking(baseURL: baseURL)
 networking.fakeGET("/entries", fileName: "entries.json")
-let result = try await networking.oldGet("/entries")
-// JSON with the contents of entries.json
+let result: Result<NetworkingResponse, NetworkingError> = await networking.get("/entries")
+// Response with the contents of entries.json
 ```
 
 **Faking with status code**:
@@ -310,8 +303,8 @@ If you do not provide a status code for this fake request, the default returned 
 ```swift
 let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
 networking.fakeGET("/stories", response: nil, statusCode: 500)
-let result = try await networking.oldGet("/stories")
-// error with status code 500
+let result: Result<NetworkingResponse, NetworkingError> = await networking.get("/stories")
+// .failure with status code 500
 ```
 
 ## Downloading and caching an image

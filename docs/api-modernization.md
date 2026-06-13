@@ -4,6 +4,12 @@ Tracking the move from the legacy callback/`old*` API to the async/await typed A
 and the test work that depends on it. CI runs the full suite against a local
 `go-httpbin` (see `.github/workflows/ci.yml`), so integration tests are deterministic.
 
+**Keep the README in sync.** Any change to the public API (a migrated verb, a
+renamed method, a changed return type) must update `README.md` in the same PR —
+its code samples are the docs users copy, so a stale example is a broken one. Each
+per-verb migration below includes swapping that verb's `old*` README examples to
+the new API.
+
 ## Done
 
 - [x] Migrate CI to GitHub Actions + local go-httpbin; remove dead CircleCI/Travis/buddybuild config & webhooks.
@@ -24,7 +30,7 @@ Foundation (this PR):
 
 Then, one verb per PR — migrate the `old*` test call sites to the new API and delete that verb's `old*`/`cancelOld*`:
 
-- [ ] `oldGet` → `get` (incl. the 3 GET cache tests).
+- [x] `oldGet` → `get` (incl. the 3 GET cache tests); removed `oldGet`/`cancelOldGET`; updated README GET/auth/cancellation/faking examples.
 - [ ] `oldPost` → `post`.
 - [ ] `oldPut` → `put`.
 - [ ] `oldPatch` → `patch`.

@@ -2,17 +2,6 @@ import Foundation
 
 @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
 public extension Networking {
-    /// GET request to the specified path.
-    ///
-    /// - Parameters:
-    ///   - path: The path for the GET request.
-    ///   - parameters: The parameters to be used, they will be serialized using Percent-encoding and appended to the URL.
-    func oldGet(_ path: String, parameters: Any? = nil, cachingLevel: CachingLevel = .none) async throws -> JSONResult {
-        let parameterType: ParameterType = parameters != nil ? .formURLEncoded : .none
-
-        return try await handleJSONRequest(.get, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, responseType: .json, cachingLevel: cachingLevel)
-    }
-
     /// Registers a fake GET request for the specified path. After registering this, every GET request to the path, will return the registered response.
     ///
     /// - Parameters:
@@ -31,14 +20,6 @@ public extension Networking {
     ///   - bundle: The Bundle where the file is located.
     func fakeGET(_ path: String, fileName: String, bundle: Bundle = Bundle.main, statusCode: Int = 200, delay: Double = 0) {
         registerFake(requestType: .get, path: path, fileName: fileName, bundle: bundle, statusCode: statusCode, delay: delay)
-    }
-
-    /// Cancels the GET request for the specified path. This causes the request to complete with error code URLError.cancelled.
-    ///
-    /// - Parameter path: The path for the cancelled GET request
-    func cancelOldGET(_ path: String) async throws {
-        let url = try composedURL(with: path)
-        await cancelRequest(.data, requestType: .get, url: url)
     }
 
     func get<T: Decodable>(_ path: String, parameters: Any? = nil, cachingLevel: CachingLevel = .none) async -> Result<T, NetworkingError> {
