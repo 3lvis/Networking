@@ -131,4 +131,25 @@ class GETIntegrationTests: XCTestCase {
             XCTFail(error.localizedDescription)
         }
     }
+
+    // /uuid returns a fresh value per call, so a matching second response proves the first
+    // was served from cache. Also exercises the new statusCode on NetworkingResponse.
+    func testGETResponseCaching() async throws {
+        let cache = NSCache<AnyObject, AnyObject>()
+        let networking = Networking(baseURL: baseURL, cache: cache)
+
+        let first: Result<NetworkingResponse, NetworkingError> = await networking.get("/uuid", cachingLevel: .memory)
+        let second: Result<NetworkingResponse, NetworkingError> = await networking.get("/uuid", cachingLevel: .memory)
+
+        guard case let .success(firstResponse) = first, case let .success(secondResponse) = second else {
+            return XCTFail("expected both requests to succeed")
+        }
+        XCTAssertEqual(firstResponse.statusCode, 200)
+        XCTAssertNotNil(firstResponse.body.string(for: "uuid"))
+        XCTAssertEqual(
+            firstResponse.body.string(for: "uuid"),
+            secondResponse.body.string(for: "uuid"),
+            "the second request should return the cached response"
+        )
+    }
 }

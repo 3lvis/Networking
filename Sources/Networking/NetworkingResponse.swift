@@ -1,6 +1,7 @@
 import Foundation
 
 public struct NetworkingResponse: Decodable {
+    public let statusCode: Int
     public let headers: [String: AnyCodable]
     public let body: [String: AnyCodable]
 }

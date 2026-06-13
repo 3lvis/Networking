@@ -56,7 +56,9 @@ extension FileManager {
 
     public func remove(at url: URL) throws {
         let path = url.path
-        guard FileManager.default.isDeletableFile(atPath: url.path) else { return }
+        // `isDeletableFile` is true for a missing file with a writable parent, so removeItem would
+        // throw "couldn't be removed" on a cache miss. Only attempt removal when the file exists.
+        guard FileManager.default.fileExists(atPath: path) else { return }
 
         try FileManager.default.removeItem(atPath: path)
     }
