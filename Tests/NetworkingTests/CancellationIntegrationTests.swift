@@ -60,9 +60,10 @@ class CancellationIntegrationTests: XCTestCase {
 
     func testCancelImageDownload() async throws {
         let networking = Networking(baseURL: baseURL)
-        let task = Task { try await networking.downloadImage("/delay/5") }
+        let path = "/delay/5"
+        let task = Task { try await networking.downloadImage(path) }
         try await Task.sleep(nanoseconds: 200_000_000)
-        task.cancel()
+        try await networking.cancelImageDownload(path)
         do {
             _ = try await task.value
             XCTFail("expected the download to be cancelled")

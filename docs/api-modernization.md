@@ -15,4 +15,5 @@ and the test work that depends on it. CI runs the full suite against a local
 
 ## Open items
 
+- [ ] **Fix or remove `cancel(_ requestID:)`.** It matches `URLSessionTask.taskDescription == requestID`, but nothing in the library ever *sets* `taskDescription`, so it can never match a task — it's currently dead code. Either wire a request ID through the request pipeline (set `taskDescription` when creating the request, expose a way to pass/return the ID) and add a test, or remove the method. Not addressed in the cancellation-suite PR because it needs an API change, not just a test.
 - [ ] **Remove the legacy `old*` API and migrate every remaining test to the new API.** Delete `oldGet`/`oldPost`/`oldPut`/`oldPatch`/`oldDelete` and `cancelOld*`; port the `*IntegrationTests` that still use them (GET/POST/PUT/PATCH/DELETE, Download, Networking, Response, Unauthorized) onto `get`/`post`/`put`/`patch`/`delete` + `NetworkingResponse`. This is the larger follow-up the query-param and DELETE work above feeds into.
