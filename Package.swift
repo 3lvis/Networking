@@ -1,4 +1,4 @@
-// swift-tools-version: 5.8
+// swift-tools-version: 6.0
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "Networking",
     platforms: [
-        .iOS(.v16), .macOS(.v13), .tvOS(.v16), .watchOS(.v9)
+        .iOS(.v18), .macOS(.v15), .tvOS(.v18), .watchOS(.v11)
     ],
     products: [
         .library(
@@ -26,5 +26,8 @@ let package = Package(
             path: "Tests",
             resources: [.process("NetworkingTests/Resources")]
         )
-    ]
+    ],
+    // tools-version 6.0 is needed for the iOS 18 platform, but keep Swift 5 language mode —
+    // a Swift 6 strict-concurrency migration is a separate piece of work.
+    swiftLanguageModes: [.v5]
 )
