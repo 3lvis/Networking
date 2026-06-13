@@ -165,7 +165,7 @@ extension FakeRequestTests {
 
         networking.fakeGET("/stories", response: ["name": "Elvis"])
 
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.get("/stories")
+        let result: Result<JSONResponse, NetworkingError> = await networking.get("/stories")
         switch result {
         case let .success(response):
             XCTAssertEqual(response.body.string(for: "name"), "Elvis")
@@ -181,7 +181,7 @@ extension FakeRequestTests {
         let startTime1 = Date()
         networking.fakeGET("/stories", response: ["name": "Elvis"], delay: delay)
 
-        let firstResult: Result<NetworkingResponse, NetworkingError> = await networking.get("/stories")
+        let firstResult: Result<JSONResponse, NetworkingError> = await networking.get("/stories")
         let endTime1 = Date()
         let elapsedTime1 = endTime1.timeIntervalSince(startTime1)
         XCTAssertGreaterThanOrEqual(elapsedTime1, delay, "The delay was not correctly applied")
@@ -199,7 +199,7 @@ extension FakeRequestTests {
 
         networking.fakeGET("/stories", response: nil, statusCode: 401)
 
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.get("/stories")
+        let result: Result<JSONResponse, NetworkingError> = await networking.get("/stories")
         switch result {
         case .success:
             XCTFail()
@@ -216,7 +216,7 @@ extension FakeRequestTests {
 
         networking.fakeGET("/stories", response: ["error": "Shit went down"], statusCode: 401)
 
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.get("/stories")
+        let result: Result<JSONResponse, NetworkingError> = await networking.get("/stories")
         switch result {
         case .success:
             XCTFail()
@@ -257,7 +257,7 @@ extension FakeRequestTests {
         networking.fakeGET("/users/melos", response: json, statusCode: 200)
         networking.fakeGET("/users/{userID}", response: json, statusCode: 200)
 
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.get("/users/10")
+        let result: Result<JSONResponse, NetworkingError> = await networking.get("/users/10")
         switch result {
         case let .success(response):
             XCTAssertEqual(response.body.string(for: "name"), "Name 10")
@@ -265,7 +265,7 @@ extension FakeRequestTests {
             XCTFail(error.localizedDescription)
         }
 
-        let result2: Result<NetworkingResponse, NetworkingError> = await networking.get("/users/20")
+        let result2: Result<JSONResponse, NetworkingError> = await networking.get("/users/20")
         switch result2 {
         case let .success(response):
             XCTAssertEqual(response.body.string(for: "name"), "Name 20")
@@ -279,7 +279,7 @@ extension FakeRequestTests {
 
         networking.fakeGET("/story", response: ["ok": true], headerFields: ["uid": "12345678"])
 
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.get("/story")
+        let result: Result<JSONResponse, NetworkingError> = await networking.get("/story")
         switch result {
         case let .success(response):
             XCTAssertEqual(response.headers.string(for: "uid"), "12345678")
@@ -310,7 +310,7 @@ extension FakeRequestTests {
 
         networking.fakePOST("/story", response: nil, statusCode: 401)
 
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/story")
+        let result: Result<JSONResponse, NetworkingError> = await networking.post("/story")
         switch result {
         case .success:
             XCTFail()
@@ -341,7 +341,7 @@ extension FakeRequestTests {
 
         networking.fakePOST("/story", response: nil, headerFields: ["uid": "12345678"])
 
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/story")
+        let result: Result<JSONResponse, NetworkingError> = await networking.post("/story")
         switch result {
         case let .success(response):
             XCTAssertEqual(response.headers.string(for: "uid"), "12345678")
@@ -364,7 +364,7 @@ extension FakeRequestTests {
         networking.fakeDELETE("/g/2/2", response: nil)
         networking.fakePOST("/g/1/b", response: ["id":"1"])
 
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/g/1/b", parameters: ["ignored": true])
+        let result: Result<JSONResponse, NetworkingError> = await networking.post("/g/1/b", parameters: ["ignored": true])
         switch result {
         case let .success(response):
             XCTAssertEqual(response.body.string(for: "id"), "1")
@@ -395,7 +395,7 @@ extension FakeRequestTests {
 
         networking.fakePUT("/story", response: nil, statusCode: 401)
 
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.put("/story")
+        let result: Result<JSONResponse, NetworkingError> = await networking.put("/story")
         switch result {
         case .success:
             XCTFail()
@@ -426,7 +426,7 @@ extension FakeRequestTests {
 
         networking.fakePUT("/story", response: nil, headerFields: ["uid": "12345678"])
 
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.put("/story")
+        let result: Result<JSONResponse, NetworkingError> = await networking.put("/story")
         switch result {
         case let .success(response):
             XCTAssertEqual(response.headers.string(for: "uid"), "12345678")
@@ -457,7 +457,7 @@ extension FakeRequestTests {
 
         networking.fakePATCH("/story", response: nil, statusCode: 401)
 
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.patch("/story")
+        let result: Result<JSONResponse, NetworkingError> = await networking.patch("/story")
         switch result {
         case .success:
             XCTFail()
@@ -488,7 +488,7 @@ extension FakeRequestTests {
 
         networking.fakePATCH("/story", response: nil, headerFields: ["uid": "12345678"])
 
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.patch("/story")
+        let result: Result<JSONResponse, NetworkingError> = await networking.patch("/story")
         switch result {
         case let .success(response):
             XCTAssertEqual(response.headers.string(for: "uid"), "12345678")
@@ -505,7 +505,7 @@ extension FakeRequestTests {
 
         networking.fakeDELETE("/stories", response: ["name": "Elvis"])
 
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.delete("/stories")
+        let result: Result<JSONResponse, NetworkingError> = await networking.delete("/stories")
         switch result {
         case let .success(response):
             XCTAssertEqual(response.body.string(for: "name"), "Elvis")
@@ -532,7 +532,7 @@ extension FakeRequestTests {
         let expectation = self.expectation(description: "testFakeDELETEMultiple")
 
         Task {
-            let result: Result<NetworkingResponse, NetworkingError> = await networking.delete("/a/1/b/5")
+            let result: Result<JSONResponse, NetworkingError> = await networking.delete("/a/1/b/5")
             switch result {
             case let .success(response):
                 XCTAssertEqual(response.statusCode, 200)
@@ -551,7 +551,7 @@ extension FakeRequestTests {
 
         networking.fakeDELETE("/story", response: nil, statusCode: 401)
 
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.delete("/story")
+        let result: Result<JSONResponse, NetworkingError> = await networking.delete("/story")
         switch result {
         case .success:
             XCTFail()
@@ -582,7 +582,7 @@ extension FakeRequestTests {
 
         networking.fakeDELETE("/story", response: nil, headerFields: ["uid": "12345678"])
 
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.delete("/story")
+        let result: Result<JSONResponse, NetworkingError> = await networking.delete("/story")
         switch result {
         case let .success(response):
             XCTAssertEqual(response.headers.string(for: "uid"), "12345678")
@@ -676,7 +676,7 @@ extension FakeRequestTests {
             "confirmation_code": "confirmationCode"
         ]
 
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/auth/verify_confirmation_code", parameters: parameters)
+        let result: Result<JSONResponse, NetworkingError> = await networking.post("/auth/verify_confirmation_code", parameters: parameters)
         switch result {
         case .success(let response):
             let headers = response.headers

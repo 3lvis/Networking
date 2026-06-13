@@ -7,7 +7,7 @@ class DELETEIntegrationTests: XCTestCase {
 
     func testDELETE() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.delete("/delete")
+        let result: Result<JSONResponse, NetworkingError> = await networking.delete("/delete")
         switch result {
         case let .success(response):
             XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/delete")
@@ -19,7 +19,7 @@ class DELETEIntegrationTests: XCTestCase {
 
     func testDELETEWithHeaders() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.delete("/delete")
+        let result: Result<JSONResponse, NetworkingError> = await networking.delete("/delete")
         switch result {
         case let .success(response):
             XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/delete")
@@ -31,7 +31,7 @@ class DELETEIntegrationTests: XCTestCase {
 
     func testDELETEWithInvalidPath() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.delete("/invalidpath")
+        let result: Result<JSONResponse, NetworkingError> = await networking.delete("/invalidpath")
         switch result {
         case .success:
             XCTFail()
@@ -45,7 +45,7 @@ class DELETEIntegrationTests: XCTestCase {
 
     func testDELETEWithURLEncodedParameters() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.delete("/delete", parameters: ["userId": 25])
+        let result: Result<JSONResponse, NetworkingError> = await networking.delete("/delete", parameters: ["userId": 25])
         switch result {
         case let .success(response):
             XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/delete?userId=25")

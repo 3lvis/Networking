@@ -75,7 +75,7 @@ To authenticate using [basic authentication](http://www.w3.org/Protocols/HTTP/1.
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.setAuthorizationHeader(username: "aladdin", password: "opensesame")
-let result: Result<NetworkingResponse, NetworkingError> = await networking.get("/basic-auth/aladdin/opensesame")
+let result: Result<JSONResponse, NetworkingError> = await networking.get("/basic-auth/aladdin/opensesame")
 // Successfully authenticated!
 ```
 
@@ -86,7 +86,7 @@ To authenticate using a [bearer token](https://tools.ietf.org/html/rfc6750) **"A
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.setAuthorizationHeader(token: "AAAFFAAAA3DAAAAAA")
-let result: Result<NetworkingResponse, NetworkingError> = await networking.get("/get")
+let result: Result<JSONResponse, NetworkingError> = await networking.get("/get")
 // Successfully authenticated!
 ```
 
@@ -97,7 +97,7 @@ To authenticate using a custom authentication header, for example **"Token token
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.setAuthorizationHeader(headerValue: "Token token=AAAFFAAAA3DAAAAAA")
-let result: Result<NetworkingResponse, NetworkingError> = await networking.get("/get")
+let result: Result<JSONResponse, NetworkingError> = await networking.get("/get")
 // Successfully authenticated!
 ```
 
@@ -106,7 +106,7 @@ Providing the following authentication header `Anonymous-Token: AAAFFAAAA3DAAAAA
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
 networking.setAuthorizationHeader(headerKey: "Anonymous-Token", headerValue: "AAAFFAAAA3DAAAAAA")
-let result: Result<NetworkingResponse, NetworkingError> = await networking.get("/get")
+let result: Result<JSONResponse, NetworkingError> = await networking.get("/get")
 // Successfully authenticated!
 ```
 
@@ -120,7 +120,7 @@ Making a request is as simple as just calling `get`, `post`, `put`, or `delete`.
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-let result: Result<NetworkingResponse, NetworkingError> = await networking.get("/get")
+let result: Result<JSONResponse, NetworkingError> = await networking.get("/get")
 switch result {
 case .success(let response):
     let body = response.body // [String: AnyCodable]
@@ -134,7 +134,7 @@ case .failure(let error):
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/post", parameters: ["username" : "jameson", "password" : "secret"])
+let result: Result<JSONResponse, NetworkingError> = await networking.post("/post", parameters: ["username" : "jameson", "password" : "secret"])
 // On success, response.body holds the echoed JSON below.
  /*
  {
@@ -159,7 +159,7 @@ You can get the response headers and status code inside the success.
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-let result: Result<NetworkingResponse, NetworkingError> = await networking.get("/get")
+let result: Result<JSONResponse, NetworkingError> = await networking.get("/get")
 switch result {
 case .success(let response):
     let headers = response.headers // [String: AnyCodable]
@@ -190,7 +190,7 @@ case .failure(let error):
 }
 ```
 
-Use `NetworkingResponse` as the type when you want the raw `statusCode`, `headers`, and `body` instead of a model.
+Use `JSONResponse` as the type when you want the raw `statusCode`, `headers`, and `body` instead of a model.
 
 ## Choosing a Content or Parameter Type
 
@@ -204,7 +204,7 @@ When sending JSON your parameters will be serialized to data using `NSJSONSerial
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/post", parameters: ["name" : "jameson"])
+let result: Result<JSONResponse, NetworkingError> = await networking.post("/post", parameters: ["name" : "jameson"])
 // Successfull post using `application/json` as `Content-Type`
 ```
 
@@ -214,7 +214,7 @@ let result: Result<NetworkingResponse, NetworkingError> = await networking.post(
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/post", parameterType: .formURLEncoded, parameters: ["name" : "jameson"])
+let result: Result<JSONResponse, NetworkingError> = await networking.post("/post", parameterType: .formURLEncoded, parameters: ["name" : "jameson"])
 // Successfull post using `application/x-www-form-urlencoded` as `Content-Type`
 ```
 
@@ -226,7 +226,7 @@ let result: Result<NetworkingResponse, NetworkingError> = await networking.post(
 let networking = Networking(baseURL: "https://example.com")
 let imageData = UIImagePNGRepresentation(imageToUpload)!
 let part = FormDataPart(data: imageData, parameterName: "file", filename: "selfie.png")
-let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/image/upload", parts: [part])
+let result: Result<JSONResponse, NetworkingError> = await networking.post("/image/upload", parts: [part])
 // Successfull upload using `multipart/form-data` as `Content-Type`
 ```
 
@@ -237,7 +237,7 @@ let networking = Networking(baseURL: "https://example.com")
 let part1 = FormDataPart(data: imageData1, parameterName: "file1", filename: "selfie1.png")
 let part2 = FormDataPart(data: imageData2, parameterName: "file2", filename: "selfie2.png")
 let parameters = ["username" : "3lvis"]
-let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/image/upload", parameters: parameters, parts: [part1, part2])
+let result: Result<JSONResponse, NetworkingError> = await networking.post("/image/upload", parameters: parameters, parts: [part1, part2])
 // Do something
 ```
 
@@ -252,7 +252,7 @@ At the moment **Networking** supports four types of `ParameterType`s out of the 
 For example:
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/upload", parameterType: .custom("application/octet-stream"), parameters: imageData)
+let result: Result<JSONResponse, NetworkingError> = await networking.post("/upload", parameterType: .custom("application/octet-stream"), parameters: imageData)
 // Successfull upload using `application/octet-stream` as `Content-Type`
 ```
 
@@ -263,7 +263,7 @@ Hold the `Task` running the request and call `cancel()` on it. A cancelled reque
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
 let task = Task {
-    let result: Result<NetworkingResponse, NetworkingError> = await networking.get("/get")
+    let result: Result<JSONResponse, NetworkingError> = await networking.get("/get")
     // On cancellation this is .failure(.cancelled)
 }
 
@@ -293,7 +293,7 @@ If your file is not located in the main bundle you have to specify using the bun
 ```swift
 let networking = Networking(baseURL: baseURL)
 networking.fakeGET("/entries", fileName: "entries.json")
-let result: Result<NetworkingResponse, NetworkingError> = await networking.get("/entries")
+let result: Result<JSONResponse, NetworkingError> = await networking.get("/entries")
 // Response with the contents of entries.json
 ```
 
@@ -304,7 +304,7 @@ If you do not provide a status code for this fake request, the default returned 
 ```swift
 let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
 networking.fakeGET("/stories", response: nil, statusCode: 500)
-let result: Result<NetworkingResponse, NetworkingError> = await networking.get("/stories")
+let result: Result<JSONResponse, NetworkingError> = await networking.get("/stories")
 // .failure with status code 500
 ```
 

@@ -58,7 +58,7 @@ class NewNetworkingIntegrationTests: XCTestCase {
     func testNetworkingJSON() async throws {
         let networking = Networking(baseURL: baseURL)
 
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.get("/auth")
+        let result: Result<JSONResponse, NetworkingError> = await networking.get("/auth")
         switch result {
         case .success(let success):
             _ = success.headers.string(for: "access-token")

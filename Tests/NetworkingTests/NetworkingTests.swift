@@ -9,7 +9,7 @@ class NetworkingTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         let value = "hi-mom"
         networking.setAuthorizationHeader(headerValue: value)
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/post")
+        let result: Result<JSONResponse, NetworkingError> = await networking.post("/post")
         switch result {
         case let .success(response):
             let headers = httpbinEchoedMap(response, "headers")
@@ -24,7 +24,7 @@ class NetworkingTests: XCTestCase {
         let key = "Anonymous-Token"
         let value = "hi-mom"
         networking.setAuthorizationHeader(headerKey: key, headerValue: value)
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/post")
+        let result: Result<JSONResponse, NetworkingError> = await networking.post("/post")
         switch result {
         case let .success(response):
             let headers = httpbinEchoedMap(response, "headers")

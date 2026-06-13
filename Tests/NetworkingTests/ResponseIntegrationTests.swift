@@ -8,7 +8,7 @@ class ResponseIntegrationTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         let expectedUserAgent = "hi mom!"
         networking.headerFields = ["user-agent": expectedUserAgent]
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.get("/user-agent")
+        let result: Result<JSONResponse, NetworkingError> = await networking.get("/user-agent")
         switch result {
         case let .success(response):
             XCTAssertEqual(response.body.string(for: "user-agent"), expectedUserAgent)

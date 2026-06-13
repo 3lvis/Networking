@@ -13,7 +13,7 @@ class UnauthorizedCallbackIntegrationTests: XCTestCase {
             callbackExecuted = true
         }
 
-        let _: Result<NetworkingResponse, NetworkingError> = await networking.get("/basic-auth/user/passwd")
+        let _: Result<JSONResponse, NetworkingError> = await networking.get("/basic-auth/user/passwd")
         XCTAssertTrue(callbackExecuted)
     }
 }

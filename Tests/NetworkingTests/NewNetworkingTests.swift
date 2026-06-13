@@ -16,7 +16,7 @@ class NewNetworkingTests: XCTestCase {
         ]
         networking.fakePOST("/auth", response: response, statusCode: 422)
 
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/auth", parameters: [:])
+        let result: Result<JSONResponse, NetworkingError> = await networking.post("/auth", parameters: [:])
         switch result {
         case .success(_): break
         case .failure(let response):
