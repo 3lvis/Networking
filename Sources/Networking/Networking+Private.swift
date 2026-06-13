@@ -81,34 +81,6 @@ extension Networking {
         return (fakeRequest.response, response, error)
     }
 
-    func handleJSONRequest(_ requestType: RequestType, path: String, cacheName: String?, parameterType: ParameterType?, parameters: Any?, parts: [FormDataPart]? = nil, responseType: ResponseType, cachingLevel: CachingLevel) async throws -> JSONResult {
-
-        if let fakeRequest = try FakeRequest.find(ofType: requestType, forPath: path, in: fakeRequests) {
-            let (_, response, error) = try handleFakeRequest(fakeRequest, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
-            if fakeRequest.delay > 0 {
-                let nanoseconds = UInt64(fakeRequest.delay * 1_000_000_000)
-                try? await Task.sleep(nanoseconds: nanoseconds)
-            }
-            return try JSONResult(body: fakeRequest.response, response: response, error: error)
-        } else {
-            switch cachingLevel {
-            case .memory, .memoryAndFile:
-                if let object = try objectFromCache(for: path, cacheName: nil, cachingLevel: cachingLevel, responseType: responseType) {
-                    let url = try self.composedURL(with: path)
-                    let response = HTTPURLResponse(url: url, statusCode: 200)
-                    return try JSONResult(body: object, response: response, error: nil)
-                }
-            default: break
-            }
-
-            let (data, response) = try await requestData(requestType, path: path, cachingLevel: cachingLevel, parameterType: parameterType, parameters: parameters, parts: parts, responseType: responseType)
-            var responseError: NSError?
-            if response.statusCode.statusCodeType != .successful {
-                responseError = NSError(statusCode: response.statusCode)
-            }
-            return try JSONResult(body: data, response: response, error: responseError)
-        }
-    }
 
     func handleDataRequest(_ requestType: RequestType, path: String, cacheName: String?, cachingLevel: CachingLevel, responseType: ResponseType) async throws -> DataResult {
         if let fakeRequests = fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
