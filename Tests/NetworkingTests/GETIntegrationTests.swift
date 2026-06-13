@@ -98,4 +98,26 @@ class GETIntegrationTests: XCTestCase {
             XCTAssertEqual(response.error, connectionError)
         }
     }
+
+    func testGETWithURLEncodedParameters() async throws {
+        let networking = Networking(baseURL: baseURL)
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.get("/get", parameters: ["count": 25])
+        switch result {
+        case let .success(response):
+            XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/get?count=25")
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
+        }
+    }
+
+    func testGETWithURLEncodedParametersWithPercentEncoding() async throws {
+        let networking = Networking(baseURL: baseURL)
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.get("/get", parameters: ["name": "Elvis Nuñez"])
+        switch result {
+        case let .success(response):
+            XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/get?name=Elvis%20Nu%C3%B1ez")
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
+        }
+    }
 }

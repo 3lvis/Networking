@@ -25,42 +25,6 @@ class GETTests: XCTestCase {
     }
      */
 
-//    func testGETWithURLEncodedParameters() async throws {
-//        let networking = Networking(baseURL: baseURL)
-//        let result = try await networking.oldGet("/get", parameters: ["count": 25])
-//        switch result {
-//        case let .success(response):
-//            let json = response.dictionaryBody
-//            XCTAssertEqual(json["url"] as? String, "http://httpbin.org/get?count=25")
-//        case let .failure(response):
-//            XCTFail(response.error.localizedDescription)
-//        }
-//    }
-
-//    func testGETWithURLEncodedParametersWithExistingQuery() async throws {
-//        let networking = Networking(baseURL: baseURL)
-//        let result = try await networking.oldGet("/get?accountId=123", parameters: ["userId": 5])
-//        switch result {
-//        case let .success(response):
-//            let json = response.dictionaryBody
-//            XCTAssertEqual(json["url"] as? String, "http://httpbin.org/get?accountId=123&userId=5")
-//        case let .failure(response):
-//            XCTFail(response.error.localizedDescription)
-//        }
-//    }
-
-//    func testGETWithURLEncodedParametersWithPercentEncoding() async throws {
-//        let networking = Networking(baseURL: baseURL)
-//        let result = try await networking.oldGet("/get", parameters: ["name": "Elvis Nuñez"])
-//        switch result {
-//        case let .success(response):
-//            let json = response.dictionaryBody
-//            XCTAssertEqual(json["url"] as? String, "http://httpbin.org/get?name=Elvis Nuñez")
-//        case let .failure(response):
-//            XCTFail(response.error.localizedDescription)
-//        }
-//    }
-
     func testGETCachedFromMemory() async throws {
         let cache = NSCache<AnyObject, AnyObject>()
         let networking = Networking(baseURL: baseURL, configuration: .default, cache: cache)

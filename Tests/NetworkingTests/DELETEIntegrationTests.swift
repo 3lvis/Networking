@@ -75,17 +75,4 @@ class DELETEIntegrationTests: XCTestCase {
 
         waitForExpectations(timeout: 15.0, handler: nil)
     }*/
-
-    /*
-    func testDELETEWithURLEncodedParameters() async throws {
-        let networking = Networking(baseURL: baseURL)
-        let result = try await networking.oldDelete("/delete", parameters: ["userId": 25])
-        switch result {
-        case let .success(response):
-            let json = response.dictionaryBody
-            XCTAssertEqual(json["url"] as? String, "\(TestConfig.httpbinBaseURL)/delete?userId=25")
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
-        }
-    }*/
 }
