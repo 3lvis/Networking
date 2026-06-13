@@ -23,28 +23,6 @@ class DownloadIntegrationTests: XCTestCase {
         }
     }
 
-    // Find a new source for this test
-    /*
-    func testImageDownloadWithWeirdCharacters() {
-        let networking = Networking(baseURL: "https://rescuejuice.com")
-        let path = "/wp-content/uploads/2015/11/døgnvillburgere.jpg"
-
-        try! Helper.removeFileIfNeeded(networking, path: path)
-
-        networking.downloadImage(path) { result in
-            switch result {
-            case let .success(response):
-                let pigImage = Image.find(named: "døgnvillburgere.jpg", inBundle: .module)
-                let pigImageData = pigImage.pngData()
-                let imageData = response.image.pngData()
-                XCTAssertEqual(pigImageData, imageData)
-            case let .failure(response):
-                XCTFail(response.error.localizedDescription)
-            }
-        }
-    }
-    */
-
     func testDownloadedImageInFile() async throws {
         let networking = Networking(baseURL: baseURL)
         let path = "/image/png"
