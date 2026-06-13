@@ -25,7 +25,7 @@ Decisions: add caching + statusCode to the new API; migrate per-verb in separate
 
 Foundation (this PR):
 
-- [x] Add `statusCode` to `NetworkingResponse` (populated from the HTTP response).
+- [x] Add `statusCode` to `JSONResponse` (populated from the HTTP response).
 - [x] Add `cachingLevel:` to the new `get` and wire response caching into the async `handle()` path (+ real cache-hit test; fixed a latent `remove(at:)` cache-miss bug).
 
 Then, one verb per PR — migrate the `old*` test call sites to the new API and delete that verb's `old*`/`cancelOld*`:
@@ -61,5 +61,5 @@ Then, one verb per PR — migrate the `old*` test call sites to the new API and 
 5. **Bump to iOS 18 + drop the `@available` annotations.** `Package.swift` targets `.iOS(.v16)/.macOS(.v13)/.tvOS(.v16)/.watchOS(.v9)`; raise `platforms` to `.iOS(.v18)` (+ `.macOS(.v15)`/`.tvOS(.v18)`/`.watchOS(.v11)`) and remove the 8 `@available(iOS 15.0, …)` annotations (`Networking.swift`, `Networking+Private.swift`, `Networking+HTTPRequests.swift` ×6).
    - *Why last — and separable:* the `@available(iOS 15…)` annotations are **already redundant** at the current iOS 16 floor, so deleting them needs no bump and can be done anytime as pure cleanup. The iOS 18 **bump** itself is a product/support decision (drops iOS 16–17 consumers), so gate it on actually wanting to require iOS 18 rather than treating it as routine cleanup.
 
-6. **Evaluate: give the verbs the same constrained-`T` treatment as the downloads.** The verbs (`get`/`post`/…) dispatch on the requested type at runtime — `if T.self == Data.self … else if T.self == NetworkingResponse.self … else decode` — with `T: Decodable` as the only compile-time guard. The downloads (#1) instead constrain `T` to a small protocol (`ImageDownloadable`/`DataDownloadable`) whose factory builds the result, so only valid types compile and there's no runtime fallback. Assess whether a similar protocol (e.g. `JSONDecodableResponse` covering `Data` / the JSON envelope / arbitrary `Decodable`) is worth retrofitting onto the verbs — cleaner and symmetric, but the verbs' "any `Decodable`" case is open-ended, so the win is smaller than for downloads. Evaluate before committing; may not be worth the churn.
+6. **Evaluate: give the verbs the same constrained-`T` treatment as the downloads.** The verbs (`get`/`post`/…) dispatch on the requested type at runtime — `if T.self == Data.self … else if T.self == JSONResponse.self … else decode` — with `T: Decodable` as the only compile-time guard. The downloads (#1) instead constrain `T` to a small protocol (`ImageDownloadable`/`DataDownloadable`) whose factory builds the result, so only valid types compile and there's no runtime fallback. Assess whether a similar protocol (e.g. `JSONDecodableResponse` covering `Data` / the JSON envelope / arbitrary `Decodable`) is worth retrofitting onto the verbs — cleaner and symmetric, but the verbs' "any `Decodable`" case is open-ended, so the win is smaller than for downloads. Evaluate before committing; may not be worth the churn.
    - *Why an evaluate, not a task:* internal-only refactor with uncertain payoff; decide after the higher-value items land.
