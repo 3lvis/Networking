@@ -505,14 +505,12 @@ extension FakeRequestTests {
 
         networking.fakeDELETE("/stories", response: ["name": "Elvis"])
 
-        let result = try await networking.oldDelete("/stories")
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.delete("/stories")
         switch result {
         case let .success(response):
-            let json = response.dictionaryBody
-            let value = json["name"] as? String
-            XCTAssertEqual(value, "Elvis")
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
+            XCTAssertEqual(response.body.string(for: "name"), "Elvis")
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
     }
 
@@ -534,13 +532,13 @@ extension FakeRequestTests {
         let expectation = self.expectation(description: "testFakeDELETEMultiple")
 
         Task {
-            let result = try await networking.oldDelete("/a/1/b/5")
+            let result: Result<NetworkingResponse, NetworkingError> = await networking.delete("/a/1/b/5")
             switch result {
             case let .success(response):
                 XCTAssertEqual(response.statusCode, 200)
                 expectation.fulfill()
-            case let .failure(response):
-                XCTFail(response.error.localizedDescription)
+            case let .failure(error):
+                XCTFail(error.localizedDescription)
                 expectation.fulfill()
             }
         }
@@ -553,12 +551,15 @@ extension FakeRequestTests {
 
         networking.fakeDELETE("/story", response: nil, statusCode: 401)
 
-        let result = try await networking.oldDelete("/story")
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.delete("/story")
         switch result {
         case .success:
             XCTFail()
-        case let .failure(response):
-            XCTAssertEqual(response.error.code, 401)
+        case let .failure(error):
+            guard case let .clientError(statusCode, _) = error else {
+                return XCTFail("expected a client error, got \(error)")
+            }
+            XCTAssertEqual(statusCode, 401)
         }
     }
 
@@ -567,15 +568,12 @@ extension FakeRequestTests {
 
         networking.fakeDELETE("/entries", fileName: "entries.json", bundle: .module)
 
-        let result = try await networking.oldDelete("/entries")
+        let result: Result<[[String: AnyCodable]], NetworkingError> = await networking.delete("/entries")
         switch result {
-        case let .success(response):
-            let json = response.arrayBody
-            let entry = json[0]
-            let value = entry["title"] as? String
-            XCTAssertEqual(value, "Entry 1")
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
+        case let .success(entries):
+            XCTAssertEqual(entries.first?.string(for: "title"), "Entry 1")
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
     }
 
@@ -584,13 +582,12 @@ extension FakeRequestTests {
 
         networking.fakeDELETE("/story", response: nil, headerFields: ["uid": "12345678"])
 
-        let result = try await networking.oldDelete("/story")
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.delete("/story")
         switch result {
         case let .success(response):
-            let headers = response.headers
-            XCTAssertEqual(headers["uid"] as! String, "12345678")
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
+            XCTAssertEqual(response.headers.string(for: "uid"), "12345678")
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
     }
 }

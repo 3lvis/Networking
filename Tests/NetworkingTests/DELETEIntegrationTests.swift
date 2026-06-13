@@ -7,45 +7,39 @@ class DELETEIntegrationTests: XCTestCase {
 
     func testDELETE() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result = try await networking.oldDelete("/delete")
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.delete("/delete")
         switch result {
         case let .success(response):
-            let json = response.dictionaryBody
-            guard let url = json["url"] as? String else { XCTFail(); return }
-            XCTAssertEqual(url, "\(TestConfig.httpbinBaseURL)/delete")
-
-            let headers = httpbinEchoedMap(json, "headers")
-            let contentType = headers["Content-Type"]
-            XCTAssertNil(contentType)
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
+            XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/delete")
+            XCTAssertNil(httpbinEchoedMap(response, "headers")["Content-Type"])
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
     }
 
     func testDELETEWithHeaders() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result = try await networking.oldDelete("/delete")
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.delete("/delete")
         switch result {
         case let .success(response):
-            let json = response.dictionaryBody
-            guard let url = json["url"] as? String else { XCTFail(); return }
-            XCTAssertEqual(url, "\(TestConfig.httpbinBaseURL)/delete")
-
-            let headers = response.headers
-            XCTAssertTrue((headers["Content-Type"] as? String)?.hasPrefix("application/json") ?? false)
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
+            XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/delete")
+            XCTAssertTrue(response.headers.string(for: "Content-Type")?.hasPrefix("application/json") ?? false)
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
     }
 
     func testDELETEWithInvalidPath() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result = try await networking.oldDelete("/invalidpath")
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.delete("/invalidpath")
         switch result {
         case .success:
             XCTFail()
-        case let .failure(response):
-            XCTAssertEqual(response.error.code, 404)
+        case let .failure(error):
+            guard case let .clientError(statusCode, _) = error else {
+                return XCTFail("expected a client error, got \(error)")
+            }
+            XCTAssertEqual(statusCode, 404)
         }
     }
 

@@ -62,18 +62,13 @@ public extension Networking {
         return result.map { _ in () }
     }
 
-    func delete(_ path: String) async -> Result<Void, NetworkingError> {
-        let result: Result<Data, NetworkingError> = await handle(.delete, path: path, parameters: nil)
-        switch result {
-        case .success:
-            return .success(())
-        case .failure(let error):
-            return .failure(error)
-        }
+    func delete<T: Decodable>(_ path: String, parameters: Any? = nil) async -> Result<T, NetworkingError> {
+        return await handle(.delete, path: path, parameters: parameters)
     }
 
-    func delete<T: Decodable>(_ path: String, parameters: [String: Any]) async -> Result<T, NetworkingError> {
-        return await handle(.delete, path: path, parameters: parameters)
+    func delete(_ path: String, parameters: Any? = nil) async -> Result<Void, NetworkingError> {
+        let result: Result<Data, NetworkingError> = await handle(.delete, path: path, parameters: parameters)
+        return result.map { _ in () }
     }
 }
 
@@ -155,16 +150,6 @@ public extension Networking {
 @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
 public extension Networking {
 
-    /// DELETE request to the specified path, using the provided parameters.
-    ///
-    /// - Parameters:
-    ///   - path: The path for the DELETE request.
-    ///   - parameters: The parameters to be used, they will be serialized using Percent-encoding and appended to the URL.
-    func oldDelete(_ path: String, parameters: Any? = nil) async throws -> JSONResult {
-        let parameterType: ParameterType = parameters != nil ? .formURLEncoded : .none
-        return try await handleJSONRequest(.delete, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, responseType: .json, cachingLevel: .none)
-    }
-
     /// Registers a fake DELETE request for the specified path. After registering this, every DELETE request to the path, will return the registered response.
     ///
     /// - Parameters:
@@ -185,13 +170,6 @@ public extension Networking {
         registerFake(requestType: .delete, path: path, fileName: fileName, bundle: bundle, statusCode: statusCode, delay: delay)
     }
 
-    /// Cancels the DELETE request for the specified path. This causes the request to complete with error code URLError.cancelled.
-    ///
-    /// - Parameter path: The path for the cancelled DELETE request.
-    func cancelOldDELETE(_ path: String) async throws {
-        let url = try composedURL(with: path)
-        await cancelRequest(.data, requestType: .delete, url: url)
-    }
 }
 
 @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
