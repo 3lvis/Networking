@@ -93,31 +93,6 @@ class DownloadIntegrationTests: XCTestCase {
         }
     }
 
-    // Disabled since I don't find a reliable wait to test cancellations
-    /*
-    func testCancelImageDownload() {
-        let expectation = self.expectation(description: "testCancelImageDownload")
-
-        let networking = Networking(baseURL: baseURL)
-        networking.isSynchronous = true
-        let path = "/image/png"
-
-        try! Helper.removeFileIfNeeded(networking, path: path)
-
-        networking.downloadImage(path) { result in
-            switch result {
-            case .success:
-                XCTFail()
-            case let .failure(response):
-                XCTAssertEqual(response.error.code, URLError.cancelled.rawValue)
-                expectation.fulfill()
-            }
-        }
-
-        networking.cancelImageDownload("/image/png")
-
-        waitForExpectations(timeout: 15.0, handler: nil)
-    }*/
 
     // Test `imageFromCache` using path, expecting image from Cache
     func testImageFromCacheForPathInCache() async throws {

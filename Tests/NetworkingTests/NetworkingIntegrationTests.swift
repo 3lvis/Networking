@@ -50,60 +50,6 @@ class NetworkingIntegrationTests: XCTestCase {
         }
     }
 
-    // I don't know how to test cancelling
-    /*
-    func testCancelAllRequests() async throws {
-        let networking = Networking(baseURL: baseURL)
-        networking.isSynchronous = true
-        var cancelledGET = false
-        var cancelledPOST = false
-
-        let result = try await networking.oldGet("/get")
-        switch result {
-        case .success:
-            XCTFail()
-        case let .failure(response):
-            cancelledGET = response.error.code == URLError.cancelled.rawValue
-            XCTAssertTrue(cancelledGET)
-
-            if cancelledGET && cancelledPOST {
-                // ?
-            }
-        }
-
-        networking.oldPost("/post") { result in
-            switch result {
-            case .success:
-                XCTFail()
-            case let .failure(response):
-                cancelledPOST = response.error.code == URLError.cancelled.rawValue
-                XCTAssertTrue(cancelledPOST)
-
-                if cancelledGET && cancelledPOST {
-                    // ?
-                }
-            }
-        }
-
-        await networking.cancelAllRequests()
-    }*/
-
-    // I don't know how to test cancelling
-    /*
-    func testCancelRequestsReturnInMainThread() async throws {
-        let networking = Networking(baseURL: baseURL)
-        networking.isSynchronous = true
-        let result = try await networking.oldGet("/get")
-        switch result {
-        case .success:
-            XCTFail()
-        case let .failure(response):
-            XCTAssertTrue(Thread.isMainThread)
-            XCTAssertEqual(response.error.code, URLError.cancelled.rawValue)
-        }
-        await networking.cancelAllRequests()
-    }*/
-
     func testDeleteCachedFiles() async throws {
         let directory = FileManager.SearchPathDirectory.cachesDirectory
         let cachesURL = FileManager.default.urls(for: directory, in: .userDomainMask).first!

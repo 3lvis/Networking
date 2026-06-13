@@ -148,6 +148,9 @@ extension Networking {
     }
 
     private func handleRequestError<T: Decodable>(error: Error) -> Result<T, NetworkingError> {
+        if error is CancellationError || (error as? URLError)?.code == .cancelled {
+            return .failure(.cancelled)
+        }
         if let decodingError = error as? DecodingError {
             logger.error("Unexpected error occurred: \(decodingError.detailedMessage, privacy: .public)")
         } else {

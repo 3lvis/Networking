@@ -60,30 +60,4 @@ class DELETEIntegrationTests: XCTestCase {
         }
     }
 
-    // Disabling because I haven't found a way to test cancel
-    /*
-    func testCancelDELETEWithPath() {
-        let expectation = self.expectation(description: "testCancelDELETE")
-
-        let networking = Networking(baseURL: baseURL)
-        networking.isSynchronous = true
-        var completed = false
-        networking.oldDelete("/delete") { result in
-            switch result {
-            case .success:
-                XCTFail()
-            case let .failure(response):
-                print(response.error)
-
-                XCTAssertTrue(completed)
-                XCTAssertEqual(response.error.code, URLError.cancelled.rawValue)
-                expectation.fulfill()
-            }
-        }
-
-        networking.cancelDELETE("/delete")
-        completed = true
-
-        waitForExpectations(timeout: 15.0, handler: nil)
-    }*/
 }
