@@ -9,24 +9,55 @@ extension Networking {
                 return try await handleFakeRequest(fakeRequest, path: path, requestType: requestType)
             }
 
+            let request = try createRequest(path: path, requestType: requestType, parameters: parameters)
+            // Key off the request's full effective URL so distinct requests never collide (e.g.
+            // full-URL GETs to different hosts). Passed as the cacheName so destinationURL uses it
+            // verbatim instead of re-prepending the baseURL.
+            let cacheKey = cacheKey(for: request, fallbackPath: path)
             if cachingLevel != .none,
-                let cachedData = try objectFromCache(for: path, cacheName: nil, cachingLevel: cachingLevel, responseType: .json) as? Data,
-                let url = try? composedURL(with: path) {
-                let cachedResponse = HTTPURLResponse(url: url, statusCode: 200)
-                return try handleSuccessfulResponse(responseData: cachedData, path: path, httpResponse: cachedResponse)
+                let cachedData = try objectFromCache(for: path, cacheName: cacheKey, cachingLevel: cachingLevel, responseType: .json) as? Data,
+                let cached = try? JSONDecoder().decode(CachedResponse.self, from: cachedData),
+                let url = request.url,
+                let cachedResponse = HTTPURLResponse(url: url, statusCode: cached.statusCode, httpVersion: nil, headerFields: cached.headers) {
+                return try handleSuccessfulResponse(responseData: cached.body, path: path, httpResponse: cachedResponse)
             }
 
-            let request = try createRequest(path: path, requestType: requestType, parameters: parameters)
             let (responseData, response) = try await session.data(for: request)
             let result: Result<T, NetworkingError> = try handleResponse(responseData: responseData, response: response, path: path)
-            if cachingLevel != .none, case .success = result {
-                try? cacheOrPurgeData(data: responseData, path: path, cacheName: nil, cachingLevel: cachingLevel)
+            if cachingLevel != .none, case .success = result, let httpResponse = response as? HTTPURLResponse {
+                let headers = Dictionary(uniqueKeysWithValues: httpResponse.allHeaderFields.compactMap { key, value in
+                    (key as? String).map { ($0, "\(value)") }
+                })
+                let envelope = CachedResponse(statusCode: httpResponse.statusCode, headers: headers, body: responseData)
+                if let encoded = try? JSONEncoder().encode(envelope) {
+                    try? cacheOrPurgeData(data: encoded, path: path, cacheName: cacheKey, cachingLevel: cachingLevel)
+                }
             }
             return result
 
         } catch {
             return handleRequestError(error: error)
         }
+    }
+
+    // Persists the response's status code and headers so a cache hit reproduces real metadata, not fabricated values.
+    private struct CachedResponse: Codable {
+        let statusCode: Int
+        let headers: [String: String]
+        let body: Data
+    }
+
+    private func cacheKey(for request: URLRequest, fallbackPath: String) -> String {
+        guard let url = request.url,
+              var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+            return fallbackPath
+        }
+        // Sort the *encoded* query components so parameter order doesn't change the key (a cache
+        // miss) while distinct encodings still produce distinct keys (no collision).
+        if let query = components.percentEncodedQuery {
+            components.percentEncodedQuery = query.split(separator: "&").sorted().joined(separator: "&")
+        }
+        return components.string ?? url.absoluteString
     }
 
     private func handleFakeRequest<T: Decodable>(_ fakeRequest: FakeRequest, path: String, requestType: RequestType) async throws -> Result<T, NetworkingError> {
