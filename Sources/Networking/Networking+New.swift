@@ -199,13 +199,13 @@ extension Networking {
     private func handleSuccessfulResponse<T: Decodable>(responseData: Data, path: String, httpResponse: HTTPURLResponse) throws -> Result<T, NetworkingError> {
         if T.self == Data.self {
             return .success(Data() as! T)
-        } else if T.self == NetworkingResponse.self {
+        } else if T.self == JSONResponse.self {
             let headers = Dictionary(uniqueKeysWithValues: httpResponse.allHeaderFields.compactMap { key, value in
                 (key as? String).map { ($0, AnyCodable(value)) }
             })
             // An empty body (e.g. 204 No Content) is a success — decoding empty data would fail, so use an empty body.
             let body = responseData.isEmpty ? [:] : try JSONDecoder().decode([String: AnyCodable].self, from: responseData)
-            let networkingJSON = NetworkingResponse(statusCode: httpResponse.statusCode, headers: headers, body: body)
+            let networkingJSON = JSONResponse(statusCode: httpResponse.statusCode, headers: headers, body: body)
             return .success(networkingJSON as! T)
         } else {
             let decoder = JSONDecoder()

@@ -7,7 +7,7 @@ class GETIntegrationTests: XCTestCase {
 
     func testGET() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.get("/get")
+        let result: Result<JSONResponse, NetworkingError> = await networking.get("/get")
         switch result {
         case let .success(response):
             XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/get")
@@ -19,7 +19,7 @@ class GETIntegrationTests: XCTestCase {
 
     func testGETWithFullPath() async throws {
         let networking = Networking()
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.get("\(TestConfig.httpbinBaseURL)/get")
+        let result: Result<JSONResponse, NetworkingError> = await networking.get("\(TestConfig.httpbinBaseURL)/get")
         switch result {
         case let .success(response):
             XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/get")
@@ -31,7 +31,7 @@ class GETIntegrationTests: XCTestCase {
 
     func testGETWithHeaders() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.get("/get")
+        let result: Result<JSONResponse, NetworkingError> = await networking.get("/get")
         switch result {
         case let .success(response):
             XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/get")
@@ -43,7 +43,7 @@ class GETIntegrationTests: XCTestCase {
 
     func testGETWithInvalidPath() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.get("/invalidpath")
+        let result: Result<JSONResponse, NetworkingError> = await networking.get("/invalidpath")
         switch result {
         case .success:
             XCTFail()
@@ -79,7 +79,7 @@ class GETIntegrationTests: XCTestCase {
 
     func testGETWithURLEncodedParameters() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.get("/get", parameters: ["count": 25])
+        let result: Result<JSONResponse, NetworkingError> = await networking.get("/get", parameters: ["count": 25])
         switch result {
         case let .success(response):
             XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/get?count=25")
@@ -90,7 +90,7 @@ class GETIntegrationTests: XCTestCase {
 
     func testGETWithURLEncodedParametersWithExistingQuery() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.get("/get?accountId=123", parameters: ["userId": 5])
+        let result: Result<JSONResponse, NetworkingError> = await networking.get("/get?accountId=123", parameters: ["userId": 5])
         switch result {
         case let .success(response):
             XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/get?accountId=123&userId=5")
@@ -101,7 +101,7 @@ class GETIntegrationTests: XCTestCase {
 
     func testGETWithURLEncodedParametersWithPercentEncoding() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.get("/get", parameters: ["name": "Elvis Nuñez"])
+        let result: Result<JSONResponse, NetworkingError> = await networking.get("/get", parameters: ["name": "Elvis Nuñez"])
         switch result {
         case let .success(response):
             XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/get?name=Elvis%20Nu%C3%B1ez")
@@ -111,13 +111,13 @@ class GETIntegrationTests: XCTestCase {
     }
 
     // /uuid returns a fresh value per call, so a matching second response proves the first
-    // was served from cache. Also exercises the new statusCode on NetworkingResponse.
+    // was served from cache. Also exercises the new statusCode on JSONResponse.
     func testGETResponseCaching() async throws {
         let cache = NSCache<AnyObject, AnyObject>()
         let networking = Networking(baseURL: baseURL, cache: cache)
 
-        let first: Result<NetworkingResponse, NetworkingError> = await networking.get("/uuid", cachingLevel: .memory)
-        let second: Result<NetworkingResponse, NetworkingError> = await networking.get("/uuid", cachingLevel: .memory)
+        let first: Result<JSONResponse, NetworkingError> = await networking.get("/uuid", cachingLevel: .memory)
+        let second: Result<JSONResponse, NetworkingError> = await networking.get("/uuid", cachingLevel: .memory)
 
         guard case let .success(firstResponse) = first, case let .success(secondResponse) = second else {
             return XCTFail("expected both requests to succeed")
@@ -136,8 +136,8 @@ class GETIntegrationTests: XCTestCase {
         let cache = NSCache<AnyObject, AnyObject>()
         let networking = Networking(baseURL: baseURL, cache: cache)
 
-        let first: Result<NetworkingResponse, NetworkingError> = await networking.get("/get", parameters: ["value": 1], cachingLevel: .memory)
-        let second: Result<NetworkingResponse, NetworkingError> = await networking.get("/get", parameters: ["value": 2], cachingLevel: .memory)
+        let first: Result<JSONResponse, NetworkingError> = await networking.get("/get", parameters: ["value": 1], cachingLevel: .memory)
+        let second: Result<JSONResponse, NetworkingError> = await networking.get("/get", parameters: ["value": 2], cachingLevel: .memory)
 
         guard case let .success(firstResponse) = first, case let .success(secondResponse) = second else {
             return XCTFail("expected both requests to succeed")
@@ -153,8 +153,8 @@ class GETIntegrationTests: XCTestCase {
         let cache = NSCache<AnyObject, AnyObject>()
         let networking = Networking(baseURL: baseURL, cache: cache)
 
-        let _: Result<NetworkingResponse, NetworkingError> = await networking.get("/get", parameters: ["a": "1&b=2"], cachingLevel: .memory)
-        let second: Result<NetworkingResponse, NetworkingError> = await networking.get("/get", parameters: ["a": 1, "b": 2], cachingLevel: .memory)
+        let _: Result<JSONResponse, NetworkingError> = await networking.get("/get", parameters: ["a": "1&b=2"], cachingLevel: .memory)
+        let second: Result<JSONResponse, NetworkingError> = await networking.get("/get", parameters: ["a": 1, "b": 2], cachingLevel: .memory)
 
         guard case let .success(secondResponse) = second else {
             return XCTFail("expected the second request to succeed")
@@ -183,8 +183,8 @@ class GETIntegrationTests: XCTestCase {
         let cache = NSCache<AnyObject, AnyObject>()
         let networking = Networking(cache: cache)
 
-        let _: Result<NetworkingResponse, NetworkingError> = await networking.get("\(base)/get", cachingLevel: .memory)
-        let second: Result<NetworkingResponse, NetworkingError> = await networking.get("\(alias)/get", cachingLevel: .memory)
+        let _: Result<JSONResponse, NetworkingError> = await networking.get("\(base)/get", cachingLevel: .memory)
+        let second: Result<JSONResponse, NetworkingError> = await networking.get("\(alias)/get", cachingLevel: .memory)
 
         guard case let .success(secondResponse) = second else {
             return XCTFail("expected the second request to succeed")
@@ -198,8 +198,8 @@ class GETIntegrationTests: XCTestCase {
         let cache = NSCache<AnyObject, AnyObject>()
         let networking = Networking(baseURL: baseURL, cache: cache)
 
-        let _: Result<NetworkingResponse, NetworkingError> = await networking.get("/get", cachingLevel: .memory)
-        let cached: Result<NetworkingResponse, NetworkingError> = await networking.get("/get", cachingLevel: .memory)
+        let _: Result<JSONResponse, NetworkingError> = await networking.get("/get", cachingLevel: .memory)
+        let cached: Result<JSONResponse, NetworkingError> = await networking.get("/get", cachingLevel: .memory)
 
         guard case let .success(response) = cached else {
             return XCTFail("expected the cached request to succeed")

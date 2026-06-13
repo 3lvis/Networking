@@ -10,7 +10,7 @@ class CancellationIntegrationTests: XCTestCase {
 
     func testCancelGET() async throws {
         let networking = Networking(baseURL: baseURL)
-        let task = Task { () -> Result<NetworkingResponse, NetworkingError> in
+        let task = Task { () -> Result<JSONResponse, NetworkingError> in
             await networking.get("/delay/5")
         }
         try await Task.sleep(nanoseconds: 200_000_000)
@@ -20,7 +20,7 @@ class CancellationIntegrationTests: XCTestCase {
 
     func testCancelPOST() async throws {
         let networking = Networking(baseURL: baseURL)
-        let task = Task { () -> Result<NetworkingResponse, NetworkingError> in
+        let task = Task { () -> Result<JSONResponse, NetworkingError> in
             await networking.post("/delay/5", parameters: [:])
         }
         try await Task.sleep(nanoseconds: 200_000_000)
@@ -30,7 +30,7 @@ class CancellationIntegrationTests: XCTestCase {
 
     func testCancelPUT() async throws {
         let networking = Networking(baseURL: baseURL)
-        let task = Task { () -> Result<NetworkingResponse, NetworkingError> in
+        let task = Task { () -> Result<JSONResponse, NetworkingError> in
             await networking.put("/delay/5", parameters: [:])
         }
         try await Task.sleep(nanoseconds: 200_000_000)
@@ -40,7 +40,7 @@ class CancellationIntegrationTests: XCTestCase {
 
     func testCancelPATCH() async throws {
         let networking = Networking(baseURL: baseURL)
-        let task = Task { () -> Result<NetworkingResponse, NetworkingError> in
+        let task = Task { () -> Result<JSONResponse, NetworkingError> in
             await networking.patch("/delay/5", parameters: [:])
         }
         try await Task.sleep(nanoseconds: 200_000_000)
@@ -71,7 +71,7 @@ class CancellationIntegrationTests: XCTestCase {
 
     func testCancelAllRequests() async throws {
         let networking = Networking(baseURL: baseURL)
-        let task = Task { () -> Result<NetworkingResponse, NetworkingError> in
+        let task = Task { () -> Result<JSONResponse, NetworkingError> in
             await networking.get("/delay/5")
         }
         try await Task.sleep(nanoseconds: 200_000_000)
@@ -84,10 +84,10 @@ class CancellationIntegrationTests: XCTestCase {
     // mechanism existed for — now provided natively by the Task handle, no extra plumbing.
     func testCancelOneOfTwoConcurrentRequestsToSameURL() async throws {
         let networking = Networking(baseURL: baseURL)
-        let cancelled = Task { () -> Result<NetworkingResponse, NetworkingError> in
+        let cancelled = Task { () -> Result<JSONResponse, NetworkingError> in
             await networking.get("/delay/2")
         }
-        let kept = Task { () -> Result<NetworkingResponse, NetworkingError> in
+        let kept = Task { () -> Result<JSONResponse, NetworkingError> in
             await networking.get("/delay/2")
         }
         try await Task.sleep(nanoseconds: 200_000_000)

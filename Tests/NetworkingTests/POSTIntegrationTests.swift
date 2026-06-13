@@ -7,7 +7,7 @@ class POSTIntegrationTests: XCTestCase {
 
     func testPOSTWithoutParameters() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/post", parameters: nil)
+        let result: Result<JSONResponse, NetworkingError> = await networking.post("/post", parameters: nil)
         switch result {
         case let .success(response):
             let headers = httpbinEchoedMap(response, "headers")
@@ -39,7 +39,7 @@ class POSTIntegrationTests: XCTestCase {
 
     func testPOSTWithHeaders() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/post")
+        let result: Result<JSONResponse, NetworkingError> = await networking.post("/post")
         switch result {
         case let .success(response):
             XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/post")
@@ -51,7 +51,7 @@ class POSTIntegrationTests: XCTestCase {
 
     func testPOSTWithNoParameters() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/post")
+        let result: Result<JSONResponse, NetworkingError> = await networking.post("/post")
         switch result {
         case let .success(response):
             XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/post")
@@ -69,7 +69,7 @@ class POSTIntegrationTests: XCTestCase {
             "bool": true,
             "date": "2016-11-02T13:55:28+01:00",
         ] as [String: Any]
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/post", parameterType: .formURLEncoded, parameters: parameters)
+        let result: Result<JSONResponse, NetworkingError> = await networking.post("/post", parameterType: .formURLEncoded, parameters: parameters)
         switch result {
         case let .success(response):
             let form = httpbinEchoedMap(response, "form")
@@ -96,7 +96,7 @@ class POSTIntegrationTests: XCTestCase {
             "double": 20.0,
             "bool": true,
         ] as [String: Any]
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/post", parameters: parameters, parts: [part1, part2])
+        let result: Result<JSONResponse, NetworkingError> = await networking.post("/post", parameters: parameters, parts: [part1, part2])
         switch result {
         case let .success(response):
             XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/post")
@@ -123,7 +123,7 @@ class POSTIntegrationTests: XCTestCase {
 
         let item1 = "FIRSTDATA"
         let part1 = FormDataPart(data: item1.data(using: .utf8)!, parameterName: item1, filename: "\(item1).png")
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/post", parameters: nil, parts: [part1])
+        let result: Result<JSONResponse, NetworkingError> = await networking.post("/post", parameters: nil, parts: [part1])
         switch result {
         case let .success(response):
             XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/post")
@@ -145,7 +145,7 @@ class POSTIntegrationTests: XCTestCase {
         let imageData = try Data(contentsOf: imageURL)
         let imagePart = FormDataPart(data: imageData, parameterName: "file", filename: "pig.png")
 
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/post", parameters: ["public_id": "pig"], parts: [imagePart])
+        let result: Result<JSONResponse, NetworkingError> = await networking.post("/post", parameters: ["public_id": "pig"], parts: [imagePart])
         switch result {
         case let .success(response):
             XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/post")
@@ -168,7 +168,7 @@ class POSTIntegrationTests: XCTestCase {
 
     func testPOSTWithEmptyResponseBody() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/status/204")
+        let result: Result<JSONResponse, NetworkingError> = await networking.post("/status/204")
         switch result {
         case let .success(response):
             XCTAssertEqual(response.statusCode, 204)
@@ -180,7 +180,7 @@ class POSTIntegrationTests: XCTestCase {
 
     func testPOSTWithIvalidPath() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/posdddddt", parameters: ["username": "jameson", "password": "secret"])
+        let result: Result<JSONResponse, NetworkingError> = await networking.post("/posdddddt", parameters: ["username": "jameson", "password": "secret"])
         switch result {
         case .success:
             XCTFail()
