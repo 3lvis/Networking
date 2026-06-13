@@ -339,7 +339,7 @@ extension FakeRequestTests {
     func testFakePOSTUsingHeader() async throws {
         let networking = Networking(baseURL: baseURL)
 
-        networking.fakePOST("/story", response: ["ok": true], headerFields: ["uid": "12345678"])
+        networking.fakePOST("/story", response: nil, headerFields: ["uid": "12345678"])
 
         let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/story")
         switch result {

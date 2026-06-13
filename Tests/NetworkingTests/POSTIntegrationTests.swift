@@ -166,6 +166,19 @@ class POSTIntegrationTests: XCTestCase {
         }
     }
 
+    // A 2xx with no body (204 No Content) must still succeed, surfacing the status and headers.
+    func testPOSTWithEmptyResponseBody() async throws {
+        let networking = Networking(baseURL: baseURL)
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/status/204")
+        switch result {
+        case let .success(response):
+            XCTAssertEqual(response.statusCode, 204)
+            XCTAssertTrue(response.body.isEmpty)
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
+        }
+    }
+
     func testPOSTWithIvalidPath() async throws {
         let networking = Networking(baseURL: baseURL)
         let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/posdddddt", parameters: ["username": "jameson", "password": "secret"])

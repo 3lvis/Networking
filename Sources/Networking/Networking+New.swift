@@ -194,7 +194,9 @@ extension Networking {
             let headers = Dictionary(uniqueKeysWithValues: httpResponse.allHeaderFields.compactMap { key, value in
                 (key as? String).map { ($0, AnyCodable(value)) }
             })
-            let body = try JSONDecoder().decode([String: AnyCodable].self, from: responseData)
+            // An empty body (e.g. 204 No Content) is still a success — surface the status and
+            // headers with an empty body rather than failing to decode nothing.
+            let body = responseData.isEmpty ? [:] : try JSONDecoder().decode([String: AnyCodable].self, from: responseData)
             let networkingJSON = NetworkingResponse(statusCode: httpResponse.statusCode, headers: headers, body: body)
             return .success(networkingJSON as! T)
         } else {
