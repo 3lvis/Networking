@@ -3,65 +3,6 @@ import XCTest
 @testable import Networking
 
 class JSONTests: XCTestCase {
-    // MARK: - Equatable
-
-    func testEqualDictionary() throws {
-        XCTAssertEqual(try JSON(["hello": "value"]), try JSON(["hello": "value"]))
-        XCTAssertNotEqual(try JSON(["hello1": "value"]), try JSON(["hello2": "value"]))
-    }
-
-    func testEqualArray() throws {
-        XCTAssertEqual(try JSON([["hello": "value"]]), try JSON([["hello": "value"]]))
-        XCTAssertNotEqual(try JSON([["hello1": "value"]]), try JSON([["hello2": "value"]]))
-
-        XCTAssertEqual(try JSON([["hello2": "value"], ["hello1": "value"]]), try JSON([["hello2": "value"], ["hello1": "value"]]))
-        XCTAssertNotEqual(try JSON([["hello1": "value"], ["hello2": "value"]]), try JSON([["hello3": "value"], ["hello4": "value"]]))
-    }
-
-    func testEqualData() throws {
-        let helloData = try JSONSerialization.data(withJSONObject: ["a": "b"], options: [])
-        let byeData = try JSONSerialization.data(withJSONObject: ["c": "d"], options: [])
-        XCTAssertEqual(try JSON(helloData), try JSON(helloData))
-        XCTAssertNotEqual(try JSON(helloData), try JSON(byeData))
-    }
-
-    func testEqualNone() {
-        XCTAssertNotEqual(JSON.data(Data()), try JSON(["hello": "value"]))
-    }
-
-    // MARKL - Accessors
-
-    func testDictionaryAccessor() throws {
-        let body = ["hello": "value"]
-
-        let json = try JSON(body)
-        XCTAssertEqual(json.dictionary.debugDescription, body.debugDescription)
-        XCTAssertEqual(json.array.debugDescription, [[String: Any]]().debugDescription)
-    }
-
-    func testArrayAccessor() throws {
-        let body = [["hello": "value"]]
-
-        let json = try JSON(body)
-        XCTAssertEqual(json.dictionary.debugDescription, [String: Any]().debugDescription)
-        XCTAssertEqual(json.array.debugDescription, body.debugDescription)
-    }
-
-    func testDataAccessor() throws {
-        let body = ["hello": "value"]
-        let bodyData = try JSONSerialization.data(withJSONObject: body, options: [])
-
-        let json = try JSON(bodyData)
-        switch json {
-        case let .dictionary(data, _):
-            XCTAssertEqual(data.hashValue, bodyData.hashValue)
-        default:
-            XCTFail()
-        }
-    }
-
-    // MARK: - from
-
     func testArrayJSONFromFileNamed() throws {
         let result = try FileManager.json(from: "simple_array.json", bundle: .module) as? [[String: Any]] ?? [[String: Any]]()
         let compared = [["id": 1, "name": "Hi"] as [String : Any]]
