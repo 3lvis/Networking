@@ -100,8 +100,6 @@ extension Networking {
             throw URLError(.badURL)
         }
 
-        // GET/DELETE carry their parameters in the query (handled above), so they send no body
-        // and no Content-Type; body verbs serialize per the parameterType.
         let bodyParameterType: ParameterType? = carriesQueryParameters ? nil : parameterType
         var request = URLRequest(
             url: url,
@@ -123,7 +121,7 @@ extension Networking {
         return request
     }
 
-    // Serializes a request body for the new API, mirroring the legacy path's parameter handling.
+    // Intentional duplicate of the legacy requestData(...) body serialization; that copy goes away with the old* API.
     private func httpBody(parameterType: ParameterType, parameters: Any?, parts: [FormDataPart]?) throws -> Data? {
         switch parameterType {
         case .none:
@@ -194,8 +192,7 @@ extension Networking {
             let headers = Dictionary(uniqueKeysWithValues: httpResponse.allHeaderFields.compactMap { key, value in
                 (key as? String).map { ($0, AnyCodable(value)) }
             })
-            // An empty body (e.g. 204 No Content) is still a success — surface the status and
-            // headers with an empty body rather than failing to decode nothing.
+            // An empty body (e.g. 204 No Content) is a success — decoding empty data would fail, so use an empty body.
             let body = responseData.isEmpty ? [:] : try JSONDecoder().decode([String: AnyCodable].self, from: responseData)
             let networkingJSON = NetworkingResponse(statusCode: httpResponse.statusCode, headers: headers, body: body)
             return .success(networkingJSON as! T)
