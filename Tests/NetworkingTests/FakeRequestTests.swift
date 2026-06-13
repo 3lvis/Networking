@@ -381,14 +381,12 @@ extension FakeRequestTests {
 
         networking.fakePUT("/story", response: [["name": "Elvis"]])
 
-        let result = try await networking.oldPut("/story", parameters: ["username": "jameson", "password": "secret"])
+        let result: Result<[[String: AnyCodable]], NetworkingError> = await networking.put("/story", parameters: ["username": "jameson", "password": "secret"])
         switch result {
-        case let .success(response):
-            let json = response.arrayBody
-            let value = json[0]["name"] as? String
-            XCTAssertEqual(value, "Elvis")
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
+        case let .success(stories):
+            XCTAssertEqual(stories.first?.string(for: "name"), "Elvis")
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
     }
 
@@ -397,12 +395,15 @@ extension FakeRequestTests {
 
         networking.fakePUT("/story", response: nil, statusCode: 401)
 
-        let result = try await networking.oldPut("/story", parameters: nil)
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.put("/story")
         switch result {
         case .success:
             XCTFail()
-        case let .failure(response):
-            XCTAssertEqual(response.error.code, 401)
+        case let .failure(error):
+            guard case let .clientError(statusCode, _) = error else {
+                return XCTFail("expected a client error, got \(error)")
+            }
+            XCTAssertEqual(statusCode, 401)
         }
     }
 
@@ -411,15 +412,12 @@ extension FakeRequestTests {
 
         networking.fakePUT("/entries", fileName: "entries.json", bundle: .module)
 
-        let result = try await networking.oldPut("/entries", parameters: nil)
+        let result: Result<[[String: AnyCodable]], NetworkingError> = await networking.put("/entries")
         switch result {
-        case let .success(response):
-            let json = response.arrayBody
-            let entry = json[0]
-            let value = entry["title"] as? String
-            XCTAssertEqual(value, "Entry 1")
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
+        case let .success(entries):
+            XCTAssertEqual(entries.first?.string(for: "title"), "Entry 1")
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
     }
 
@@ -428,13 +426,12 @@ extension FakeRequestTests {
 
         networking.fakePUT("/story", response: nil, headerFields: ["uid": "12345678"])
 
-        let result = try await networking.oldPut("/story")
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.put("/story")
         switch result {
         case let .success(response):
-            let headers = response.headers
-            XCTAssertEqual(headers["uid"] as! String, "12345678")
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
+            XCTAssertEqual(response.headers.string(for: "uid"), "12345678")
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
     }
 }
