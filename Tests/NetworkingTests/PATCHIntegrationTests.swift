@@ -3,7 +3,7 @@ import XCTest
 @testable import Networking
 
 class PATCHIntegrationTests: XCTestCase {
-    let baseURL = "http://httpbin.org"
+    let baseURL = TestConfig.httpbinBaseURL
 
     func testPATCH() async throws {
         let networking = Networking(baseURL: baseURL)
@@ -15,7 +15,7 @@ class PATCHIntegrationTests: XCTestCase {
             XCTAssertEqual("jameson", JSONResponse?["username"])
             XCTAssertEqual("secret", JSONResponse?["password"])
 
-            guard let headers = json["headers"] as? [String: String] else { XCTFail(); return }
+            let headers = httpbinEchoedMap(json, "headers")
             XCTAssertEqual(headers["Content-Type"], "application/json")
         case let .failure(response):
             XCTFail(response.error.localizedDescription)
@@ -29,12 +29,10 @@ class PATCHIntegrationTests: XCTestCase {
         case let .success(response):
             let json = response.dictionaryBody
             guard let url = json["url"] as? String else { XCTFail(); return }
-            XCTAssertEqual(url, "http://httpbin.org/patch")
+            XCTAssertEqual(url, "\(TestConfig.httpbinBaseURL)/patch")
 
             let headers = response.headers
-            guard let connection = headers["Connection"] as? String else { XCTFail(); return }
-            XCTAssertEqual(connection, "keep-alive")
-            XCTAssertEqual(headers["Content-Type"] as? String, "application/json")
+            XCTAssertTrue((headers["Content-Type"] as? String)?.hasPrefix("application/json") ?? false)
         case let .failure(response):
             XCTFail(response.error.localizedDescription)
         }

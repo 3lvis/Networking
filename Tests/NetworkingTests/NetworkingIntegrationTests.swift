@@ -3,7 +3,7 @@ import XCTest
 @testable import Networking
 
 class NetworkingIntegrationTests: XCTestCase {
-    let baseURL = "http://httpbin.org"
+    let baseURL = TestConfig.httpbinBaseURL
 
     func testSetAuthorizationHeaderWithUsernameAndPassword() async throws {
         let networking = Networking(baseURL: baseURL)
@@ -29,8 +29,8 @@ class NetworkingIntegrationTests: XCTestCase {
         switch result {
         case let .success(response):
             let json = response.dictionaryBody
-            let headers = json["headers"] as? [String: Any]
-            XCTAssertEqual("Bearer \(token)", headers?["Authorization"] as? String)
+            let headers = httpbinEchoedMap(json, "headers")
+            XCTAssertEqual("Bearer \(token)", headers["Authorization"])
         case let .failure(response):
             XCTFail(response.error.localizedDescription)
         }
@@ -43,8 +43,8 @@ class NetworkingIntegrationTests: XCTestCase {
         switch result {
         case let .success(response):
             let json = response.dictionaryBody
-            let headers = json["headers"] as? [String: Any]
-            XCTAssertEqual("HeaderValue", headers?["Headerkey"] as? String)
+            let headers = httpbinEchoedMap(json, "headers")
+            XCTAssertEqual("HeaderValue", headers["Headerkey"])
         case let .failure(response):
             XCTFail(response.error.localizedDescription)
         }

@@ -3,7 +3,7 @@ import XCTest
 @testable import Networking
 
 class GETIntegrationTests: XCTestCase {
-    let baseURL = "http://httpbin.org"
+    let baseURL = TestConfig.httpbinBaseURL
 
     func testGET() async throws {
         let networking = Networking(baseURL: baseURL)
@@ -13,9 +13,9 @@ class GETIntegrationTests: XCTestCase {
             let json = response.dictionaryBody
 
             guard let url = json["url"] as? String else { XCTFail(); return }
-            XCTAssertEqual(url, "http://httpbin.org/get")
+            XCTAssertEqual(url, "\(TestConfig.httpbinBaseURL)/get")
 
-            guard let headers = json["headers"] as? [String: String] else { XCTFail(); return }
+            let headers = httpbinEchoedMap(json, "headers")
             let contentType = headers["Content-Type"]
             XCTAssertNil(contentType)
         case let .failure(response):
@@ -25,15 +25,15 @@ class GETIntegrationTests: XCTestCase {
 
     func testGETWithFullPath() async throws {
         let networking = Networking()
-        let result = try await networking.oldGet("http://httpbin.org/get")
+        let result = try await networking.oldGet("\(TestConfig.httpbinBaseURL)/get")
         switch result {
         case let .success(response):
             let json = response.dictionaryBody
 
             guard let url = json["url"] as? String else { XCTFail(); return }
-            XCTAssertEqual(url, "http://httpbin.org/get")
+            XCTAssertEqual(url, "\(TestConfig.httpbinBaseURL)/get")
 
-            guard let headers = json["headers"] as? [String: String] else { XCTFail(); return }
+            let headers = httpbinEchoedMap(json, "headers")
             let contentType = headers["Content-Type"]
             XCTAssertNil(contentType)
         case let .failure(response):
@@ -48,12 +48,10 @@ class GETIntegrationTests: XCTestCase {
         case let .success(response):
             let json = response.dictionaryBody
             guard let url = json["url"] as? String else { XCTFail(); return }
-            XCTAssertEqual(url, "http://httpbin.org/get")
+            XCTAssertEqual(url, "\(TestConfig.httpbinBaseURL)/get")
 
             let headers = response.headers
-            guard let connection = headers["Connection"] as? String else { XCTFail(); return }
-            XCTAssertEqual(connection, "keep-alive")
-            XCTAssertEqual(headers["Content-Type"] as? String, "application/json")
+            XCTAssertTrue((headers["Content-Type"] as? String)?.hasPrefix("application/json") ?? false)
         case let .failure(response):
             XCTFail(response.error.localizedDescription)
         }

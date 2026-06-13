@@ -4,7 +4,7 @@ import XCTest
 
 class JSONIntegrationTests: XCTestCase {
     func testToJSON() async throws {
-        guard let url = URL(string: "http://httpbin.org/get") else {
+        guard let url = URL(string: "\(TestConfig.httpbinBaseURL)/get") else {
             XCTFail()
             return
         }
@@ -13,7 +13,7 @@ class JSONIntegrationTests: XCTestCase {
         do {
             let JSON = try data.toJSON() as? [String: Any]
             let url = JSON?["url"] as! String
-            XCTAssertEqual(url, "http://httpbin.org/get")
+            XCTAssertEqual(url, "\(TestConfig.httpbinBaseURL)/get")
         } catch {
             XCTFail()
         }

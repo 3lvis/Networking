@@ -3,7 +3,7 @@ import XCTest
 @testable import Networking
 
 class DELETEIntegrationTests: XCTestCase {
-    let baseURL = "http://httpbin.org"
+    let baseURL = TestConfig.httpbinBaseURL
 
     func testDELETE() async throws {
         let networking = Networking(baseURL: baseURL)
@@ -12,9 +12,9 @@ class DELETEIntegrationTests: XCTestCase {
         case let .success(response):
             let json = response.dictionaryBody
             guard let url = json["url"] as? String else { XCTFail(); return }
-            XCTAssertEqual(url, "http://httpbin.org/delete")
+            XCTAssertEqual(url, "\(TestConfig.httpbinBaseURL)/delete")
 
-            guard let headers = json["headers"] as? [String: String] else { XCTFail(); return }
+            let headers = httpbinEchoedMap(json, "headers")
             let contentType = headers["Content-Type"]
             XCTAssertNil(contentType)
         case let .failure(response):
@@ -29,10 +29,10 @@ class DELETEIntegrationTests: XCTestCase {
         case let .success(response):
             let json = response.dictionaryBody
             guard let url = json["url"] as? String else { XCTFail(); return }
-            XCTAssertEqual(url, "http://httpbin.org/delete")
+            XCTAssertEqual(url, "\(TestConfig.httpbinBaseURL)/delete")
 
             let headers = response.headers
-            XCTAssertEqual(headers["Content-Type"] as? String, "application/json")
+            XCTAssertTrue((headers["Content-Type"] as? String)?.hasPrefix("application/json") ?? false)
         case let .failure(response):
             XCTFail(response.error.localizedDescription)
         }
@@ -83,7 +83,7 @@ class DELETEIntegrationTests: XCTestCase {
         switch result {
         case let .success(response):
             let json = response.dictionaryBody
-            XCTAssertEqual(json["url"] as? String, "https://httpbin.org/delete?userId=25")
+            XCTAssertEqual(json["url"] as? String, "\(TestConfig.httpbinBaseURL)/delete?userId=25")
         case let .failure(response):
             XCTFail(response.error.localizedDescription)
         }

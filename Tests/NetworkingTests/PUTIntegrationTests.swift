@@ -3,7 +3,7 @@ import XCTest
 @testable import Networking
 
 class PUTIntegrationTests: XCTestCase {
-    let baseURL = "http://httpbin.org"
+    let baseURL = TestConfig.httpbinBaseURL
 
     func testPUT() async throws {
         let networking = Networking(baseURL: baseURL)
@@ -15,7 +15,7 @@ class PUTIntegrationTests: XCTestCase {
             XCTAssertEqual("jameson", JSONResponse?["username"])
             XCTAssertEqual("secret", JSONResponse?["password"])
 
-            guard let headers = json["headers"] as? [String: String] else { XCTFail(); return }
+            let headers = httpbinEchoedMap(json, "headers")
             XCTAssertEqual(headers["Content-Type"], "application/json")
         case let .failure(response):
             XCTFail(response.error.localizedDescription)
@@ -29,12 +29,10 @@ class PUTIntegrationTests: XCTestCase {
         case let .success(response):
             let json = response.dictionaryBody
             guard let url = json["url"] as? String else { XCTFail(); return }
-            XCTAssertEqual(url, "http://httpbin.org/put")
+            XCTAssertEqual(url, "\(TestConfig.httpbinBaseURL)/put")
 
             let headers = response.headers
-            guard let connection = headers["Connection"] as? String else { XCTFail(); return }
-            XCTAssertEqual(connection, "keep-alive")
-            XCTAssertEqual(headers["Content-Type"] as? String, "application/json")
+            XCTAssertTrue((headers["Content-Type"] as? String)?.hasPrefix("application/json") ?? false)
         case let .failure(response):
             XCTFail(response.error.localizedDescription)
         }

@@ -3,7 +3,7 @@ import XCTest
 @testable import Networking
 
 class UnauthorizedCallbackIntegrationTests: XCTestCase {
-    let baseURL = "http://httpbin.org"
+    let baseURL = TestConfig.httpbinBaseURL
 
     func testUnauthorizedCallback() async throws {
         let networking = Networking(baseURL: baseURL)

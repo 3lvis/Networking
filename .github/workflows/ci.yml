@@ -22,12 +22,24 @@ jobs:
       - name: Versions
         run: xcodebuild -version && swift --version
 
+      # Integration tests run against a local go-httpbin rather than the public
+      # httpbin.org (which rate-limits to HTTP 503 under load). go-httpbin is a faithful
+      # native reimplementation, so tests still exercise the full real HTTP stack.
+      - name: Start go-httpbin
+        run: |
+          mkdir -p /tmp/ghb
+          curl -sSL https://github.com/mccutchen/go-httpbin/releases/download/v2.23.1/go-httpbin-darwin-all.tar.gz | tar xz -C /tmp/ghb
+          /tmp/ghb/go-httpbin -port 8080 > /tmp/go-httpbin.log 2>&1 &
+          for i in $(seq 1 20); do curl -sf http://127.0.0.1:8080/get >/dev/null && break; sleep 0.5; done
+          curl -sf http://127.0.0.1:8080/get >/dev/null && echo "go-httpbin is up"
+
       - name: Build
         run: swift build -v
 
-      # Integration tests live in *IntegrationTests classes and hit live hosts
-      # (http://httpbin.org et al.), which rate-limit under load (HTTP 503) and make CI
-      # nondeterministic. CI runs the offline suite only; run the full `swift test`
-      # locally for live integration coverage.
-      - name: Test (offline suite)
-        run: swift test -v --skip 'IntegrationTests'
+      # Two tests hit other live third-party services (a CDN image and a Cloudinary
+      # upload) that go-httpbin can't emulate; they're skipped here and stay runnable
+      # locally via the full `swift test`.
+      - name: Test
+        env:
+          HTTPBIN_BASE_URL: http://127.0.0.1:8080
+        run: swift test -v --skip 'testUploadingAnImageWithMultipartFormData|testImageDownloadWithWeirdCharacters'
