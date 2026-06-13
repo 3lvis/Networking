@@ -38,6 +38,10 @@ Then, one verb per PR — migrate the `old*` test call sites to the new API and 
 - [ ] Remove `cancel(_ requestID:)` and any now-unused private helpers (`handleJSONRequest`, `cacheOrPurgeJSON`…), keeping what downloads use.
 - [ ] **Remove `JSONResult` / `NetworkingResult`.** The new API replaced it with `Result<T, NetworkingError>`, but it's not purely an old-path type yet: the async fake-request path still builds the fake response `Data` through `JSONResult(body:response:error:)` (`Networking+New.swift`, `handleFakeRequest`). Removing `JSONResult` needs that one usage decoupled first — serialize the fake `response: Any?` to `Data` inline — then delete `JSONResult` once the `old*` verbs (its only other users) are gone.
 
+## Platform: raise the deployment target
+
+- [ ] **Bump the minimum to iOS 18 and delete the `@available` annotations.** `Package.swift` targets `.iOS(.v16)/.macOS(.v13)/.tvOS(.v16)/.watchOS(.v9)`, and 8 `@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)` annotations guard the async API (`Networking.swift`, `Networking+Private.swift`, `Networking+HTTPRequests.swift` ×6). They're already redundant at iOS 16 and pure dead weight once the floor moves up. Raise `platforms` to `.iOS(.v18)` (+ matching `.macOS(.v15)` / `.tvOS(.v18)` / `.watchOS(.v11)`) and remove every such annotation.
+
 ## Open items
 
 - [ ] **The test suite still references `http://httpbin.org`.** CI is deterministic because it sets `HTTPBIN_BASE_URL` to a local go-httpbin, but the string still appears in three different roles:
