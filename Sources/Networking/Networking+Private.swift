@@ -1,7 +1,7 @@
 import Foundation
 
 extension Networking {
-    func objectFromCache(for path: String, cacheName: String?, cachingLevel: CachingLevel, responseType: ResponseType) throws -> Any? {
+    nonisolated func objectFromCache(for path: String, cacheName: String?, cachingLevel: CachingLevel, responseType: ResponseType) throws -> Any? {
         /// Workaround: Remove URL parameters from path. That can lead to writing cached files with names longer than
         /// 255 characters, resulting in error. Another option to explore is to use a hash version of the url if it's
         /// longer than 255 characters.
@@ -299,7 +299,7 @@ extension Networking {
         print(" ")
     }
 
-    func cacheOrPurgeJSON(object: Any?, path: String, cacheName: String?, cachingLevel: CachingLevel) throws {
+    nonisolated func cacheOrPurgeJSON(object: Any?, path: String, cacheName: String?, cachingLevel: CachingLevel) throws {
         let destinationURL = try self.destinationURL(for: path, cacheName: cacheName)
 
         if let unwrappedObject = object {
@@ -319,7 +319,7 @@ extension Networking {
         }
     }
 
-    func cacheOrPurgeData(data: Data?, path: String, cacheName: String?, cachingLevel: CachingLevel) throws {
+    nonisolated func cacheOrPurgeData(data: Data?, path: String, cacheName: String?, cachingLevel: CachingLevel) throws {
         let destinationURL = try self.destinationURL(for: path, cacheName: cacheName)
 
         if let returnedData = data, returnedData.count > 0 {
@@ -338,7 +338,7 @@ extension Networking {
     }
     
     @discardableResult
-    func cacheOrPurgeImage(data: Data?, path: String, cacheName: String?, cachingLevel: CachingLevel) throws -> Image? {
+    nonisolated func cacheOrPurgeImage(data: Data?, path: String, cacheName: String?, cachingLevel: CachingLevel) throws -> Image? {
         let destinationURL = try self.destinationURL(for: path, cacheName: cacheName)
 
         var image: Image?

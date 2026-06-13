@@ -26,7 +26,10 @@ public extension Int {
     }
 }
 
-open class Networking {
+// An actor: its mutable state (`fakeRequests`, auth/header config, `unauthorizedRequestCallback`)
+// is isolated, so the compiler guarantees no data races when an instance is shared across tasks.
+// Trade-off vs the old `open class`: no subclassing, and isolated members are accessed with `await`.
+public actor Networking {
     static let domain = "com.3lvis.networking"
 
     enum RequestType: String {
@@ -97,16 +100,18 @@ open class Networking {
     var authorizationHeaderValue: String?
     var authorizationHeaderKey = "Authorization"
     fileprivate var configuration: URLSessionConfiguration
-    var cache: NSCache<AnyObject, AnyObject>
-
-    /// Flag used to indicate synchronous request.
-    public var isSynchronous = false
+    nonisolated(unsafe) let cache: NSCache<AnyObject, AnyObject>
 
     /// Flag used to disable error logging. Useful when want to disable log before release build.
     public var isErrorLoggingEnabled = true
 
+    /// Enables or disables error logging (actor-isolated setter).
+    public func setErrorLoggingEnabled(_ enabled: Bool) {
+        self.isErrorLoggingEnabled = enabled
+    }
+
     /// The boundary used for multipart requests.
-    let boundary = String(format: "com.elvisnunez.networking.%08x%08x", arc4random(), arc4random())
+    nonisolated let boundary = String(format: "com.elvisnunez.networking.%08x%08x", arc4random(), arc4random())
 
     lazy var session: URLSession = {
         URLSession(configuration: self.configuration)
@@ -161,6 +166,11 @@ open class Networking {
     /// Sets the header fields for every HTTP call.
     public var headerFields: [String: String]?
 
+    /// Sets the header fields for every HTTP call (actor-isolated setter).
+    public func setHeaderFields(_ headerFields: [String: String]?) {
+        self.headerFields = headerFields
+    }
+
     /// Authenticates using a custom HTTP Authorization header.
     ///
     /// - Parameters:
@@ -172,14 +182,19 @@ open class Networking {
     }
 
     /// Callback used to intercept requests that return with a 403 or 401 status code.
-    public var unauthorizedRequestCallback: (() -> Void)?
+    public var unauthorizedRequestCallback: (@Sendable () -> Void)?
+
+    /// Sets the unauthorized-request callback (actor-isolated setter).
+    public func setUnauthorizedRequestCallback(_ callback: (@Sendable () -> Void)?) {
+        self.unauthorizedRequestCallback = callback
+    }
 
     /// Returns a URL by appending the provided path to the Networking's base URL.
     ///
     /// - Parameter path: The path to be appended to the base URL.
     /// - Returns: A URL generated after appending the path to the base URL.
     /// - Throws: An error if the URL couldn't be created.
-    public func composedURL(with path: String) throws -> URL {
+    nonisolated public func composedURL(with path: String) throws -> URL {
         let encodedPath = path.encodeUTF8() ?? path
         guard let url = URL(string: baseURL + encodedPath) else {
             throw NSError(domain: Networking.domain, code: 0, userInfo: [NSLocalizedDescriptionKey: "Couldn't create a url using baseURL: \(baseURL) and encodedPath: \(encodedPath)"])
@@ -194,7 +209,7 @@ open class Networking {
     ///   - cacheName: The alias to be used for storing the resource, if a cache name is provided, this will be used instead of the path.
     /// - Returns: A URL where a resource has been stored.
     /// - Throws: An error if the URL couldn't be created.
-    public func destinationURL(for path: String, cacheName: String? = nil) throws -> URL {
+    nonisolated public func destinationURL(for path: String, cacheName: String? = nil) throws -> URL {
         let normalizedCacheName = cacheName?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
         var resourcesPath: String
         if let normalizedCacheName = normalizedCacheName {

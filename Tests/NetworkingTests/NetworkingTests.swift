@@ -8,7 +8,7 @@ class NetworkingTests: XCTestCase {
     func setAuthorizationHeaderCustomValue() async throws {
         let networking = Networking(baseURL: baseURL)
         let value = "hi-mom"
-        networking.setAuthorizationHeader(headerValue: value)
+        await networking.setAuthorizationHeader(headerValue: value)
         let result: Result<JSONResponse, NetworkingError> = await networking.post("/post")
         switch result {
         case let .success(response):
@@ -23,7 +23,7 @@ class NetworkingTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         let key = "Anonymous-Token"
         let value = "hi-mom"
-        networking.setAuthorizationHeader(headerKey: key, headerValue: value)
+        await networking.setAuthorizationHeader(headerKey: key, headerValue: value)
         let result: Result<JSONResponse, NetworkingError> = await networking.post("/post")
         switch result {
         case let .success(response):
@@ -108,21 +108,27 @@ class NetworkingTests: XCTestCase {
         XCTAssertEqual(relativePath2, "/basic-auth/user/passwd")
     }
 
-    func testReset() throws {
+    func testReset() async throws {
         let networking = Networking(baseURL: baseURL)
 
-        networking.setAuthorizationHeader(username: "user", password: "passwd")
-        networking.setAuthorizationHeader(token: "token")
-        networking.headerFields = ["HeaderKey": "HeaderValue"]
+        await networking.setAuthorizationHeader(username: "user", password: "passwd")
+        await networking.setAuthorizationHeader(token: "token")
+        await networking.setHeaderFields(["HeaderKey": "HeaderValue"])
 
-        XCTAssertEqual(networking.token, "token")
-        XCTAssertEqual(networking.authorizationHeaderKey, "Authorization")
-        XCTAssertEqual(networking.authorizationHeaderValue, "Basic dXNlcjpwYXNzd2Q=")
+        var token = await networking.token
+        var authKey = await networking.authorizationHeaderKey
+        var authValue = await networking.authorizationHeaderValue
+        XCTAssertEqual(token, "token")
+        XCTAssertEqual(authKey, "Authorization")
+        XCTAssertEqual(authValue, "Basic dXNlcjpwYXNzd2Q=")
 
-        try networking.reset()
+        try await networking.reset()
 
-        XCTAssertNil(networking.token)
-        XCTAssertEqual(networking.authorizationHeaderKey, "Authorization")
-        XCTAssertNil(networking.authorizationHeaderValue)
+        token = await networking.token
+        authKey = await networking.authorizationHeaderKey
+        authValue = await networking.authorizationHeaderValue
+        XCTAssertNil(token)
+        XCTAssertEqual(authKey, "Authorization")
+        XCTAssertNil(authValue)
     }
 }

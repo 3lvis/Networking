@@ -7,7 +7,7 @@ class NetworkingIntegrationTests: XCTestCase {
 
     func testSetAuthorizationHeaderWithUsernameAndPassword() async throws {
         let networking = Networking(baseURL: baseURL)
-        networking.setAuthorizationHeader(username: "user", password: "passwd")
+        await networking.setAuthorizationHeader(username: "user", password: "passwd")
         let result: Result<JSONResponse, NetworkingError> = await networking.get("/basic-auth/user/passwd")
         switch result {
         case let .success(response):
@@ -21,7 +21,7 @@ class NetworkingIntegrationTests: XCTestCase {
     func testSetAuthorizationHeaderWithBearerToken() async throws {
         let networking = Networking(baseURL: baseURL)
         let token = "hi-mom"
-        networking.setAuthorizationHeader(token: token)
+        await networking.setAuthorizationHeader(token: token)
         let result: Result<JSONResponse, NetworkingError> = await networking.post("/post")
         switch result {
         case let .success(response):
@@ -34,7 +34,7 @@ class NetworkingIntegrationTests: XCTestCase {
 
     func testHeaderField() async throws {
         let networking = Networking(baseURL: baseURL)
-        networking.headerFields = ["HeaderKey": "HeaderValue"]
+        await networking.setHeaderFields(["HeaderKey": "HeaderValue"])
         let result: Result<JSONResponse, NetworkingError> = await networking.post("/post")
         switch result {
         case let .success(response):

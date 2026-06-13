@@ -56,6 +56,8 @@ let networking = Networking(baseURL: "http://example.com")
 let networking = Networking(baseURL: "http://example.com", configuration: .ephemeral)
 ```
 
+`Networking` is an `actor`, so it's safe to share one instance across tasks. Its members are accessed with `await` (e.g. `await networking.setAuthorizationHeader(...)`), and it can't be subclassed.
+
 ## Changing request headers
 
 You can set the `headerFields` in any networking object.
@@ -63,7 +65,7 @@ You can set the `headerFields` in any networking object.
 This will append (if not found) or overwrite (if found) what NSURLSession sends on each request.
 
 ```swift
-networking.headerFields = ["User-Agent": "your new user agent"]
+await networking.setHeaderFields(["User-Agent": "your new user agent"])
 ```
 
 ## Authenticating
@@ -74,7 +76,7 @@ To authenticate using [basic authentication](http://www.w3.org/Protocols/HTTP/1.
 
 ```swift
 let networking = Networking(baseURL: "http://example.com")
-networking.setAuthorizationHeader(username: "aladdin", password: "opensesame")
+await networking.setAuthorizationHeader(username: "aladdin", password: "opensesame")
 let result: Result<JSONResponse, NetworkingError> = await networking.get("/basic-auth/aladdin/opensesame")
 // Successfully authenticated!
 ```
@@ -85,7 +87,7 @@ To authenticate using a [bearer token](https://tools.ietf.org/html/rfc6750) **"A
 
 ```swift
 let networking = Networking(baseURL: "http://example.com")
-networking.setAuthorizationHeader(token: "AAAFFAAAA3DAAAAAA")
+await networking.setAuthorizationHeader(token: "AAAFFAAAA3DAAAAAA")
 let result: Result<JSONResponse, NetworkingError> = await networking.get("/get")
 // Successfully authenticated!
 ```
@@ -96,7 +98,7 @@ To authenticate using a custom authentication header, for example **"Token token
 
 ```swift
 let networking = Networking(baseURL: "http://example.com")
-networking.setAuthorizationHeader(headerValue: "Token token=AAAFFAAAA3DAAAAAA")
+await networking.setAuthorizationHeader(headerValue: "Token token=AAAFFAAAA3DAAAAAA")
 let result: Result<JSONResponse, NetworkingError> = await networking.get("/get")
 // Successfully authenticated!
 ```
@@ -105,7 +107,7 @@ Providing the following authentication header `Anonymous-Token: AAAFFAAAA3DAAAAA
 
 ```swift
 let networking = Networking(baseURL: "http://example.com")
-networking.setAuthorizationHeader(headerKey: "Anonymous-Token", headerValue: "AAAFFAAAA3DAAAAAA")
+await networking.setAuthorizationHeader(headerKey: "Anonymous-Token", headerValue: "AAAFFAAAA3DAAAAAA")
 let result: Result<JSONResponse, NetworkingError> = await networking.get("/get")
 // Successfully authenticated!
 ```
@@ -423,11 +425,11 @@ Status code: 404 — not found
 ================= ~ ==================
 ```
 
-To disable error logging use the flag `disableErrorLogging`.
+To disable error logging:
 
 ```swift
 let networking = Networking(baseURL: "http://example.com")
-networking.disableErrorLogging = true
+await networking.setErrorLoggingEnabled(false)
 ```
 
 ## Installing
