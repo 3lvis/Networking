@@ -314,18 +314,33 @@ let result: Result<NetworkingResponse, NetworkingError> = await networking.get("
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-let result = try await networking.downloadImage("/image/png")
-// Do something with the downloaded image
+let result: Result<Image, NetworkingError> = await networking.downloadImage("/image/png")
+switch result {
+case .success(let image):
+    // Do something with the downloaded image
+case .failure(let error):
+    // Handle error
+}
+```
+
+Ask for `ImageResponse` instead of `Image` (or `DataResponse`/`Data` from `downloadData`) when you also need the response's `statusCode` and `headers`:
+
+```swift
+let result: Result<ImageResponse, NetworkingError> = await networking.downloadImage("/image/png")
+// response.image, response.statusCode, response.headers
 ```
 
 **Cancelling**:
 
 ```swift
 let networking = Networking(baseURL: baseURL)
-let result = try await networking.downloadImage("/image/png")
-// Cancelling an image download returns an error with code URLError.cancelled which means cancelled request
+let task = Task {
+    let result: Result<Image, NetworkingError> = await networking.downloadImage("/image/png")
+    // On cancellation this is .failure(.cancelled)
+}
 
-networking.cancelImageDownload("/image/png")
+// In another place
+try await networking.cancelImageDownload("/image/png")
 ```
 
 **Caching**:
@@ -334,10 +349,10 @@ networking.cancelImageDownload("/image/png")
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-let result = try await networking.downloadImage("/image/png")
+let _: Result<Image, NetworkingError> = await networking.downloadImage("/image/png")
 // Image from network
-   
-let result = try await networking.downloadImage("/image/png")
+
+let _: Result<Image, NetworkingError> = await networking.downloadImage("/image/png")
 // Image from cache
 ```
 
@@ -346,8 +361,8 @@ If you want to remove the downloaded image you can do it like this:
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
 let destinationURL = try networking.destinationURL(for: "/image/png")
-if let path = destinationURL.path where NSFileManager.defaultManager().fileExistsAtPath(path) {
-   try NSFileManager.defaultManager().removeItemAtPath(path)
+if FileManager.default.fileExists(atPath: destinationURL.path) {
+    try FileManager.default.removeItem(at: destinationURL)
 }
 ```
 
@@ -357,7 +372,7 @@ if let path = destinationURL.path where NSFileManager.defaultManager().fileExist
 let networking = Networking(baseURL: baseURL)
 let pigImage = UIImage(named: "pig.png")!
 networking.fakeImageDownload("/image/png", image: pigImage)
-let result = try await networking.downloadImage("/image/png")
+let result: Result<Image, NetworkingError> = await networking.downloadImage("/image/png")
 // Here you'll get the provided pig.png image
 ```
 

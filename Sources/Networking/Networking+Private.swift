@@ -82,56 +82,94 @@ extension Networking {
     }
 
 
-    func handleDataRequest(_ requestType: RequestType, path: String, cacheName: String?, cachingLevel: CachingLevel, responseType: ResponseType) async throws -> DataResult {
-        if let fakeRequests = fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
-            let (_, response, error) = try handleFakeRequest(fakeRequest, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
-            if fakeRequest.delay > 0 {
-                let nanoseconds = UInt64(fakeRequest.delay * 1_000_000_000)
-                try? await Task.sleep(nanoseconds: nanoseconds)
-            }
-            return DataResult(body: fakeRequest.response, response: response, error: error)
-        } else {
-            let object = try objectFromCache(for: path, cacheName: cacheName, cachingLevel: cachingLevel, responseType: responseType)
-            if let object = object {
-                let url = try self.composedURL(with: path)
-                let response = HTTPURLResponse(url: url, statusCode: 200)
-                return DataResult(body: object, response: response, error: nil)
-            } else {
-                let (data, response) = try await requestData(requestType, path: path, cachingLevel: cachingLevel, responseType: responseType)
-                try self.cacheOrPurgeData(data: data, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
-                var responseError: NSError?
-                if response.statusCode.statusCodeType != .successful {
-                    responseError = NSError(statusCode: response.statusCode)
+    func handleDataRequest<T: DataDownloadable>(_ requestType: RequestType, path: String, cacheName: String?, cachingLevel: CachingLevel, responseType: ResponseType) async -> Result<T, NetworkingError> {
+        do {
+            let data: Data
+            let response: HTTPURLResponse
+            if let fakeRequests = fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
+                let (_, fakeResponse, _) = try handleFakeRequest(fakeRequest, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
+                if fakeRequest.delay > 0 {
+                    try? await Task.sleep(nanoseconds: UInt64(fakeRequest.delay * 1_000_000_000))
                 }
-                return DataResult(body: data, response: response, error: responseError)
+                guard fakeResponse.statusCode.statusCodeType == .successful else {
+                    return .failure(downloadError(forStatusCode: fakeResponse.statusCode))
+                }
+                guard let fakeData = fakeRequest.response as? Data else { return .failure(.invalidResponse) }
+                data = fakeData
+                response = fakeResponse
+            } else if let cached = try objectFromCache(for: path, cacheName: cacheName, cachingLevel: cachingLevel, responseType: responseType) as? Data {
+                data = cached
+                response = HTTPURLResponse(url: try composedURL(with: path), statusCode: 200)
+            } else {
+                let (downloaded, networkResponse) = try await requestData(requestType, path: path, cachingLevel: cachingLevel, responseType: responseType)
+                try cacheOrPurgeData(data: downloaded, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
+                guard networkResponse.statusCode.statusCodeType == .successful else {
+                    return .failure(downloadError(forStatusCode: networkResponse.statusCode))
+                }
+                data = downloaded
+                response = networkResponse
             }
+            return .success(T.makeDownloadResult(data: data, statusCode: response.statusCode, headers: headerFields(from: response)))
+        } catch {
+            return .failure(downloadError(error))
         }
     }
 
-    func handleImageRequest(_ requestType: RequestType, path: String, cacheName: String?, cachingLevel: CachingLevel, responseType: ResponseType) async throws -> ImageResult {
-        if let fakeRequests = fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
-            let (_, response, error) = try handleFakeRequest(fakeRequest, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
-            if fakeRequest.delay > 0 {
-                let nanoseconds = UInt64(fakeRequest.delay * 1_000_000_000)
-                try? await Task.sleep(nanoseconds: nanoseconds)
-            }
-            return ImageResult(body: fakeRequest.response, response: response, error: error)
-        } else {
-            let object = try objectFromCache(for: path, cacheName: cacheName, cachingLevel: cachingLevel, responseType: responseType)
-            if let object = object {
-                let url = try self.composedURL(with: path)
-                let response = HTTPURLResponse(url: url, statusCode: 200)
-                return ImageResult(body: object, response: response, error: nil)
-            } else {
-                let (data, response) = try await requestData(requestType, path: path, cachingLevel: cachingLevel, responseType: responseType)
-                let returnedImage = try self.cacheOrPurgeImage(data: data, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
-                var responseError: NSError?
-                if response.statusCode.statusCodeType != .successful {
-                    responseError = NSError(statusCode: response.statusCode)
+    func handleImageRequest<T: ImageDownloadable>(_ requestType: RequestType, path: String, cacheName: String?, cachingLevel: CachingLevel, responseType: ResponseType) async -> Result<T, NetworkingError> {
+        do {
+            let image: Image
+            let response: HTTPURLResponse
+            if let fakeRequests = fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
+                let (_, fakeResponse, _) = try handleFakeRequest(fakeRequest, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
+                if fakeRequest.delay > 0 {
+                    try? await Task.sleep(nanoseconds: UInt64(fakeRequest.delay * 1_000_000_000))
                 }
-                return ImageResult(body: returnedImage, response: response, error: responseError)
+                guard fakeResponse.statusCode.statusCodeType == .successful else {
+                    return .failure(downloadError(forStatusCode: fakeResponse.statusCode))
+                }
+                guard let fakeImage = fakeRequest.response as? Image else { return .failure(.invalidResponse) }
+                image = fakeImage
+                response = fakeResponse
+            } else if let cached = try objectFromCache(for: path, cacheName: cacheName, cachingLevel: cachingLevel, responseType: responseType) as? Image {
+                image = cached
+                response = HTTPURLResponse(url: try composedURL(with: path), statusCode: 200)
+            } else {
+                let (data, networkResponse) = try await requestData(requestType, path: path, cachingLevel: cachingLevel, responseType: responseType)
+                guard networkResponse.statusCode.statusCodeType == .successful else {
+                    return .failure(downloadError(forStatusCode: networkResponse.statusCode))
+                }
+                guard let downloaded = try cacheOrPurgeImage(data: data, path: path, cacheName: cacheName, cachingLevel: cachingLevel) else {
+                    return .failure(.invalidResponse)
+                }
+                image = downloaded
+                response = networkResponse
             }
+            return .success(T.makeDownloadResult(image: image, statusCode: response.statusCode, headers: headerFields(from: response)))
+        } catch {
+            return .failure(downloadError(error))
         }
+    }
+
+    private func headerFields(from response: HTTPURLResponse) -> [String: AnyCodable] {
+        Dictionary(uniqueKeysWithValues: response.allHeaderFields.compactMap { key, value in
+            (key as? String).map { ($0, AnyCodable(value)) }
+        })
+    }
+
+    private func downloadError(forStatusCode statusCode: Int) -> NetworkingError {
+        let message = HTTPURLResponse.localizedString(forStatusCode: statusCode)
+        switch statusCode.statusCodeType {
+        case .clientError: return .clientError(statusCode: statusCode, message: message)
+        case .serverError: return .serverError(statusCode: statusCode, message: message, details: nil)
+        default: return .unexpectedError(statusCode: statusCode, message: message)
+        }
+    }
+
+    private func downloadError(_ error: Error) -> NetworkingError {
+        if error is CancellationError || (error as? URLError)?.code == .cancelled {
+            return .cancelled
+        }
+        return .unexpectedError(statusCode: nil, message: "Failed to process request (error: \(error.localizedDescription)).")
     }
 
     func requestData(_ requestType: RequestType, path: String, cachingLevel: CachingLevel, responseType: ResponseType) async throws -> (Data, HTTPURLResponse) {
