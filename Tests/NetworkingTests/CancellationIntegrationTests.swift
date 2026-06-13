@@ -83,6 +83,29 @@ class CancellationIntegrationTests: XCTestCase {
         assertCancelled(await task.value)
     }
 
+    // Two requests to the SAME url: cancelling one Task cancels only that request, the other
+    // completes. This is the precise per-request cancellation the old requestID/taskDescription
+    // mechanism existed for — now provided natively by the Task handle, no extra plumbing.
+    func testCancelOneOfTwoConcurrentRequestsToSameURL() async throws {
+        let networking = Networking(baseURL: baseURL)
+        let cancelled = Task { () -> Result<NetworkingResponse, NetworkingError> in
+            await networking.get("/delay/2")
+        }
+        let kept = Task { () -> Result<NetworkingResponse, NetworkingError> in
+            await networking.get("/delay/2")
+        }
+        try await Task.sleep(nanoseconds: 200_000_000)
+        cancelled.cancel()
+
+        assertCancelled(await cancelled.value)
+        switch await kept.value {
+        case .success:
+            break
+        case .failure(let error):
+            XCTFail("the un-cancelled request should have completed, got \(error)")
+        }
+    }
+
     private func assertCancelled<T>(_ result: Result<T, NetworkingError>) {
         switch result {
         case .success:
