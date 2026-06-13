@@ -23,7 +23,7 @@ jobs:
         run: xcodebuild -version && swift --version
 
       # Integration tests run against a local go-httpbin rather than the public
-      # httpbin.org (which rate-limits to HTTP 503 under load). go-httpbin is a faithful
+      # httpbin service (which rate-limits to HTTP 503 under load). go-httpbin is a faithful
       # native reimplementation, so tests still exercise the full real HTTP stack.
       - name: Start go-httpbin
         run: |
