@@ -152,4 +152,34 @@ class GETIntegrationTests: XCTestCase {
             "the second request should return the cached response"
         )
     }
+
+    // Different query parameters on the same path must not share a cache entry.
+    func testGETCacheKeyIncludesParameters() async throws {
+        let cache = NSCache<AnyObject, AnyObject>()
+        let networking = Networking(baseURL: baseURL, cache: cache)
+
+        let first: Result<NetworkingResponse, NetworkingError> = await networking.get("/get", parameters: ["value": 1], cachingLevel: .memory)
+        let second: Result<NetworkingResponse, NetworkingError> = await networking.get("/get", parameters: ["value": 2], cachingLevel: .memory)
+
+        guard case let .success(firstResponse) = first, case let .success(secondResponse) = second else {
+            return XCTFail("expected both requests to succeed")
+        }
+        XCTAssertEqual(firstResponse.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/get?value=1")
+        XCTAssertEqual(secondResponse.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/get?value=2")
+    }
+
+    // A cache hit must carry the original response's status code and headers, not fabricated ones.
+    func testGETCachePreservesResponseMetadata() async throws {
+        let cache = NSCache<AnyObject, AnyObject>()
+        let networking = Networking(baseURL: baseURL, cache: cache)
+
+        let _: Result<NetworkingResponse, NetworkingError> = await networking.get("/get", cachingLevel: .memory)
+        let cached: Result<NetworkingResponse, NetworkingError> = await networking.get("/get", cachingLevel: .memory)
+
+        guard case let .success(response) = cached else {
+            return XCTFail("expected the cached request to succeed")
+        }
+        XCTAssertEqual(response.statusCode, 200)
+        XCTAssertTrue(response.headers.string(for: "Content-Type")?.hasPrefix("application/json") ?? false)
+    }
 }
