@@ -39,15 +39,14 @@ extension Networking {
     }
 
     func registerFake(requestType: RequestType, path: String, fileName: String, bundle: Bundle, statusCode: Int, delay: Double) {
-        do {
-            if let result = try FileManager.json(from: fileName, bundle: bundle) {
-                registerFake(requestType: requestType, path: path, headerFields: nil, response: result, responseType: .json, statusCode: statusCode, delay: delay)
-            }
-        } catch ParsingError.notFound {
+        let url = URL(string: fileName)
+        guard let resource = url?.deletingPathExtension().absoluteString,
+              let filePath = bundle.path(forResource: resource, ofType: url?.pathExtension),
+              let data = try? Data(contentsOf: URL(fileURLWithPath: filePath)) else {
             fatalError("We couldn't find \(fileName), are you sure is there?")
-        } catch {
-            fatalError("Converting data to JSON failed")
         }
+        // Store the file's raw bytes as the fake response; the async fake path serves Data as-is.
+        registerFake(requestType: requestType, path: path, headerFields: nil, response: data, responseType: .json, statusCode: statusCode, delay: delay)
     }
 
     func registerFake(requestType: RequestType, path: String, headerFields: [String: String]?, response: Any?, responseType: ResponseType, statusCode: Int, delay: Double) {
