@@ -61,14 +61,26 @@ extension Networking {
     }
 
     private func handleFakeRequest<T: Decodable>(_ fakeRequest: FakeRequest, path: String, requestType: RequestType) async throws -> Result<T, NetworkingError> {
-        let (_, response, error) = try handleFakeRequest(fakeRequest, path: path, cacheName: nil, cachingLevel: .none)
+        let (_, response, _) = try handleFakeRequest(fakeRequest, path: path, cacheName: nil, cachingLevel: .none)
 
         if fakeRequest.delay > 0 {
             try? await Task.sleep(nanoseconds: UInt64(fakeRequest.delay * 1_000_000_000))
         }
 
-        let result = try JSONResult(body: fakeRequest.response, response: response, error: error)
-        return try handleResponse(responseData: result.data, response: response, path: path)
+        // Serialize the registered fake response to Data; handleResponse routes success/failure
+        // off the fake's HTTP status code, so an empty body is fine.
+        let responseData: Data
+        switch fakeRequest.response {
+        case let dictionary as [String: Any]:
+            responseData = try JSONSerialization.data(withJSONObject: dictionary, options: [])
+        case let array as [[String: Any]]:
+            responseData = try JSONSerialization.data(withJSONObject: array, options: [])
+        case let data as Data:
+            responseData = data
+        default:
+            responseData = Data()
+        }
+        return try handleResponse(responseData: responseData, response: response, path: path)
     }
 
     private func createRequest(path: String, requestType: RequestType, parameterType: ParameterType, parameters: Any?, parts: [FormDataPart]?) throws -> URLRequest {
