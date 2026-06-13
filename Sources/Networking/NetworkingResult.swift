@@ -4,63 +4,6 @@ public protocol NetworkingResult {
     init(body: Any?, response: HTTPURLResponse, error: NSError?) throws
 }
 
-public enum GenericResult<T> {
-    case success(T)
-    case failure(FailureJSONResponse)
-}
-
-public enum VoidResult {
-    case success
-    case failure(FailureJSONResponse)
-}
-
-public enum JSONResult: NetworkingResult {
-    case success(SuccessJSONResponse)
-
-    case failure(FailureJSONResponse)
-
-    public var data: Data {
-        switch self {
-        case .success(let response): return response.json.data
-        case .failure(let response): return response.json.data
-        }
-    }
-
-    public var error: NSError? {
-        switch self {
-        case .success:
-            return nil
-        case let .failure(response):
-            return response.error
-        }
-    }
-
-    public init(body: Any?, response: HTTPURLResponse, error: NSError?) throws {
-        var returnedError = error
-        var json = JSON.data(Data())
-
-        do {
-            if let dictionary = body as? [String: Any] {
-                json = try JSON(dictionary)
-            } else if let array = body as? [[String: Any]] {
-                json = try JSON(array)
-            } else if let data = body as? Data, data.count > 0 {
-                json = try JSON(data)
-            }
-        } catch let JSONParsingError as NSError {
-            if returnedError == nil {
-                returnedError = JSONParsingError
-            }
-        }
-
-        if let finalError = returnedError {
-            self = .failure(FailureJSONResponse(json: json, response: response, error: finalError))
-        } else {
-            self = .success(SuccessJSONResponse(json: json, response: response, body: body))
-        }
-    }
-}
-
 public enum ImageResult: NetworkingResult {
     case success(SuccessImageResponse)
 

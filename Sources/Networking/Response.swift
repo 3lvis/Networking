@@ -26,48 +26,6 @@ public class FailureResponse: Response {
     }
 }
 
-public class JSONResponse: Response {
-    let json: JSON
-    public let body: Any?
-
-    public var dictionaryBody: [String: Any] {
-        return json.dictionary
-    }
-
-    public var arrayBody: [[String: Any]] {
-        return json.array
-    }
-
-    public var data: Data {
-        switch json {
-        case let .array(value, _):
-            return value
-        case let .dictionary(value, _):
-            return value
-        case .data:
-            return Data()
-        }
-    }
-
-    init(json: JSON, response: HTTPURLResponse, body: Any? = nil) {
-        self.json = json
-        self.body = body
-        super.init(response: response)
-    }
-}
-
-public class SuccessJSONResponse: JSONResponse {}
-
-public class FailureJSONResponse: JSONResponse {
-    public let error: NSError
-
-    init(json: JSON, response: HTTPURLResponse, error: NSError) {
-        self.error = error
-
-        super.init(json: json, response: response)
-    }
-}
-
 public class SuccessImageResponse: Response {
     public let image: Image
 
