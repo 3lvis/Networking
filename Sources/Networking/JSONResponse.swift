@@ -1,12 +1,14 @@
 import Foundation
 
-public struct JSONResponse: Decodable {
+public struct JSONResponse: Decodable, Sendable {
     public let statusCode: Int
     public let headers: [String: AnyCodable]
     public let body: [String: AnyCodable]
 }
 
-public struct AnyCodable: Decodable {
+// @unchecked: `value` is an immutable box around a decoded JSON value (scalar, NSNull, or nested
+// AnyCodable collections) — all effectively Sendable — but its `Any` static type can't prove it.
+public struct AnyCodable: Decodable, @unchecked Sendable {
     let value: Any
 
     init(_ value: Any) {

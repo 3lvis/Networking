@@ -26,7 +26,10 @@ public extension Int {
     }
 }
 
-open class Networking {
+// @unchecked: shared state is thread-safe in practice — `session` (URLSession) and `cache`
+// (NSCache) are themselves thread-safe, and the mutable config (`headerFields`, `token`,
+// `fakeRequests`) is set up before requests run rather than mutated concurrently with them.
+open class Networking: @unchecked Sendable {
     static let domain = "com.3lvis.networking"
 
     enum RequestType: String {

@@ -514,7 +514,7 @@ extension FakeRequestTests {
         }
     }
 
-    func testFakeDELETEMultiple() {
+    func testFakeDELETEMultiple() async {
         let networking = Networking(baseURL: baseURL)
 
         networking.fakeDELETE("/a/1/b/1", response: nil)
@@ -529,21 +529,13 @@ extension FakeRequestTests {
         networking.fakeDELETE("/a/1/b/10", response: nil)
         networking.fakeDELETE("/a/1/b/11", response: nil)
 
-        let expectation = self.expectation(description: "testFakeDELETEMultiple")
-
-        Task {
-            let result: Result<JSONResponse, NetworkingError> = await networking.delete("/a/1/b/5")
-            switch result {
-            case let .success(response):
-                XCTAssertEqual(response.statusCode, 200)
-                expectation.fulfill()
-            case let .failure(error):
-                XCTFail(error.localizedDescription)
-                expectation.fulfill()
-            }
+        let result: Result<JSONResponse, NetworkingError> = await networking.delete("/a/1/b/5")
+        switch result {
+        case let .success(response):
+            XCTAssertEqual(response.statusCode, 200)
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
-
-        waitForExpectations(timeout: 2.0, handler: nil)
     }
 
     func testFakeDELETEWithInvalidStatusCode() async throws {

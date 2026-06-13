@@ -4,7 +4,7 @@ public enum NetworkingError: Error {
     case invalidURL
     case invalidResponse
     case clientError(statusCode: Int, message: String)
-    case serverError(statusCode: Int, message: String, details: [String: Any]?)
+    case serverError(statusCode: Int, message: String, details: [String: any Sendable]?)
     case unexpectedError(statusCode: Int?, message: String)
     case cancelled
 }

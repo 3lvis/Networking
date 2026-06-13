@@ -226,7 +226,7 @@ extension Networking {
 
     private func handleServerError<T: Decodable>(responseData: Data, statusCode: Int, path: String) throws -> Result<T, NetworkingError> {
         let errorMessage = HTTPURLResponse.localizedString(forStatusCode: statusCode)
-        var errorDetails: [String: Any]? = nil
+        var errorDetails: [String: any Sendable]? = nil
         if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: responseData) {
             errorDetails = ["error": errorResponse.error ?? "",
                             "message": errorResponse.message ?? "",

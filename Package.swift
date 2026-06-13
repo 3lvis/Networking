@@ -27,7 +27,5 @@ let package = Package(
             resources: [.process("NetworkingTests/Resources")]
         )
     ],
-    // tools-version 6.0 is needed for the iOS 18 platform, but keep Swift 5 language mode —
-    // a Swift 6 strict-concurrency migration is a separate piece of work.
-    swiftLanguageModes: [.v5]
+    swiftLanguageModes: [.v6]
 )
