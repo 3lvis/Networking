@@ -44,18 +44,13 @@ public extension Networking {
         return result.map { _ in () }
     }
 
-    func put<T: Decodable>(_ path: String, parameters: [String: Any]) async -> Result<T, NetworkingError> {
-        return await handle(.put, path: path, parameters: parameters)
+    func put<T: Decodable>(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil) async -> Result<T, NetworkingError> {
+        return await handle(.put, path: path, parameterType: parameterType, parameters: parameters)
     }
 
-    func put(_ path: String, parameters: [String: Any]) async -> Result<Void, NetworkingError> {
-        let result: Result<Data, NetworkingError> = await handle(.put, path: path, parameters: parameters)
-        switch result {
-        case .success:
-            return .success(())
-        case .failure(let error):
-            return .failure(error)
-        }
+    func put(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil) async -> Result<Void, NetworkingError> {
+        let result: Result<Data, NetworkingError> = await handle(.put, path: path, parameterType: parameterType, parameters: parameters)
+        return result.map { _ in () }
     }
 
     func patch<T: Decodable>(_ path: String, parameters: [String: Any]) async -> Result<T, NetworkingError> {
@@ -132,16 +127,6 @@ public extension Networking {
 @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
 public extension Networking {
 
-    /// PUT request to the specified path, using the provided parameters.
-    ///
-    /// - Parameters:
-    ///   - path: The path for the PUT request.
-    ///   - parameterType: The parameters type to be used, by default is JSON.
-    ///   - parameters: The parameters to be used, they will be serialized using the ParameterType, by default this is JSON.
-    func oldPut(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil) async throws -> JSONResult {
-        return try await handleJSONRequest(.put, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, responseType: .json, cachingLevel: .none)
-    }
-
     /// Registers a fake PUT request for the specified path. After registering this, every PUT request to the path, will return the registered response.
     ///
     /// - Parameters:
@@ -162,13 +147,6 @@ public extension Networking {
         registerFake(requestType: .put, path: path, fileName: fileName, bundle: bundle, statusCode: statusCode, delay: delay)
     }
 
-    /// Cancels the PUT request for the specified path. This causes the request to complete with error code URLError.cancelled.
-    ///
-    /// - Parameter path: The path for the cancelled PUT request.
-    func cancelOldPUT(_ path: String) async throws {
-        let url = try composedURL(with: path)
-        await cancelRequest(.data, requestType: .put, url: url)
-    }
 }
 
 @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)

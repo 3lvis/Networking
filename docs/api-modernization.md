@@ -32,7 +32,7 @@ Then, one verb per PR — migrate the `old*` test call sites to the new API and 
 
 - [x] `oldGet` → `get` (incl. the 3 GET cache tests); removed `oldGet`/`cancelOldGET`; updated README GET/auth/cancellation/faking examples.
 - [x] `oldPost` → `post`. Extended the async `post`/`handle()` to full parity — optional params, `parameterType:` (form-URL-encoded/custom), and multipart `parts:` (new `httpBody(...)` serializer in the async path) — then migrated all sites and removed `oldPost`/`cancelOldPOST`; updated README POST examples.
-- [ ] `oldPut` → `put`.
+- [x] `oldPut` → `put`. Extended `put` to `parameterType:`/optional params (reusing the `handle()` body path from the POST work; no multipart — `oldPut` had none); migrated all sites and removed `oldPut`/`cancelOldPUT`. No README PUT examples to update.
 - [ ] `oldPatch` → `patch`.
 - [ ] `oldDelete` → `delete`.
 - [ ] Remove `cancel(_ requestID:)` and any now-unused private helpers (`handleJSONRequest`, `cacheOrPurgeJSON`…), keeping what downloads use.
