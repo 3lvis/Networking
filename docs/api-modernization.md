@@ -35,7 +35,8 @@ Then, one verb per PR — migrate the `old*` test call sites to the new API and 
 - [ ] `oldPut` → `put`.
 - [ ] `oldPatch` → `patch`.
 - [ ] `oldDelete` → `delete`.
-- [ ] Remove `cancel(_ requestID:)` and any now-unused private helpers (`handleJSONRequest`, `JSONResult`, `cacheOrPurgeJSON`…), keeping what downloads use.
+- [ ] Remove `cancel(_ requestID:)` and any now-unused private helpers (`handleJSONRequest`, `cacheOrPurgeJSON`…), keeping what downloads use.
+- [ ] **Remove `JSONResult` / `NetworkingResult`.** The new API replaced it with `Result<T, NetworkingError>`, but it's not purely an old-path type yet: the async fake-request path still builds the fake response `Data` through `JSONResult(body:response:error:)` (`Networking+New.swift`, `handleFakeRequest`). Removing `JSONResult` needs that one usage decoupled first — serialize the fake `response: Any?` to `Data` inline — then delete `JSONResult` once the `old*` verbs (its only other users) are gone.
 
 ## Open items
 
