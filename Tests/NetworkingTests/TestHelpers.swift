@@ -2,14 +2,13 @@ import Foundation
 @testable import Networking
 
 enum TestConfig {
-    /// Base URL for httpbin-backed integration tests. Defaults to the public service;
-    /// CI overrides it with HTTPBIN_BASE_URL to point at a locally-run go-httpbin instance.
-    static let httpbinBaseURL = ProcessInfo.processInfo.environment["HTTPBIN_BASE_URL"] ?? "http://httpbin.org"
+    /// Base URL for httpbin-backed integration tests. Defaults to a local go-httpbin on :8080;
+    /// CI sets HTTPBIN_BASE_URL to the same. Run one with `docker run -p 8080:8080 mccutchen/go-httpbin`.
+    static let httpbinBaseURL = ProcessInfo.processInfo.environment["HTTPBIN_BASE_URL"] ?? "http://127.0.0.1:8080"
 }
 
-/// httpbin echoes request maps (headers/form/args/files) under a top-level key. httpbin.org
-/// uses `String` values; go-httpbin uses `[String]`. Normalize either shape to `[String: String]`
-/// so integration tests pass against both.
+/// httpbin echoes request maps (headers/form/args/files) under a top-level key, with values as
+/// either `String` or `[String]` depending on the server. Normalize both to `[String: String]`.
 func httpbinEchoedMap(_ json: [String: Any], _ key: String) -> [String: String] {
     guard let raw = json[key] as? [String: Any] else { return [:] }
     var result: [String: String] = [:]

@@ -49,11 +49,11 @@ Then, one verb per PR — migrate the `old*` test call sites to the new API and 
 
 2. ~~**Rename `NetworkingResponse` → `JSONResponse`.**~~ ✅ Done. Renamed the type (and `NetworkingResponse.swift` → `JSONResponse.swift`) and all ~100 references across sources, tests, and the README — symmetric with `ImageResponse`/`DataResponse`. Pure mechanical rename; suite stayed green.
 
-3. **Purge `http://httpbin.org` from the test suite.** CI is deterministic because it sets `HTTPBIN_BASE_URL` to a local go-httpbin, but the string still appears in three roles:
-   1. **Integration fallback** — `TestConfig.httpbinBaseURL` falls back to `"http://httpbin.org"` when the env var is unset, so a bare local `swift test` hits the public host, which rate-limits to HTTP 503 and flakes. These tests need a server speaking the httpbin protocol (`/get`, `/post`, `/put`, `/patch`, `/delete`, `/status/N`, `/delay/N`, `/uuid`, `/image/png`, `/basic-auth/...`, `/user-agent`).
-   2. **Offline suites** (`GETTests`, `NewNetworkingTests`, `FakeRequestTests`, `UnauthorizedCallbackTests`) — `let baseURL = "http://httpbin.org"` is an arbitrary base string for *faked* requests; never contacted or asserted.
-   3. **`NetworkingTests.swift`** — sample data coupled to URL-composition / cache-filename assertions (`composedURL` → `http://httpbin.org/hello`, `destinationURL.lastPathComponent` → `http:--httpbin.org-image-png`, `splitBaseURLAndRelativePath`). No server involved.
-   - *Why third:* low-risk quick win that makes a bare local `swift test` deterministic — pays off for every task here and for any contributor.
+3. ~~**Purge `http://httpbin.org` from the test suite.**~~ ✅ Done — handled by role:
+   1. **Integration fallback** — `TestConfig.httpbinBaseURL` now defaults to `"http://127.0.0.1:8080"` (matching CI's go-httpbin), so a bare local `swift test` fails fast with connection-refused instead of flaking against the public host.
+   2. **Offline suites** (`GETTests`, `NewNetworkingTests`, `FakeRequestTests`, `UnauthorizedCallbackTests`) — `baseURL` now reads `TestConfig.httpbinBaseURL` (faked requests; host never contacted).
+   3. **`NetworkingTests.swift`** — URL-composition / cache-filename sample data switched to `example.com` (input and expected sides together).
+   - Not touched: the **README** still uses `http://httpbin.org` in its illustrative snippets — that's a separate doc call (httpbin.org is the canonical example service, and some snippets show its echoed response body), out of this test-suite-scoped item.
 
 4. **Drop the internal `JSON` enum.** `JSON` (`JSON.swift`) is an internal parsing helper still used by file-based fakes (`FileManager.json`) and the cache path in `Networking+Private.swift`. Replace those uses with `JSONSerialization`/`Codable` directly and delete the enum (+ `JSONTests`/`JSONIntegrationTests`).
    - *Why fourth:* internal-only (no public surface), modest payoff, and best done after #1 so it's the last thing touching the result/parsing internals.

@@ -8,7 +8,7 @@ struct Friend: Decodable {
 }
 
 class GETTests: XCTestCase {
-    let baseURL = "http://httpbin.org"
+    let baseURL = TestConfig.httpbinBaseURL
 
     func testGETCachedFromMemory() async throws {
         let cache = NSCache<AnyObject, AnyObject>()

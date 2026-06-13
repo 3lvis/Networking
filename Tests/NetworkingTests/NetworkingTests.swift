@@ -3,7 +3,7 @@ import XCTest
 @testable import Networking
 
 class NetworkingTests: XCTestCase {
-    let baseURL = "http://httpbin.org"
+    let baseURL = "http://example.com"
 
     func setAuthorizationHeaderCustomValue() async throws {
         let networking = Networking(baseURL: baseURL)
@@ -37,34 +37,34 @@ class NetworkingTests: XCTestCase {
     func testURLForPath() throws {
         let networking = Networking(baseURL: baseURL)
         let url = try networking.composedURL(with: "/hello")
-        XCTAssertEqual(url.absoluteString, "http://httpbin.org/hello")
+        XCTAssertEqual(url.absoluteString, "http://example.com/hello")
     }
 
     func testURLForPathWithFullPath() throws {
         let networking = Networking()
-        let url = try networking.composedURL(with: "http://httpbin.org/hello")
-        XCTAssertEqual(url.absoluteString, "http://httpbin.org/hello")
+        let url = try networking.composedURL(with: "http://example.com/hello")
+        XCTAssertEqual(url.absoluteString, "http://example.com/hello")
     }
 
     func testDestinationURL() throws {
         let networking = Networking(baseURL: baseURL)
         let path = "/image/png"
         let destinationURL = try networking.destinationURL(for: path)
-        XCTAssertEqual(destinationURL.lastPathComponent, "http:--httpbin.org-image-png")
+        XCTAssertEqual(destinationURL.lastPathComponent, "http:--example.com-image-png")
     }
 
     func testDestinationURLWithFullPath() throws {
         let networking = Networking()
-        let path = "http://httpbin.org/image/png"
+        let path = "http://example.com/image/png"
         let destinationURL = try networking.destinationURL(for: path)
-        XCTAssertEqual(destinationURL.lastPathComponent, "http:--httpbin.org-image-png")
+        XCTAssertEqual(destinationURL.lastPathComponent, "http:--example.com-image-png")
     }
 
     func testDestinationURLWithSpecialCharactersInPath() throws {
         let networking = Networking(baseURL: baseURL)
         let path = "/h�sttur.jpg"
         let destinationURL = try networking.destinationURL(for: path)
-        XCTAssertEqual(destinationURL.lastPathComponent, "http:--httpbin.org-h%EF%BF%BDsttur.jpg")
+        XCTAssertEqual(destinationURL.lastPathComponent, "http:--example.com-h%EF%BF%BDsttur.jpg")
     }
 
     func testDestinationURLWithSpecialCharactersInCacheName() throws {
@@ -103,8 +103,8 @@ class NetworkingTests: XCTestCase {
         XCTAssertEqual(baseURL1, "https://rescuejuice.com")
         XCTAssertEqual(relativePath1, "/wp-content/uploads/2015/11/døgnvillburgere.jpg")
 
-        let (baseURL2, relativePath2) = Networking.splitBaseURLAndRelativePath(for: "http://httpbin.org/basic-auth/user/passwd")
-        XCTAssertEqual(baseURL2, "http://httpbin.org")
+        let (baseURL2, relativePath2) = Networking.splitBaseURLAndRelativePath(for: "http://example.com/basic-auth/user/passwd")
+        XCTAssertEqual(baseURL2, "http://example.com")
         XCTAssertEqual(relativePath2, "/basic-auth/user/passwd")
     }
 

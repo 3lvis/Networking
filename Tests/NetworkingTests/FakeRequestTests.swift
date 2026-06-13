@@ -3,7 +3,7 @@ import XCTest
 @testable import Networking
 
 class FakeRequestTests: XCTestCase {
-    let baseURL = "http://httpbin.org"
+    let baseURL = TestConfig.httpbinBaseURL
 
     func testRemoveFirstLetterIfDash() {
         var evaluated = "/"

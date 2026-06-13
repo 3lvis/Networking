@@ -4,7 +4,7 @@ import CoreLocation
 @testable import Networking
 
 class NewNetworkingTests: XCTestCase {
-    let baseURL = "http://httpbin.org"
+    let baseURL = TestConfig.httpbinBaseURL
 
     func testErrorNetworkingJSON() async throws {
         let networking = Networking(baseURL: baseURL)
