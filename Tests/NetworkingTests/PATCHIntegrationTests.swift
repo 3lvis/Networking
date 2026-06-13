@@ -7,47 +7,43 @@ class PATCHIntegrationTests: XCTestCase {
 
     func testPATCH() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result = try await networking.oldPatch("/patch", parameters: ["username": "jameson", "password": "secret"])
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.patch("/patch", parameters: ["username": "jameson", "password": "secret"])
         switch result {
         case let .success(response):
-            let json = response.dictionaryBody
-            let JSONResponse = json["json"] as? [String: String]
-            XCTAssertEqual("jameson", JSONResponse?["username"])
-            XCTAssertEqual("secret", JSONResponse?["password"])
+            let json = httpbinEchoedMap(response, "json")
+            XCTAssertEqual(json["username"], "jameson")
+            XCTAssertEqual(json["password"], "secret")
 
-            let headers = httpbinEchoedMap(json, "headers")
+            let headers = httpbinEchoedMap(response, "headers")
             XCTAssertEqual(headers["Content-Type"], "application/json")
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
     }
 
     func testPATCHWithHeaders() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result = try await networking.oldPatch("/patch")
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.patch("/patch")
         switch result {
         case let .success(response):
-            let json = response.dictionaryBody
-            guard let url = json["url"] as? String else { XCTFail(); return }
-            XCTAssertEqual(url, "\(TestConfig.httpbinBaseURL)/patch")
-
-            let headers = response.headers
-            XCTAssertTrue((headers["Content-Type"] as? String)?.hasPrefix("application/json") ?? false)
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
+            XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/patch")
+            XCTAssertTrue(response.headers.string(for: "Content-Type")?.hasPrefix("application/json") ?? false)
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
     }
 
     func testPATCHWithIvalidPath() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result = try await networking.oldPatch("/posdddddt", parameters: ["username": "jameson", "password": "secret"])
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.patch("/posdddddt", parameters: ["username": "jameson", "password": "secret"])
         switch result {
         case .success:
             XCTFail()
-        case let .failure(response):
-            XCTAssertEqual(response.error.code, 404)
+        case let .failure(error):
+            guard case let .clientError(statusCode, _) = error else {
+                return XCTFail("expected a client error, got \(error)")
+            }
+            XCTAssertEqual(statusCode, 404)
         }
     }
-
 }
-
