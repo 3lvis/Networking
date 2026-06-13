@@ -1,7 +1,7 @@
 import Foundation
 
 extension Networking {
-    func handle<T: Decodable>(_ requestType: RequestType, path: String, parameters: Any?, cachingLevel: CachingLevel = .none) async -> Result<T, NetworkingError> {
+    func handle<T: Decodable>(_ requestType: RequestType, path: String, parameterType: ParameterType = .json, parameters: Any?, parts: [FormDataPart]? = nil, cachingLevel: CachingLevel = .none) async -> Result<T, NetworkingError> {
         do {
             logger.info("Starting \(requestType.rawValue) request to \(path, privacy: .public)")
 
@@ -9,7 +9,7 @@ extension Networking {
                 return try await handleFakeRequest(fakeRequest, path: path, requestType: requestType)
             }
 
-            let request = try createRequest(path: path, requestType: requestType, parameters: parameters)
+            let request = try createRequest(path: path, requestType: requestType, parameterType: parameterType, parameters: parameters, parts: parts)
             // Key off the request's full effective URL so distinct requests never collide (e.g.
             // full-URL GETs to different hosts). Passed as the cacheName so destinationURL uses it
             // verbatim instead of re-prepending the baseURL.
@@ -71,7 +71,7 @@ extension Networking {
         return try handleResponse(responseData: result.data, response: response, path: path)
     }
 
-    private func createRequest(path: String, requestType: RequestType, parameters: Any?) throws -> URLRequest {
+    private func createRequest(path: String, requestType: RequestType, parameterType: ParameterType, parameters: Any?, parts: [FormDataPart]?) throws -> URLRequest {
         // Split a query embedded in the path so it survives URL building instead of being
         // percent-encoded into the path (encodeUTF8 uses .urlPathAllowed, which escapes "?").
         let pathParts = path.split(separator: "?", maxSplits: 1, omittingEmptySubsequences: false)
@@ -100,12 +100,12 @@ extension Networking {
             throw URLError(.badURL)
         }
 
-        let parameterType: Networking.ParameterType? = (carriesQueryParameters || parameters == nil) ? nil : .json
+        let bodyParameterType: ParameterType? = carriesQueryParameters ? nil : parameterType
         var request = URLRequest(
             url: url,
             requestType: requestType,
             path: path,
-            parameterType: parameterType,
+            parameterType: bodyParameterType,
             responseType: .json,
             boundary: boundary,
             authorizationHeaderValue: authorizationHeaderValue,
@@ -114,11 +114,47 @@ extension Networking {
             headerFields: headerFields
         )
 
-        if !carriesQueryParameters, let parameters = parameters {
-            request.httpBody = try JSONSerialization.data(withJSONObject: parameters, options: [])
+        if !carriesQueryParameters {
+            request.httpBody = try httpBody(parameterType: parameterType, parameters: parameters, parts: parts)
         }
 
         return request
+    }
+
+    // Intentional duplicate of the legacy requestData(...) body serialization; that copy goes away with the old* API.
+    private func httpBody(parameterType: ParameterType, parameters: Any?, parts: [FormDataPart]?) throws -> Data? {
+        switch parameterType {
+        case .none:
+            return nil
+        case .json:
+            guard let parameters else { return nil }
+            return try JSONSerialization.data(withJSONObject: parameters, options: [])
+        case .formURLEncoded:
+            guard let parametersDictionary = parameters as? [String: Any] else { return nil }
+            return try parametersDictionary.urlEncodedString().data(using: .utf8)
+        case .multipartFormData:
+            var bodyData = Data()
+            if let parameters = parameters as? [String: Any] {
+                for (key, value) in parameters {
+                    let usedValue: Any = value is NSNull ? "null" : value
+                    var body = ""
+                    body += "--\(boundary)\r\n"
+                    body += "Content-Disposition: form-data; name=\"\(key)\""
+                    body += "\r\n\r\n\(usedValue)\r\n"
+                    bodyData.append(body.data(using: .utf8)!)
+                }
+            }
+            if let parts {
+                for var part in parts {
+                    part.boundary = boundary
+                    bodyData.append(part.formData as Data)
+                }
+            }
+            bodyData.append("--\(boundary)--\r\n".data(using: .utf8)!)
+            return bodyData
+        case .custom:
+            return parameters as? Data
+        }
     }
 
     private func handleResponse<T: Decodable>(responseData: Data, response: URLResponse, path: String) throws -> Result<T, NetworkingError> {
@@ -156,7 +192,8 @@ extension Networking {
             let headers = Dictionary(uniqueKeysWithValues: httpResponse.allHeaderFields.compactMap { key, value in
                 (key as? String).map { ($0, AnyCodable(value)) }
             })
-            let body = try JSONDecoder().decode([String: AnyCodable].self, from: responseData)
+            // An empty body (e.g. 204 No Content) is a success — decoding empty data would fail, so use an empty body.
+            let body = responseData.isEmpty ? [:] : try JSONDecoder().decode([String: AnyCodable].self, from: responseData)
             let networkingJSON = NetworkingResponse(statusCode: httpResponse.statusCode, headers: headers, body: body)
             return .success(networkingJSON as! T)
         } else {

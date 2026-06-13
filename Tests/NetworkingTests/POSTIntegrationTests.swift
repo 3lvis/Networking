@@ -7,15 +7,13 @@ class POSTIntegrationTests: XCTestCase {
 
     func testPOSTWithoutParameters() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result = try await networking.oldPost("/post", parameters: nil)
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/post", parameters: nil)
         switch result {
         case let .success(response):
-            let json = response.dictionaryBody
-
-            let headers = httpbinEchoedMap(json, "headers")
+            let headers = httpbinEchoedMap(response, "headers")
             XCTAssertEqual(headers["Content-Type"], "application/json")
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
     }
 
@@ -27,49 +25,38 @@ class POSTIntegrationTests: XCTestCase {
             "double": 20.0,
             "bool": true,
         ] as [String: Any]
-        let result = try await networking.oldPost("/post", parameters: parameters)
+        let result: Result<PostJSONEcho, NetworkingError> = await networking.post("/post", parameters: parameters)
         switch result {
         case let .success(response):
-            let json = response.dictionaryBody
-            guard let JSONResponse = json["json"] as? [String: Any] else { XCTFail(); return }
-            XCTAssertEqual(JSONResponse["string"] as? String, "valueA")
-            XCTAssertEqual(JSONResponse["int"] as? Int, 20)
-            XCTAssertEqual(JSONResponse["double"] as? Double, 20.0)
-            XCTAssertEqual(JSONResponse["bool"] as? Bool, true)
-
-            let headers = httpbinEchoedMap(json, "headers")
-            let contentType = headers["Content-Type"]
-            XCTAssertEqual(contentType, "application/json")
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
+            XCTAssertEqual(response.json.string, "valueA")
+            XCTAssertEqual(response.json.int, 20)
+            XCTAssertEqual(response.json.double, 20.0)
+            XCTAssertEqual(response.json.bool, true)
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
     }
 
     func testPOSTWithHeaders() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result = try await networking.oldPost("/post")
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/post")
         switch result {
         case let .success(response):
-            let json = response.dictionaryBody
-            guard let url = json["url"] as? String else { XCTFail(); return }
-            XCTAssertEqual(url, "\(TestConfig.httpbinBaseURL)/post")
-
-            let headers = response.headers
-            XCTAssertTrue((headers["Content-Type"] as? String)?.hasPrefix("application/json") ?? false)
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
+            XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/post")
+            XCTAssertTrue(response.headers.string(for: "Content-Type")?.hasPrefix("application/json") ?? false)
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
     }
 
     func testPOSTWithNoParameters() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result = try await networking.oldPost("/post")
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/post")
         switch result {
         case let .success(response):
-            let JSONResponse = response.dictionaryBody
-            XCTAssertEqual("\(TestConfig.httpbinBaseURL)/post", JSONResponse["url"] as? String)
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
+            XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/post")
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
     }
 
@@ -82,18 +69,17 @@ class POSTIntegrationTests: XCTestCase {
             "bool": true,
             "date": "2016-11-02T13:55:28+01:00",
         ] as [String: Any]
-        let result = try await networking.oldPost("/post", parameterType: .formURLEncoded, parameters: parameters)
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/post", parameterType: .formURLEncoded, parameters: parameters)
         switch result {
         case let .success(response):
-            let json = response.dictionaryBody
-            let form = httpbinEchoedMap(json, "form")
+            let form = httpbinEchoedMap(response, "form")
             XCTAssertEqual(form["string"], "B&B")
             XCTAssertEqual(form["int"], "20")
             XCTAssertEqual(form["double"], "20.0")
             XCTAssertEqual(form["bool"], "true")
             XCTAssertEqual(form["date"], "2016-11-02T13:55:28+01:00")
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
     }
 
@@ -110,26 +96,25 @@ class POSTIntegrationTests: XCTestCase {
             "double": 20.0,
             "bool": true,
         ] as [String: Any]
-        let result = try await networking.oldPost("/post", parameters: parameters, parts: [part1, part2])
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/post", parameters: parameters, parts: [part1, part2])
         switch result {
         case let .success(response):
-            let json = response.dictionaryBody
-            XCTAssertEqual(json["url"] as? String, "\(TestConfig.httpbinBaseURL)/post")
+            XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/post")
 
-            let headers = httpbinEchoedMap(json, "headers")
+            let headers = httpbinEchoedMap(response, "headers")
             XCTAssertEqual(headers["Content-Type"], "multipart/form-data; boundary=\(networking.boundary)")
 
-            let files = httpbinEchoedMap(json, "files")
+            let files = httpbinEchoedMap(response, "files")
             XCTAssertEqual(files[item1], item1)
             XCTAssertEqual(files[item2], item2)
 
-            let form = httpbinEchoedMap(json, "form")
+            let form = httpbinEchoedMap(response, "form")
             XCTAssertEqual(form["string"], "valueA")
             XCTAssertEqual(form["int"], "20")
             XCTAssertEqual(form["double"], "20.0")
             XCTAssertEqual(form["bool"], "true")
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
     }
 
@@ -138,19 +123,18 @@ class POSTIntegrationTests: XCTestCase {
 
         let item1 = "FIRSTDATA"
         let part1 = FormDataPart(data: item1.data(using: .utf8)!, parameterName: item1, filename: "\(item1).png")
-        let result = try await networking.oldPost("/post", parameters: nil, parts: [part1])
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/post", parameters: nil, parts: [part1])
         switch result {
         case let .success(response):
-            let json = response.dictionaryBody
-            XCTAssertEqual(json["url"] as? String, "\(TestConfig.httpbinBaseURL)/post")
+            XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/post")
 
-            let headers = httpbinEchoedMap(json, "headers")
+            let headers = httpbinEchoedMap(response, "headers")
             XCTAssertEqual(headers["Content-Type"], "multipart/form-data; boundary=\(networking.boundary)")
 
-            let files = httpbinEchoedMap(json, "files")
+            let files = httpbinEchoedMap(response, "files")
             XCTAssertEqual(files[item1], item1)
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
     }
 
@@ -161,43 +145,61 @@ class POSTIntegrationTests: XCTestCase {
         let imageData = try Data(contentsOf: imageURL)
         let imagePart = FormDataPart(data: imageData, parameterName: "file", filename: "pig.png")
 
-        let result = try await networking.oldPost("/post", parameters: ["public_id": "pig"], parts: [imagePart])
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/post", parameters: ["public_id": "pig"], parts: [imagePart])
         switch result {
         case let .success(response):
-            let json = response.dictionaryBody
-            XCTAssertEqual(json["url"] as? String, "\(TestConfig.httpbinBaseURL)/post")
+            XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/post")
 
-            let headers = httpbinEchoedMap(json, "headers")
+            let headers = httpbinEchoedMap(response, "headers")
             XCTAssertEqual(headers["Content-Type"], "multipart/form-data; boundary=\(networking.boundary)")
 
             // The image arrived as a multipart file part. httpbin echoes file content as a
             // (lossy) JSON string, so assert the PNG signature crossed the wire rather than
             // byte-equality.
-            let files = httpbinEchoedMap(json, "files")
+            let files = httpbinEchoedMap(response, "files")
             XCTAssertTrue(files["file"]?.contains("PNG") ?? false)
 
-            let form = httpbinEchoedMap(json, "form")
+            let form = httpbinEchoedMap(response, "form")
             XCTAssertEqual(form["public_id"], "pig")
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
+        }
+    }
+
+    func testPOSTWithEmptyResponseBody() async throws {
+        let networking = Networking(baseURL: baseURL)
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/status/204")
+        switch result {
+        case let .success(response):
+            XCTAssertEqual(response.statusCode, 204)
+            XCTAssertTrue(response.body.isEmpty)
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
     }
 
     func testPOSTWithIvalidPath() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result = try await networking.oldPost("/posdddddt", parameters: ["username": "jameson", "password": "secret"])
+        let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/posdddddt", parameters: ["username": "jameson", "password": "secret"])
         switch result {
         case .success:
             XCTFail()
-        case let .failure(response):
-            XCTAssertEqual(response.error.code, 404)
+        case let .failure(error):
+            guard case let .clientError(statusCode, _) = error else {
+                return XCTFail("expected a client error, got \(error)")
+            }
+            XCTAssertEqual(statusCode, 404)
         }
-
     }
+}
 
-
-    func deleteAllCloudinaryPhotos(networking: Networking, cloudName: String, secret: String, APIKey: String) async throws {
-        networking.setAuthorizationHeader(username: APIKey, password: secret)
-        _ = try await networking.oldDelete("/v1_1/\(cloudName)/resources/image/upload?all=true")
+// httpbin echoes a posted JSON body back under the top-level `json` key.
+private struct PostJSONEcho: Decodable {
+    struct Payload: Decodable {
+        let string: String
+        let int: Int
+        let double: Double
+        let bool: Bool
     }
+    let json: Payload
 }

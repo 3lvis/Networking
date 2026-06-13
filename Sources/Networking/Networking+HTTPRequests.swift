@@ -26,18 +26,22 @@ public extension Networking {
         return await handle(.get, path: path, parameters: parameters, cachingLevel: cachingLevel)
     }
 
-    func post<T: Decodable>(_ path: String, parameters: [String: Any]) async -> Result<T, NetworkingError> {
-        return await handle(.post, path: path, parameters: parameters)
+    func post<T: Decodable>(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil) async -> Result<T, NetworkingError> {
+        return await handle(.post, path: path, parameterType: parameterType, parameters: parameters)
     }
 
-    func post(_ path: String, parameters: [String: Any]) async -> Result<Void, NetworkingError> {
-        let result: Result<Data, NetworkingError> = await handle(.post, path: path, parameters: parameters)
-        switch result {
-        case .success:
-            return .success(())
-        case .failure(let error):
-            return .failure(error)
-        }
+    func post(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil) async -> Result<Void, NetworkingError> {
+        let result: Result<Data, NetworkingError> = await handle(.post, path: path, parameterType: parameterType, parameters: parameters)
+        return result.map { _ in () }
+    }
+
+    func post<T: Decodable>(_ path: String, parameters: Any? = nil, parts: [FormDataPart]) async -> Result<T, NetworkingError> {
+        return await handle(.post, path: path, parameterType: .multipartFormData, parameters: parameters, parts: parts)
+    }
+
+    func post(_ path: String, parameters: Any? = nil, parts: [FormDataPart]) async -> Result<Void, NetworkingError> {
+        let result: Result<Data, NetworkingError> = await handle(.post, path: path, parameterType: .multipartFormData, parameters: parameters, parts: parts)
+        return result.map { _ in () }
     }
 
     func put<T: Decodable>(_ path: String, parameters: [String: Any]) async -> Result<T, NetworkingError> {
@@ -170,26 +174,6 @@ public extension Networking {
 @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
 public extension Networking {
 
-    /// POST request to the specified path, using the provided parameters.
-    ///
-    /// - Parameters:
-    ///   - path: The path for the POST request.
-    ///   - parameterType: The parameters type to be used, by default is JSON.
-    ///   - parameters: The parameters to be used, they will be serialized using the ParameterType, by default this is JSON.
-    func oldPost(_ path: String, parameterType: ParameterType = .json, parameters: Any? = nil) async throws -> JSONResult {
-        return try await handleJSONRequest(.post, path: path, cacheName: nil, parameterType: parameterType, parameters: parameters, responseType: .json, cachingLevel: .none)
-    }
-
-    /// POST request to the specified path, using the provided parameters.
-    ///
-    /// - Parameters:
-    ///   - path: The path for the POST request.
-    ///   - parameters: The parameters to be used, they will be serialized using the ParameterType, by default this is JSON.
-    ///   - parts: The list of form data parts that will be sent in the request.
-    func oldPost(_ path: String, parameters: Any? = nil, parts: [FormDataPart]) async throws -> JSONResult {
-        return try await handleJSONRequest(.post, path: path, cacheName: nil, parameterType: .multipartFormData, parameters: parameters, parts: parts, responseType: .json, cachingLevel: .none)
-    }
-
     /// Registers a fake POST request for the specified path. After registering this, every POST request to the path, will return the registered response.
     ///
     /// - Parameters:
@@ -210,13 +194,6 @@ public extension Networking {
         registerFake(requestType: .post, path: path, fileName: fileName, bundle: bundle, statusCode: statusCode, delay: delay)
     }
 
-    /// Cancels the POST request for the specified path. This causes the request to complete with error code URLError.cancelled.
-    ///
-    /// - Parameter path: The path for the cancelled POST request.
-    func cancelOldPOST(_ path: String) async throws {
-        let url = try composedURL(with: path)
-        await cancelRequest(.data, requestType: .post, url: url)
-    }
 }
 
 @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)

@@ -134,7 +134,8 @@ case .failure(let error):
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-let result = try await networking.oldPost("/post", parameters: ["username" : "jameson", "password" : "secret"])
+let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/post", parameters: ["username" : "jameson", "password" : "secret"])
+// On success, response.body holds the echoed JSON below.
  /*
  {
      "json" : {
@@ -203,7 +204,7 @@ When sending JSON your parameters will be serialized to data using `NSJSONSerial
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-let result = try await networking.oldPost("/post", parameters: ["name" : "jameson"])
+let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/post", parameters: ["name" : "jameson"])
 // Successfull post using `application/json` as `Content-Type`
 ```
 
@@ -213,7 +214,7 @@ let result = try await networking.oldPost("/post", parameters: ["name" : "jameso
 
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-let result = try await networking.oldPost("/post", parameterType: .formURLEncoded, parameters: ["name" : "jameson"])
+let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/post", parameterType: .formURLEncoded, parameters: ["name" : "jameson"])
 // Successfull post using `application/x-www-form-urlencoded` as `Content-Type`
 ```
 
@@ -225,7 +226,7 @@ let result = try await networking.oldPost("/post", parameterType: .formURLEncode
 let networking = Networking(baseURL: "https://example.com")
 let imageData = UIImagePNGRepresentation(imageToUpload)!
 let part = FormDataPart(data: imageData, parameterName: "file", filename: "selfie.png")
-let result = try await networking.oldPost("/image/upload", part: part)
+let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/image/upload", parts: [part])
 // Successfull upload using `multipart/form-data` as `Content-Type`
 ```
 
@@ -236,7 +237,7 @@ let networking = Networking(baseURL: "https://example.com")
 let part1 = FormDataPart(data: imageData1, parameterName: "file1", filename: "selfie1.png")
 let part2 = FormDataPart(data: imageData2, parameterName: "file2", filename: "selfie2.png")
 let parameters = ["username" : "3lvis"]
-let result = try await networking.oldPost("/image/upload", parts: [part1, part2], parameters: parameters)
+let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/image/upload", parameters: parameters, parts: [part1, part2])
 // Do something
 ```
 
@@ -251,7 +252,7 @@ At the moment **Networking** supports four types of `ParameterType`s out of the 
 For example:
 ```swift
 let networking = Networking(baseURL: "http://httpbin.org")
-let result = try await networking.oldPost("/upload", parameterType: .Custom("application/octet-stream"), parameters: imageData)
+let result: Result<NetworkingResponse, NetworkingError> = await networking.post("/upload", parameterType: .custom("application/octet-stream"), parameters: imageData)
 // Successfull upload using `application/octet-stream` as `Content-Type`
 ```
 

@@ -31,11 +31,12 @@ Foundation (this PR):
 Then, one verb per PR — migrate the `old*` test call sites to the new API and delete that verb's `old*`/`cancelOld*`:
 
 - [x] `oldGet` → `get` (incl. the 3 GET cache tests); removed `oldGet`/`cancelOldGET`; updated README GET/auth/cancellation/faking examples.
-- [ ] `oldPost` → `post`.
+- [x] `oldPost` → `post`. Extended the async `post`/`handle()` to full parity — optional params, `parameterType:` (form-URL-encoded/custom), and multipart `parts:` (new `httpBody(...)` serializer in the async path) — then migrated all sites and removed `oldPost`/`cancelOldPOST`; updated README POST examples.
 - [ ] `oldPut` → `put`.
 - [ ] `oldPatch` → `patch`.
 - [ ] `oldDelete` → `delete`.
-- [ ] Remove `cancel(_ requestID:)` and any now-unused private helpers (`handleJSONRequest`, `JSONResult`, `cacheOrPurgeJSON`…), keeping what downloads use.
+- [ ] Remove `cancel(_ requestID:)` and any now-unused private helpers (`handleJSONRequest`, `cacheOrPurgeJSON`…), keeping what downloads use.
+- [ ] **Remove `JSONResult` / `NetworkingResult`.** The new API replaced it with `Result<T, NetworkingError>`, but it's not purely an old-path type yet: the async fake-request path still builds the fake response `Data` through `JSONResult(body:response:error:)` (`Networking+New.swift`, `handleFakeRequest`). Removing `JSONResult` needs that one usage decoupled first — serialize the fake `response: Any?` to `Data` inline — then delete `JSONResult` once the `old*` verbs (its only other users) are gone.
 
 ## Open items
 
