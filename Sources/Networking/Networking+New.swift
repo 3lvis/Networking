@@ -10,10 +10,9 @@ extension Networking {
             }
 
             let request = try createRequest(path: path, requestType: requestType, parameters: parameters)
-            // Key the cache by the request's full effective URL (scheme/host/path/query) so no two
-            // distinct requests collide — neither different hosts (full-URL GETs) nor parameters
-            // that differ only by encoding (["a": "1&b=2"] vs ["a": 1, "b": 2]). Passed as the
-            // cacheName so destinationURL uses it verbatim instead of re-prepending the baseURL.
+            // Key off the request's full effective URL so distinct requests never collide (e.g.
+            // full-URL GETs to different hosts). Passed as the cacheName so destinationURL uses it
+            // verbatim instead of re-prepending the baseURL.
             let cacheKey = cacheKey(for: request, fallbackPath: path)
             if cachingLevel != .none,
                 let cachedData = try objectFromCache(for: path, cacheName: cacheKey, cachingLevel: cachingLevel, responseType: .json) as? Data,
@@ -41,8 +40,7 @@ extension Networking {
         }
     }
 
-    // Cached payload for the new API: persists the original response's status code and headers
-    // alongside the body so a cache hit reproduces the real response metadata, not fabricated values.
+    // Persists the response's status code and headers so a cache hit reproduces real metadata, not fabricated values.
     private struct CachedResponse: Codable {
         let statusCode: Int
         let headers: [String: String]
