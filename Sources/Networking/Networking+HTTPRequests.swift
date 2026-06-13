@@ -193,8 +193,8 @@ public extension Networking {
     ///   - path: The path where the image is located.
     ///   - cacheName: The cache name used to identify the downloaded image, by default the path is used.
     ///   - cachingLevel: Enum to control the caching level: .memory, .memoryAndFile, .none
-    func downloadImage(_ path: String, cacheName: String? = nil, cachingLevel: CachingLevel = .memoryAndFile) async throws -> ImageResult {
-        return try await handleImageRequest(.get, path: path, cacheName: cacheName, cachingLevel: cachingLevel, responseType: .image)
+    func downloadImage<T: ImageDownloadable>(_ path: String, cacheName: String? = nil, cachingLevel: CachingLevel = .memoryAndFile) async -> Result<T, NetworkingError> {
+        return await handleImageRequest(.get, path: path, cacheName: cacheName, cachingLevel: cachingLevel, responseType: .image)
     }
 
     /// Cancels the image download request for the specified path. This causes the request to complete with error code URLError.cancelled.
@@ -221,8 +221,8 @@ public extension Networking {
     ///   - path: The path used to download the resource.
     ///   - cacheName: The cache name used to identify the downloaded data, by default the path is used.
     ///   - cachingLevel: Enum to control the caching level: .memory, .memoryAndFile, .none
-    func downloadData(_ path: String, cacheName: String? = nil, cachingLevel: CachingLevel = .memoryAndFile) async throws -> DataResult {
-        return try await handleDataRequest(.get, path: path, cacheName: cacheName, cachingLevel: cachingLevel, responseType: .data)
+    func downloadData<T: DataDownloadable>(_ path: String, cacheName: String? = nil, cachingLevel: CachingLevel = .memoryAndFile) async -> Result<T, NetworkingError> {
+        return await handleDataRequest(.get, path: path, cacheName: cacheName, cachingLevel: cachingLevel, responseType: .data)
     }
 
     /// Retrieves data from the cache or from the filesystem.

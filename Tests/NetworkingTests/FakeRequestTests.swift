@@ -598,14 +598,12 @@ extension FakeRequestTests {
         let networking = Networking(baseURL: baseURL)
         let pigImage = Image.find(named: "pig.png", inBundle: .module)
         networking.fakeImageDownload("/image/png", image: pigImage)
-        let result = try await networking.downloadImage("/image/png")
+        let result: Result<Image, NetworkingError> = await networking.downloadImage("/image/png")
         switch result {
-        case let .success(response):
-            let pigImageData = pigImage.pngData()
-            let imageData = response.image.pngData()
-            XCTAssertEqual(pigImageData, imageData)
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
+        case let .success(image):
+            XCTAssertEqual(pigImage.pngData(), image.pngData())
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
     }
 
@@ -617,18 +615,16 @@ extension FakeRequestTests {
         let startTime = Date()
         networking.fakeImageDownload("/image/png", image: pigImage, delay: delay)
 
-        let result = try await networking.downloadImage("/image/png")
+        let result: Result<Image, NetworkingError> = await networking.downloadImage("/image/png")
         let endTime = Date()
         let elapsedTime = endTime.timeIntervalSince(startTime)
         XCTAssertGreaterThanOrEqual(elapsedTime, delay, "The delay was not correctly applied")
 
         switch result {
-        case let .success(response):
-            let pigImageData = pigImage.pngData()
-            let imageData = response.image.pngData()
-            XCTAssertEqual(pigImageData, imageData)
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
+        case let .success(image):
+            XCTAssertEqual(pigImage.pngData(), image.pngData())
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
     }
 
@@ -636,30 +632,30 @@ extension FakeRequestTests {
         let networking = Networking(baseURL: baseURL)
         let pigImage = Image.find(named: "pig.png", inBundle: .module)
         networking.fakeImageDownload("/image/png", image: pigImage, statusCode: 401)
-        let result = try await networking.downloadImage("/image/png")
+        let result: Result<Image, NetworkingError> = await networking.downloadImage("/image/png")
         switch result {
         case .success:
             XCTFail()
-        case let .failure(response):
-            XCTAssertEqual(response.error.code, 401)
+        case let .failure(error):
+            guard case let .clientError(statusCode, _) = error else {
+                return XCTFail("expected a client error, got \(error)")
+            }
+            XCTAssertEqual(statusCode, 401)
         }
     }
 
+    // The envelope form keeps the response headers reachable for image downloads.
     func testFakeImageDownloadUsingHeader() async throws {
         let networking = Networking(baseURL: baseURL)
         let pigImage = Image.find(named: "pig.png", inBundle: .module)
         networking.fakeImageDownload("/image/png", image: pigImage, headerFields: ["uid": "12345678"])
-        let result = try await networking.downloadImage("/image/png")
+        let result: Result<ImageResponse, NetworkingError> = await networking.downloadImage("/image/png")
         switch result {
         case let .success(response):
-            let pigImageData = pigImage.pngData()
-            let imageData = response.image.pngData()
-            XCTAssertEqual(pigImageData, imageData)
-
-            let headers = response.headers
-            XCTAssertEqual(headers["uid"] as! String, "12345678")
-        case let .failure(response):
-            XCTFail(response.error.localizedDescription)
+            XCTAssertEqual(pigImage.pngData(), response.image.pngData())
+            XCTAssertEqual(response.headers.string(for: "uid"), "12345678")
+        case let .failure(error):
+            XCTFail(error.localizedDescription)
         }
     }
 

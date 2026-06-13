@@ -51,7 +51,7 @@ class NetworkingIntegrationTests: XCTestCase {
         let folderURL = cachesURL.appendingPathComponent(URL(string: Networking.domain)!.absoluteString)
 
         let networking = Networking(baseURL: baseURL)
-        _ = try await networking.downloadImage("/image/png")
+        let _: Result<Image, NetworkingError> = await networking.downloadImage("/image/png")
         let image = Image.find(named: "sample.jpg", inBundle: .module)
         let data = image.jpgData()
         let filename = cachesURL.appendingPathComponent("sample.jpg")
