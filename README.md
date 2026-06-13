@@ -283,7 +283,7 @@ Faking a request means that after calling this method on a specific path, any ca
 struct Story: Decodable { let id: Int; let title: String }
 
 let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
-networking.fakeGET("/stories", response: [["id" : 47333, "title" : "Site Design: Aquest"]])
+await networking.fakeGET("/stories", response: [["id" : 47333, "title" : "Site Design: Aquest"]])
 let result: Result<[Story], NetworkingError> = await networking.get("/stories")
 // .success carrying the stories
 ```
@@ -294,7 +294,7 @@ If your file is not located in the main bundle you have to specify using the bun
 
 ```swift
 let networking = Networking(baseURL: baseURL)
-networking.fakeGET("/entries", fileName: "entries.json")
+await networking.fakeGET("/entries", fileName: "entries.json")
 let result: Result<JSONResponse, NetworkingError> = await networking.get("/entries")
 // Response with the contents of entries.json
 ```
@@ -305,7 +305,7 @@ If you do not provide a status code for this fake request, the default returned 
 
 ```swift
 let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
-networking.fakeGET("/stories", response: nil, statusCode: 500)
+await networking.fakeGET("/stories", response: nil, statusCode: 500)
 let result: Result<JSONResponse, NetworkingError> = await networking.get("/stories")
 // .failure with status code 500
 ```
@@ -373,7 +373,7 @@ if FileManager.default.fileExists(atPath: destinationURL.path) {
 ```swift
 let networking = Networking(baseURL: baseURL)
 let pigImage = UIImage(named: "pig.png")!
-networking.fakeImageDownload("/image/png", image: pigImage)
+await networking.fakeImageDownload("/image/png", image: pigImage)
 let result: Result<Image, NetworkingError> = await networking.downloadImage("/image/png")
 // Here you'll get the provided pig.png image
 ```
