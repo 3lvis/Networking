@@ -10,10 +10,6 @@ struct Friend: Decodable {
 class GETTests: XCTestCase {
     let baseURL = "http://httpbin.org"
 
-    // I'm not sure how it implement this, since I need a service that returns a faulty status code, meaning not 2XX, and at the same time it returns a JSON response.
-    func testGETWithInvalidPathAndJSONError() {
-    }
-
     // Disabling since I don't know a reliable way to test cancellations in async/await
     /*
     func testCancelGETWithPath() async throws {
