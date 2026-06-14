@@ -493,6 +493,18 @@ await networking.setObserver { event in
 - `RequestContext` carries a unique `id` (shared by the request's `.started`/`.completed`, and stamped into the library's `os.Logger` lines), plus `method`, `url`, and redacted `headers`.
 - `.completed` carries the `Outcome` (`.success(statusCode:byteCount:)` / `.failure(NetworkingError)`), the measured `duration`, and — for real network requests — `TransactionMetrics` distilled from `URLSessionTaskMetrics` (DNS / connect / TLS / request / response timings, byte counts, redirect count, cache hit).
 
+The closure suits fire-and-forget side effects (a network-activity indicator, a quick log). When you'd rather **accumulate or transform** events, use `events()` — an `AsyncStream` you iterate with `for await`, no callback-capture gymnastics:
+
+```swift
+let stream = await networking.events()
+for await event in stream {
+    // plain local state — no @Sendable-closure capture, no boxing
+    if case let .completed(context, outcome, duration, _) = event { … }
+}
+```
+
+Each `events()` call returns its own stream (multiple consumers are fine), and the closure observer still fires alongside it. Both deliver the same `NetworkingEvent`.
+
 **Redaction.** `Authorization`, the active auth-header key, `Cookie`, and `Set-Cookie` are replaced with `<redacted>` in `RequestContext.headers`. Change the set:
 
 ```swift

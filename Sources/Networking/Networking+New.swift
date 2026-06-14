@@ -38,7 +38,7 @@ extension Networking {
             if let fakeRequest = try FakeRequest.find(ofType: requestType, forPath: path, in: fakeRequests) {
                 let fakeContext = makeContext(id: requestID, method: requestType.rawValue, url: try? composedURL(with: path), headers: headerFields ?? [:])
                 context = fakeContext
-                observer?(.started(fakeContext))
+                emit(.started(fakeContext))
                 let (fakeResult, fakeStatus, fakeBytes): (Result<T, NetworkingError>, Int, Int) = try await handleFakeRequest(fakeRequest, path: path, requestType: requestType)
                 result = fakeResult
                 statusCode = fakeStatus
@@ -47,7 +47,7 @@ extension Networking {
                 let request = try createRequest(path: path, requestType: requestType, body: body, query: query)
                 let requestContext = makeContext(id: requestID, method: requestType.rawValue, url: request.url, headers: request.allHTTPHeaderFields ?? [:])
                 context = requestContext
-                observer?(.started(requestContext))
+                emit(.started(requestContext))
 
                 // Key off the request's full effective URL so distinct requests never collide (e.g.
                 // full-URL GETs to different hosts). Passed as the cacheName so destinationURL uses it
@@ -87,7 +87,7 @@ extension Networking {
             if context == nil {
                 let errorContext = makeContext(id: requestID, method: requestType.rawValue, url: nil, headers: headerFields ?? [:])
                 context = errorContext
-                observer?(.started(errorContext))
+                emit(.started(errorContext))
             }
             result = mapThrownError(error, path: path)
         }
@@ -112,7 +112,7 @@ extension Networking {
                 logFailure(context, error: error)
             }
         }
-        observer?(.completed(context, outcome: outcome, duration: duration, metrics: metrics))
+        emit(.completed(context, outcome: outcome, duration: duration, metrics: metrics))
         return result
     }
 
@@ -122,7 +122,7 @@ extension Networking {
         let requestID = UUID()
         record("→ \(requestType.rawValue) \(path) [\(requestID.uuidString)]", level: .info)
         let context = makeContext(id: requestID, method: requestType.rawValue, url: try? composedURL(with: path), headers: headerFields ?? [:])
-        observer?(.started(context))
+        emit(.started(context))
         return complete(.failure(error), context: context, statusCode: nil, byteCount: 0, metrics: nil, duration: .zero)
     }
 

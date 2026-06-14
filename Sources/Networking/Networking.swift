@@ -86,6 +86,36 @@ public actor Networking {
         self.observer = observer
     }
 
+    // Live `events()` consumers. Each call to `events()` registers a continuation here; `emit` fans out
+    // to all of them, and `onTermination` drops one when its consumer's task ends.
+    private var streamContinuations: [UUID: AsyncStream<NetworkingEvent>.Continuation] = [:]
+
+    /// A stream of observability events — the structured-concurrency counterpart to `setObserver`.
+    /// Iterate it with `for await event in await networking.events()` to accumulate/transform events
+    /// without the `@Sendable`-closure capture dance. Each call returns its own multicast stream; the
+    /// closure observer still fires too. Buffer keeps the newest 256 events for a slow consumer.
+    public func events() -> AsyncStream<NetworkingEvent> {
+        let (stream, continuation) = AsyncStream.makeStream(of: NetworkingEvent.self, bufferingPolicy: .bufferingNewest(256))
+        let id = UUID()
+        streamContinuations[id] = continuation
+        continuation.onTermination = { [weak self] _ in
+            Task { await self?.removeContinuation(id) }
+        }
+        return stream
+    }
+
+    private func removeContinuation(_ id: UUID) {
+        streamContinuations[id] = nil
+    }
+
+    /// The single fan-out point for observability events: the closure observer and every live `events()` stream.
+    func emit(_ event: NetworkingEvent) {
+        observer?(event)
+        for continuation in streamContinuations.values {
+            continuation.yield(event)
+        }
+    }
+
     /// Whether the library emits its own diagnostics — request starts and failures. On by default:
     /// this is the out-of-the-box logging, sent to `os.Logger` (Xcode console / Console.app) and, when
     /// a log file is configured, mirrored there. Turn it off for release builds; `setObserver` still fires.
