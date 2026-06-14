@@ -23,42 +23,106 @@ extension Networking {
     }
 
     func handle<T: Decodable>(_ requestType: RequestType, path: String, body: RequestBody = .none, query: [URLQueryItem] = [], cachingLevel: CachingLevel = .none) async -> Result<T, NetworkingError> {
+        let requestID = UUID()
+        let clock = ContinuousClock()
+        let startInstant = clock.now
+        record("→ \(requestType.rawValue) \(path) [\(requestID.uuidString)]", level: .info)
+
+        var context: RequestContext?
+        let result: Result<T, NetworkingError>
+        var statusCode: Int?
+        var byteCount = 0
+        var metrics: TransactionMetrics?
+
         do {
-            logger.info("Starting \(requestType.rawValue) request to \(path, privacy: .public)")
-
             if let fakeRequest = try FakeRequest.find(ofType: requestType, forPath: path, in: fakeRequests) {
-                return try await handleFakeRequest(fakeRequest, path: path, requestType: requestType)
-            }
+                let fakeContext = makeContext(id: requestID, method: requestType.rawValue, url: try? composedURL(with: path), headers: headerFields ?? [:])
+                context = fakeContext
+                observer?(.started(fakeContext))
+                let (fakeResult, fakeStatus, fakeBytes): (Result<T, NetworkingError>, Int, Int) = try await handleFakeRequest(fakeRequest, path: path, requestType: requestType)
+                result = fakeResult
+                statusCode = fakeStatus
+                byteCount = fakeBytes
+            } else {
+                let request = try createRequest(path: path, requestType: requestType, body: body, query: query)
+                let requestContext = makeContext(id: requestID, method: requestType.rawValue, url: request.url, headers: request.allHTTPHeaderFields ?? [:])
+                context = requestContext
+                observer?(.started(requestContext))
 
-            let request = try createRequest(path: path, requestType: requestType, body: body, query: query)
-            // Key off the request's full effective URL so distinct requests never collide (e.g.
-            // full-URL GETs to different hosts). Passed as the cacheName so destinationURL uses it
-            // verbatim instead of re-prepending the baseURL.
-            let cacheKey = cacheKey(for: request, fallbackPath: path)
-            if cachingLevel != .none,
-                let cachedData = try objectFromCache(for: path, cacheName: cacheKey, cachingLevel: cachingLevel, responseType: .json) as? Data,
-                let cached = try? JSONDecoder().decode(CachedResponse.self, from: cachedData),
-                let url = request.url,
-                let cachedResponse = HTTPURLResponse(url: url, statusCode: cached.statusCode, httpVersion: nil, headerFields: cached.headers) {
-                return handleSuccessfulResponse(responseData: cached.body, path: path, httpResponse: cachedResponse)
-            }
-
-            let (responseData, response) = try await session.data(for: request)
-            let result: Result<T, NetworkingError> = handleResponse(responseData: responseData, response: response, path: path)
-            if cachingLevel != .none, case .success = result, let httpResponse = response as? HTTPURLResponse {
-                let headers = Dictionary(uniqueKeysWithValues: httpResponse.allHeaderFields.compactMap { key, value in
-                    (key as? String).map { ($0, "\(value)") }
-                })
-                let envelope = CachedResponse(statusCode: httpResponse.statusCode, headers: headers, body: responseData)
-                if let encoded = try? JSONEncoder().encode(envelope) {
-                    try? cacheOrPurgeData(data: encoded, path: path, cacheName: cacheKey, cachingLevel: cachingLevel)
+                // Key off the request's full effective URL so distinct requests never collide (e.g.
+                // full-URL GETs to different hosts). Passed as the cacheName so destinationURL uses it
+                // verbatim instead of re-prepending the baseURL.
+                let cacheKey = cacheKey(for: request, fallbackPath: path)
+                if cachingLevel != .none,
+                    let cachedData = try objectFromCache(for: path, cacheName: cacheKey, cachingLevel: cachingLevel, responseType: .json) as? Data,
+                    let cached = try? JSONDecoder().decode(CachedResponse.self, from: cachedData),
+                    let url = request.url,
+                    let cachedResponse = HTTPURLResponse(url: url, statusCode: cached.statusCode, httpVersion: nil, headerFields: cached.headers) {
+                    result = handleSuccessfulResponse(responseData: cached.body, path: path, httpResponse: cachedResponse)
+                    statusCode = cached.statusCode
+                    byteCount = cached.body.count
+                } else {
+                    // The per-task delegate collects URLSessionTaskMetrics for the .completed event.
+                    let collector = MetricsCollector()
+                    let (responseData, response) = try await session.data(for: request, delegate: collector)
+                    let networkResult: Result<T, NetworkingError> = handleResponse(responseData: responseData, response: response, path: path)
+                    if cachingLevel != .none, case .success = networkResult, let httpResponse = response as? HTTPURLResponse {
+                        let headers = Dictionary(uniqueKeysWithValues: httpResponse.allHeaderFields.compactMap { key, value in
+                            (key as? String).map { ($0, "\(value)") }
+                        })
+                        let envelope = CachedResponse(statusCode: httpResponse.statusCode, headers: headers, body: responseData)
+                        if let encoded = try? JSONEncoder().encode(envelope) {
+                            try? cacheOrPurgeData(data: encoded, path: path, cacheName: cacheKey, cachingLevel: cachingLevel)
+                        }
+                    }
+                    result = networkResult
+                    statusCode = (response as? HTTPURLResponse)?.statusCode
+                    byteCount = responseData.count
+                    metrics = collector.metrics.flatMap(TransactionMetrics.init)
                 }
             }
-            return result
-
         } catch {
-            return mapThrownError(error, path: path)
+            // A failure before the request context was built (e.g. URL building) still emits a paired
+            // .started/.completed so observers see every request.
+            if context == nil {
+                let errorContext = makeContext(id: requestID, method: requestType.rawValue, url: nil, headers: headerFields ?? [:])
+                context = errorContext
+                observer?(.started(errorContext))
+            }
+            result = mapThrownError(error, path: path)
         }
+
+        let duration = clock.now - startInstant
+        let outcome: Outcome
+        switch result {
+        case .success:
+            outcome = .success(statusCode: statusCode ?? 0, byteCount: byteCount)
+            if let context {
+                record("← \(statusCode ?? 0) (\(byteCount) bytes) in \(duration) [\(context.id.uuidString)]", level: .info)
+            }
+        case let .failure(error):
+            outcome = .failure(error)
+            // Out-of-the-box failure logging (os.Logger + optional file). Cancellations are intentional, so not logged as errors.
+            if !error.isCancelled, let context {
+                logFailure(context, error: error)
+            }
+        }
+        if let context {
+            observer?(.completed(context, outcome: outcome, duration: duration, metrics: metrics))
+        }
+        return result
+    }
+
+    private func makeContext(id: UUID, method: String, url: URL?, headers: [String: String]) -> RequestContext {
+        RequestContext(id: id, method: method, url: url, headers: redactedHeaders(headers))
+    }
+
+    private func logFailure(_ context: RequestContext, error: NetworkingError) {
+        var message = "✗ \(context.method) \(context.url?.absoluteString ?? "") [\(context.id.uuidString)] failed: \(error.errorDescription ?? "request failed")"
+        if let snippet = error.responseMetadata?.bodySnippet {
+            message += " — body: \(snippet)"
+        }
+        record(message, level: .error)
     }
 
     // Persists the response's status code and headers so a cache hit reproduces real metadata, not fabricated values.
@@ -81,7 +145,7 @@ extension Networking {
         return components.string ?? url.absoluteString
     }
 
-    private func handleFakeRequest<T: Decodable>(_ fakeRequest: FakeRequest, path: String, requestType: RequestType) async throws -> Result<T, NetworkingError> {
+    private func handleFakeRequest<T: Decodable>(_ fakeRequest: FakeRequest, path: String, requestType: RequestType) async throws -> (Result<T, NetworkingError>, statusCode: Int, byteCount: Int) {
         let (response, _) = try handleFakeRequest(fakeRequest, path: path, cacheName: nil, cachingLevel: .none)
 
         if fakeRequest.delay > 0 {
@@ -95,7 +159,8 @@ extension Networking {
         } else {
             responseData = Data()
         }
-        return handleResponse(responseData: responseData, response: response, path: path)
+        let result: Result<T, NetworkingError> = handleResponse(responseData: responseData, response: response, path: path)
+        return (result, response.statusCode, responseData.count)
     }
 
     private func createRequest(path: String, requestType: RequestType, body: RequestBody, query: [URLQueryItem]) throws -> URLRequest {
@@ -215,7 +280,6 @@ extension Networking {
             do {
                 return .success(try decoder.decode(T.self, from: responseData))
             } catch let error as DecodingError {
-                logger.error("Failed to decode response: \(error.detailedMessage, privacy: .public)")
                 return .failure(.decoding(error, responseMetadata(httpResponse, body: responseData)))
             } catch {
                 return .failure(.invalidResponse) // JSONDecoder only throws DecodingError; unreachable.
@@ -248,14 +312,12 @@ extension Networking {
             if urlError.code == .badURL {
                 return .failure(.invalidRequest(.invalidURL(path)))
             }
-            logger.error("Transport error for \(path, privacy: .public): \(urlError.localizedDescription, privacy: .public)")
             return .failure(.transport(urlError))
         }
         // composedURL throws an NSError in our domain when the URL can't be built from baseURL + path.
         if (error as NSError).domain == Networking.domain {
             return .failure(.invalidRequest(.invalidURL(path)))
         }
-        logger.error("Unexpected error for \(path, privacy: .public): \(error.localizedDescription, privacy: .public)")
         return .failure(.transport(URLError(.unknown)))
     }
 }

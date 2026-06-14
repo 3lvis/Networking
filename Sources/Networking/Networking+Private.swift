@@ -175,24 +175,15 @@ extension Networking {
 
         let (data, response) = try await self.session.data(for: request)
 
-        var returnedResponse: URLResponse?
-        var returnedData: Data?
-
-        returnedResponse = response
-        returnedData = data
-
         if let httpResponse = response as? HTTPURLResponse {
-            if httpResponse.statusCode >= 200 && httpResponse.statusCode < 300 {
-                returnedData = data
-            } else {
-                if let unauthorizedRequestCallback = self.unauthorizedRequestCallback, httpResponse.statusCode == 403 || httpResponse.statusCode == 401 {
-                    unauthorizedRequestCallback()
-                }
+            if !(httpResponse.statusCode >= 200 && httpResponse.statusCode < 300),
+               let unauthorizedRequestCallback = self.unauthorizedRequestCallback,
+               httpResponse.statusCode == 403 || httpResponse.statusCode == 401 {
+                unauthorizedRequestCallback()
             }
 
             try self.cacheOrPurgeData(data: data, path: path, cacheName: nil, cachingLevel: cachingLevel)
 
-            self.logError(data: returnedData, request: request, response: returnedResponse, error: nil)
             return (data, httpResponse)
         } else {
             let url = try self.composedURL(with: path)
@@ -219,57 +210,6 @@ extension Networking {
                 break
             }
         }
-    }
-
-    func logError(data: Data?, request: URLRequest?, response: URLResponse?, error: NSError?) {
-        guard isErrorLoggingEnabled else { return }
-        guard let error = error else { return }
-
-        print(" ")
-        print("========== Networking Error ==========")
-        print(" ")
-
-        let isCancelled = error.code == NSURLErrorCancelled
-        if isCancelled {
-            if let request = request, let url = request.url {
-                print("Cancelled request: \(url.absoluteString)")
-                print(" ")
-            }
-        } else {
-            print("*** Request ***")
-            print(" ")
-
-            print("Error \(error.code): \(error.description)")
-            print(" ")
-
-            if let request = request, let url = request.url {
-                print("URL: \(url.absoluteString)")
-                print(" ")
-            }
-
-            if let headers = request?.allHTTPHeaderFields {
-                print("Headers: \(headers)")
-                print(" ")
-            }
-
-            if let data = data, let stringData = String(data: data, encoding: .utf8) {
-                print("Data: \(stringData)")
-                print(" ")
-            }
-
-            if let response = response as? HTTPURLResponse {
-                print("*** Response ***")
-                print(" ")
-
-                print("Headers: \(response.allHeaderFields)")
-                print(" ")
-
-                print("Status code: \(response.statusCode) — \(HTTPURLResponse.localizedString(forStatusCode: response.statusCode))")
-                print(" ")
-            }
-        }
-        print("================= ~ ==================")
-        print(" ")
     }
 
     nonisolated func cacheOrPurgeData(data: Data?, path: String, cacheName: String?, cachingLevel: CachingLevel) throws {

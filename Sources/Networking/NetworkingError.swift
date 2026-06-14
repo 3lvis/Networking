@@ -30,6 +30,12 @@ public extension NetworkingError {
         }
     }
 
+    /// Whether this is a cancellation — used to skip logging intentional cancels as errors.
+    var isCancelled: Bool {
+        if case .cancelled = self { return true }
+        return false
+    }
+
     /// The response metadata, when the failure carries a response (`.http` or `.decoding`).
     var responseMetadata: ResponseMetadata? {
         switch self {

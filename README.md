@@ -34,7 +34,7 @@
 * [Cancelling a request](#cancelling-a-request)
 * [Faking a request](#faking-a-request)
 * [Downloading and caching an image](#downloading-and-caching-an-image)
-* [Logging errors](#logging-errors)
+* [Observing requests](#observing-requests)
 * [Updating the Network Activity Indicator](#updating-the-network-activity-indicator)
 * [Installing](#installing)
 * [Author](#author)
@@ -466,59 +466,75 @@ let result: Result<Image, NetworkingError> = await networking.downloadImage("/im
 // Here you'll get the provided pig.png image
 ```
 
-## Logging errors
+## Observing requests
 
-Any error catched by **Networking** will be printed in your console. This is really convenient since you want to know why your networking call failed anyway.
-
-For example a cancelled request will print this:
-
-```shell
-========== Networking Error ==========
-
-Cancelled request: https://api.mmm.com/38bea9c8b75bfed1326f90c48675fce87dd04ae6/thumb/small
-
-================= ~ ==================
-```
-
-A 404 request will print something like this:
-
-```shell
-========== Networking Error ==========
-
-*** Request ***
-
-Error 404: Error Domain=NetworkingErrorDomain Code=404 "not found" UserInfo={NSLocalizedDescription=not found}
-
-URL: http://example.com/posdddddt
-
-Headers: ["Accept": "application/json", "Content-Type": "application/json"]
-
-Parameters: {
-  "password" : "secret",
-  "username" : "jameson"
-}
-
-Data: <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
-<title>404 Not Found</title>
-<h1>Not Found</h1>
-<p>The requested URL was not found on the server.  If you entered the URL manually please check your spelling and try again.</p>
-
-
-*** Response ***
-
-Headers: ["Content-Length": 233, "Server": nginx, "Access-Control-Allow-Origin": *, "Content-Type": text/html, "Date": Sun, 29 May 2016 07:19:13 GMT, "Access-Control-Allow-Credentials": true, "Connection": keep-alive]
-
-Status code: 404 — not found
-
-================= ~ ==================
-```
-
-To disable error logging:
+**Networking** doesn't print to the console. Instead, set an observer to receive a structured event for every request — one `.started` and one `.completed` — for logging, analytics, a network-activity indicator, or debugging:
 
 ```swift
 let networking = Networking(baseURL: "http://example.com")
-await networking.setErrorLoggingEnabled(false)
+await networking.setObserver { event in
+    switch event {
+    case let .started(context):
+        print("→ [\(context.id)] \(context.method) \(context.url?.absoluteString ?? "")")
+    case let .completed(context, outcome, duration, metrics):
+        switch outcome {
+        case let .success(statusCode, byteCount):
+            print("← [\(context.id)] \(statusCode) (\(byteCount) bytes) in \(duration)")
+        case let .failure(error):
+            print("✗ [\(context.id)] \(error.localizedDescription) — retryable: \(error.isRetryable)")
+        }
+        if let metrics {
+            print("   DNS \(metrics.domainLookup ?? 0)s · TLS \(metrics.secureConnection ?? 0)s")
+        }
+    }
+}
 ```
+
+- `RequestContext` carries a unique `id` (shared by the request's `.started`/`.completed`, and stamped into the library's `os.Logger` lines), plus `method`, `url`, and redacted `headers`.
+- `.completed` carries the `Outcome` (`.success(statusCode:byteCount:)` / `.failure(NetworkingError)`), the measured `duration`, and — for real network requests — `TransactionMetrics` distilled from `URLSessionTaskMetrics` (DNS / connect / TLS / request / response timings, byte counts, redirect count, cache hit).
+
+**Redaction.** `Authorization`, the active auth-header key, `Cookie`, and `Set-Cookie` are replaced with `<redacted>` in `RequestContext.headers`. Change the set:
+
+```swift
+await networking.setRedactedHeaderFields(["Authorization", "X-Api-Key"])
+```
+
+### Built-in logging
+
+Out of the box — no observer required — the library logs each request start and **every failure** (HTTP 4xx/5xx, decoding, transport, invalid-request) to Apple's unified logging (`os.Logger`, subsystem `com.elvisnunez.networking`), tagged with the request id. This is the modern replacement for console `print`: it appears automatically in the Xcode console and Console.app, is filterable by subsystem/level, and honors privacy annotations. Failure logs include the status, error description, and the redacted body snippet.
+
+Silence the built-in logger (e.g. for release builds) without affecting your observer:
+
+```swift
+await networking.setLoggingEnabled(false)
+```
+
+**Reading logs from a CLI / test / headless run.** `os.Logger` isn't visible in `swift test` / `swift run` stdout. Point the library at a file and it mirrors the same diagnostics there as plain text:
+
+```swift
+await networking.setLogFileURL(URL(fileURLWithPath: "/tmp/networking.log"))
+```
+
+Or set it with **no code change** via the `NETWORKING_LOG_FILE` environment variable — handy for CI or an automated agent:
+
+```shell
+NETWORKING_LOG_FILE=/tmp/networking.log swift test
+cat /tmp/networking.log
+# 2026-06-14T20:09:58Z → GET /get [F97CE6EB-…]
+# 2026-06-14T20:09:58Z ← 200 (452 bytes) in 0.022s [F97CE6EB-…]
+# 2026-06-14T20:09:58Z ✗ GET …/status/404 [C3569F63-…] failed: The server returned status 404 (not found).
+```
+
+`NETWORKING_LOG_FILE` accepts an absolute path **or a bare filename** — a bare name resolves under the app's Caches directory (sandbox-safe; the same default location CocoaLumberjack uses). That makes it work inside a **running app on the simulator**, where you inject it at launch and read it back from the app's container:
+
+```shell
+# simctl forwards SIMCTL_CHILD_-prefixed vars into the app (prefix stripped)
+xcrun simctl launch SIMCTL_CHILD_NETWORKING_LOG_FILE=networking.log <device> <bundle-id>
+dir=$(xcrun simctl get_app_container <device> <bundle-id> data)
+cat "$dir/Library/Caches/networking.log"
+```
+
+(On a physical device there's no `simctl`; fall back to Console.app / `os.Logger`.)
 
 ## Installing
 
