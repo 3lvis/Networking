@@ -15,11 +15,12 @@ Async HTTP client for Apple platforms. **iOS 18+ / Swift 6** (`swift-tools 6.2`,
 - **Verbs:** `get`/`post`/`put`/`patch`/`delete` → `Result<T, NetworkingError>`. Pick `T`: any `Decodable` model, `Data`, `Void`, or `JSONResponse` (`{ statusCode, headers, body }`) when you want metadata.
 - **Typed bodies — no `Any`.** The encoding is chosen by the method, not an untyped `parameters:`/`parameterType:` pair (`Networking+HTTPRequests.swift`): `post`/`put`/`patch` take `body:` (any `Encodable` → JSON, ISO-8601 dates), `form:` (any flat `Encodable` → url-encoded), `parts:`+`fields:` (multipart), or `data:contentType:` (raw); `get`/`delete` take `query:` (a `[URLQueryItem]` for ordering/dupes, or any flat `Encodable`). `form:`/`query:` flatten an `Encodable` to `[String: String]` via `formFields` in `Networking+FormEncoding.swift` (JSON bridge + scalar re-decode so `Bool`→"true", not NSNumber "1"). Bodies flow through the typed `RequestBody` enum in `Networking+New.swift`.
 - **Downloads:** `downloadImage`/`downloadData` → `Result<T, NetworkingError>` where `T` is the payload (`Image`/`Data`) or an envelope (`ImageResponse`/`DataResponse`).
-- **Fakes (testing):** `fakeGET`/`fakePOST`/… take `response:` over any `Encodable` (encoded to JSON), a no-body overload for status-only fakes, or `fileName:` for bundled raw `Data`; `FakeRequest` holds a typed `Payload` enum. Errors are `NetworkingError`.
+- **Fakes (testing):** `fakeGET`/`fakePOST`/… take `response:` over any `Encodable` (encoded to JSON), a no-body overload for status-only fakes, or `fileName:` for bundled raw `Data`; `FakeRequest` holds a typed `Payload` enum.
+- **Errors (`NetworkingError.swift`):** categorized by where the failure happened — `invalidRequest(InvalidRequestReason)`, `transport(URLError)`, `http(HTTPError)`, `decoding(DecodingError, ResponseMetadata)`, `invalidResponse`, `cancelled`. `HTTPError` carries `statusCode`/`serverMessage`/`isClientError`/`isServerError`/`metadata`; cross-cutting `statusCode`, `responseMetadata`, and conservative `isRetryable` (transient transport + 408/429/5xx). Construction lives in `Networking+New.swift` (`handleResponse`/`handleSuccessfulResponse`/`mapThrownError`).
 
 ## Roadmap
 
-`docs/roadmap.md`. The async/`Result`/Swift-6 modernization is done, and #1 (typed request API — fully off `Any`) has landed. Next up (highest-leverage, dependency-free): a richer error model (#2), structured observability replacing `print` (#3).
+`docs/roadmap.md`. The async/`Result`/Swift-6 modernization is done; #1 (typed request API — fully off `Any`) and #2 (richer error model) have landed. Next up (highest-leverage, dependency-free): structured observability replacing `print` (#3).
 
 ## Conventions
 

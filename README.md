@@ -23,6 +23,7 @@
 * [Making a request](#making-a-request)
   * [The basics](#the-basics)
   * [The Result type](#the-result-type)
+  * [Handling errors](#handling-errors)
   * [Typed request bodies](#typed-request-bodies)
 * [Choosing how the body is encoded](#choosing-how-the-body-is-encoded)
     * [JSON](#json)
@@ -191,12 +192,53 @@ case .success(let recipes):
     // recipes is [Recipe] — fully typed, no optionals
     print(recipes.map(\.title))
 case .failure(let error):
-    // error is a NetworkingError carrying the status code and message
+    // error is a NetworkingError — see "Handling errors" below
     print(error.localizedDescription)
 }
 ```
 
 Use `JSONResponse` as the type when you want the raw `statusCode`, `headers`, and `body` instead of a model.
+
+### Handling errors
+
+`NetworkingError` is categorized by *where* the request failed, so you can branch on the cause instead of parsing a message. Each case preserves the underlying error or response:
+
+```swift
+switch result {
+case .success(let value):
+    break
+case .failure(let error):
+    switch error {
+    case .invalidRequest(let reason):
+        // Couldn't build/encode the request — a caller-side bug. reason says which.
+        break
+    case .transport(let urlError):
+        // Never reached the server: offline, DNS, TLS, timeout. The underlying URLError is intact.
+        break
+    case .http(let httpError):
+        // A non-2xx response. httpError.statusCode, .serverMessage, .isClientError/.isServerError,
+        // and .metadata (headers + a truncated body snippet).
+        break
+    case .decoding(let decodingError, let metadata):
+        // 2xx but the body didn't match your type. The DecodingError and response metadata are preserved.
+        break
+    case .invalidResponse:
+        break
+    case .cancelled:
+        break
+    }
+}
+```
+
+Two conveniences cut across the cases:
+
+```swift
+error.statusCode      // Int? — present for .http and .decoding
+error.responseMetadata // ResponseMetadata? — status, headers, redaction-friendly body snippet
+error.isRetryable      // Bool — conservative: transient transport failures + HTTP 408/429/5xx
+```
+
+`isRetryable` is deliberately conservative: only transport timeouts/connection failures and a small set of status codes (408, 429, 500, 502, 503, 504). A 4xx (other than 408/429), a decoding failure, or an invalid request is never reported as retryable.
 
 ### Typed request bodies
 
@@ -345,7 +387,7 @@ let result: Result<JSONResponse, NetworkingError> = await networking.get("/entri
 
 **Faking with status code**:
 
-If you do not provide a status code for this fake request, the default returned one will be 200 (SUCCESS), but if you do provide a status code that is not 2XX, then **Networking** will return an NSError containing the status code and a proper error description.
+If you do not provide a status code for this fake request, the default returned one will be 200 (SUCCESS), but if you do provide a status code that is not 2xx, then **Networking** returns `.failure(.http(HTTPError))` carrying that status code (and any parsed `serverMessage`) — see [Handling errors](#handling-errors).
 
 Use the no-body overload (omit `response:`) for a status-code-only fake:
 

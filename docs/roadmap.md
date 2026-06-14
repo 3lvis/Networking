@@ -27,7 +27,11 @@ External review: the foundation is solid, but a top-tier Swift HTTP library woul
     - **Fakes:** `fake*(response:)` takes any `Encodable` (encoded to JSON), plus a no-body overload and the existing `fileName:` variant; `FakeRequest` stores a typed `Payload` enum. Internals (`handle`/`createRequest`/`httpBody`, `RequestBody`, `URLRequest` init `contentType:`, `logError`) carry no `Any`.
     - Header *values* were already `[String: String]`; a typed header-*name* vocabulary (enum of well-known keys) is a possible future ergonomics nicety, not an `Any` fix. The only remaining `Any` is the download cache substrate (`NSCache<AnyObject, AnyObject>`) and `AnyCodable` response bodies — both out of scope here.
 
-2. **Richer error model.** `NetworkingError` (`NetworkingError.swift`) collapses transport, decoding, server payload, cancellation, invalid-response, and "unexpected" into broad cases. Redesign around categories (transport / HTTP / decoding) that **preserve** the underlying `URLError`/`DecodingError`, response metadata, a redaction-safe body snippet, and retryability. Breaking — pairs with the error call sites.
+2. ~~**Richer error model.**~~ ✅ `NetworkingError` (`NetworkingError.swift`) is now categorized by where the failure happened, preserving the underlying cause:
+    - `invalidRequest(InvalidRequestReason)` (bad URL / un-encodable body or params), `transport(URLError)`, `http(HTTPError)`, `decoding(DecodingError, ResponseMetadata)`, `invalidResponse`, `cancelled`.
+    - `HTTPError` carries `statusCode`, `serverMessage` (parsed from the error body), `isClientError`/`isServerError`, and `ResponseMetadata` (headers + a truncated, log-friendly body snippet). `decoding` keeps the live `DecodingError` (Sendable in this SDK) + metadata.
+    - Cross-cutting conveniences: `statusCode`, `responseMetadata`, and a conservative `isRetryable` (transient transport failures + HTTP 408/429/5xx only).
+    - The old flat `clientError`/`serverError`/`unexpectedError`/`invalidURL` cases and the `ParameterType`-era `[String: any Sendable]` details bag are gone.
 
 3. **Structured observability — remove `print`.** `logError` writes to the console unconditionally (`Networking+Private.swift`). Replace with consumer-supplied structured logging hooks, `URLSessionTaskMetrics`, request IDs, redaction, and optional signposts. No unconditional printing.
 

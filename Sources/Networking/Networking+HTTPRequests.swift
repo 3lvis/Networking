@@ -198,7 +198,7 @@ extension Networking {
             data = try Self.requestBodyEncoder.encode(body)
         } catch {
             logger.error("Failed to encode request body: \(error.localizedDescription, privacy: .public)")
-            return .failure(.unexpectedError(statusCode: nil, message: "Failed to encode request body: \(error.localizedDescription)"))
+            return .failure(.invalidRequest(.bodyEncodingFailed(message: error.localizedDescription)))
         }
         return await handle(requestType, path: path, body: .json(data))
     }
@@ -221,7 +221,7 @@ extension Networking {
             fields = try formFields(from: form)
         } catch {
             logger.error("Failed to encode form parameters: \(error.localizedDescription, privacy: .public)")
-            return .failure(.unexpectedError(statusCode: nil, message: "Failed to encode form parameters: \(error.localizedDescription)"))
+            return .failure(.invalidRequest(.parameterEncodingFailed(message: error.localizedDescription)))
         }
         return await handle(requestType, path: path, body: .formURLEncoded(fields))
     }
@@ -232,7 +232,7 @@ extension Networking {
             items = try formFields(from: query).map { URLQueryItem(name: $0.key, value: $0.value) }
         } catch {
             logger.error("Failed to encode query parameters: \(error.localizedDescription, privacy: .public)")
-            return .failure(.unexpectedError(statusCode: nil, message: "Failed to encode query parameters: \(error.localizedDescription)"))
+            return .failure(.invalidRequest(.parameterEncodingFailed(message: error.localizedDescription)))
         }
         return await handle(requestType, path: path, query: items, cachingLevel: cachingLevel)
     }
