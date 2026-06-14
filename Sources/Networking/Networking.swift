@@ -116,14 +116,14 @@ public actor Networking {
         }
     }
 
-    /// Whether the library emits its own diagnostics — request starts and failures. On by default:
-    /// this is the out-of-the-box logging, sent to `os.Logger` (Xcode console / Console.app) and, when
-    /// a log file is configured, mirrored there. Turn it off for release builds; `setObserver` still fires.
-    public var isLoggingEnabled = true
+    /// Verbosity of the built-in `os.Logger`/file diagnostics — `.none` / `.basic` (default) / `.headers`
+    /// / `.body`, à la OkHttp's `HttpLoggingInterceptor`. Gates and shapes *only* the built-in logging;
+    /// `setObserver` and `events()` always carry full structured events regardless.
+    public var logLevel: LogLevel = .basic
 
-    /// Enables or disables the built-in diagnostics (actor-isolated setter).
-    public func setLoggingEnabled(_ enabled: Bool) {
-        self.isLoggingEnabled = enabled
+    /// Sets the built-in logging verbosity (actor-isolated setter).
+    public func setLogLevel(_ level: LogLevel) {
+        self.logLevel = level
     }
 
     /// When set, the built-in diagnostics are *also* appended to this file as plain text — so a CLI or
@@ -138,7 +138,7 @@ public actor Networking {
 
     /// Emits one built-in diagnostic line to `os.Logger` and, if configured, to the log file.
     func record(_ message: String, level: OSLogType) {
-        guard isLoggingEnabled else { return }
+        guard logLevel != .none else { return }
         logger.log(level: level, "\(message, privacy: .public)")
         appendToLogFile(message)
     }

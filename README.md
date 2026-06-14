@@ -515,11 +515,16 @@ await networking.setRedactedHeaderFields(["Authorization", "X-Api-Key"])
 
 Out of the box — no observer required — the library logs each request start and **every failure** (HTTP 4xx/5xx, decoding, transport, invalid-request) to Apple's unified logging (`os.Logger`, subsystem `com.elvisnunez.networking`), tagged with the request id. This is the modern replacement for console `print`: it appears automatically in the Xcode console and Console.app, is filterable by subsystem/level, and honors privacy annotations. Failure logs include the status, error description, and the redacted body snippet.
 
-Silence the built-in logger (e.g. for release builds) without affecting your observer:
+Control the verbosity with `setLogLevel` — modeled on OkHttp's `HttpLoggingInterceptor` levels:
 
 ```swift
-await networking.setLoggingEnabled(false)
+await networking.setLogLevel(.none)     // silent (observer/events() still fire)
+await networking.setLogLevel(.basic)    // default — request/response lines + failures
+await networking.setLogLevel(.headers)  // also redacted request & response headers
+await networking.setLogLevel(.body)     // also truncated request & response bodies
 ```
+
+`.headers`/`.body` add detail for the network request path; bodies can carry sensitive data (the same caveat OkHttp's docs give), so `.body` is opt-in and header redaction still applies. The verbosity gates *only* the built-in `os.Logger`/file output — `setObserver` and `events()` always deliver full structured events.
 
 **Reading logs from a CLI / test / headless run.** `os.Logger` isn't visible in `swift test` / `swift run` stdout. Point the library at a file and it mirrors the same diagnostics there as plain text:
 

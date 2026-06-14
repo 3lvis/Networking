@@ -79,6 +79,7 @@ extension Networking {
                     statusCode = (response as? HTTPURLResponse)?.statusCode
                     byteCount = responseData.count
                     metrics = collector.metrics.flatMap(TransactionMetrics.init)
+                    logVerbose(requestContext: requestContext, requestBody: body, response: response as? HTTPURLResponse, responseData: responseData)
                 }
             }
         } catch {
@@ -312,6 +313,43 @@ extension Networking {
         guard !data.isEmpty, let string = String(data: data, encoding: .utf8) else { return nil }
         guard string.count > limit else { return string }
         return String(string.prefix(limit)) + "… (truncated)"
+    }
+
+    // Extra built-in log lines for `.headers`/`.body`. The request headers are already redacted (they come
+    // from the context); response headers get the same redaction. Bodies are truncated like everything else.
+    private func logVerbose(requestContext: RequestContext, requestBody: RequestBody, response: HTTPURLResponse?, responseData: Data) {
+        guard logLevel >= .headers else { return }
+        for (key, value) in requestContext.headers.sorted(by: { $0.key < $1.key }) {
+            record("  → \(key): \(value)", level: .debug)
+        }
+        if let response {
+            let responseHeaders = Dictionary(uniqueKeysWithValues: response.allHeaderFields.compactMap { key, value in
+                (key as? String).map { ($0, "\(value)") }
+            })
+            for (key, value) in redactedHeaders(responseHeaders).sorted(by: { $0.key < $1.key }) {
+                record("  ← \(key): \(value)", level: .debug)
+            }
+        }
+        guard logLevel >= .body else { return }
+        if let requestBodyText = requestBodyString(requestBody) {
+            record("  → body: \(requestBodyText)", level: .debug)
+        }
+        if let responseBodyText = bodySnippet(from: responseData) {
+            record("  ← body: \(responseBodyText)", level: .debug)
+        }
+    }
+
+    private func requestBodyString(_ body: RequestBody) -> String? {
+        switch body {
+        case .none:
+            return nil
+        case let .json(data), let .raw(data, _):
+            return bodySnippet(from: data)
+        case let .formURLEncoded(fields):
+            return (try? fields.urlEncodedString()).flatMap { $0.isEmpty ? nil : $0 }
+        case .multipart:
+            return "<multipart/form-data>"
+        }
     }
 
     private func mapThrownError<T: Decodable>(_ error: Error, path: String) -> Result<T, NetworkingError> {
