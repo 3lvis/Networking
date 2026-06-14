@@ -23,11 +23,13 @@
 * [Making a request](#making-a-request)
   * [The basics](#the-basics)
   * [The Result type](#the-result-type)
-* [Choosing a content or parameter type](#choosing-a-content-or-parameter-type)
+  * [Typed request bodies](#typed-request-bodies)
+* [Choosing how the body is encoded](#choosing-how-the-body-is-encoded)
     * [JSON](#json)
     * [URL-encoding](#url-encoding)
     * [Multipart](#multipart)
-    * [Others](#others)
+    * [Raw data](#raw-data)
+    * [Query items](#query-items)
 * [Cancelling a request](#cancelling-a-request)
 * [Faking a request](#faking-a-request)
 * [Downloading and caching an image](#downloading-and-caching-an-image)
@@ -135,8 +137,10 @@ case .failure(let error):
 **POST example**:
 
 ```swift
+struct Credentials: Encodable { let username: String; let password: String }
+
 let networking = Networking(baseURL: "http://example.com")
-let result: Result<JSONResponse, NetworkingError> = await networking.post("/post", parameters: ["username" : "jameson", "password" : "secret"])
+let result: Result<JSONResponse, NetworkingError> = await networking.post("/post", body: Credentials(username: "jameson", password: "secret"))
 // On success, response.body holds the echoed JSON below.
  /*
  {
@@ -194,52 +198,77 @@ case .failure(let error):
 
 Use `JSONResponse` as the type when you want the raw `statusCode`, `headers`, and `body` instead of a model.
 
-## Choosing a Content or Parameter Type
+### Typed request bodies
 
-The `Content-Type` HTTP specification is so unfriendly, you have to know the specifics of it before understanding that content type is really just the parameter type. Because of this **Networking** uses a `ParameterType` instead of a `ContentType`. Anyway, here's hoping this makes it more human friendly.
+Just as the response side is generic over any `Decodable`, the request side is generic over any `Encodable`. `post`, `put`, and `patch` take a `body:` that's JSON-encoded for you and sent with `Content-Type: application/json` — so the body you send is compile-checked, never an untyped `[String: Any]` dictionary:
+
+```swift
+struct Credentials: Encodable {
+    let username: String
+    let password: String
+}
+
+let networking = Networking(baseURL: "http://example.com")
+let body = Credentials(username: "jameson", password: "secret")
+
+// Decode the response straight into your model…
+let result: Result<Account, NetworkingError> = await networking.post("/login", body: body)
+
+// …or ignore it with a Void result when you only care about success/failure.
+let ack: Result<Void, NetworkingError> = await networking.put("/account", body: body)
+```
+
+`Date`s in the body are encoded as ISO-8601, matching how responses are decoded.
+
+## Choosing how the body is encoded
+
+Each encoding is a distinct, typed method — the method you call picks the `Content-Type`, so there's no untyped `parameters:`/`parameterType:` pair to get wrong.
 
 ### JSON
 
-**Networking** by default uses `application/json` as the `Content-Type`, if you're sending JSON you don't have to do anything. But if you want to send other types of parameters you can do it by providing the `ParameterType` attribute.
-
-When sending JSON your parameters will be serialized to data using `NSJSONSerialization`.
+The common case: pass any `Encodable` as `body:`. It's serialized with `JSONEncoder` and sent as `application/json`.
 
 ```swift
 let networking = Networking(baseURL: "http://example.com")
-let result: Result<JSONResponse, NetworkingError> = await networking.post("/post", parameters: ["name" : "jameson"])
-// Successfull post using `application/json` as `Content-Type`
+let result: Result<JSONResponse, NetworkingError> = await networking.post("/post", body: ["name": "jameson"])
+// Successful post using `application/json` as `Content-Type`
 ```
 
 ### URL-encoding
 
- If you want to use `application/x-www-form-urlencoded` just use the `.formURLEncoded` parameter type, internally **Networking** will format your parameters so they use [`Percent-encoding` or `URL-enconding`](https://en.wikipedia.org/wiki/Percent-encoding#The_application.2Fx-www-form-urlencoded_type).
+Pass `form:` to send `application/x-www-form-urlencoded`; **Networking** percent-encodes it for you ([`Percent-encoding` / `URL-encoding`](https://en.wikipedia.org/wiki/Percent-encoding#The_application.2Fx-www-form-urlencoded_type)). `form:` takes any flat `Encodable` — a `[String: String]` or your own model — and stringifies scalars for you (`Bool` → `"true"`, not `"1"`):
 
 ```swift
 let networking = Networking(baseURL: "http://example.com")
-let result: Result<JSONResponse, NetworkingError> = await networking.post("/post", parameterType: .formURLEncoded, parameters: ["name" : "jameson"])
-// Successfull post using `application/x-www-form-urlencoded` as `Content-Type`
+
+// A dictionary…
+let result: Result<JSONResponse, NetworkingError> = await networking.post("/post", form: ["name": "jameson"])
+
+// …or your own model.
+struct SignIn: Encodable { let name: String; let remember: Bool }
+let result2: Result<JSONResponse, NetworkingError> = await networking.post("/post", form: SignIn(name: "jameson", remember: true))
+// Successful post using `application/x-www-form-urlencoded` as `Content-Type`
 ```
 
 ### Multipart
 
-**Networking** provides a simple model to use `multipart/form-data`. A multipart request consists in appending one or several [FormDataPart](https://github.com/3lvis/Networking/blob/master/Sources/FormDataPart.swift) items to a request. The simplest multipart request would look like this.
+**Networking** provides a simple model to use `multipart/form-data`. A multipart request consists of appending one or several [FormDataPart](https://github.com/3lvis/Networking/blob/master/Sources/Networking/FormDataPart.swift) items to a request. The simplest multipart request would look like this.
 
 ```swift
 let networking = Networking(baseURL: "https://example.com")
-let imageData = UIImagePNGRepresentation(imageToUpload)!
+let imageData = imageToUpload.pngData()!
 let part = FormDataPart(data: imageData, parameterName: "file", filename: "selfie.png")
 let result: Result<JSONResponse, NetworkingError> = await networking.post("/image/upload", parts: [part])
-// Successfull upload using `multipart/form-data` as `Content-Type`
+// Successful upload using `multipart/form-data` as `Content-Type`
 ```
 
-If you need to use several parts or append other parameters than aren't files, you can do it like this:
+To send several parts, or string form fields alongside the files, pass `fields:`:
 
 ```swift
 let networking = Networking(baseURL: "https://example.com")
 let part1 = FormDataPart(data: imageData1, parameterName: "file1", filename: "selfie1.png")
 let part2 = FormDataPart(data: imageData2, parameterName: "file2", filename: "selfie2.png")
-let parameters = ["username" : "3lvis"]
-let result: Result<JSONResponse, NetworkingError> = await networking.post("/image/upload", parameters: parameters, parts: [part1, part2])
+let result: Result<JSONResponse, NetworkingError> = await networking.post("/image/upload", parts: [part1, part2], fields: ["username": "3lvis"])
 // Do something
 ```
 
@@ -247,15 +276,30 @@ let result: Result<JSONResponse, NetworkingError> = await networking.post("/imag
 
 `FormDataPart` uses `FormDataPartType` to generate the `Content-Type` for each part. The default `FormDataPartType` is `.Data` which adds the `application/octet-stream` to your part. If you want to use a `Content-Type` that is not available between the existing `FormDataPartType`s, you can use `.Custom("your-content-type)`.
 
-### Others
+### Raw data
 
-At the moment **Networking** supports four types of `ParameterType`s out of the box: `JSON`, `FormURLEncoded`, `MultipartFormData` and `Custom`. Meanwhile `JSON` and `FormURLEncoded` serialize your parameters in some way, `Custom(String)` sends your parameters as plain `NSData` and sets the value inside `Custom` as the `Content-Type`.
+To send bytes verbatim under a `Content-Type` you choose, pass `data:contentType:`.
 
-For example:
 ```swift
 let networking = Networking(baseURL: "http://example.com")
-let result: Result<JSONResponse, NetworkingError> = await networking.post("/upload", parameterType: .custom("application/octet-stream"), parameters: imageData)
-// Successfull upload using `application/octet-stream` as `Content-Type`
+let result: Result<JSONResponse, NetworkingError> = await networking.post("/upload", data: imageData, contentType: "application/octet-stream")
+// Successful upload using `application/octet-stream` as `Content-Type`
+```
+
+### Query items
+
+`get` and `delete` carry their parameters in the URL query string. Pass typed `[URLQueryItem]` when you need ordering or repeated keys, or any flat `Encodable` model:
+
+```swift
+let networking = Networking(baseURL: "http://example.com")
+
+// Explicit query items…
+let result: Result<JSONResponse, NetworkingError> = await networking.get("/search", query: [URLQueryItem(name: "q", value: "swift")])
+
+// …or a model.
+struct Search: Encodable { let q: String; let page: Int }
+let result2: Result<JSONResponse, NetworkingError> = await networking.get("/search", query: Search(q: "swift", page: 2))
+// GET /search?q=swift&page=2
 ```
 
 ## Cancelling a request
@@ -280,10 +324,10 @@ Faking a request means that after calling this method on a specific path, any ca
 **Faking with successfull response**:
 
 ```swift
-struct Story: Decodable { let id: Int; let title: String }
+struct Story: Codable { let id: Int; let title: String }
 
-let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
-await networking.fakeGET("/stories", response: [["id" : 47333, "title" : "Site Design: Aquest"]])
+let networking = Networking(baseURL: "https://example.com")
+await networking.fakeGET("/stories", response: [Story(id: 47333, title: "Site Design: Aquest")])
 let result: Result<[Story], NetworkingError> = await networking.get("/stories")
 // .success carrying the stories
 ```
@@ -303,9 +347,11 @@ let result: Result<JSONResponse, NetworkingError> = await networking.get("/entri
 
 If you do not provide a status code for this fake request, the default returned one will be 200 (SUCCESS), but if you do provide a status code that is not 2XX, then **Networking** will return an NSError containing the status code and a proper error description.
 
+Use the no-body overload (omit `response:`) for a status-code-only fake:
+
 ```swift
-let networking = Networking(baseURL: "https://api-news.layervault.com/api/v2")
-await networking.fakeGET("/stories", response: nil, statusCode: 500)
+let networking = Networking(baseURL: "https://example.com")
+await networking.fakeGET("/stories", statusCode: 500)
 let result: Result<JSONResponse, NetworkingError> = await networking.get("/stories")
 // .failure with status code 500
 ```

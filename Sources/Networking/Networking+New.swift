@@ -1,7 +1,28 @@
 import Foundation
 
 extension Networking {
-    func handle<T: Decodable>(_ requestType: RequestType, path: String, parameterType: ParameterType = .json, parameters: Any?, parts: [FormDataPart]? = nil, cachingLevel: CachingLevel = .none) async -> Result<T, NetworkingError> {
+    // Typed request payload. Replaces the old `parameters: Any?` + `ParameterType` pair: each
+    // case carries exactly the data its encoding needs, so the wrong combination can't be expressed.
+    enum RequestBody {
+        case none
+        case json(Data)                                       // pre-encoded JSON
+        case formURLEncoded([String: String])
+        case multipart(fields: [String: String], parts: [FormDataPart])
+        case raw(Data, contentType: String)
+
+        // Multipart's content type needs the boundary, which only the actor knows, so it's passed in.
+        func contentType(boundary: String) -> String? {
+            switch self {
+            case .none: return nil
+            case .json: return "application/json"
+            case .formURLEncoded: return "application/x-www-form-urlencoded"
+            case .multipart: return "multipart/form-data; boundary=\(boundary)"
+            case let .raw(_, contentType): return contentType
+            }
+        }
+    }
+
+    func handle<T: Decodable>(_ requestType: RequestType, path: String, body: RequestBody = .none, query: [URLQueryItem] = [], cachingLevel: CachingLevel = .none) async -> Result<T, NetworkingError> {
         do {
             logger.info("Starting \(requestType.rawValue) request to \(path, privacy: .public)")
 
@@ -9,7 +30,7 @@ extension Networking {
                 return try await handleFakeRequest(fakeRequest, path: path, requestType: requestType)
             }
 
-            let request = try createRequest(path: path, requestType: requestType, parameterType: parameterType, parameters: parameters, parts: parts)
+            let request = try createRequest(path: path, requestType: requestType, body: body, query: query)
             // Key off the request's full effective URL so distinct requests never collide (e.g.
             // full-URL GETs to different hosts). Passed as the cacheName so destinationURL uses it
             // verbatim instead of re-prepending the baseURL.
@@ -61,29 +82,23 @@ extension Networking {
     }
 
     private func handleFakeRequest<T: Decodable>(_ fakeRequest: FakeRequest, path: String, requestType: RequestType) async throws -> Result<T, NetworkingError> {
-        let (_, response, _) = try handleFakeRequest(fakeRequest, path: path, cacheName: nil, cachingLevel: .none)
+        let (response, _) = try handleFakeRequest(fakeRequest, path: path, cacheName: nil, cachingLevel: .none)
 
         if fakeRequest.delay > 0 {
             try? await Task.sleep(nanoseconds: UInt64(fakeRequest.delay * 1_000_000_000))
         }
 
-        // Serialize the registered fake response to Data; handleResponse routes success/failure
-        // off the fake's HTTP status code, so an empty body is fine.
+        // handleResponse routes success/failure off the fake's HTTP status code, so an empty body is fine.
         let responseData: Data
-        switch fakeRequest.response {
-        case let dictionary as [String: Any]:
-            responseData = try JSONSerialization.data(withJSONObject: dictionary, options: [])
-        case let array as [[String: Any]]:
-            responseData = try JSONSerialization.data(withJSONObject: array, options: [])
-        case let data as Data:
+        if case let .data(data) = fakeRequest.payload {
             responseData = data
-        default:
+        } else {
             responseData = Data()
         }
         return try handleResponse(responseData: responseData, response: response, path: path)
     }
 
-    private func createRequest(path: String, requestType: RequestType, parameterType: ParameterType, parameters: Any?, parts: [FormDataPart]?) throws -> URLRequest {
+    private func createRequest(path: String, requestType: RequestType, body: RequestBody, query: [URLQueryItem]) throws -> URLRequest {
         // Split a query embedded in the path so it survives URL building instead of being
         // percent-encoded into the path (encodeUTF8 uses .urlPathAllowed, which escapes "?").
         let pathParts = path.split(separator: "?", maxSplits: 1, omittingEmptySubsequences: false)
@@ -94,16 +109,12 @@ extension Networking {
             throw URLError(.badURL)
         }
 
-        // GET and DELETE carry parameters in the query string; merge them onto any query the
-        // path already had rather than replacing it.
-        let carriesQueryParameters = requestType == .get || requestType == .delete
+        // Merge typed query items onto any query the path already carried rather than replacing it.
         var queryItems = [URLQueryItem]()
         if let pathQuery, let parsed = URLComponents(string: "?\(pathQuery)")?.queryItems {
             queryItems.append(contentsOf: parsed)
         }
-        if carriesQueryParameters, let queryParameters = parameters as? [String: Any] {
-            queryItems.append(contentsOf: queryParameters.map { URLQueryItem(name: $0, value: "\($1)") })
-        }
+        queryItems.append(contentsOf: query)
         if !queryItems.isEmpty {
             urlComponents.queryItems = queryItems
         }
@@ -112,59 +123,48 @@ extension Networking {
             throw URLError(.badURL)
         }
 
-        let bodyParameterType: ParameterType? = carriesQueryParameters ? nil : parameterType
         var request = URLRequest(
             url: url,
             requestType: requestType,
             path: path,
-            parameterType: bodyParameterType,
+            contentType: body.contentType(boundary: boundary),
             responseType: .json,
-            boundary: boundary,
             authorizationHeaderValue: authorizationHeaderValue,
             token: token,
             authorizationHeaderKey: authorizationHeaderKey,
             headerFields: headerFields
         )
 
-        if !carriesQueryParameters {
-            request.httpBody = try httpBody(parameterType: parameterType, parameters: parameters, parts: parts)
-        }
+        request.httpBody = try httpBody(body)
 
         return request
     }
 
-    private func httpBody(parameterType: ParameterType, parameters: Any?, parts: [FormDataPart]?) throws -> Data? {
-        switch parameterType {
+    private func httpBody(_ body: RequestBody) throws -> Data? {
+        switch body {
         case .none:
             return nil
-        case .json:
-            guard let parameters else { return nil }
-            return try JSONSerialization.data(withJSONObject: parameters, options: [])
-        case .formURLEncoded:
-            guard let parametersDictionary = parameters as? [String: Any] else { return nil }
-            return try parametersDictionary.urlEncodedString().data(using: .utf8)
-        case .multipartFormData:
+        case let .json(data):
+            return data
+        case let .formURLEncoded(parameters):
+            return try parameters.urlEncodedString().data(using: .utf8)
+        case let .multipart(fields, parts):
             var bodyData = Data()
-            if let parameters = parameters as? [String: Any] {
-                for (key, value) in parameters {
-                    let usedValue: Any = value is NSNull ? "null" : value
-                    var body = ""
-                    body += "--\(boundary)\r\n"
-                    body += "Content-Disposition: form-data; name=\"\(key)\""
-                    body += "\r\n\r\n\(usedValue)\r\n"
-                    bodyData.append(body.data(using: .utf8)!)
-                }
+            for (key, value) in fields {
+                var body = ""
+                body += "--\(boundary)\r\n"
+                body += "Content-Disposition: form-data; name=\"\(key)\""
+                body += "\r\n\r\n\(value)\r\n"
+                bodyData.append(body.data(using: .utf8)!)
             }
-            if let parts {
-                for var part in parts {
-                    part.boundary = boundary
-                    bodyData.append(part.formData as Data)
-                }
+            for var part in parts {
+                part.boundary = boundary
+                bodyData.append(part.formData as Data)
             }
             bodyData.append("--\(boundary)--\r\n".data(using: .utf8)!)
             return bodyData
-        case .custom:
-            return parameters as? Data
+        case let .raw(data, _):
+            return data
         }
     }
 

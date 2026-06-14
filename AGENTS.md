@@ -12,14 +12,14 @@ Async HTTP client for Apple platforms. **iOS 18+ / Swift 6** (`swift-tools 6.2`,
 ## Architecture (current)
 
 - **`Networking` is a `public actor`.** Safe to share one instance across tasks; isolated members are accessed with `await`. Config is via async setters — `setAuthorizationHeader`, `setHeaderFields`, `setUnauthorizedRequestCallback`, `setErrorLoggingEnabled` (actors forbid external property mutation). No subclassing.
-- **Verbs:** `get`/`post`/`put`/`patch`/`delete` → `Result<T, NetworkingError>`. Pick `T`: any `Decodable` model, `Data`, `Void`, or `JSONResponse` (`{ statusCode, headers, body }`) when you want metadata. `post`/`put`/`patch` also take `parameterType:` (JSON/form-URL-encoded/custom) and multipart `parts:`.
+- **Verbs:** `get`/`post`/`put`/`patch`/`delete` → `Result<T, NetworkingError>`. Pick `T`: any `Decodable` model, `Data`, `Void`, or `JSONResponse` (`{ statusCode, headers, body }`) when you want metadata.
+- **Typed bodies — no `Any`.** The encoding is chosen by the method, not an untyped `parameters:`/`parameterType:` pair (`Networking+HTTPRequests.swift`): `post`/`put`/`patch` take `body:` (any `Encodable` → JSON, ISO-8601 dates), `form:` (any flat `Encodable` → url-encoded), `parts:`+`fields:` (multipart), or `data:contentType:` (raw); `get`/`delete` take `query:` (a `[URLQueryItem]` for ordering/dupes, or any flat `Encodable`). `form:`/`query:` flatten an `Encodable` to `[String: String]` via `formFields` in `Networking+FormEncoding.swift` (JSON bridge + scalar re-decode so `Bool`→"true", not NSNumber "1"). Bodies flow through the typed `RequestBody` enum in `Networking+New.swift`.
 - **Downloads:** `downloadImage`/`downloadData` → `Result<T, NetworkingError>` where `T` is the payload (`Image`/`Data`) or an envelope (`ImageResponse`/`DataResponse`).
-- **Fakes (testing):** `fakeGET`/`fakePOST`/… register canned responses; the `fileName:` variants load a bundled file as raw `Data`. Errors are `NetworkingError`.
-- Request `parameters` and fake responses are still `Any?` — see roadmap #1 (typed `Encodable` bodies) for the planned fix.
+- **Fakes (testing):** `fakeGET`/`fakePOST`/… take `response:` over any `Encodable` (encoded to JSON), a no-body overload for status-only fakes, or `fileName:` for bundled raw `Data`; `FakeRequest` holds a typed `Payload` enum. Errors are `NetworkingError`.
 
 ## Roadmap
 
-`docs/roadmap.md`. The async/`Result`/Swift-6 modernization is done; next up (highest-leverage, dependency-free): typed `Encodable` request bodies (#1), a richer error model (#2), structured observability replacing `print` (#3).
+`docs/roadmap.md`. The async/`Result`/Swift-6 modernization is done, and #1 (typed request API — fully off `Any`) has landed. Next up (highest-leverage, dependency-free): a richer error model (#2), structured observability replacing `print` (#3).
 
 ## Conventions
 

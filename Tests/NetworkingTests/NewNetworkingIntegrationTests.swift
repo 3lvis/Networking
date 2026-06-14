@@ -25,14 +25,14 @@ class NewNetworkingIntegrationTests: XCTestCase {
         let pickupCoordinate = CLLocationCoordinate2D(latitude: 59.91700978556453, longitude: 10.760668740407757)
         let deliveryCoordinate = CLLocationCoordinate2D(latitude: 59.937611066825674, longitude: 10.735343079276985)
 
-        let parameters = [
-            "pickup_latitude": pickupCoordinate.latitude,
-            "pickup_longitude": pickupCoordinate.longitude,
-            "delivery_latitude": deliveryCoordinate.latitude,
-            "delivery_longitude": deliveryCoordinate.longitude
+        let query = [
+            URLQueryItem(name: "pickup_latitude", value: "\(pickupCoordinate.latitude)"),
+            URLQueryItem(name: "pickup_longitude", value: "\(pickupCoordinate.longitude)"),
+            URLQueryItem(name: "delivery_latitude", value: "\(deliveryCoordinate.latitude)"),
+            URLQueryItem(name: "delivery_longitude", value: "\(deliveryCoordinate.longitude)")
         ]
 
-        let result: Result<Friend, NetworkingError> = await networking.get("/get", parameters: parameters)
+        let result: Result<Friend, NetworkingError> = await networking.get("/get", query: query)
 
         switch result {
         case .success(_):
@@ -45,7 +45,7 @@ class NewNetworkingIntegrationTests: XCTestCase {
     func testNewPOST() async throws {
         let networking = Networking(baseURL: baseURL)
 
-        let result: Result<Void, NetworkingError> = await networking.post("/get", parameters: ["String": "String"])
+        let result: Result<Void, NetworkingError> = await networking.post("/get", body: ["String": "String"])
 
         switch result {
         case .success(_):

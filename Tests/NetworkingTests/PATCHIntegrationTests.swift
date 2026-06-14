@@ -7,7 +7,7 @@ class PATCHIntegrationTests: XCTestCase {
 
     func testPATCH() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result: Result<JSONResponse, NetworkingError> = await networking.patch("/patch", parameters: ["username": "jameson", "password": "secret"])
+        let result: Result<JSONResponse, NetworkingError> = await networking.patch("/patch", body: ["username": "jameson", "password": "secret"])
         switch result {
         case let .success(response):
             let json = httpbinEchoedMap(response, "json")
@@ -35,7 +35,7 @@ class PATCHIntegrationTests: XCTestCase {
 
     func testPATCHWithIvalidPath() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result: Result<JSONResponse, NetworkingError> = await networking.patch("/posdddddt", parameters: ["username": "jameson", "password": "secret"])
+        let result: Result<JSONResponse, NetworkingError> = await networking.patch("/posdddddt", body: ["username": "jameson", "password": "secret"])
         switch result {
         case .success:
             XCTFail()
