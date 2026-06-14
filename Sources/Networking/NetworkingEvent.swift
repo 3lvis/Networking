@@ -1,5 +1,19 @@
 import Foundation
 
+public extension Networking {
+    /// Verbosity of the built-in diagnostics, modeled on OkHttp's `HttpLoggingInterceptor.Level`:
+    /// `.none` (silent) · `.basic` (request/response lines + failures) · `.headers` (+ redacted headers)
+    /// · `.body` (+ truncated request/response bodies — opt-in; bodies can carry sensitive data).
+    enum LogLevel: Int, Sendable, Comparable {
+        case none
+        case basic
+        case headers
+        case body
+
+        public static func < (lhs: LogLevel, rhs: LogLevel) -> Bool { lhs.rawValue < rhs.rawValue }
+    }
+}
+
 /// Identifying context for a single request, shared by its `.started` and `.completed` events so a
 /// consumer can correlate the two by `id`.
 public struct RequestContext: Sendable {
