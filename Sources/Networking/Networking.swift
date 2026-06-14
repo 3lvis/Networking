@@ -76,12 +76,71 @@ public actor Networking {
     fileprivate var configuration: URLSessionConfiguration
     nonisolated(unsafe) let cache: NSCache<AnyObject, AnyObject>
 
-    /// Flag used to disable error logging. Useful when want to disable log before release build.
-    public var isErrorLoggingEnabled = true
+    /// Observability hook — receives a `.started` and a `.completed` event per request. Replaces the
+    /// old console logging. The library itself only logs to `os.Logger` (filterable unified logging).
+    public typealias Observer = @Sendable (NetworkingEvent) -> Void
+    var observer: Observer?
 
-    /// Enables or disables error logging (actor-isolated setter).
-    public func setErrorLoggingEnabled(_ enabled: Bool) {
-        self.isErrorLoggingEnabled = enabled
+    /// Sets the observability hook (actor-isolated setter).
+    public func setObserver(_ observer: Observer?) {
+        self.observer = observer
+    }
+
+    /// Whether the library emits its own diagnostics — request starts and failures. On by default:
+    /// this is the out-of-the-box logging, sent to `os.Logger` (Xcode console / Console.app) and, when
+    /// a log file is configured, mirrored there. Turn it off for release builds; `setObserver` still fires.
+    public var isLoggingEnabled = true
+
+    /// Enables or disables the built-in diagnostics (actor-isolated setter).
+    public func setLoggingEnabled(_ enabled: Bool) {
+        self.isLoggingEnabled = enabled
+    }
+
+    /// When set, the built-in diagnostics are *also* appended to this file as plain text — so a CLI or
+    /// headless/agent run (where `os.Logger` isn't visible in stdout) can read what happened. Defaults
+    /// from the `NETWORKING_LOG_FILE` environment variable, so logs can be captured with no code change.
+    public var logFileURL: URL?
+
+    /// Sets (or clears) the diagnostics log file (actor-isolated setter).
+    public func setLogFileURL(_ url: URL?) {
+        self.logFileURL = url
+    }
+
+    /// Emits one built-in diagnostic line to `os.Logger` and, if configured, to the log file.
+    func record(_ message: String, level: OSLogType) {
+        guard isLoggingEnabled else { return }
+        logger.log(level: level, "\(message, privacy: .public)")
+        appendToLogFile(message)
+    }
+
+    private func appendToLogFile(_ message: String) {
+        guard let logFileURL else { return }
+        let entry = "\(Date().ISO8601Format()) \(message)\n"
+        guard let data = entry.data(using: .utf8) else { return }
+        if let handle = try? FileHandle(forWritingTo: logFileURL) {
+            defer { try? handle.close() }
+            _ = try? handle.seekToEnd()
+            try? handle.write(contentsOf: data)
+        } else {
+            try? data.write(to: logFileURL, options: .atomic)
+        }
+    }
+
+    /// Header field names whose values are replaced with `<redacted>` in emitted `RequestContext.headers`.
+    /// Matched case-insensitively; the active authorization header key is always redacted too.
+    var redactedHeaderFields: Set<String> = ["Authorization", "Cookie", "Set-Cookie"]
+
+    /// Replaces the set of redacted header names (actor-isolated setter).
+    public func setRedactedHeaderFields(_ fields: Set<String>) {
+        self.redactedHeaderFields = fields
+    }
+
+    /// Redacts sensitive header values for inclusion in an emitted event.
+    func redactedHeaders(_ headers: [String: String]) -> [String: String] {
+        let redacted = Set(redactedHeaderFields.union([authorizationHeaderKey]).map { $0.lowercased() })
+        return headers.reduce(into: [String: String]()) { result, pair in
+            result[pair.key] = redacted.contains(pair.key.lowercased()) ? "<redacted>" : pair.value
+        }
     }
 
     /// The boundary used for multipart requests.
@@ -112,6 +171,21 @@ public actor Networking {
         self.configuration = configuration
         self.cache = cache ?? NSCache()
         self.logger = logger ?? Networking.defaultLogger
+        self.logFileURL = ProcessInfo.processInfo.environment["NETWORKING_LOG_FILE"].flatMap(Networking.resolveLogFileURL)
+    }
+
+    /// Resolves the `NETWORKING_LOG_FILE` value to a URL. An absolute/relative path is used as given; a
+    /// bare filename resolves under the app's Caches directory — sandbox-safe in an app (the default
+    /// location CocoaLumberjack uses too) and still readable from a CLI/simulator run.
+    static func resolveLogFileURL(_ value: String) -> URL? {
+        guard !value.isEmpty else { return nil }
+        if value.contains("/") {
+            return URL(fileURLWithPath: value)
+        }
+        guard let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else {
+            return nil
+        }
+        return caches.appendingPathComponent(value)
     }
 
     /// Authenticates using Basic Authentication, it converts username:password to Base64 then sets the Authorization header to "Basic \(Base64(username:password))".
