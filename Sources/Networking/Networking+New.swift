@@ -93,24 +93,37 @@ extension Networking {
         }
 
         let duration = clock.now - startInstant
+        guard let context else { return result }
+        return complete(result, context: context, statusCode: statusCode, byteCount: byteCount, metrics: metrics, duration: duration)
+    }
+
+    // The single completion path: logs the outcome (os.Logger + optional file) and emits `.completed`.
+    // Shared by the network path and by pre-flight failures so every request attempt reports identically.
+    private func complete<T: Decodable>(_ result: Result<T, NetworkingError>, context: RequestContext, statusCode: Int?, byteCount: Int, metrics: TransactionMetrics?, duration: Duration) -> Result<T, NetworkingError> {
         let outcome: Outcome
         switch result {
         case .success:
             outcome = .success(statusCode: statusCode ?? 0, byteCount: byteCount)
-            if let context {
-                record("← \(statusCode ?? 0) (\(byteCount) bytes) in \(duration) [\(context.id.uuidString)]", level: .info)
-            }
+            record("← \(statusCode ?? 0) (\(byteCount) bytes) in \(duration) [\(context.id.uuidString)]", level: .info)
         case let .failure(error):
             outcome = .failure(error)
-            // Out-of-the-box failure logging (os.Logger + optional file). Cancellations are intentional, so not logged as errors.
-            if !error.isCancelled, let context {
+            // Cancellations are intentional, so they're not logged as errors.
+            if !error.isCancelled {
                 logFailure(context, error: error)
             }
         }
-        if let context {
-            observer?(.completed(context, outcome: outcome, duration: duration, metrics: metrics))
-        }
+        observer?(.completed(context, outcome: outcome, duration: duration, metrics: metrics))
         return result
+    }
+
+    // A request attempt that fails before reaching the network (e.g. body/parameter encoding) still emits
+    // the same `.started`/`.completed` pair, routed through `complete`, so observers don't miss it.
+    func emitPreflightFailure<T: Decodable>(_ requestType: RequestType, path: String, error: NetworkingError) -> Result<T, NetworkingError> {
+        let requestID = UUID()
+        record("→ \(requestType.rawValue) \(path) [\(requestID.uuidString)]", level: .info)
+        let context = makeContext(id: requestID, method: requestType.rawValue, url: try? composedURL(with: path), headers: headerFields ?? [:])
+        observer?(.started(context))
+        return complete(.failure(error), context: context, statusCode: nil, byteCount: 0, metrics: nil, duration: .zero)
     }
 
     private func makeContext(id: UUID, method: String, url: URL?, headers: [String: String]) -> RequestContext {

@@ -197,8 +197,7 @@ extension Networking {
         do {
             data = try Self.requestBodyEncoder.encode(body)
         } catch {
-            record("✗ failed to encode request body for \(path): \(error.localizedDescription)", level: .error)
-            return .failure(.invalidRequest(.bodyEncodingFailed(message: error.localizedDescription)))
+            return emitPreflightFailure(requestType, path: path, error: .invalidRequest(.bodyEncodingFailed(message: error.localizedDescription)))
         }
         return await handle(requestType, path: path, body: .json(data))
     }
@@ -220,8 +219,7 @@ extension Networking {
         do {
             fields = try formFields(from: form)
         } catch {
-            record("✗ failed to encode form parameters for \(path): \(error.localizedDescription)", level: .error)
-            return .failure(.invalidRequest(.parameterEncodingFailed(message: error.localizedDescription)))
+            return emitPreflightFailure(requestType, path: path, error: .invalidRequest(.parameterEncodingFailed(message: error.localizedDescription)))
         }
         return await handle(requestType, path: path, body: .formURLEncoded(fields))
     }
@@ -231,8 +229,7 @@ extension Networking {
         do {
             items = try formFields(from: query).map { URLQueryItem(name: $0.key, value: $0.value) }
         } catch {
-            record("✗ failed to encode query parameters for \(path): \(error.localizedDescription)", level: .error)
-            return .failure(.invalidRequest(.parameterEncodingFailed(message: error.localizedDescription)))
+            return emitPreflightFailure(requestType, path: path, error: .invalidRequest(.parameterEncodingFailed(message: error.localizedDescription)))
         }
         return await handle(requestType, path: path, query: items, cachingLevel: cachingLevel)
     }
