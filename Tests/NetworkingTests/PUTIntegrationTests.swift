@@ -7,7 +7,7 @@ class PUTIntegrationTests: XCTestCase {
 
     func testPUT() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result: Result<JSONResponse, NetworkingError> = await networking.put("/put", parameters: ["username": "jameson", "password": "secret"])
+        let result: Result<JSONResponse, NetworkingError> = await networking.put("/put", body: ["username": "jameson", "password": "secret"])
         switch result {
         case let .success(response):
             let json = httpbinEchoedMap(response, "json")
@@ -35,7 +35,7 @@ class PUTIntegrationTests: XCTestCase {
 
     func testPUTWithIvalidPath() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result: Result<JSONResponse, NetworkingError> = await networking.put("/posdddddt", parameters: ["username": "jameson", "password": "secret"])
+        let result: Result<JSONResponse, NetworkingError> = await networking.put("/posdddddt", body: ["username": "jameson", "password": "secret"])
         switch result {
         case .success:
             XCTFail()

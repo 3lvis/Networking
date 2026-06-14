@@ -1,14 +1,22 @@
 import Foundation
 
 struct FakeRequest {
-    let response: Any?
+    // Typed canned response. `.data` holds already-serialized JSON (or raw file bytes); `.image`
+    // is served straight back by the image-download path. Replaces the old `response: Any?`.
+    enum Payload {
+        case none
+        case data(Data)
+        case image(Image)
+    }
+
+    let payload: Payload
     let responseType: Networking.ResponseType
     let headerFields: [String: String]?
     let statusCode: Int
     let delay: Double
 
-    init(response: Any?, responseType: Networking.ResponseType, headerFields: [String : String]?, statusCode: Int, delay: Double) {
-        self.response = response
+    init(payload: Payload, responseType: Networking.ResponseType, headerFields: [String : String]?, statusCode: Int, delay: Double) {
+        self.payload = payload
         self.responseType = responseType
         self.headerFields = headerFields
         self.statusCode = statusCode
@@ -51,16 +59,16 @@ struct FakeRequest {
                     replacedPath = replacedPath.replacingOccurrences(of: key, with: value)
                 }
                 guard replacedPath == path else { continue }
-                guard let response = fakeRequest.response else { continue }
-                guard var responseString = String(data: try JSONSerialization.data(withJSONObject: response, options: .prettyPrinted), encoding: .utf8) else { continue }
+                // Substitute the captured path values into the JSON body string (e.g. "{userID}" -> "10").
+                guard case let .data(data) = fakeRequest.payload,
+                      var responseString = String(data: data, encoding: .utf8) else { continue }
 
                 for (key, value) in replacedValues {
                     responseString = responseString.replacingOccurrences(of: key, with: value)
                 }
 
                 guard let stringData = responseString.data(using: .utf8) else { continue }
-                let finalJSON = try JSONSerialization.jsonObject(with: stringData, options: [])
-                return FakeRequest(response: finalJSON, responseType: fakeRequest.responseType, headerFields: fakeRequest.headerFields, statusCode: fakeRequest.statusCode, delay: fakeRequest.delay)
+                return FakeRequest(payload: .data(stringData), responseType: fakeRequest.responseType, headerFields: fakeRequest.headerFields, statusCode: fakeRequest.statusCode, delay: fakeRequest.delay)
             }
         }
 

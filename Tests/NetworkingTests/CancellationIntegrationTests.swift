@@ -21,7 +21,7 @@ class CancellationIntegrationTests: XCTestCase {
     func testCancelPOST() async throws {
         let networking = Networking(baseURL: baseURL)
         let task = Task { () -> Result<JSONResponse, NetworkingError> in
-            await networking.post("/delay/5", parameters: [:])
+            await networking.post("/delay/5")
         }
         try await Task.sleep(nanoseconds: 200_000_000)
         task.cancel()
@@ -31,7 +31,7 @@ class CancellationIntegrationTests: XCTestCase {
     func testCancelPUT() async throws {
         let networking = Networking(baseURL: baseURL)
         let task = Task { () -> Result<JSONResponse, NetworkingError> in
-            await networking.put("/delay/5", parameters: [:])
+            await networking.put("/delay/5")
         }
         try await Task.sleep(nanoseconds: 200_000_000)
         task.cancel()
@@ -41,7 +41,7 @@ class CancellationIntegrationTests: XCTestCase {
     func testCancelPATCH() async throws {
         let networking = Networking(baseURL: baseURL)
         let task = Task { () -> Result<JSONResponse, NetworkingError> in
-            await networking.patch("/delay/5", parameters: [:])
+            await networking.patch("/delay/5")
         }
         try await Task.sleep(nanoseconds: 200_000_000)
         task.cancel()

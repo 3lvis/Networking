@@ -46,16 +46,16 @@ extension Networking {
             fatalError("We couldn't find \(fileName), are you sure is there?")
         }
         // Store the file's raw bytes as the fake response; the async fake path serves Data as-is.
-        registerFake(requestType: requestType, path: path, headerFields: nil, response: data, responseType: .json, statusCode: statusCode, delay: delay)
+        registerFake(requestType: requestType, path: path, headerFields: nil, payload: .data(data), responseType: .json, statusCode: statusCode, delay: delay)
     }
 
-    func registerFake(requestType: RequestType, path: String, headerFields: [String: String]?, response: Any?, responseType: ResponseType, statusCode: Int, delay: Double) {
+    func registerFake(requestType: RequestType, path: String, headerFields: [String: String]?, payload: FakeRequest.Payload, responseType: ResponseType, statusCode: Int, delay: Double) {
         var requests = fakeRequests[requestType] ?? [String: FakeRequest]()
-        requests[path] = FakeRequest(response: response, responseType: responseType, headerFields: headerFields, statusCode: statusCode, delay: delay)
+        requests[path] = FakeRequest(payload: payload, responseType: responseType, headerFields: headerFields, statusCode: statusCode, delay: delay)
         fakeRequests[requestType] = requests
     }
 
-    func handleFakeRequest(_ fakeRequest: FakeRequest, path: String, cacheName: String?, cachingLevel: CachingLevel) throws -> (Any?, HTTPURLResponse, NSError?) {
+    func handleFakeRequest(_ fakeRequest: FakeRequest, path: String, cacheName: String?, cachingLevel: CachingLevel) throws -> (HTTPURLResponse, NSError?) {
         var error: NSError?
         let url = try composedURL(with: path)
         let response = HTTPURLResponse(url: url, headerFields: fakeRequest.headerFields, statusCode: fakeRequest.statusCode)
@@ -68,15 +68,15 @@ extension Networking {
             error = NSError(statusCode: fakeRequest.statusCode)
         }
 
+        // Images are served directly by handleImageRequest, so there's nothing to cache here.
+        let data: Data? = { if case let .data(data) = fakeRequest.payload { return data } else { return nil } }()
         switch fakeRequest.responseType {
         case .image:
-            try cacheOrPurgeImage(data: fakeRequest.response as? Data, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
-        case .data:
-            try cacheOrPurgeData(data: fakeRequest.response as? Data, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
-        case .json:
-            try cacheOrPurgeJSON(object: fakeRequest.response, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
+            try cacheOrPurgeImage(data: nil, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
+        case .data, .json:
+            try cacheOrPurgeData(data: data, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
         }
-        return (fakeRequest.response, response, error)
+        return (response, error)
     }
 
 
@@ -85,14 +85,14 @@ extension Networking {
             let data: Data
             let response: HTTPURLResponse
             if let fakeRequests = fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
-                let (_, fakeResponse, _) = try handleFakeRequest(fakeRequest, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
+                let (fakeResponse, _) = try handleFakeRequest(fakeRequest, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
                 if fakeRequest.delay > 0 {
                     try? await Task.sleep(nanoseconds: UInt64(fakeRequest.delay * 1_000_000_000))
                 }
                 guard fakeResponse.statusCode.statusCodeType == .successful else {
                     return .failure(downloadError(forStatusCode: fakeResponse.statusCode))
                 }
-                guard let fakeData = fakeRequest.response as? Data else { return .failure(.invalidResponse) }
+                guard case let .data(fakeData) = fakeRequest.payload else { return .failure(.invalidResponse) }
                 data = fakeData
                 response = fakeResponse
             } else if let cached = try objectFromCache(for: path, cacheName: cacheName, cachingLevel: cachingLevel, responseType: responseType) as? Data {
@@ -118,14 +118,14 @@ extension Networking {
             let image: Image
             let response: HTTPURLResponse
             if let fakeRequests = fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
-                let (_, fakeResponse, _) = try handleFakeRequest(fakeRequest, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
+                let (fakeResponse, _) = try handleFakeRequest(fakeRequest, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
                 if fakeRequest.delay > 0 {
                     try? await Task.sleep(nanoseconds: UInt64(fakeRequest.delay * 1_000_000_000))
                 }
                 guard fakeResponse.statusCode.statusCodeType == .successful else {
                     return .failure(downloadError(forStatusCode: fakeResponse.statusCode))
                 }
-                guard let fakeImage = fakeRequest.response as? Image else { return .failure(.invalidResponse) }
+                guard case let .image(fakeImage) = fakeRequest.payload else { return .failure(.invalidResponse) }
                 image = fakeImage
                 response = fakeResponse
             } else if let cached = try objectFromCache(for: path, cacheName: cacheName, cachingLevel: cachingLevel, responseType: responseType) as? Image {
@@ -171,7 +171,7 @@ extension Networking {
     }
 
     func requestData(_ requestType: RequestType, path: String, cachingLevel: CachingLevel, responseType: ResponseType) async throws -> (Data, HTTPURLResponse) {
-        let request = URLRequest(url: try composedURL(with: path), requestType: requestType, path: path, parameterType: nil, responseType: responseType, boundary: boundary, authorizationHeaderValue: authorizationHeaderValue, token: token, authorizationHeaderKey: authorizationHeaderKey, headerFields: headerFields)
+        let request = URLRequest(url: try composedURL(with: path), requestType: requestType, path: path, contentType: nil, responseType: responseType, authorizationHeaderValue: authorizationHeaderValue, token: token, authorizationHeaderKey: authorizationHeaderKey, headerFields: headerFields)
 
         let (data, response) = try await self.session.data(for: request)
 
@@ -192,7 +192,7 @@ extension Networking {
 
             try self.cacheOrPurgeData(data: data, path: path, cacheName: nil, cachingLevel: cachingLevel)
 
-            self.logError(parameterType: nil, parameters: nil, data: returnedData, request: request, response: returnedResponse, error: nil)
+            self.logError(data: returnedData, request: request, response: returnedResponse, error: nil)
             return (data, httpResponse)
         } else {
             let url = try self.composedURL(with: path)
@@ -221,7 +221,7 @@ extension Networking {
         }
     }
 
-    func logError(parameterType: ParameterType?, parameters: Any? = nil, data: Data?, request: URLRequest?, response: URLResponse?, error: NSError?) {
+    func logError(data: Data?, request: URLRequest?, response: URLResponse?, error: NSError?) {
         guard isErrorLoggingEnabled else { return }
         guard let error = error else { return }
 
@@ -252,33 +252,6 @@ extension Networking {
                 print(" ")
             }
 
-            if let parameterType = parameterType, let parameters = parameters {
-                switch parameterType {
-                case .json:
-                    do {
-                        let data = try JSONSerialization.data(withJSONObject: parameters, options: .prettyPrinted)
-                        let string = String(data: data, encoding: .utf8)
-                        if let string = string {
-                            print("Parameters: \(string)")
-                            print(" ")
-                        }
-                    } catch let error as NSError {
-                        print("Failed pretty printing parameters: \(parameters), error: \(error)")
-                        print(" ")
-                    }
-                case .formURLEncoded:
-                    guard let parametersDictionary = parameters as? [String: Any] else { fatalError("Couldn't cast parameters as dictionary: \(parameters)") }
-                    do {
-                        let formattedParameters = try parametersDictionary.urlEncodedString()
-                        print("Parameters: \(formattedParameters)")
-                    } catch let error as NSError {
-                        print("Failed parsing Parameters: \(parametersDictionary) — \(error)")
-                    }
-                    print(" ")
-                default: break
-                }
-            }
-
             if let data = data, let stringData = String(data: data, encoding: .utf8) {
                 print("Data: \(stringData)")
                 print(" ")
@@ -297,26 +270,6 @@ extension Networking {
         }
         print("================= ~ ==================")
         print(" ")
-    }
-
-    nonisolated func cacheOrPurgeJSON(object: Any?, path: String, cacheName: String?, cachingLevel: CachingLevel) throws {
-        let destinationURL = try self.destinationURL(for: path, cacheName: cacheName)
-
-        if let unwrappedObject = object {
-            switch cachingLevel {
-            case .memory:
-                self.cache.setObject(unwrappedObject as AnyObject, forKey: destinationURL.absoluteString as AnyObject)
-            case .memoryAndFile:
-
-                let convertedData = try JSONSerialization.data(withJSONObject: unwrappedObject, options: [])
-                _ = try convertedData.write(to: destinationURL, options: [.atomic])
-                self.cache.setObject(unwrappedObject as AnyObject, forKey: destinationURL.absoluteString as AnyObject)
-            case .none:
-                break
-            }
-        } else {
-            self.cache.removeObject(forKey: destinationURL.absoluteString as AnyObject)
-        }
     }
 
     nonisolated func cacheOrPurgeData(data: Data?, path: String, cacheName: String?, cachingLevel: CachingLevel) throws {

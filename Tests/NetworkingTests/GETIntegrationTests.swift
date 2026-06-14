@@ -79,7 +79,7 @@ class GETIntegrationTests: XCTestCase {
 
     func testGETWithURLEncodedParameters() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result: Result<JSONResponse, NetworkingError> = await networking.get("/get", parameters: ["count": 25])
+        let result: Result<JSONResponse, NetworkingError> = await networking.get("/get", query: [URLQueryItem(name: "count", value: "25")])
         switch result {
         case let .success(response):
             XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/get?count=25")
@@ -90,7 +90,7 @@ class GETIntegrationTests: XCTestCase {
 
     func testGETWithURLEncodedParametersWithExistingQuery() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result: Result<JSONResponse, NetworkingError> = await networking.get("/get?accountId=123", parameters: ["userId": 5])
+        let result: Result<JSONResponse, NetworkingError> = await networking.get("/get?accountId=123", query: [URLQueryItem(name: "userId", value: "5")])
         switch result {
         case let .success(response):
             XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/get?accountId=123&userId=5")
@@ -101,7 +101,7 @@ class GETIntegrationTests: XCTestCase {
 
     func testGETWithURLEncodedParametersWithPercentEncoding() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result: Result<JSONResponse, NetworkingError> = await networking.get("/get", parameters: ["name": "Elvis Nuñez"])
+        let result: Result<JSONResponse, NetworkingError> = await networking.get("/get", query: [URLQueryItem(name: "name", value: "Elvis Nuñez")])
         switch result {
         case let .success(response):
             XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/get?name=Elvis%20Nu%C3%B1ez")
@@ -136,8 +136,8 @@ class GETIntegrationTests: XCTestCase {
         let cache = NSCache<AnyObject, AnyObject>()
         let networking = Networking(baseURL: baseURL, cache: cache)
 
-        let first: Result<JSONResponse, NetworkingError> = await networking.get("/get", parameters: ["value": 1], cachingLevel: .memory)
-        let second: Result<JSONResponse, NetworkingError> = await networking.get("/get", parameters: ["value": 2], cachingLevel: .memory)
+        let first: Result<JSONResponse, NetworkingError> = await networking.get("/get", query: [URLQueryItem(name: "value", value: "1")], cachingLevel: .memory)
+        let second: Result<JSONResponse, NetworkingError> = await networking.get("/get", query: [URLQueryItem(name: "value", value: "2")], cachingLevel: .memory)
 
         guard case let .success(firstResponse) = first, case let .success(secondResponse) = second else {
             return XCTFail("expected both requests to succeed")
@@ -153,8 +153,8 @@ class GETIntegrationTests: XCTestCase {
         let cache = NSCache<AnyObject, AnyObject>()
         let networking = Networking(baseURL: baseURL, cache: cache)
 
-        let _: Result<JSONResponse, NetworkingError> = await networking.get("/get", parameters: ["a": "1&b=2"], cachingLevel: .memory)
-        let second: Result<JSONResponse, NetworkingError> = await networking.get("/get", parameters: ["a": 1, "b": 2], cachingLevel: .memory)
+        let _: Result<JSONResponse, NetworkingError> = await networking.get("/get", query: [URLQueryItem(name: "a", value: "1&b=2")], cachingLevel: .memory)
+        let second: Result<JSONResponse, NetworkingError> = await networking.get("/get", query: [URLQueryItem(name: "a", value: "1"), URLQueryItem(name: "b", value: "2")], cachingLevel: .memory)
 
         guard case let .success(secondResponse) = second else {
             return XCTFail("expected the second request to succeed")
