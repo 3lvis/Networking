@@ -40,11 +40,11 @@ extension Networking {
                 let cached = try? JSONDecoder().decode(CachedResponse.self, from: cachedData),
                 let url = request.url,
                 let cachedResponse = HTTPURLResponse(url: url, statusCode: cached.statusCode, httpVersion: nil, headerFields: cached.headers) {
-                return try handleSuccessfulResponse(responseData: cached.body, path: path, httpResponse: cachedResponse)
+                return handleSuccessfulResponse(responseData: cached.body, path: path, httpResponse: cachedResponse)
             }
 
             let (responseData, response) = try await session.data(for: request)
-            let result: Result<T, NetworkingError> = try handleResponse(responseData: responseData, response: response, path: path)
+            let result: Result<T, NetworkingError> = handleResponse(responseData: responseData, response: response, path: path)
             if cachingLevel != .none, case .success = result, let httpResponse = response as? HTTPURLResponse {
                 let headers = Dictionary(uniqueKeysWithValues: httpResponse.allHeaderFields.compactMap { key, value in
                     (key as? String).map { ($0, "\(value)") }
@@ -57,7 +57,7 @@ extension Networking {
             return result
 
         } catch {
-            return handleRequestError(error: error)
+            return mapThrownError(error, path: path)
         }
     }
 
@@ -95,7 +95,7 @@ extension Networking {
         } else {
             responseData = Data()
         }
-        return try handleResponse(responseData: responseData, response: response, path: path)
+        return handleResponse(responseData: responseData, response: response, path: path)
     }
 
     private func createRequest(path: String, requestType: RequestType, body: RequestBody, query: [URLQueryItem]) throws -> URLRequest {
@@ -168,7 +168,7 @@ extension Networking {
         }
     }
 
-    private func handleResponse<T: Decodable>(responseData: Data, response: URLResponse, path: String) throws -> Result<T, NetworkingError> {
+    private func handleResponse<T: Decodable>(responseData: Data, response: URLResponse, path: String) -> Result<T, NetworkingError> {
         guard let httpResponse = response as? HTTPURLResponse else {
             return .failure(.invalidResponse)
         }
@@ -177,75 +177,85 @@ extension Networking {
 
         switch statusCode.statusCodeType {
         case .informational, .successful:
-            return try handleSuccessfulResponse(responseData: responseData, path: path, httpResponse: httpResponse)
-        case .redirection:
-            return .failure(.unexpectedError(statusCode: statusCode, message: "Redirection occurred."))
-        case .clientError:
-            if (statusCode == 401 || statusCode == 403),
-               let callback = unauthorizedRequestCallback {
+            return handleSuccessfulResponse(responseData: responseData, path: path, httpResponse: httpResponse)
+        case .cancelled:
+            return .failure(.cancelled)
+        case .redirection, .clientError, .serverError, .unknown:
+            if statusCode == 401 || statusCode == 403, let callback = unauthorizedRequestCallback {
                 callback()
             }
-
-            return try handleClientError(responseData: responseData, statusCode: statusCode, path: path)
-        case .serverError:
-            return try handleServerError(responseData: responseData, statusCode: statusCode, path: path)
-        case .cancelled:
-            return .failure(.unexpectedError(statusCode: statusCode, message: "Request was cancelled."))
-        case .unknown:
-            return .failure(.unexpectedError(statusCode: statusCode, message: "An unexpected error occurred."))
+            // Parse a recognized error body into a message; keep the raw (truncated) body in metadata regardless.
+            let parsedMessage = (try? JSONDecoder().decode(ErrorResponse.self, from: responseData))?.combinedMessage
+            let serverMessage = (parsedMessage?.isEmpty == false) ? parsedMessage : nil
+            let error = HTTPError(statusCode: statusCode, metadata: responseMetadata(httpResponse, body: responseData), serverMessage: serverMessage)
+            return .failure(.http(error))
         }
     }
 
-    private func handleSuccessfulResponse<T: Decodable>(responseData: Data, path: String, httpResponse: HTTPURLResponse) throws -> Result<T, NetworkingError> {
+    private func handleSuccessfulResponse<T: Decodable>(responseData: Data, path: String, httpResponse: HTTPURLResponse) -> Result<T, NetworkingError> {
         if T.self == Data.self {
             return .success(Data() as! T)
         } else if T.self == JSONResponse.self {
             let headers = Dictionary(uniqueKeysWithValues: httpResponse.allHeaderFields.compactMap { key, value in
                 (key as? String).map { ($0, AnyCodable(value)) }
             })
-            // An empty body (e.g. 204 No Content) is a success — decoding empty data would fail, so use an empty body.
-            let body = responseData.isEmpty ? [:] : try JSONDecoder().decode([String: AnyCodable].self, from: responseData)
-            let networkingJSON = JSONResponse(statusCode: httpResponse.statusCode, headers: headers, body: body)
-            return .success(networkingJSON as! T)
+            do {
+                // An empty body (e.g. 204 No Content) is a success — decoding empty data would fail, so use an empty body.
+                let body = responseData.isEmpty ? [:] : try JSONDecoder().decode([String: AnyCodable].self, from: responseData)
+                let networkingJSON = JSONResponse(statusCode: httpResponse.statusCode, headers: headers, body: body)
+                return .success(networkingJSON as! T)
+            } catch let error as DecodingError {
+                return .failure(.decoding(error, responseMetadata(httpResponse, body: responseData)))
+            } catch {
+                return .failure(.invalidResponse) // JSONDecoder only throws DecodingError; unreachable.
+            }
         } else {
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .iso8601
-            let decodedResponse = try decoder.decode(T.self, from: responseData)
-            return .success(decodedResponse)
+            do {
+                return .success(try decoder.decode(T.self, from: responseData))
+            } catch let error as DecodingError {
+                logger.error("Failed to decode response: \(error.detailedMessage, privacy: .public)")
+                return .failure(.decoding(error, responseMetadata(httpResponse, body: responseData)))
+            } catch {
+                return .failure(.invalidResponse) // JSONDecoder only throws DecodingError; unreachable.
+            }
         }
     }
 
-    private func handleClientError<T: Decodable>(responseData: Data, statusCode: Int, path: String) throws -> Result<T, NetworkingError> {
-        let errorMessage = HTTPURLResponse.localizedString(forStatusCode: statusCode)
-        if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: responseData) {
-            return .failure(.clientError(statusCode: statusCode, message: errorResponse.combinedMessage))
-        } else {
-            return .failure(.clientError(statusCode: statusCode, message: errorMessage))
-        }
+    private func responseMetadata(_ httpResponse: HTTPURLResponse, body: Data) -> ResponseMetadata {
+        let headers = Dictionary(uniqueKeysWithValues: httpResponse.allHeaderFields.compactMap { key, value in
+            (key as? String).map { ($0, "\(value)") }
+        })
+        return ResponseMetadata(statusCode: httpResponse.statusCode, headers: headers, bodySnippet: bodySnippet(from: body))
     }
 
-    private func handleServerError<T: Decodable>(responseData: Data, statusCode: Int, path: String) throws -> Result<T, NetworkingError> {
-        let errorMessage = HTTPURLResponse.localizedString(forStatusCode: statusCode)
-        var errorDetails: [String: any Sendable]? = nil
-        if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: responseData) {
-            errorDetails = ["error": errorResponse.error ?? "",
-                            "message": errorResponse.message ?? "",
-                            "errors": errorResponse.errors ?? [:]]
-            return .failure(.serverError(statusCode: statusCode, message: errorResponse.combinedMessage, details: errorDetails))
-        } else {
-            return .failure(.serverError(statusCode: statusCode, message: errorMessage, details: errorDetails))
-        }
+    // A bounded, log-friendly view of the body — never the whole payload.
+    private func bodySnippet(from data: Data, limit: Int = 512) -> String? {
+        guard !data.isEmpty, let string = String(data: data, encoding: .utf8) else { return nil }
+        guard string.count > limit else { return string }
+        return String(string.prefix(limit)) + "… (truncated)"
     }
 
-    private func handleRequestError<T: Decodable>(error: Error) -> Result<T, NetworkingError> {
-        if error is CancellationError || (error as? URLError)?.code == .cancelled {
+    private func mapThrownError<T: Decodable>(_ error: Error, path: String) -> Result<T, NetworkingError> {
+        if error is CancellationError {
             return .failure(.cancelled)
         }
-        if let decodingError = error as? DecodingError {
-            logger.error("Unexpected error occurred: \(decodingError.detailedMessage, privacy: .public)")
-        } else {
-            logger.error("Unexpected error occurred: \(error.localizedDescription, privacy: .public)")
+        if let urlError = error as? URLError {
+            if urlError.code == .cancelled {
+                return .failure(.cancelled)
+            }
+            if urlError.code == .badURL {
+                return .failure(.invalidRequest(.invalidURL(path)))
+            }
+            logger.error("Transport error for \(path, privacy: .public): \(urlError.localizedDescription, privacy: .public)")
+            return .failure(.transport(urlError))
         }
-        return .failure(.unexpectedError(statusCode: nil, message: "Failed to process request (error: \(error.localizedDescription))."))
+        // composedURL throws an NSError in our domain when the URL can't be built from baseURL + path.
+        if (error as NSError).domain == Networking.domain {
+            return .failure(.invalidRequest(.invalidURL(path)))
+        }
+        logger.error("Unexpected error for \(path, privacy: .public): \(error.localizedDescription, privacy: .public)")
+        return .failure(.transport(URLError(.unknown)))
     }
 }

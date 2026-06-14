@@ -48,10 +48,10 @@ class GETIntegrationTests: XCTestCase {
         case .success:
             XCTFail()
         case let .failure(error):
-            guard case let .clientError(statusCode, _) = error else {
-                return XCTFail("expected a client error, got \(error)")
+            guard case let .http(httpError) = error else {
+                return XCTFail("expected an HTTP error, got \(error)")
             }
-            XCTAssertEqual(statusCode, 404)
+            XCTAssertEqual(httpError.statusCode, 404)
         }
     }
 
@@ -62,19 +62,21 @@ class GETIntegrationTests: XCTestCase {
         let ok: Result<Data, NetworkingError> = await networking.get("/status/200")
         if case let .failure(error) = ok { XCTFail("200 should succeed, got \(error)") }
 
-        // 4xx -> clientError carrying the status code.
+        // 4xx -> .http carrying the status code, flagged as a client error.
         let clientError: Result<Data, NetworkingError> = await networking.get("/status/404")
-        guard case let .failure(.clientError(clientStatus, _)) = clientError else {
-            return XCTFail("expected a client error")
+        guard case let .failure(.http(clientHTTPError)) = clientError else {
+            return XCTFail("expected an HTTP error")
         }
-        XCTAssertEqual(clientStatus, 404)
+        XCTAssertEqual(clientHTTPError.statusCode, 404)
+        XCTAssertTrue(clientHTTPError.isClientError)
 
-        // 5xx -> serverError carrying the status code.
+        // 5xx -> .http carrying the status code, flagged as a server error.
         let serverError: Result<Data, NetworkingError> = await networking.get("/status/500")
-        guard case let .failure(.serverError(serverStatus, _, _)) = serverError else {
+        guard case let .failure(.http(serverHTTPError)) = serverError else {
             return XCTFail("expected a server error")
         }
-        XCTAssertEqual(serverStatus, 500)
+        XCTAssertEqual(serverHTTPError.statusCode, 500)
+        XCTAssertTrue(serverHTTPError.isServerError)
     }
 
     func testGETWithURLEncodedParameters() async throws {

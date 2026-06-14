@@ -155,19 +155,19 @@ extension Networking {
     }
 
     private func downloadError(forStatusCode statusCode: Int) -> NetworkingError {
-        let message = HTTPURLResponse.localizedString(forStatusCode: statusCode)
-        switch statusCode.statusCodeType {
-        case .clientError: return .clientError(statusCode: statusCode, message: message)
-        case .serverError: return .serverError(statusCode: statusCode, message: message, details: nil)
-        default: return .unexpectedError(statusCode: statusCode, message: message)
-        }
+        // Downloads don't retain the response body/headers at this point, so the metadata is status-only.
+        let metadata = ResponseMetadata(statusCode: statusCode, headers: [:], bodySnippet: nil)
+        return .http(HTTPError(statusCode: statusCode, metadata: metadata, serverMessage: nil))
     }
 
     private func downloadError(_ error: Error) -> NetworkingError {
         if error is CancellationError || (error as? URLError)?.code == .cancelled {
             return .cancelled
         }
-        return .unexpectedError(statusCode: nil, message: "Failed to process request (error: \(error.localizedDescription)).")
+        if let urlError = error as? URLError {
+            return .transport(urlError)
+        }
+        return .transport(URLError(.unknown))
     }
 
     func requestData(_ requestType: RequestType, path: String, cachingLevel: CachingLevel, responseType: ResponseType) async throws -> (Data, HTTPURLResponse) {

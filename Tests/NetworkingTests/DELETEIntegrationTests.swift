@@ -36,10 +36,10 @@ class DELETEIntegrationTests: XCTestCase {
         case .success:
             XCTFail()
         case let .failure(error):
-            guard case let .clientError(statusCode, _) = error else {
-                return XCTFail("expected a client error, got \(error)")
+            guard case let .http(httpError) = error else {
+                return XCTFail("expected an HTTP error, got \(error)")
             }
-            XCTAssertEqual(statusCode, 404)
+            XCTAssertEqual(httpError.statusCode, 404)
         }
     }
 

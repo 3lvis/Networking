@@ -211,10 +211,10 @@ extension FakeRequestTests {
         case .success:
             XCTFail()
         case let .failure(error):
-            guard case let .clientError(statusCode, _) = error else {
-                return XCTFail("expected a client error, got \(error)")
+            guard case let .http(httpError) = error else {
+                return XCTFail("expected an HTTP error, got \(error)")
             }
-            XCTAssertEqual(statusCode, 401)
+            XCTAssertEqual(httpError.statusCode, 401)
         }
     }
 
@@ -228,11 +228,11 @@ extension FakeRequestTests {
         case .success:
             XCTFail()
         case let .failure(error):
-            guard case let .clientError(statusCode, message) = error else {
-                return XCTFail("expected a client error, got \(error)")
+            guard case let .http(httpError) = error else {
+                return XCTFail("expected an HTTP error, got \(error)")
             }
-            XCTAssertEqual(statusCode, 401)
-            XCTAssertTrue(message.contains("Shit went down"))
+            XCTAssertEqual(httpError.statusCode, 401)
+            XCTAssertTrue(httpError.serverMessage?.contains("Shit went down") ?? false)
         }
     }
 
@@ -322,10 +322,10 @@ extension FakeRequestTests {
         case .success:
             XCTFail()
         case let .failure(error):
-            guard case let .clientError(statusCode, _) = error else {
-                return XCTFail("expected a client error, got \(error)")
+            guard case let .http(httpError) = error else {
+                return XCTFail("expected an HTTP error, got \(error)")
             }
-            XCTAssertEqual(statusCode, 401)
+            XCTAssertEqual(httpError.statusCode, 401)
         }
     }
 
@@ -407,10 +407,10 @@ extension FakeRequestTests {
         case .success:
             XCTFail()
         case let .failure(error):
-            guard case let .clientError(statusCode, _) = error else {
-                return XCTFail("expected a client error, got \(error)")
+            guard case let .http(httpError) = error else {
+                return XCTFail("expected an HTTP error, got \(error)")
             }
-            XCTAssertEqual(statusCode, 401)
+            XCTAssertEqual(httpError.statusCode, 401)
         }
     }
 
@@ -469,10 +469,10 @@ extension FakeRequestTests {
         case .success:
             XCTFail()
         case let .failure(error):
-            guard case let .clientError(statusCode, _) = error else {
-                return XCTFail("expected a client error, got \(error)")
+            guard case let .http(httpError) = error else {
+                return XCTFail("expected an HTTP error, got \(error)")
             }
-            XCTAssertEqual(statusCode, 401)
+            XCTAssertEqual(httpError.statusCode, 401)
         }
     }
 
@@ -555,10 +555,10 @@ extension FakeRequestTests {
         case .success:
             XCTFail()
         case let .failure(error):
-            guard case let .clientError(statusCode, _) = error else {
-                return XCTFail("expected a client error, got \(error)")
+            guard case let .http(httpError) = error else {
+                return XCTFail("expected an HTTP error, got \(error)")
             }
-            XCTAssertEqual(statusCode, 401)
+            XCTAssertEqual(httpError.statusCode, 401)
         }
     }
 
@@ -636,10 +636,10 @@ extension FakeRequestTests {
         case .success:
             XCTFail()
         case let .failure(error):
-            guard case let .clientError(statusCode, _) = error else {
-                return XCTFail("expected a client error, got \(error)")
+            guard case let .http(httpError) = error else {
+                return XCTFail("expected an HTTP error, got \(error)")
             }
-            XCTAssertEqual(statusCode, 401)
+            XCTAssertEqual(httpError.statusCode, 401)
         }
     }
 
