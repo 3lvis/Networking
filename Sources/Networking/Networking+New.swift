@@ -372,17 +372,11 @@ extension Networking {
     }
 
     private func makeResponseMetadata(_ httpResponse: HTTPURLResponse, body: Data) -> ResponseMetadata {
-        let headers = Dictionary(uniqueKeysWithValues: httpResponse.allHeaderFields.compactMap { key, value in
-            (key as? String).map { ($0, "\(value)") }
-        })
-        return ResponseMetadata(statusCode: httpResponse.statusCode, headers: headers, bodySnippet: bodySnippet(from: body))
+        ResponseMetadata(response: httpResponse, body: body)
     }
 
-    // A bounded, log-friendly view of the body — never the whole payload.
     private func bodySnippet(from data: Data, limit: Int = 512) -> String? {
-        guard !data.isEmpty, let string = String(data: data, encoding: .utf8) else { return nil }
-        guard string.count > limit else { return string }
-        return String(string.prefix(limit)) + "… (truncated)"
+        ResponseMetadata.bodySnippet(from: data, limit: limit)
     }
 
 

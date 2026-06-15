@@ -132,6 +132,37 @@ private extension Duration {
     }
 }
 
+/// Validates a successful (2xx) response beyond its status code — content-type, envelope shape — turning a
+/// "2xx but wrong" response into a typed `.validation` failure. Non-2xx responses pass through untouched so
+/// they still surface as `.http` errors. Register it outermost (before retry) to validate the final result.
+public struct ResponseValidatorInterceptor: HTTPInterceptor {
+    public enum Validation: Sendable {
+        case valid
+        case invalid(reason: String)
+    }
+
+    private let validate: @Sendable (HTTPExchange) -> Validation
+
+    public init(validate: @escaping @Sendable (HTTPExchange) -> Validation) {
+        self.validate = validate
+    }
+
+    public func intercept(
+        _ request: URLRequest,
+        next: @Sendable (URLRequest) async throws -> HTTPExchange
+    ) async throws -> HTTPExchange {
+        let exchange = try await next(request)
+        // Only scrutinize successes — let non-2xx flow through to become .http errors.
+        guard (200..<300).contains(exchange.response.statusCode) else { return exchange }
+        switch validate(exchange) {
+        case .valid:
+            return exchange
+        case let .invalid(reason):
+            throw NetworkingError.validation(reason: reason, ResponseMetadata(response: exchange.response, body: exchange.data))
+        }
+    }
+}
+
 /// Dedupes concurrent refreshes: while one is in flight, later callers await it rather than each firing
 /// their own (the token-refresh stampede).
 actor RefreshCoordinator {
