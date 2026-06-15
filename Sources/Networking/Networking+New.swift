@@ -59,10 +59,12 @@ extension Networking {
                     let cached = try? JSONDecoder().decode(CachedResponse.self, from: cachedData),
                     let url = request.url,
                     let cachedResponse = HTTPURLResponse(url: url, statusCode: cached.statusCode, httpVersion: nil, headerFields: cached.headers) {
-                    result = handleSuccessfulResponse(responseData: cached.body, path: path, httpResponse: cachedResponse)
-                    statusCode = cached.statusCode
-                    byteCount = cached.body.count
-                    responseMetadata = makeResponseMetadata(cachedResponse, body: cached.body)
+                    // Run the cache hit back out through the interceptor chain so validators apply to it too.
+                    let exchange = try await perform(request, cached: HTTPExchange(data: cached.body, response: cachedResponse))
+                    result = handleResponse(responseData: exchange.data, response: exchange.response, path: path)
+                    statusCode = exchange.response.statusCode
+                    byteCount = exchange.data.count
+                    responseMetadata = makeResponseMetadata(exchange.response, body: exchange.data)
                 } else {
                     // The per-task delegate collects URLSessionTaskMetrics for the .completed event.
                     let collector = MetricsCollector()
@@ -104,11 +106,14 @@ extension Networking {
         return complete(result, context: context, statusCode: statusCode, byteCount: byteCount, metrics: metrics, duration: duration, requestBody: body, responseMetadata: responseMetadata)
     }
 
-    // Runs the interceptor chain around the real network call. session/collector are read into locals first
-    // so the @Sendable chain captures no actor-isolated state (Swift 6 region isolation).
-    func perform(_ request: URLRequest, collector: MetricsCollector? = nil) async throws -> HTTPExchange {
+    // Runs the interceptor chain. The cache is the innermost layer: on a hit, `cached` is the base result
+    // and no network call happens, but it still flows out through the chain so validators see it (retry/auth
+    // are no-ops on a success). session/collector are read into locals first so the @Sendable chain captures
+    // no actor-isolated state (Swift 6 region isolation).
+    func perform(_ request: URLRequest, collector: MetricsCollector? = nil, cached: HTTPExchange? = nil) async throws -> HTTPExchange {
         let session = self.session
         let base: @Sendable (URLRequest) async throws -> HTTPExchange = { request in
+            if let cached { return cached }
             let (data, response): (Data, URLResponse)
             if let collector {
                 (data, response) = try await session.data(for: request, delegate: collector)
@@ -372,17 +377,11 @@ extension Networking {
     }
 
     private func makeResponseMetadata(_ httpResponse: HTTPURLResponse, body: Data) -> ResponseMetadata {
-        let headers = Dictionary(uniqueKeysWithValues: httpResponse.allHeaderFields.compactMap { key, value in
-            (key as? String).map { ($0, "\(value)") }
-        })
-        return ResponseMetadata(statusCode: httpResponse.statusCode, headers: headers, bodySnippet: bodySnippet(from: body))
+        ResponseMetadata(response: httpResponse, body: body)
     }
 
-    // A bounded, log-friendly view of the body — never the whole payload.
     private func bodySnippet(from data: Data, limit: Int = 512) -> String? {
-        guard !data.isEmpty, let string = String(data: data, encoding: .utf8) else { return nil }
-        guard string.count > limit else { return string }
-        return String(string.prefix(limit)) + "… (truncated)"
+        ResponseMetadata.bodySnippet(from: data, limit: limit)
     }
 
 

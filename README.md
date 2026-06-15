@@ -161,6 +161,23 @@ await networking.setInterceptors([
 
 Interceptors apply to **downloads** (`downloadImage`/`downloadData`) as well as the verbs.
 
+### Validating the response
+
+A `2xx` isn't always a *correct* response — the server might return the wrong content-type or a malformed envelope. `ResponseValidatorInterceptor` runs your check on each successful response and turns a failure into a typed `NetworkingError.validation(reason:_:)` (carrying the response metadata). Non-2xx responses pass through untouched, so a real `500` still surfaces as `.http`, not a validation failure.
+
+```swift
+await networking.setInterceptors([
+    ResponseValidatorInterceptor { exchange in
+        let contentType = exchange.response.value(forHTTPHeaderField: "Content-Type") ?? ""
+        return contentType.hasPrefix("application/json")
+            ? .valid
+            : .invalid(reason: "expected JSON, got \(contentType)")
+    }
+])
+```
+
+Register it outermost (before `RetryInterceptor`) so it validates the final, post-retry response. The cache sits beneath the interceptors, so **cache hits are validated too** — a response cached before the validator existed can't slip through.
+
 ## Making a request
 
 ### The basics
@@ -268,6 +285,9 @@ case .failure(let error):
     case .decoding(let decodingError, let metadata):
         // 2xx but the body didn't match your type. The DecodingError and response metadata are preserved.
         break
+    case .validation(let reason, let metadata):
+        // 2xx but a ResponseValidatorInterceptor rejected it (wrong content-type, bad envelope, …).
+        break
     case .invalidResponse:
         break
     case .cancelled:
@@ -279,7 +299,7 @@ case .failure(let error):
 Two conveniences cut across the cases:
 
 ```swift
-error.statusCode      // Int? — present for .http and .decoding
+error.statusCode      // Int? — present for .http, .decoding, and .validation
 error.responseMetadata // ResponseMetadata? — status, headers, redaction-friendly body snippet
 error.isRetryable      // Bool — conservative: transient transport failures + HTTP 408/429/5xx
 ```

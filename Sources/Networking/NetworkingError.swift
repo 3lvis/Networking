@@ -14,6 +14,9 @@ public enum NetworkingError: Error {
     /// A response arrived but its body couldn't be decoded into the requested type. Carries the
     /// underlying `DecodingError` and the response metadata for debugging.
     case decoding(DecodingError, ResponseMetadata)
+    /// A 2xx response failed a registered validator (wrong content-type, bad envelope, …) — structurally
+    /// fine but not acceptable. Carries the reason and the response metadata.
+    case validation(reason: String, ResponseMetadata)
     /// The response wasn't an HTTP response at all.
     case invalidResponse
     /// The request was cancelled.
@@ -26,6 +29,7 @@ public extension NetworkingError {
         switch self {
         case let .http(error): return error.statusCode
         case let .decoding(_, metadata): return metadata.statusCode
+        case let .validation(_, metadata): return metadata.statusCode
         default: return nil
         }
     }
@@ -41,6 +45,7 @@ public extension NetworkingError {
         switch self {
         case let .http(error): return error.metadata
         case let .decoding(_, metadata): return metadata
+        case let .validation(_, metadata): return metadata
         default: return nil
         }
     }
@@ -67,7 +72,7 @@ public extension NetworkingError {
             return Self.isRetryableTransport(error)
         case let .http(error):
             return Self.retryableStatusCodes.contains(error.statusCode)
-        case .invalidRequest, .decoding, .invalidResponse, .cancelled:
+        case .invalidRequest, .decoding, .validation, .invalidResponse, .cancelled:
             return false
         }
     }
@@ -111,6 +116,20 @@ public struct ResponseMetadata: Sendable {
         self.headers = headers
         self.bodySnippet = bodySnippet
     }
+
+    /// Builds metadata from a response and its body, truncating the body to a log-friendly snippet.
+    public init(response: HTTPURLResponse, body: Data) {
+        let headers = Dictionary(uniqueKeysWithValues: response.allHeaderFields.compactMap { key, value in
+            (key as? String).map { ($0, "\(value)") }
+        })
+        self.init(statusCode: response.statusCode, headers: headers, bodySnippet: Self.bodySnippet(from: body))
+    }
+
+    static func bodySnippet(from data: Data, limit: Int = 512) -> String? {
+        guard !data.isEmpty, let string = String(data: data, encoding: .utf8) else { return nil }
+        guard string.count > limit else { return string }
+        return String(string.prefix(limit)) + "… (truncated)"
+    }
 }
 
 extension NetworkingError: LocalizedError {
@@ -134,6 +153,8 @@ extension NetworkingError: LocalizedError {
             return "The server returned status \(error.statusCode) (\(HTTPURLResponse.localizedString(forStatusCode: error.statusCode)))."
         case let .decoding(error, metadata):
             return "Failed to decode the response (status \(metadata.statusCode)): \(error.detailedMessage)"
+        case let .validation(reason, metadata):
+            return "The response (status \(metadata.statusCode)) failed validation: \(reason)"
         case .invalidResponse:
             return "The server returned a response that wasn't valid HTTP."
         case .cancelled:
