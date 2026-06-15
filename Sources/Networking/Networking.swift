@@ -76,24 +76,14 @@ public actor Networking {
     fileprivate var configuration: URLSessionConfiguration
     nonisolated(unsafe) let cache: NSCache<AnyObject, AnyObject>
 
-    /// Observability hook — receives a `.started` and a `.completed` event per request. Replaces the
-    /// old console logging. The library itself only logs to `os.Logger` (filterable unified logging).
-    public typealias Observer = @Sendable (NetworkingEvent) -> Void
-    var observer: Observer?
-
-    /// Sets the observability hook (actor-isolated setter).
-    public func setObserver(_ observer: Observer?) {
-        self.observer = observer
-    }
-
     // Live `events()` consumers. Each call to `events()` registers a continuation here; `emit` fans out
     // to all of them, and `onTermination` drops one when its consumer's task ends.
     private var streamContinuations: [UUID: AsyncStream<NetworkingEvent>.Continuation] = [:]
 
-    /// A stream of observability events — the structured-concurrency counterpart to `setObserver`.
-    /// Iterate it with `for await event in await networking.events()` to accumulate/transform events
-    /// without the `@Sendable`-closure capture dance. Each call returns its own multicast stream; the
-    /// closure observer still fires too. Buffer keeps the newest 256 events for a slow consumer.
+    /// A stream of observability events — one `.started` then one `.completed` per request (verbs *and*
+    /// downloads). Iterate with `for await event in await networking.events()` to log, accumulate, or
+    /// drive UI. Each call returns its own multicast stream; the buffer keeps the newest 256 events for a
+    /// slow consumer. This is the only consumer hook — the built-in failure logging is separate (below).
     public func events() -> AsyncStream<NetworkingEvent> {
         let (stream, continuation) = AsyncStream.makeStream(of: NetworkingEvent.self, bufferingPolicy: .bufferingNewest(256))
         let id = UUID()
@@ -108,22 +98,45 @@ public actor Networking {
         streamContinuations[id] = nil
     }
 
-    /// The single fan-out point for observability events: the closure observer and every live `events()` stream.
+    /// The single fan-out point: run the built-in (failure-only) logging synchronously, then deliver to
+    /// every live `events()` stream. Logging is driven here — not by an async stream consumer — so it
+    /// stays synchronous and lossless.
     func emit(_ event: NetworkingEvent) {
-        observer?(event)
         for continuation in streamContinuations.values {
             continuation.yield(event)
         }
     }
 
-    /// Verbosity of the built-in `os.Logger`/file diagnostics — `.none` / `.basic` (default) / `.headers`
-    /// / `.body`, à la OkHttp's `HttpLoggingInterceptor`. Gates and shapes *only* the built-in logging;
-    /// `setObserver` and `events()` always carry full structured events regardless.
-    public var logLevel: LogLevel = .basic
+    /// Which requests the built-in `os.Logger`/file diagnostics cover — `.none` / `.failures` (default) /
+    /// `.all`. Logged requests always get full detail. Gates *only* the built-in logging; `events()`
+    /// always carries full structured events regardless.
+    public var logLevel: LogLevel = .failures
 
-    /// Sets the built-in logging verbosity (actor-isolated setter).
+    /// Sets the built-in logging scope (actor-isolated setter).
     public func setLogLevel(_ level: LogLevel) {
         self.logLevel = level
+    }
+
+    // Debug builds (dev / local / simulator) show everything; release builds (e.g. the App Store) redact.
+    private static let defaultRedactsLogs: Bool = {
+        #if DEBUG
+        return false
+        #else
+        return true
+        #endif
+    }()
+
+    /// Whether the built-in **logs** redact sensitive content — the request/response body lines *and* the
+    /// `redactedHeaderFields` header values. Defaults to redacting in release builds and showing everything
+    /// in debug, so secrets stay out of production logs while local/dev runs stay fully readable. Override
+    /// either way. This governs the *logs* only — `events()` always carries the real headers (it's your own
+    /// request data). And the scope is bodies + headers, not the server's error message, which the failure
+    /// line includes as diagnostic text regardless.
+    public var redactsLogs = Networking.defaultRedactsLogs
+
+    /// Sets log redaction for the built-in logs (actor-isolated setter).
+    public func setRedactsLogs(_ redacts: Bool) {
+        self.redactsLogs = redacts
     }
 
     /// When set, the built-in diagnostics are *also* appended to this file as plain text — so a CLI or
@@ -156,8 +169,9 @@ public actor Networking {
         }
     }
 
-    /// Header field names whose values are replaced with `<redacted>` in emitted `RequestContext.headers`.
-    /// Matched case-insensitively; the active authorization header key is always redacted too.
+    /// Header field names whose values are replaced with `<redacted>` in the built-in **logs** when
+    /// `redactsLogs` is on (the release default). Matched case-insensitively; the active authorization
+    /// header key is always included. `events()` is unaffected — it carries the real header values.
     var redactedHeaderFields: Set<String> = ["Authorization", "Cookie", "Set-Cookie"]
 
     /// Replaces the set of redacted header names (actor-isolated setter).
@@ -165,7 +179,7 @@ public actor Networking {
         self.redactedHeaderFields = fields
     }
 
-    /// Redacts sensitive header values for inclusion in an emitted event.
+    /// Redacts sensitive header values for inclusion in the built-in logs.
     func redactedHeaders(_ headers: [String: String]) -> [String: String] {
         let redacted = Set(redactedHeaderFields.union([authorizationHeaderKey]).map { $0.lowercased() })
         return headers.reduce(into: [String: String]()) { result, pair in

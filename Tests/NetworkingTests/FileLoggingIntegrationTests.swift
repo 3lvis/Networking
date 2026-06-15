@@ -12,13 +12,13 @@ final class FileLoggingIntegrationTests: XCTestCase {
         let networking = Networking(baseURL: TestConfig.httpbinBaseURL)
         await networking.setLogFileURL(url)
 
-        let _: Result<JSONResponse, NetworkingError> = await networking.get("/get")
-        let _: Result<JSONResponse, NetworkingError> = await networking.get("/status/404")
+        let _: Result<JSONResponse, NetworkingError> = await networking.get("/get")          // success — not logged
+        let _: Result<JSONResponse, NetworkingError> = await networking.get("/status/404")   // failure — logged
 
         let contents = (try? String(contentsOf: url, encoding: .utf8)) ?? ""
-        XCTAssertTrue(contents.contains("→ GET /get"), "expected the request-start line; got:\n\(contents)")
-        XCTAssertTrue(contents.contains("← 200"), "expected the success line; got:\n\(contents)")
-        XCTAssertTrue(contents.contains("failed: The server returned status 404"), "expected the failure line; got:\n\(contents)")
+        XCTAssertFalse(contents.contains("/get "), "successful requests must not be logged; got:\n\(contents)")
+        XCTAssertTrue(contents.contains("✗ GET"), "expected a failure line; got:\n\(contents)")
+        XCTAssertTrue(contents.contains("failed: The server returned status 404"), "expected the failure detail; got:\n\(contents)")
     }
 
     // NETWORKING_LOG_FILE resolution: a bare name lands in Caches (sandbox-safe for an app); a path is used as-is.

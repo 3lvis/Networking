@@ -1,16 +1,15 @@
 import Foundation
 
 public extension Networking {
-    /// Verbosity of the built-in diagnostics, modeled on OkHttp's `HttpLoggingInterceptor.Level`:
-    /// `.none` (silent) · `.basic` (request/response lines + failures) · `.headers` (+ redacted headers)
-    /// · `.body` (+ truncated request/response bodies — opt-in; bodies can carry sensitive data).
-    enum LogLevel: Int, Sendable, Comparable {
+    /// Scope of the built-in diagnostics. Logged requests always get *full* detail (line, request +
+    /// response headers, request + response bodies — truncated); the level just chooses which requests:
+    /// - `.none` — nothing.
+    /// - `.failures` (default) — every failure. Rare, so full detail is cheap and it's the case you debug.
+    /// - `.all` — every request, success or failure. The opt-in firehose for deep debugging.
+    enum LogLevel: Sendable {
         case none
-        case basic
-        case headers
-        case body
-
-        public static func < (lhs: LogLevel, rhs: LogLevel) -> Bool { lhs.rawValue < rhs.rawValue }
+        case failures
+        case all
     }
 }
 
@@ -62,9 +61,9 @@ public struct TransactionMetrics: Sendable {
     }
 }
 
-/// A structured observability event. Set a handler with `setObserver` to receive one `.started` and
-/// one `.completed` per request — for logging, analytics, a network-activity indicator, etc. This
-/// replaces console printing; the library itself only logs to `os.Logger` (filterable unified logging).
+/// A structured observability event. Iterate `events()` to receive one `.started` and one `.completed`
+/// per request — for logging, analytics, a network-activity indicator, etc. (The built-in failure
+/// logging is derived from these same events, synchronously, inside `emit`.)
 public enum NetworkingEvent: Sendable {
     /// Emitted just before a request is sent.
     case started(RequestContext)

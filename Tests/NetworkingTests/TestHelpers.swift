@@ -8,6 +8,20 @@ final class Box<T>: @unchecked Sendable {
     init(_ value: T) { self.value = value }
 }
 
+extension AsyncStream {
+    /// Drains the first `count` elements into an array, then stops. Tests call `events()` *before* the
+    /// request (so the stream buffers), then `await stream.collect(n)` after to read what was emitted.
+    func collect(_ count: Int) async -> [Element] {
+        guard count > 0 else { return [] }
+        var collected: [Element] = []
+        for await element in self {
+            collected.append(element)
+            if collected.count == count { break }
+        }
+        return collected
+    }
+}
+
 enum TestConfig {
     /// Base URL for httpbin-backed integration tests. Defaults to a local go-httpbin on :8080;
     /// CI sets HTTPBIN_BASE_URL to the same. Run one with `docker run -p 8080:8080 mccutchen/go-httpbin`.

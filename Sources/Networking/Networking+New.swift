@@ -1,4 +1,5 @@
 import Foundation
+import os.log
 
 extension Networking {
     // Typed request payload. Replaces the old `parameters: Any?` + `ParameterType` pair: each
@@ -26,13 +27,13 @@ extension Networking {
         let requestID = UUID()
         let clock = ContinuousClock()
         let startInstant = clock.now
-        record("→ \(requestType.rawValue) \(path) [\(requestID.uuidString)]", level: .info)
 
         var context: RequestContext?
         let result: Result<T, NetworkingError>
         var statusCode: Int?
         var byteCount = 0
         var metrics: TransactionMetrics?
+        var responseMetadata: ResponseMetadata?   // response headers + body snippet, for full-detail logging
 
         do {
             if let fakeRequest = try FakeRequest.find(ofType: requestType, forPath: path, in: fakeRequests) {
@@ -61,6 +62,7 @@ extension Networking {
                     result = handleSuccessfulResponse(responseData: cached.body, path: path, httpResponse: cachedResponse)
                     statusCode = cached.statusCode
                     byteCount = cached.body.count
+                    responseMetadata = makeResponseMetadata(cachedResponse, body: cached.body)
                 } else {
                     // The per-task delegate collects URLSessionTaskMetrics for the .completed event.
                     let collector = MetricsCollector()
@@ -79,7 +81,9 @@ extension Networking {
                     statusCode = (response as? HTTPURLResponse)?.statusCode
                     byteCount = responseData.count
                     metrics = collector.metrics.flatMap(TransactionMetrics.init)
-                    logVerbose(requestContext: requestContext, requestBody: body, response: response as? HTTPURLResponse, responseData: responseData)
+                    if let httpResponse = response as? HTTPURLResponse {
+                        responseMetadata = makeResponseMetadata(httpResponse, body: responseData)
+                    }
                 }
             }
         } catch {
@@ -95,48 +99,93 @@ extension Networking {
 
         let duration = clock.now - startInstant
         guard let context else { return result }
-        return complete(result, context: context, statusCode: statusCode, byteCount: byteCount, metrics: metrics, duration: duration)
+        return complete(result, context: context, statusCode: statusCode, byteCount: byteCount, metrics: metrics, duration: duration, requestBody: body, responseMetadata: responseMetadata)
     }
 
-    // The single completion path: logs the outcome (os.Logger + optional file) and emits `.completed`.
-    // Shared by the network path and by pre-flight failures so every request attempt reports identically.
-    private func complete<T: Decodable>(_ result: Result<T, NetworkingError>, context: RequestContext, statusCode: Int?, byteCount: Int, metrics: TransactionMetrics?, duration: Duration) -> Result<T, NetworkingError> {
+    // The single completion path: builds the outcome, runs the built-in logging, and emits `.completed`.
+    // Shared by the verb path, pre-flight failures, and downloads so all report identically. `requestBody`
+    // and `responseMetadata` aren't on the event, so they're threaded here for the full-detail logging.
+    func complete<T>(_ result: Result<T, NetworkingError>, context: RequestContext, statusCode: Int?, byteCount: Int, metrics: TransactionMetrics?, duration: Duration, requestBody: RequestBody? = nil, responseMetadata: ResponseMetadata? = nil) -> Result<T, NetworkingError> {
         let outcome: Outcome
         switch result {
         case .success:
             outcome = .success(statusCode: statusCode ?? 0, byteCount: byteCount)
-            record("← \(statusCode ?? 0) (\(byteCount) bytes) in \(duration) [\(context.id.uuidString)]", level: .info)
         case let .failure(error):
             outcome = .failure(error)
-            // Cancellations are intentional, so they're not logged as errors.
-            if !error.isCancelled {
-                logFailure(context, error: error)
-            }
         }
+        logCompletion(context: context, result: result, statusCode: statusCode, byteCount: byteCount, duration: duration, requestBody: requestBody, responseMetadata: responseMetadata)
         emit(.completed(context, outcome: outcome, duration: duration, metrics: metrics))
         return result
+    }
+
+    // Built-in logging (synchronous, lossless): failures at `.failures` and `.all`, successes only at
+    // `.all`, always with full detail (line, request + response headers, request + response bodies).
+    private func logCompletion<T>(context: RequestContext, result: Result<T, NetworkingError>, statusCode: Int?, byteCount: Int, duration: Duration, requestBody: RequestBody?, responseMetadata: ResponseMetadata?) {
+        guard logLevel != .none else { return }
+
+        let line: String
+        let level: OSLogType
+        let error: NetworkingError?
+        switch result {
+        case .success:
+            guard logLevel == .all else { return }   // successes are logged only at .all
+            line = "✓ \(context.method) \(context.url?.absoluteString ?? "") [\(context.id.uuidString)] \(statusCode ?? 0) (\(byteCount) bytes) in \(duration)"
+            level = .info
+            error = nil
+        case let .failure(failure):
+            guard !failure.isCancelled else { return }   // failures logged at .failures and .all
+            line = "✗ \(context.method) \(context.url?.absoluteString ?? "") [\(context.id.uuidString)] failed: \(failure.errorDescription ?? "request failed")"
+            level = .error
+            error = failure
+        }
+
+        record(line, level: level)
+        // context.headers are the real values (events() needs them); redaction is applied here, in the
+        // log path, only in release builds (redactsLogs).
+        let requestHeaders = redactsLogs ? redactedHeaders(context.headers) : context.headers
+        for (key, value) in requestHeaders.sorted(by: { $0.key < $1.key }) {
+            record("  → \(key): \(value)", level: level)
+        }
+        let metadata = responseMetadata ?? error?.responseMetadata
+        if let metadata {
+            let responseHeaders = redactsLogs ? redactedHeaders(metadata.headers) : metadata.headers
+            for (key, value) in responseHeaders.sorted(by: { $0.key < $1.key }) {
+                record("  ← \(key): \(value)", level: level)
+            }
+        }
+        if let requestBodyText = requestBody.flatMap(requestBodyString) {
+            record("  → body: \(redactsLogs ? "<redacted>" : requestBodyText)", level: level)
+        }
+        if let responseBodyText = metadata?.bodySnippet {
+            record("  ← body: \(redactsLogs ? "<redacted>" : responseBodyText)", level: level)
+        }
+    }
+
+    // Best-effort string form of a request body for body logging.
+    private func requestBodyString(_ body: RequestBody) -> String? {
+        switch body {
+        case .none:
+            return nil
+        case let .json(data), let .raw(data, _):
+            return bodySnippet(from: data)
+        case let .formURLEncoded(fields):
+            return (try? fields.urlEncodedString()).flatMap { $0.isEmpty ? nil : $0 }
+        case .multipart:
+            return "<multipart/form-data>"
+        }
     }
 
     // A request attempt that fails before reaching the network (e.g. body/parameter encoding) still emits
     // the same `.started`/`.completed` pair, routed through `complete`, so observers don't miss it.
     func emitPreflightFailure<T: Decodable>(_ requestType: RequestType, path: String, error: NetworkingError) -> Result<T, NetworkingError> {
         let requestID = UUID()
-        record("→ \(requestType.rawValue) \(path) [\(requestID.uuidString)]", level: .info)
         let context = makeContext(id: requestID, method: requestType.rawValue, url: try? composedURL(with: path), headers: headerFields ?? [:])
         emit(.started(context))
         return complete(.failure(error), context: context, statusCode: nil, byteCount: 0, metrics: nil, duration: .zero)
     }
 
-    private func makeContext(id: UUID, method: String, url: URL?, headers: [String: String]) -> RequestContext {
-        RequestContext(id: id, method: method, url: url, headers: redactedHeaders(headers))
-    }
-
-    private func logFailure(_ context: RequestContext, error: NetworkingError) {
-        var message = "✗ \(context.method) \(context.url?.absoluteString ?? "") [\(context.id.uuidString)] failed: \(error.errorDescription ?? "request failed")"
-        if let snippet = error.responseMetadata?.bodySnippet {
-            message += " — body: \(snippet)"
-        }
-        record(message, level: .error)
+    func makeContext(id: UUID, method: String, url: URL?, headers: [String: String]) -> RequestContext {
+        RequestContext(id: id, method: method, url: url, headers: headers)
     }
 
     // Persists the response's status code and headers so a cache hit reproduces real metadata, not fabricated values.
@@ -266,7 +315,7 @@ extension Networking {
             // Parse a recognized error body into a message; keep the raw (truncated) body in metadata regardless.
             let parsedMessage = (try? JSONDecoder().decode(ErrorResponse.self, from: responseData))?.combinedMessage
             let serverMessage = (parsedMessage?.isEmpty == false) ? parsedMessage : nil
-            let error = HTTPError(statusCode: statusCode, metadata: responseMetadata(httpResponse, body: responseData), serverMessage: serverMessage)
+            let error = HTTPError(statusCode: statusCode, metadata: makeResponseMetadata(httpResponse, body: responseData), serverMessage: serverMessage)
             return .failure(.http(error))
         }
     }
@@ -284,7 +333,7 @@ extension Networking {
                 let networkingJSON = JSONResponse(statusCode: httpResponse.statusCode, headers: headers, body: body)
                 return .success(networkingJSON as! T)
             } catch let error as DecodingError {
-                return .failure(.decoding(error, responseMetadata(httpResponse, body: responseData)))
+                return .failure(.decoding(error, makeResponseMetadata(httpResponse, body: responseData)))
             } catch {
                 return .failure(.invalidResponse) // JSONDecoder only throws DecodingError; unreachable.
             }
@@ -294,14 +343,14 @@ extension Networking {
             do {
                 return .success(try decoder.decode(T.self, from: responseData))
             } catch let error as DecodingError {
-                return .failure(.decoding(error, responseMetadata(httpResponse, body: responseData)))
+                return .failure(.decoding(error, makeResponseMetadata(httpResponse, body: responseData)))
             } catch {
                 return .failure(.invalidResponse) // JSONDecoder only throws DecodingError; unreachable.
             }
         }
     }
 
-    private func responseMetadata(_ httpResponse: HTTPURLResponse, body: Data) -> ResponseMetadata {
+    private func makeResponseMetadata(_ httpResponse: HTTPURLResponse, body: Data) -> ResponseMetadata {
         let headers = Dictionary(uniqueKeysWithValues: httpResponse.allHeaderFields.compactMap { key, value in
             (key as? String).map { ($0, "\(value)") }
         })
@@ -315,42 +364,6 @@ extension Networking {
         return String(string.prefix(limit)) + "… (truncated)"
     }
 
-    // Extra built-in log lines for `.headers`/`.body`. The request headers are already redacted (they come
-    // from the context); response headers get the same redaction. Bodies are truncated like everything else.
-    private func logVerbose(requestContext: RequestContext, requestBody: RequestBody, response: HTTPURLResponse?, responseData: Data) {
-        guard logLevel >= .headers else { return }
-        for (key, value) in requestContext.headers.sorted(by: { $0.key < $1.key }) {
-            record("  → \(key): \(value)", level: .debug)
-        }
-        if let response {
-            let responseHeaders = Dictionary(uniqueKeysWithValues: response.allHeaderFields.compactMap { key, value in
-                (key as? String).map { ($0, "\(value)") }
-            })
-            for (key, value) in redactedHeaders(responseHeaders).sorted(by: { $0.key < $1.key }) {
-                record("  ← \(key): \(value)", level: .debug)
-            }
-        }
-        guard logLevel >= .body else { return }
-        if let requestBodyText = requestBodyString(requestBody) {
-            record("  → body: \(requestBodyText)", level: .debug)
-        }
-        if let responseBodyText = bodySnippet(from: responseData) {
-            record("  ← body: \(responseBodyText)", level: .debug)
-        }
-    }
-
-    private func requestBodyString(_ body: RequestBody) -> String? {
-        switch body {
-        case .none:
-            return nil
-        case let .json(data), let .raw(data, _):
-            return bodySnippet(from: data)
-        case let .formURLEncoded(fields):
-            return (try? fields.urlEncodedString()).flatMap { $0.isEmpty ? nil : $0 }
-        case .multipart:
-            return "<multipart/form-data>"
-        }
-    }
 
     private func mapThrownError<T: Decodable>(_ error: Error, path: String) -> Result<T, NetworkingError> {
         if error is CancellationError {
