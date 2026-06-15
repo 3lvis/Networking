@@ -144,6 +144,12 @@ await networking.setInterceptors([
 ])
 ```
 
+**Only idempotent methods are retried by default** (`GET`/`HEAD`/`PUT`/`DELETE`/`OPTIONS`/`TRACE`). Retrying a `POST`/`PATCH` after a timeout or 5xx could duplicate a side effect — a second charge, a duplicate mutation — because the server may have already processed the first attempt. If a non-idempotent endpoint is safe to retry (e.g. it takes an idempotency key), opt it in explicitly:
+
+```swift
+RetryInterceptor(retryableMethods: ["GET", "HEAD", "PUT", "DELETE", "POST"])
+```
+
 Interceptors run outermost-first, so order matters: put `RetryInterceptor` **before** `AuthRefreshInterceptor` to retry around a refreshed credential, or after to refresh around each retry.
 
 ```swift

@@ -86,6 +86,39 @@ final class RetryInterceptorTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(elapsed, .milliseconds(900), "Retry-After: 1 should pace the retry ~1s, not the 1ms base backoff")
     }
 
+    // Retrying a non-idempotent request after a timeout/5xx can duplicate a side effect (a second charge,
+    // a duplicate mutation), since the server may have processed the first attempt. POST/PATCH must not be
+    // retried by default — only the idempotent methods.
+    func testDoesNotRetryNonIdempotentMethodByDefault() async {
+        let counter = CallCounter()
+        let networking = await networking(
+            RetryInterceptor(maxAttempts: 3, baseDelay: .milliseconds(1), maxDelay: .milliseconds(2)),
+            ScriptedInterceptor(counter: counter) { _ in .status(503) }
+        )
+
+        let result: Result<Data, NetworkingError> = await networking.post("/anything", body: ["k": "v"])
+
+        guard case let .failure(.http(error)) = result else { return XCTFail("expected an HTTP failure, got \(result)") }
+        XCTAssertEqual(error.statusCode, 503)
+        let attempts = await counter.count
+        XCTAssertEqual(attempts, 1, "POST is not idempotent and must not be retried by default")
+    }
+
+    func testRetriesNonIdempotentMethodWhenExplicitlyConfigured() async {
+        let counter = CallCounter()
+        let networking = await networking(
+            RetryInterceptor(maxAttempts: 3, baseDelay: .milliseconds(1), maxDelay: .milliseconds(2),
+                             retryableMethods: ["POST"]),
+            ScriptedInterceptor(counter: counter) { _ in .status(503) }
+        )
+
+        let result: Result<Data, NetworkingError> = await networking.post("/anything", body: ["k": "v"])
+
+        if case .success = result { XCTFail("expected the persistent 503 to fail") }
+        let attempts = await counter.count
+        XCTAssertEqual(attempts, 3, "an explicit retryableMethods opt-in should retry POST")
+    }
+
     func testDoesNotRetryNonRetryableStatus() async {
         let counter = CallCounter()
         let networking = await networking(

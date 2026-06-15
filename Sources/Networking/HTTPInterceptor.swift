@@ -70,35 +70,43 @@ public struct RetryInterceptor: HTTPInterceptor {
     public let maxDelay: Duration
     /// HTTP statuses worth retrying. Defaults to `NetworkingError.retryableStatusCodes`.
     public let retryableStatusCodes: Set<Int>
+    /// HTTP methods safe to retry. Defaults to the idempotent set — retrying `POST`/`PATCH` could duplicate
+    /// a side effect (a second charge, a duplicate mutation), since the server may have processed the first
+    /// attempt before the timeout/5xx. Opt non-idempotent methods in only when they carry an idempotency key.
+    public let retryableMethods: Set<String>
 
     public init(
         maxAttempts: Int = 3,
         baseDelay: Duration = .milliseconds(500),
         maxDelay: Duration = .seconds(30),
-        retryableStatusCodes: Set<Int> = NetworkingError.retryableStatusCodes
+        retryableStatusCodes: Set<Int> = NetworkingError.retryableStatusCodes,
+        retryableMethods: Set<String> = ["GET", "HEAD", "PUT", "DELETE", "OPTIONS", "TRACE"]
     ) {
         self.maxAttempts = maxAttempts
         self.baseDelay = baseDelay
         self.maxDelay = maxDelay
         self.retryableStatusCodes = retryableStatusCodes
+        self.retryableMethods = Set(retryableMethods.map { $0.uppercased() })
     }
 
     public func intercept(
         _ request: URLRequest,
         next: @Sendable (URLRequest) async throws -> HTTPExchange
     ) async throws -> HTTPExchange {
+        // Only idempotent methods are retried (see retryableMethods) — a retry must never duplicate a side effect.
+        let methodAllowsRetry = retryableMethods.contains((request.httpMethod ?? "GET").uppercased())
         var attempt = 1
         while true {
             do {
                 let exchange = try await next(request)
-                let shouldRetry = retryableStatusCodes.contains(exchange.response.statusCode)
+                let shouldRetry = methodAllowsRetry && retryableStatusCodes.contains(exchange.response.statusCode)
                 guard shouldRetry, attempt < maxAttempts else { return exchange }
                 // A server-sent Retry-After wins over our backoff (still capped at maxDelay).
                 let delay = Self.retryAfterDelay(from: exchange.response).map { Swift.min($0, maxDelay) }
                     ?? backoffDelay(forAttempt: attempt)
                 try await Task.sleep(for: delay)
                 attempt += 1
-            } catch let error as URLError where attempt < maxAttempts && NetworkingError.isRetryableTransport(error) {
+            } catch let error as URLError where attempt < maxAttempts && methodAllowsRetry && NetworkingError.isRetryableTransport(error) {
                 try await Task.sleep(for: backoffDelay(forAttempt: attempt))
                 attempt += 1
             }
