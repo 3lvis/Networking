@@ -45,25 +45,30 @@ public extension NetworkingError {
         }
     }
 
+    /// HTTP status codes worth retrying: request timeout, too-many-requests, and the transient 5xx —
+    /// never the other 4xx. The default set `RetryInterceptor` uses, and the source of truth for `isRetryable`.
+    static let retryableStatusCodes: Set<Int> = [408, 429, 500, 502, 503, 504]
+
+    /// Whether a transport failure is transient enough to be worth retrying (a dropped connection or
+    /// timeout), as opposed to a permanent one. Never treats cancellation or a bad URL as retryable.
+    static func isRetryableTransport(_ error: URLError) -> Bool {
+        switch error.code {
+        case .timedOut, .networkConnectionLost, .cannotConnectToHost, .dnsLookupFailed:
+            return true
+        default:
+            return false
+        }
+    }
+
     /// Whether retrying the request might plausibly succeed. Conservative: only transient transport
     /// failures and a small set of HTTP status codes (408, 429, 500, 502, 503, 504) — never 4xx
     /// (other than 408/429), decoding, invalid-request, invalid-response, or cancellation.
     var isRetryable: Bool {
         switch self {
         case let .transport(error):
-            switch error.code {
-            case .timedOut, .networkConnectionLost, .cannotConnectToHost, .dnsLookupFailed:
-                return true
-            default:
-                return false
-            }
+            return Self.isRetryableTransport(error)
         case let .http(error):
-            switch error.statusCode {
-            case 408, 429, 500, 502, 503, 504:
-                return true
-            default:
-                return false
-            }
+            return Self.retryableStatusCodes.contains(error.statusCode)
         case .invalidRequest, .decoding, .invalidResponse, .cancelled:
             return false
         }

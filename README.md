@@ -132,7 +132,28 @@ await networking.setInterceptors([
 
 Concurrent requests that all hit `401` at once share a **single** refresh — they wait on the one in flight instead of each firing their own (no token-refresh stampede). For pure *notification* of a `401` (no replay), you don't need an interceptor — it's already a `.completed(_, .failure)` with `error.statusCode == 401` on [`events()`](#observing-requests).
 
-`AuthRefreshInterceptor` is one implementation of the general `HTTPInterceptor` seam — an async `intercept(_:next:)` hook that wraps every verb request. Calling `next` runs the rest of the chain (the innermost being the real network call); calling it again replays. That's the basis for the retry/timeout/validator policies on the roadmap.
+`AuthRefreshInterceptor` is one implementation of the general `HTTPInterceptor` seam — an async `intercept(_:next:)` hook that wraps every verb request. Calling `next` runs the rest of the chain (the innermost being the real network call); calling it again replays.
+
+### Retrying transient failures
+
+`RetryInterceptor` retries a request when it fails transiently — a dropped connection or timeout, or an HTTP status in `retryableStatusCodes` (`408`/`429`/`500`/`502`/`503`/`504` by default, the same set behind [`NetworkingError.isRetryable`](#handling-errors)). It backs off exponentially with full jitter between attempts (capped at `maxDelay`) and honors a server's `Retry-After` header (seconds or HTTP-date) when present.
+
+```swift
+await networking.setInterceptors([
+    RetryInterceptor(maxAttempts: 3, baseDelay: .milliseconds(500), maxDelay: .seconds(30))
+])
+```
+
+Interceptors run outermost-first, so order matters: put `RetryInterceptor` **before** `AuthRefreshInterceptor` to retry around a refreshed credential, or after to refresh around each retry.
+
+```swift
+await networking.setInterceptors([
+    RetryInterceptor(),                                   // outer: retries the whole thing
+    AuthRefreshInterceptor { "Bearer \(try await refresh())" },  // inner: refreshes on 401
+])
+```
+
+Interceptors apply to **downloads** (`downloadImage`/`downloadData`) as well as the verbs.
 
 ## Making a request
 

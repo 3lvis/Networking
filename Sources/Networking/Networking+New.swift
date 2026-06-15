@@ -107,10 +107,15 @@ extension Networking {
     // Runs the interceptor chain around the real network call. The chain is folded outermost-first, so the
     // innermost `next` is the actual URLSession fetch and an interceptor retries simply by calling `next`
     // again. session/collector are read into locals first so the @Sendable chain captures no actor state.
-    func perform(_ request: URLRequest, collector: MetricsCollector) async throws -> HTTPExchange {
+    func perform(_ request: URLRequest, collector: MetricsCollector? = nil) async throws -> HTTPExchange {
         let session = self.session
         let base: @Sendable (URLRequest) async throws -> HTTPExchange = { request in
-            let (data, response) = try await session.data(for: request, delegate: collector)
+            let (data, response): (Data, URLResponse)
+            if let collector {
+                (data, response) = try await session.data(for: request, delegate: collector)
+            } else {
+                (data, response) = try await session.data(for: request)
+            }
             guard let httpResponse = response as? HTTPURLResponse else { throw NetworkingError.invalidResponse }
             return HTTPExchange(data: data, response: httpResponse)
         }
