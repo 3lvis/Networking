@@ -468,44 +468,35 @@ let result: Result<Image, NetworkingError> = await networking.downloadImage("/im
 
 ## Observing requests
 
-**Networking** doesn't print to the console. Instead, set an observer to receive a structured event for every request — one `.started` and one `.completed` — for logging, analytics, a network-activity indicator, or debugging:
+**Networking** doesn't print to the console. Two separate things give you visibility: a **failure log** that's on by default (next section), and an **event stream** you can hook for the full lifecycle.
+
+`events()` returns an `AsyncStream<NetworkingEvent>` — one `.started` then one `.completed` for **every** request (verbs *and* downloads). Iterate it with `for await`, accumulating into plain local state (no callback-capture gymnastics):
 
 ```swift
-let networking = Networking(baseURL: "http://example.com")
-await networking.setObserver { event in
-    switch event {
-    case let .started(context):
-        print("→ [\(context.id)] \(context.method) \(context.url?.absoluteString ?? "")")
-    case let .completed(context, outcome, duration, metrics):
-        switch outcome {
-        case let .success(statusCode, byteCount):
-            print("← [\(context.id)] \(statusCode) (\(byteCount) bytes) in \(duration)")
-        case let .failure(error):
-            print("✗ [\(context.id)] \(error.localizedDescription) — retryable: \(error.isRetryable)")
-        }
-        if let metrics {
-            print("   DNS \(metrics.domainLookup ?? 0)s · TLS \(metrics.secureConnection ?? 0)s")
+let stream = await networking.events()
+Task {
+    for await event in stream {
+        switch event {
+        case let .started(context):
+            print("→ [\(context.id)] \(context.method) \(context.url?.absoluteString ?? "")")
+        case let .completed(context, outcome, duration, metrics):
+            switch outcome {
+            case let .success(statusCode, byteCount):
+                print("← [\(context.id)] \(statusCode) (\(byteCount) bytes) in \(duration)")
+            case let .failure(error):
+                print("✗ [\(context.id)] \(error.localizedDescription) — retryable: \(error.isRetryable)")
+            }
+            if let metrics { print("   DNS \(metrics.domainLookup ?? 0)s · TLS \(metrics.secureConnection ?? 0)s") }
         }
     }
 }
 ```
 
-- `RequestContext` carries a unique `id` (shared by the request's `.started`/`.completed`, and stamped into the library's `os.Logger` lines), plus `method`, `url`, and redacted `headers`.
+- `RequestContext` carries a unique `id` (shared by the request's `.started`/`.completed`, and stamped into the failure logs), plus `method`, `url`, and the real request `headers` (events() is your own data — see *Privacy* below for why these aren't redacted).
 - `.completed` carries the `Outcome` (`.success(statusCode:byteCount:)` / `.failure(NetworkingError)`), the measured `duration`, and — for real network requests — `TransactionMetrics` distilled from `URLSessionTaskMetrics` (DNS / connect / TLS / request / response timings, byte counts, redirect count, cache hit).
+- Each `events()` call returns its own stream, so multiple consumers can listen independently.
 
-The closure suits fire-and-forget side effects (a network-activity indicator, a quick log). When you'd rather **accumulate or transform** events, use `events()` — an `AsyncStream` you iterate with `for await`, no callback-capture gymnastics:
-
-```swift
-let stream = await networking.events()
-for await event in stream {
-    // plain local state — no @Sendable-closure capture, no boxing
-    if case let .completed(context, outcome, duration, _) = event { … }
-}
-```
-
-Each `events()` call returns its own stream (multiple consumers are fine), and the closure observer still fires alongside it. Both deliver the same `NetworkingEvent`.
-
-**Redaction.** `Authorization`, the active auth-header key, `Cookie`, and `Set-Cookie` are replaced with `<redacted>` in `RequestContext.headers`. Change the set:
+**Which headers count as sensitive.** `Authorization`, the active auth-header key, `Cookie`, and `Set-Cookie` are the default redaction set — replaced with `<redacted>` in the built-in **logs** when redaction is on (release; see *Privacy* below). `events()` is unaffected. Change the set:
 
 ```swift
 await networking.setRedactedHeaderFields(["Authorization", "X-Api-Key"])
@@ -513,18 +504,19 @@ await networking.setRedactedHeaderFields(["Authorization", "X-Api-Key"])
 
 ### Built-in logging
 
-Out of the box — no observer required — the library logs each request start and **every failure** (HTTP 4xx/5xx, decoding, transport, invalid-request) to Apple's unified logging (`os.Logger`, subsystem `com.elvisnunez.networking`), tagged with the request id. This is the modern replacement for console `print`: it appears automatically in the Xcode console and Console.app, is filterable by subsystem/level, and honors privacy annotations. Failure logs include the status, error description, and the redacted body snippet.
+Out of the box — no setup — the library logs **failures** (HTTP 4xx/5xx, decoding, transport, invalid-request) to Apple's unified logging (`os.Logger`, subsystem `com.elvisnunez.networking`), tagged with the request id. This is the modern replacement for console `print`: it appears automatically in the Xcode console and Console.app, is filterable, and honors privacy annotations.
 
-Control the verbosity with `setLogLevel` — modeled on OkHttp's `HttpLoggingInterceptor` levels:
+`setLogLevel` chooses **which requests** are logged — logged requests always get full detail (line, request + response headers, request + response bodies, truncated):
 
 ```swift
-await networking.setLogLevel(.none)     // silent (observer/events() still fire)
-await networking.setLogLevel(.basic)    // default — request/response lines + failures
-await networking.setLogLevel(.headers)  // also redacted request & response headers
-await networking.setLogLevel(.body)     // also truncated request & response bodies
+await networking.setLogLevel(.none)      // nothing
+await networking.setLogLevel(.failures)  // default — every failure, full detail
+await networking.setLogLevel(.all)       // every request too, success or failure — the opt-in firehose
 ```
 
-`.headers`/`.body` add detail for the network request path; bodies can carry sensitive data (the same caveat OkHttp's docs give), so `.body` is opt-in and header redaction still applies. The verbosity gates *only* the built-in `os.Logger`/file output — `setObserver` and `events()` always deliver full structured events.
+`.failures` is the default: failures are rare, so logging them in full is cheap and it's the case you debug — including the **request body**, the quickest way to catch a wrong-shaped payload. `.all` adds successful requests (with their response body, for "succeeded but returned the wrong thing"). The level gates *only* the built-in logging — `events()` always delivers full structured events regardless. (Downloads — `downloadImage`/`downloadData` — log the line + request headers; their response headers/body are omitted since the payload is binary.)
+
+**Privacy — one rule: debug shows, release redacts.** Requests carry sensitive data (logins, payments, profiles, `Authorization`/`Cookie` headers). `redactsLogs` governs the built-in **logs**: in **debug** builds it shows everything (you're debugging — "is my auth header set?" must be answerable); in **release** it replaces both the body lines *and* the `setRedactedHeaderFields` header values (`Authorization`/`Cookie`/`Set-Cookie` by default) with `<redacted>`. Override either way with `setRedactsLogs(_:)`. Two caveats on what redaction does **not** cover: (1) a failure's log line still includes the server's error **message** (parsed from the response) as diagnostic text — so don't put secrets in server error strings; (2) `events()` always carries the **real** headers — it's your own request data, and redaction is a logging concern, not an observation one. Need more control? `setLogLevel(.none)` or filter `events()` yourself.
 
 **Reading logs from a CLI / test / headless run.** `os.Logger` isn't visible in `swift test` / `swift run` stdout. Point the library at a file and it mirrors the same diagnostics there as plain text:
 
