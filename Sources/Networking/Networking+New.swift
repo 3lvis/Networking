@@ -104,9 +104,8 @@ extension Networking {
         return complete(result, context: context, statusCode: statusCode, byteCount: byteCount, metrics: metrics, duration: duration, requestBody: body, responseMetadata: responseMetadata)
     }
 
-    // Runs the interceptor chain around the real network call. The chain is folded outermost-first, so the
-    // innermost `next` is the actual URLSession fetch and an interceptor retries simply by calling `next`
-    // again. session/collector are read into locals first so the @Sendable chain captures no actor state.
+    // Runs the interceptor chain around the real network call. session/collector are read into locals first
+    // so the @Sendable chain captures no actor-isolated state (Swift 6 region isolation).
     func perform(_ request: URLRequest, collector: MetricsCollector? = nil) async throws -> HTTPExchange {
         let session = self.session
         let base: @Sendable (URLRequest) async throws -> HTTPExchange = { request in

@@ -273,8 +273,7 @@ public actor Networking {
         authorizationHeaderValue = headerValue
     }
 
-    /// Interceptors wrapping every verb request, outermost first. Each can inspect or mutate the outgoing
-    /// request, observe the response, short-circuit, or retry by calling `next` again (e.g. `AuthRefreshInterceptor`).
+    /// Interceptors wrapping every verb request, applied outermost first.
     public var interceptors: [HTTPInterceptor] = []
 
     /// Sets the request interceptor chain (actor-isolated setter).

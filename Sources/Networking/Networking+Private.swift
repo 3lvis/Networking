@@ -193,8 +193,7 @@ extension Networking {
     func requestData(_ requestType: RequestType, path: String, cachingLevel: CachingLevel, responseType: ResponseType) async throws -> (Data, HTTPURLResponse) {
         let request = URLRequest(url: try composedURL(with: path), requestType: requestType, path: path, contentType: nil, responseType: responseType, authorizationHeaderValue: authorizationHeaderValue, token: token, authorizationHeaderKey: authorizationHeaderKey, headerFields: headerFields)
 
-        // Route through the interceptor chain so retry/auth-refresh apply to downloads too (perform throws
-        // .invalidResponse for a non-HTTP response, which the caller maps via downloadError).
+        // Route through the interceptor chain so retry/auth-refresh apply to downloads too.
         let exchange = try await perform(request)
         try self.cacheOrPurgeData(data: exchange.data, path: path, cacheName: nil, cachingLevel: cachingLevel)
         return (exchange.data, exchange.response)
