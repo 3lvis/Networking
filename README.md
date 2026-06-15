@@ -115,6 +115,25 @@ let result: Result<JSONResponse, NetworkingError> = await networking.get("/get")
 // Successfully authenticated!
 ```
 
+### Refreshing an expired credential
+
+When a token expires, the server answers `401`/`403`. Rather than failing that request, register an `AuthRefreshInterceptor`: on an unauthorized response it runs your `refresh` closure, then **replays** the request once with the new credential. Return `nil` from `refresh` to give up and let the original failure through.
+
+```swift
+let networking = Networking(baseURL: "http://example.com")
+await networking.setInterceptors([
+    AuthRefreshInterceptor {
+        let token = try await myAuth.refreshAccessToken()   // your refresh call
+        await networking.setAuthorizationHeader(token: token) // keep future requests authed
+        return "Bearer \(token)"                            // …and replay this one with it
+    }
+])
+```
+
+Concurrent requests that all hit `401` at once share a **single** refresh — they wait on the one in flight instead of each firing their own (no token-refresh stampede). For pure *notification* of a `401` (no replay), you don't need an interceptor — it's already a `.completed(_, .failure)` with `error.statusCode == 401` on [`events()`](#observing-requests).
+
+`AuthRefreshInterceptor` is one implementation of the general `HTTPInterceptor` seam — an async `intercept(_:next:)` hook that wraps every verb request. Calling `next` runs the rest of the chain (the innermost being the real network call); calling it again replays. That's the basis for the retry/timeout/validator policies on the roadmap.
+
 ## Making a request
 
 ### The basics
