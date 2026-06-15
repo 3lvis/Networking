@@ -176,7 +176,7 @@ await networking.setInterceptors([
 ])
 ```
 
-Register it outermost (before `RetryInterceptor`) so it validates the final, post-retry response.
+Register it outermost (before `RetryInterceptor`) so it validates the final, post-retry response. The cache sits beneath the interceptors, so **cache hits are validated too** — a response cached before the validator existed can't slip through.
 
 ## Making a request
 

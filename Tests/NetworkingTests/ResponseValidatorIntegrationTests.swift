@@ -45,6 +45,24 @@ final class ResponseValidatorIntegrationTests: XCTestCase {
         XCTAssertEqual(error.statusCode, 500)
     }
 
+    // A cache hit is still a response the caller receives, so a validator must see it too — otherwise a
+    // response cached before the validator existed (or under a different config) bypasses the check.
+    func testValidatorRunsOnCacheHits() async {
+        let networking = Networking(baseURL: baseURL)
+
+        // Prime the cache with no validator installed: /xml (200, application/xml) gets stored.
+        let primed: Result<Data, NetworkingError> = await networking.get("/xml", cachingLevel: .memory)
+        if case let .failure(error) = primed { return XCTFail("priming the cache should succeed, got \(error)") }
+
+        await requireJSON(networking)
+        // Same request → a cache hit → must still run the JSON validator and be rejected.
+        let result: Result<Data, NetworkingError> = await networking.get("/xml", cachingLevel: .memory)
+
+        guard case .failure(.validation) = result else {
+            return XCTFail("a cached response must still be validated, got \(result)")
+        }
+    }
+
     func testAcceptsValidResponse() async {
         let networking = Networking(baseURL: baseURL)
         await requireJSON(networking)
