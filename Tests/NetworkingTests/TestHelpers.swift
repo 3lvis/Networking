@@ -1,13 +1,6 @@
 import Foundation
 @testable import Networking
 
-/// A reference box so `@Sendable` callbacks can write a flag the test reads afterward.
-/// @unchecked: the callback fires synchronously inside the awaited request, before the test reads it.
-final class Box<T>: @unchecked Sendable {
-    var value: T
-    init(_ value: T) { self.value = value }
-}
-
 extension AsyncStream {
     /// Drains the first `count` elements into an array, then stops. Tests call `events()` *before* the
     /// request (so the stream buffers), then `await stream.collect(n)` after to read what was emitted.

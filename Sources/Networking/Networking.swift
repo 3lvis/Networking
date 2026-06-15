@@ -26,7 +26,7 @@ public extension Int {
     }
 }
 
-// An actor: its mutable state (`fakeRequests`, auth/header config, `unauthorizedRequestCallback`)
+// An actor: its mutable state (`fakeRequests`, auth/header config, `interceptors`)
 // is isolated, so the compiler guarantees no data races when an instance is shared across tasks.
 // Trade-off vs the old `open class`: no subclassing, and isolated members are accessed with `await`.
 public actor Networking {
@@ -273,12 +273,12 @@ public actor Networking {
         authorizationHeaderValue = headerValue
     }
 
-    /// Callback used to intercept requests that return with a 403 or 401 status code.
-    public var unauthorizedRequestCallback: (@Sendable () -> Void)?
+    /// Interceptors wrapping every verb request, applied outermost first.
+    public var interceptors: [HTTPInterceptor] = []
 
-    /// Sets the unauthorized-request callback (actor-isolated setter).
-    public func setUnauthorizedRequestCallback(_ callback: (@Sendable () -> Void)?) {
-        self.unauthorizedRequestCallback = callback
+    /// Sets the request interceptor chain (actor-isolated setter).
+    public func setInterceptors(_ interceptors: [HTTPInterceptor]) {
+        self.interceptors = interceptors
     }
 
     /// Returns a URL by appending the provided path to the Networking's base URL.

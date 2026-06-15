@@ -60,10 +60,6 @@ extension Networking {
         let url = try composedURL(with: path)
         let response = HTTPURLResponse(url: url, headerFields: fakeRequest.headerFields, statusCode: fakeRequest.statusCode)
 
-        if let unauthorizedRequestCallback = unauthorizedRequestCallback, fakeRequest.statusCode == 403 || fakeRequest.statusCode == 401 {
-            unauthorizedRequestCallback()
-        }
-
         if fakeRequest.statusCode.statusCodeType != .successful {
             error = NSError(statusCode: fakeRequest.statusCode)
         }
@@ -197,23 +193,10 @@ extension Networking {
     func requestData(_ requestType: RequestType, path: String, cachingLevel: CachingLevel, responseType: ResponseType) async throws -> (Data, HTTPURLResponse) {
         let request = URLRequest(url: try composedURL(with: path), requestType: requestType, path: path, contentType: nil, responseType: responseType, authorizationHeaderValue: authorizationHeaderValue, token: token, authorizationHeaderKey: authorizationHeaderKey, headerFields: headerFields)
 
-        let (data, response) = try await self.session.data(for: request)
-
-        if let httpResponse = response as? HTTPURLResponse {
-            if !(httpResponse.statusCode >= 200 && httpResponse.statusCode < 300),
-               let unauthorizedRequestCallback = self.unauthorizedRequestCallback,
-               httpResponse.statusCode == 403 || httpResponse.statusCode == 401 {
-                unauthorizedRequestCallback()
-            }
-
-            try self.cacheOrPurgeData(data: data, path: path, cacheName: nil, cachingLevel: cachingLevel)
-
-            return (data, httpResponse)
-        } else {
-            let url = try self.composedURL(with: path)
-            let response = HTTPURLResponse(url: url, statusCode: 400)
-            return (data, response)
-        }
+        // Route through the interceptor chain so retry/auth-refresh apply to downloads too.
+        let exchange = try await perform(request)
+        try self.cacheOrPurgeData(data: exchange.data, path: path, cacheName: nil, cachingLevel: cachingLevel)
+        return (exchange.data, exchange.response)
     }
 
     func cancelRequest(_ sessionTaskType: SessionTaskType, requestType: RequestType, url: URL) async {

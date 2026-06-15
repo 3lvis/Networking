@@ -66,7 +66,9 @@ extension Networking {
                 } else {
                     // The per-task delegate collects URLSessionTaskMetrics for the .completed event.
                     let collector = MetricsCollector()
-                    let (responseData, response) = try await session.data(for: request, delegate: collector)
+                    let exchange = try await perform(request, collector: collector)
+                    let responseData = exchange.data
+                    let response: URLResponse = exchange.response
                     let networkResult: Result<T, NetworkingError> = handleResponse(responseData: responseData, response: response, path: path)
                     if cachingLevel != .none, case .success = networkResult, let httpResponse = response as? HTTPURLResponse {
                         let headers = Dictionary(uniqueKeysWithValues: httpResponse.allHeaderFields.compactMap { key, value in
@@ -100,6 +102,28 @@ extension Networking {
         let duration = clock.now - startInstant
         guard let context else { return result }
         return complete(result, context: context, statusCode: statusCode, byteCount: byteCount, metrics: metrics, duration: duration, requestBody: body, responseMetadata: responseMetadata)
+    }
+
+    // Runs the interceptor chain around the real network call. session/collector are read into locals first
+    // so the @Sendable chain captures no actor-isolated state (Swift 6 region isolation).
+    func perform(_ request: URLRequest, collector: MetricsCollector? = nil) async throws -> HTTPExchange {
+        let session = self.session
+        let base: @Sendable (URLRequest) async throws -> HTTPExchange = { request in
+            let (data, response): (Data, URLResponse)
+            if let collector {
+                (data, response) = try await session.data(for: request, delegate: collector)
+            } else {
+                (data, response) = try await session.data(for: request)
+            }
+            guard let httpResponse = response as? HTTPURLResponse else { throw NetworkingError.invalidResponse }
+            return HTTPExchange(data: data, response: httpResponse)
+        }
+        var next = base
+        for interceptor in interceptors.reversed() {
+            let chained = next
+            next = { request in try await interceptor.intercept(request, next: chained) }
+        }
+        return try await next(request)
     }
 
     // The single completion path: builds the outcome, runs the built-in logging, and emits `.completed`.
@@ -309,9 +333,6 @@ extension Networking {
         case .cancelled:
             return .failure(.cancelled)
         case .redirection, .clientError, .serverError, .unknown:
-            if statusCode == 401 || statusCode == 403, let callback = unauthorizedRequestCallback {
-                callback()
-            }
             // Parse a recognized error body into a message; keep the raw (truncated) body in metadata regardless.
             let parsedMessage = (try? JSONDecoder().decode(ErrorResponse.self, from: responseData))?.combinedMessage
             let serverMessage = (parsedMessage?.isEmpty == false) ? parsedMessage : nil
@@ -366,6 +387,10 @@ extension Networking {
 
 
     private func mapThrownError<T: Decodable>(_ error: Error, path: String) -> Result<T, NetworkingError> {
+        // An interceptor (or the network call) may throw an already-categorized error — pass it through intact.
+        if let networkingError = error as? NetworkingError {
+            return .failure(networkingError)
+        }
         if error is CancellationError {
             return .failure(.cancelled)
         }

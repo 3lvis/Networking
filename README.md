@@ -115,6 +115,52 @@ let result: Result<JSONResponse, NetworkingError> = await networking.get("/get")
 // Successfully authenticated!
 ```
 
+### Refreshing an expired credential
+
+When a token expires, the server answers `401`/`403`. Rather than failing that request, register an `AuthRefreshInterceptor`: on an unauthorized response it runs your `refresh` closure, then **replays** the request once with the new credential. Return `nil` from `refresh` to give up and let the original failure through.
+
+```swift
+let networking = Networking(baseURL: "http://example.com")
+await networking.setInterceptors([
+    AuthRefreshInterceptor {
+        let token = try await myAuth.refreshAccessToken()   // your refresh call
+        await networking.setAuthorizationHeader(token: token) // keep future requests authed
+        return "Bearer \(token)"                            // …and replay this one with it
+    }
+])
+```
+
+Concurrent requests that all hit `401` at once share a **single** refresh — they wait on the one in flight instead of each firing their own (no token-refresh stampede). For pure *notification* of a `401` (no replay), you don't need an interceptor — it's already a `.completed(_, .failure)` with `error.statusCode == 401` on [`events()`](#observing-requests).
+
+`AuthRefreshInterceptor` is one implementation of the general `HTTPInterceptor` seam — an async `intercept(_:next:)` hook that wraps every verb request. Calling `next` runs the rest of the chain (the innermost being the real network call); calling it again replays.
+
+### Retrying transient failures
+
+`RetryInterceptor` retries a request when it fails transiently — a dropped connection or timeout, or an HTTP status in `retryableStatusCodes` (`408`/`429`/`500`/`502`/`503`/`504` by default, the same set behind [`NetworkingError.isRetryable`](#handling-errors)). It backs off exponentially with full jitter between attempts (capped at `maxDelay`) and honors a server's `Retry-After` header (seconds or HTTP-date) when present.
+
+```swift
+await networking.setInterceptors([
+    RetryInterceptor(maxAttempts: 3, baseDelay: .milliseconds(500), maxDelay: .seconds(30))
+])
+```
+
+**Only idempotent methods are retried by default** (`GET`/`HEAD`/`PUT`/`DELETE`/`OPTIONS`/`TRACE`). Retrying a `POST`/`PATCH` after a timeout or 5xx could duplicate a side effect — a second charge, a duplicate mutation — because the server may have already processed the first attempt. If a non-idempotent endpoint is safe to retry (e.g. it takes an idempotency key), opt it in explicitly:
+
+```swift
+RetryInterceptor(retryableMethods: ["GET", "HEAD", "PUT", "DELETE", "POST"])
+```
+
+Interceptors run outermost-first, so order matters: put `RetryInterceptor` **before** `AuthRefreshInterceptor` to retry around a refreshed credential, or after to refresh around each retry.
+
+```swift
+await networking.setInterceptors([
+    RetryInterceptor(),                                   // outer: retries the whole thing
+    AuthRefreshInterceptor { "Bearer \(try await refresh())" },  // inner: refreshes on 401
+])
+```
+
+Interceptors apply to **downloads** (`downloadImage`/`downloadData`) as well as the verbs.
+
 ## Making a request
 
 ### The basics
