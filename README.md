@@ -501,7 +501,7 @@ try await networking.cancelImageDownload("/image/png")
 
 **Caching**:
 
-**Networking** uses a multi-cache architecture when downloading images, the first time the `downloadImage` method is called for a specific path, it will store the results in disk (Documents folder) and in memory (NSCache), so in the next call it will return the cached results without hitting the network.
+**Networking** uses a multi-cache architecture when downloading images, the first time the `downloadImage` method is called for a specific path, it will store the results on disk (Caches directory) and in memory (`NSCache`), so in the next call it will return the cached results without hitting the network.
 
 ```swift
 let networking = Networking(baseURL: "http://example.com")
@@ -521,6 +521,15 @@ if FileManager.default.fileExists(atPath: destinationURL.path) {
     try FileManager.default.removeItem(at: destinationURL)
 }
 ```
+
+> **This is a key→blob store, not HTTP caching.** `cachingLevel` caches the downloaded bytes *unconditionally* by path (or `cacheName:`), ignoring `Cache-Control`/`ETag`/`Expires` — which is what you usually want for images and other assets whose hosts often send no cache headers at all. It deliberately does **not** implement HTTP cache semantics (freshness, conditional `304` revalidation, eviction). If you want those, configure a `URLCache` on the session and let `URLSession` handle it per the response headers — it composes with the verb requests:
+>
+> ```swift
+> let configuration = URLSessionConfiguration.default
+> configuration.urlCache = URLCache(memoryCapacity: 10_000_000, diskCapacity: 50_000_000)
+> configuration.requestCachePolicy = .useProtocolCachePolicy
+> let networking = Networking(baseURL: "https://example.com", configuration: configuration)
+> ```
 
 **Faking**:
 
@@ -613,7 +622,17 @@ cat "$dir/Library/Caches/networking.log"
 
 ## Installing
 
-**Networking** is available through Swift Package Manager.
+**Networking** is distributed through Swift Package Manager. It requires **Swift 6.2+** and **iOS 18 / macOS 15 / tvOS 18 / watchOS 11**.
+
+In your `Package.swift`:
+
+```swift
+.package(url: "https://github.com/3lvis/Networking.git", from: "8.0.0")
+```
+
+…and add `"Networking"` to your target's dependencies. In Xcode, use **File ▸ Add Package Dependencies…** and enter `https://github.com/3lvis/Networking.git`.
+
+> **Upgrading from 7.x?** 8.0.0 is a major, breaking release (async/`await` + `Result`, Swift 6, typed request bodies, a categorized error model, an event stream, and request interceptors). See [`CHANGELOG.md`](CHANGELOG.md) for the full migration.
 
 ## Running the tests
 
