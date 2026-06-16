@@ -218,6 +218,8 @@ extension FakeRequestTests {
         }
     }
 
+    struct ServerError: Decodable { let error: String }
+
     func testFakeGETWithInvalidPathAndJSONError() async throws {
         let networking = Networking(baseURL: baseURL)
 
@@ -232,8 +234,26 @@ extension FakeRequestTests {
                 return XCTFail("expected an HTTP error, got \(error)")
             }
             XCTAssertEqual(httpError.statusCode, 401)
-            XCTAssertTrue(httpError.serverMessage?.contains("Shit went down") ?? false)
+            // The core doesn't interpret the error body; the full body is retained for the caller to decode.
+            let decoded = try httpError.metadata.decode(ServerError.self)
+            XCTAssertEqual(decoded.error, "Shit went down")
         }
+    }
+
+    // The full error body is retained, not just the truncated log snippet — so a large error envelope is
+    // still fully decodable.
+    func testErrorBodyRetainedInFullNotTruncated() async throws {
+        let networking = Networking(baseURL: baseURL)
+        let longMessage = String(repeating: "x", count: 600)
+        await networking.fakeGET("/big-error", response: ["error": longMessage], statusCode: 400)
+
+        let result: Result<JSONResponse, NetworkingError> = await networking.get("/big-error")
+        guard case let .failure(.http(httpError)) = result else {
+            return XCTFail("expected an HTTP error, got \(result)")
+        }
+        XCTAssertGreaterThan(httpError.metadata.body.count, 512)
+        XCTAssertEqual(try httpError.metadata.decode(ServerError.self).error, longMessage)
+        XCTAssertEqual(httpError.metadata.bodySnippet?.hasSuffix("… (truncated)"), true, "the snippet stays a log excerpt")
     }
 
     func testFakeGETUsingFile() async throws {

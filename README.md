@@ -279,8 +279,8 @@ case .failure(let error):
         // Never reached the server: offline, DNS, TLS, timeout. The underlying URLError is intact.
         break
     case .http(let httpError):
-        // A non-2xx response. httpError.statusCode, .serverMessage, .isClientError/.isServerError,
-        // and .metadata (headers + a truncated body snippet).
+        // A non-2xx response. httpError.statusCode, .isClientError/.isServerError, and .metadata
+        // (status, headers, and the full response body — decode it into your own error type).
         break
     case .decoding(let decodingError, let metadata):
         // 2xx but the body didn't match your type. The DecodingError and response metadata are preserved.
@@ -299,12 +299,24 @@ case .failure(let error):
 Two conveniences cut across the cases:
 
 ```swift
-error.statusCode      // Int? — present for .http, .decoding, and .validation
-error.responseMetadata // ResponseMetadata? — status, headers, redaction-friendly body snippet
+error.statusCode       // Int? — present for .http, .decoding, and .validation
+error.responseMetadata // ResponseMetadata? — status, headers, and the full body
 error.isRetryable      // Bool — conservative: transient transport failures + HTTP 408/429/5xx
 ```
 
 `isRetryable` is deliberately conservative: only transport timeouts/connection failures and a small set of status codes (408, 429, 500, 502, 503, 504). A 4xx (other than 408/429), a decoding failure, or an invalid request is never reported as retryable.
+
+**The core makes no assumption about the error body's shape.** It hands you the complete body in `ResponseMetadata` so you can decode your API's own error envelope into a typed value — `decode(_:)` is a small convenience over `body`:
+
+```swift
+struct APIError: Decodable { let errors: [String: [String]] }   // e.g. a Rails/ActiveModel envelope
+
+if case .failure(.http(let httpError)) = result,
+   let apiError = try? httpError.metadata.decode(APIError.self) {
+    // apiError.errors["start_time"] == ["can't be blank"]
+}
+// metadata.body is the full bytes; metadata.bodySnippet is a truncated excerpt for logs.
+```
 
 ### Typed request bodies
 
@@ -453,7 +465,7 @@ let result: Result<JSONResponse, NetworkingError> = await networking.get("/entri
 
 **Faking with status code**:
 
-If you do not provide a status code for this fake request, the default returned one will be 200 (SUCCESS), but if you do provide a status code that is not 2xx, then **Networking** returns `.failure(.http(HTTPError))` carrying that status code (and any parsed `serverMessage`) — see [Handling errors](#handling-errors).
+If you do not provide a status code for this fake request, the default returned one will be 200 (SUCCESS), but if you do provide a status code that is not 2xx, then **Networking** returns `.failure(.http(HTTPError))` carrying that status code, with the fake's body in `metadata` for you to `decode` — see [Handling errors](#handling-errors).
 
 Use the no-body overload (omit `response:`) for a status-code-only fake:
 
@@ -591,7 +603,7 @@ await networking.setLogLevel(.all)       // every request too, success or failur
 
 `.failures` is the default: failures are rare, so logging them in full is cheap and it's the case you debug — including the **request body**, the quickest way to catch a wrong-shaped payload. `.all` adds successful requests (with their response body, for "succeeded but returned the wrong thing"). The level gates *only* the built-in logging — `events()` always delivers full structured events regardless. (Downloads — `downloadImage`/`downloadData` — log the line + request headers; their response headers/body are omitted since the payload is binary.)
 
-**Privacy — one rule: debug shows, release redacts.** Requests carry sensitive data (logins, payments, profiles, `Authorization`/`Cookie` headers). `redactsLogs` governs the built-in **logs**: in **debug** builds it shows everything (you're debugging — "is my auth header set?" must be answerable); in **release** it replaces both the body lines *and* the `setRedactedHeaderFields` header values (`Authorization`/`Cookie`/`Set-Cookie` by default) with `<redacted>`. Override either way with `setRedactsLogs(_:)`. Two caveats on what redaction does **not** cover: (1) a failure's log line still includes the server's error **message** (parsed from the response) as diagnostic text — so don't put secrets in server error strings; (2) `events()` always carries the **real** headers — it's your own request data, and redaction is a logging concern, not an observation one. Need more control? `setLogLevel(.none)` or filter `events()` yourself.
+**Privacy — one rule: debug shows, release redacts.** Requests carry sensitive data (logins, payments, profiles, `Authorization`/`Cookie` headers). `redactsLogs` governs the built-in **logs**: in **debug** builds it shows everything (you're debugging — "is my auth header set?" must be answerable); in **release** it replaces both the body lines *and* the `setRedactedHeaderFields` header values (`Authorization`/`Cookie`/`Set-Cookie` by default) with `<redacted>`. Override either way with `setRedactsLogs(_:)`. One caveat on what redaction does **not** cover: `events()` always carries the **real** headers — it's your own request data, and redaction is a logging concern, not an observation one. Need more control? `setLogLevel(.none)` or filter `events()` yourself.
 
 **Reading logs from a CLI / test / headless run.** `os.Logger` isn't visible in `swift test` / `swift run` stdout. Point the library at a file and it mirrors the same diagnostics there as plain text:
 

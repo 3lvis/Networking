@@ -329,9 +329,9 @@ extension Networking {
         case .cancelled:
             return .failure(.cancelled)
         case .redirection, .clientError, .serverError, .unknown:
-            let parsedMessage = (try? JSONDecoder().decode(ErrorResponse.self, from: responseData))?.combinedMessage
-            let serverMessage = (parsedMessage?.isEmpty == false) ? parsedMessage : nil
-            let error = HTTPError(statusCode: statusCode, metadata: makeResponseMetadata(httpResponse, body: responseData), serverMessage: serverMessage)
+            // The core makes no assumption about the error body's shape — the full body is retained in the
+            // metadata for the caller (or an interceptor) to decode into its own error type.
+            let error = HTTPError(statusCode: statusCode, metadata: makeResponseMetadata(httpResponse, body: responseData))
             return .failure(.http(error))
         }
     }

@@ -172,8 +172,8 @@ extension Networking {
 
     private func downloadError(forStatusCode statusCode: Int) -> NetworkingError {
         // Downloads don't retain the response body/headers at this point, so the metadata is status-only.
-        let metadata = ResponseMetadata(statusCode: statusCode, headers: [:], bodySnippet: nil)
-        return .http(HTTPError(statusCode: statusCode, metadata: metadata, serverMessage: nil))
+        let metadata = ResponseMetadata(statusCode: statusCode, headers: [:], body: Data())
+        return .http(HTTPError(statusCode: statusCode, metadata: metadata))
     }
 
     private func downloadError(_ error: Error) -> NetworkingError {
