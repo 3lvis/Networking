@@ -83,38 +83,45 @@ public enum InvalidRequestReason: Sendable, Equatable {
 public struct HTTPError: Error, Sendable {
     public let statusCode: Int
     public let metadata: ResponseMetadata
-    /// A human-readable message parsed from a recognized error body, when present.
-    public let serverMessage: String?
 
-    public init(statusCode: Int, metadata: ResponseMetadata, serverMessage: String?) {
+    public init(statusCode: Int, metadata: ResponseMetadata) {
         self.statusCode = statusCode
         self.metadata = metadata
-        self.serverMessage = serverMessage
     }
 
     public var isClientError: Bool { (400 ..< 500).contains(statusCode) }
     public var isServerError: Bool { (500 ..< 600).contains(statusCode) }
 }
 
-/// Metadata about an HTTP response, retained on failures for logging and debugging.
+/// Metadata about an HTTP response, retained on failures for inspection, logging, and debugging.
 public struct ResponseMetadata: Sendable {
     public let statusCode: Int
     public let headers: [String: String]
-    /// A truncated, log-friendly snippet of the response body — not the full payload. May still contain
+    /// The complete response body. Decode it into your own error type with `decode(_:)`. May contain
     /// sensitive data, so treat it as you would any request/response contents.
-    public let bodySnippet: String?
+    public let body: Data
 
-    public init(statusCode: Int, headers: [String: String], bodySnippet: String?) {
+    public init(statusCode: Int, headers: [String: String], body: Data) {
         self.statusCode = statusCode
         self.headers = headers
-        self.bodySnippet = bodySnippet
+        self.body = body
     }
 
     public init(response: HTTPURLResponse, body: Data) {
         let headers = Dictionary(uniqueKeysWithValues: response.allHeaderFields.compactMap { key, value in
             (key as? String).map { ($0, "\(value)") }
         })
-        self.init(statusCode: response.statusCode, headers: headers, bodySnippet: Self.bodySnippet(from: body))
+        self.init(statusCode: response.statusCode, headers: headers, body: body)
+    }
+
+    /// Decodes the full response body into your own type — e.g. your API's structured error envelope.
+    public func decode<T: Decodable>(_ type: T.Type, using decoder: JSONDecoder = JSONDecoder()) throws -> T {
+        try decoder.decode(type, from: body)
+    }
+
+    /// A truncated, log-friendly excerpt of the body — not the full payload (use `body` for that).
+    public var bodySnippet: String? {
+        Self.bodySnippet(from: body)
     }
 
     static func bodySnippet(from data: Data, limit: Int = 512) -> String? {
@@ -139,9 +146,6 @@ extension NetworkingError: LocalizedError {
         case let .transport(error):
             return "A network error occurred: \(error.localizedDescription)"
         case let .http(error):
-            if let serverMessage = error.serverMessage, !serverMessage.isEmpty {
-                return "The server returned status \(error.statusCode): \(serverMessage)"
-            }
             return "The server returned status \(error.statusCode) (\(HTTPURLResponse.localizedString(forStatusCode: error.statusCode)))."
         case let .decoding(error, metadata):
             return "Failed to decode the response (status \(metadata.statusCode)): \(error.detailedMessage)"
@@ -200,32 +204,5 @@ extension DecodingError {
             errorMessage += "Unknown decoding error occurred."
         }
         return errorMessage
-    }
-}
-
-/// Best-effort parse of a JSON error body into a human-readable message, modeled on Rails/ActiveModel
-/// serialization: a top-level `error`/`message`, or `errors: { field: [messages] }` (where `base` holds
-/// record-level errors). Shapes that don't fit — e.g. nested `errors` objects — fail to decode and simply
-/// yield no `serverMessage`; the raw body is still retained in `ResponseMetadata`.
-public struct ErrorResponse: Decodable {
-    let error: String?
-    let message: String?
-    let errors: [String: [String]]?
-
-    var combinedMessage: String {
-        var messages = [String]()
-        if let error = error {
-            messages.append(error)
-        }
-        if let message = message {
-            messages.append(message)
-        }
-        if let errors = errors {
-            for (_, messagesArray) in errors {
-                let combinedFieldMessages = messagesArray.joined(separator: ", ")
-                messages.append(combinedFieldMessages)
-            }
-        }
-        return messages.joined(separator: "; ")
     }
 }

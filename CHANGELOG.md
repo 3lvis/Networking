@@ -22,8 +22,11 @@ model, a structured event stream, and composable request interceptors.
   `data:contentType:` (raw). `get`/`delete` take `query:` (a `[URLQueryItem]` or any flat `Encodable`).
 - **Categorized errors.** `NetworkingError` is now `invalidRequest` / `transport` / `http` /
   `decoding` / `validation` / `invalidResponse` / `cancelled`, each preserving the underlying cause.
-  `HTTPError` carries `statusCode` / `serverMessage` / `metadata`; cross-cutting conveniences
-  `statusCode`, `responseMetadata`, and a conservative `isRetryable`.
+  `HTTPError` carries `statusCode` / `metadata`; cross-cutting conveniences `statusCode`,
+  `responseMetadata`, and a conservative `isRetryable`. The core makes no assumption about the error
+  body's shape — `ResponseMetadata` retains the **full** `body: Data` with a `decode(_:)` convenience
+  (and a truncated `bodySnippet` for logs), so you decode your API's own error envelope into a typed
+  value.
 - **Event stream.** `events()` returns an `AsyncStream<NetworkingEvent>` emitting `.started` then
   `.completed` for every request (verbs *and* downloads) — multi-consumer, carrying the outcome,
   duration, and `URLSessionTaskMetrics`.
