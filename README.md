@@ -178,6 +178,22 @@ await networking.setInterceptors([
 
 Register it outermost (before `RetryInterceptor`) so it validates the final, post-retry response. The cache sits beneath the interceptors, so **cache hits are validated too** — a response cached before the validator existed can't slip through.
 
+### Surfacing Rails error messages
+
+By default a non-2xx becomes a `NetworkingError.http` whose `serverMessage` is best-effort — it reads a top-level `error`/`message` or a flat `{ "errors": { "field": ["…"] } }`. If you talk to a Rails backend, register `RailsErrorInterceptor` to parse the **full** ActiveModel/JSON:API shape into a readable message — including `base` (record-level) errors, nested error groups, and the JSON:API `errors` array. A general client shouldn't assume a Rails backend, so this knowledge is opt-in rather than baked into the core error model.
+
+```swift
+await networking.setInterceptors([
+    RailsErrorInterceptor(),   // outermost: shapes the final error after retries
+    RetryInterceptor()
+])
+
+// 422 { "errors": { "start_time": ["can't be blank"], "base": ["must be at least 240 minutes"] } }
+// -> NetworkingError.http(serverMessage: "can't be blank; must be at least 240 minutes")
+```
+
+Register it outermost (before `RetryInterceptor`) so it shapes the final response after retries run. A body it doesn't recognize passes through untouched, so non-Rails responses still surface as the standard `.http` error.
+
 ## Making a request
 
 ### The basics
