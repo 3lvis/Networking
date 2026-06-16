@@ -394,7 +394,7 @@ let result: Result<JSONResponse, NetworkingError> = await networking.post("/imag
 
 **FormDataPart Content-Type**:
 
-`FormDataPart` uses `FormDataPartType` to generate the `Content-Type` for each part. The default `FormDataPartType` is `.Data` which adds the `application/octet-stream` to your part. If you want to use a `Content-Type` that is not available between the existing `FormDataPartType`s, you can use `.Custom("your-content-type)`.
+Each part's `Content-Type` comes from its `FormDataPartType`, which simply carries the MIME string. The default is `.octetStream` (`application/octet-stream`); `.png` and `.jpeg` are provided as conveniences. For anything else, construct one directly — `FormDataPart(type: FormDataPartType("application/pdf"), data: …, parameterName: …)`.
 
 ### Raw data
 

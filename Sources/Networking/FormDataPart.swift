@@ -1,23 +1,15 @@
 import Foundation
 
-public enum FormDataPartType {
-    case data
-    case png
-    case jpg
-    case custom(String)
+public struct FormDataPartType: Sendable {
+    public let contentType: String
 
-    var contentType: String {
-        switch self {
-        case .data:
-            return "application/octet-stream"
-        case .png:
-            return "image/png"
-        case .jpg:
-            return "image/jpeg"
-        case let .custom(value):
-            return value
-        }
+    public init(_ contentType: String) {
+        self.contentType = contentType
     }
+
+    public static let octetStream = FormDataPartType("application/octet-stream")
+    public static let png = FormDataPartType("image/png")
+    public static let jpeg = FormDataPartType("image/jpeg")
 }
 
 public struct FormDataPart {
@@ -46,7 +38,7 @@ public struct FormDataPart {
         return bodyData as Data
     }
 
-    public init(type: FormDataPartType = .data, data: Data, parameterName: String, filename: String? = nil) {
+    public init(type: FormDataPartType = .octetStream, data: Data, parameterName: String, filename: String? = nil) {
         self.type = type
         self.data = data
         self.parameterName = parameterName
