@@ -247,6 +247,8 @@ public actor Networking {
             resourcesPath = url.absoluteString
         }
 
+        // The whole URL becomes one filename component, so a long URL (e.g. many query params) can exceed
+        // the filesystem's 255-char limit and fail the write. TODO: hash the URL when it's too long.
         let normalizedResourcesPath = resourcesPath.replacingOccurrences(of: "/", with: "-")
         let folderPath = Networking.domain
         let finalPath = "\(folderPath)/\(normalizedResourcesPath)"
