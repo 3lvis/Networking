@@ -27,7 +27,6 @@ class NewNetworkingTests: XCTestCase {
                 return XCTFail("expected an HTTP error, got \(error)")
             }
             XCTAssertEqual(httpError.statusCode, 422)
-            // The core doesn't interpret the body — decode your own error envelope from the full body.
             let decoded = try httpError.metadata.decode(ValidationErrors.self)
             XCTAssertEqual(decoded.errors["phone_number"], ["has already been taken"])
         }

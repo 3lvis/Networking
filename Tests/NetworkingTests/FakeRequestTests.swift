@@ -234,14 +234,11 @@ extension FakeRequestTests {
                 return XCTFail("expected an HTTP error, got \(error)")
             }
             XCTAssertEqual(httpError.statusCode, 401)
-            // The core doesn't interpret the error body; the full body is retained for the caller to decode.
             let decoded = try httpError.metadata.decode(ServerError.self)
             XCTAssertEqual(decoded.error, "Shit went down")
         }
     }
 
-    // The full error body is retained, not just the truncated log snippet — so a large error envelope is
-    // still fully decodable.
     func testErrorBodyRetainedInFullNotTruncated() async throws {
         let networking = Networking(baseURL: baseURL)
         let longMessage = String(repeating: "x", count: 600)

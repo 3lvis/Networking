@@ -97,8 +97,6 @@ public struct HTTPError: Error, Sendable {
 public struct ResponseMetadata: Sendable {
     public let statusCode: Int
     public let headers: [String: String]
-    /// The complete response body. Decode it into your own error type with `decode(_:)`. May contain
-    /// sensitive data, so treat it as you would any request/response contents.
     public let body: Data
 
     public init(statusCode: Int, headers: [String: String], body: Data) {
@@ -114,12 +112,11 @@ public struct ResponseMetadata: Sendable {
         self.init(statusCode: response.statusCode, headers: headers, body: body)
     }
 
-    /// Decodes the full response body into your own type — e.g. your API's structured error envelope.
     public func decode<T: Decodable>(_ type: T.Type, using decoder: JSONDecoder = JSONDecoder()) throws -> T {
         try decoder.decode(type, from: body)
     }
 
-    /// A truncated, log-friendly excerpt of the body — not the full payload (use `body` for that).
+    /// A truncated, log-friendly excerpt of `body` for logging — `nil` for an empty or non-UTF-8 body.
     public var bodySnippet: String? {
         Self.bodySnippet(from: body)
     }
