@@ -63,13 +63,8 @@ class NetworkingIntegrationTests: XCTestCase {
 
         try Networking.deleteCachedFiles()
 
-        // Caches folder should be there
         XCTAssertTrue(FileManager.default.exists(at: cachesURL))
-
-        // Files under networking domain are gone
         XCTAssertFalse(FileManager.default.exists(at: folderURL))
-
-        // Saved image should be there
         XCTAssertTrue(FileManager.default.exists(at: filename))
     }
 }

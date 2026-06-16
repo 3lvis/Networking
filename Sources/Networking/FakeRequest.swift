@@ -1,8 +1,8 @@
 import Foundation
 
 struct FakeRequest {
-    // Typed canned response. `.data` holds already-serialized JSON (or raw file bytes); `.image`
-    // is served straight back by the image-download path. Replaces the old `response: Any?`.
+    // `.data` holds already-serialized JSON (or raw file bytes), served back as-is; `.image` is served
+    // straight back by the image-download path.
     enum Payload {
         case none
         case data(Data)

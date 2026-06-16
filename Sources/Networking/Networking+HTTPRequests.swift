@@ -4,19 +4,16 @@ public extension Networking {
 
     // MARK: GET
 
-    /// Performs a GET request. Pass typed `query` items to append to the URL's query string.
     func get<T: Decodable>(_ path: String, query: [URLQueryItem]? = nil, cachingLevel: CachingLevel = .none) async -> Result<T, NetworkingError> {
         return await handle(.get, path: path, query: query ?? [], cachingLevel: cachingLevel)
     }
 
-    /// Performs a GET request whose query string is built from any flat `Encodable` (a `[String: String]` or your own model).
     func get<Q: Encodable, T: Decodable>(_ path: String, query: Q, cachingLevel: CachingLevel = .none) async -> Result<T, NetworkingError> {
         return await queryEncodeAndHandle(.get, path: path, query: query, cachingLevel: cachingLevel)
     }
 
     // MARK: POST
 
-    /// Performs a bodyless POST request.
     func post<T: Decodable>(_ path: String) async -> Result<T, NetworkingError> {
         return await handle(.post, path: path)
     }
@@ -26,8 +23,7 @@ public extension Networking {
         return result.map { _ in () }
     }
 
-    /// Performs a POST request whose body is a typed `Encodable`, JSON-encoded with a
-    /// `Content-Type: application/json` header and ISO-8601 dates.
+    /// JSON body, ISO-8601 dates.
     func post<B: Encodable, T: Decodable>(_ path: String, body: B) async -> Result<T, NetworkingError> {
         return await encodeAndHandle(.post, path: path, body: body)
     }
@@ -37,7 +33,7 @@ public extension Networking {
         return result.map { _ in () }
     }
 
-    /// Performs a POST request whose body is `application/x-www-form-urlencoded`, built from any flat `Encodable` (a `[String: String]` or your own model).
+    /// `application/x-www-form-urlencoded` body, built from a flat `Encodable`.
     func post<F: Encodable, T: Decodable>(_ path: String, form: F) async -> Result<T, NetworkingError> {
         return await formEncodeAndHandle(.post, path: path, form: form)
     }
@@ -47,7 +43,6 @@ public extension Networking {
         return result.map { _ in () }
     }
 
-    /// Performs a multipart POST request with file `parts` and optional string form `fields`.
     func post<T: Decodable>(_ path: String, parts: [FormDataPart], fields: [String: String] = [:]) async -> Result<T, NetworkingError> {
         return await handle(.post, path: path, body: .multipart(fields: fields, parts: parts))
     }
@@ -57,7 +52,6 @@ public extension Networking {
         return result.map { _ in () }
     }
 
-    /// Performs a POST request sending `data` verbatim with the given `contentType`.
     func post<T: Decodable>(_ path: String, data: Data, contentType: String) async -> Result<T, NetworkingError> {
         return await handle(.post, path: path, body: .raw(data, contentType: contentType))
     }
@@ -163,7 +157,6 @@ public extension Networking {
 
     // MARK: DELETE
 
-    /// Performs a DELETE request. Pass typed `query` items to append to the URL's query string.
     func delete<T: Decodable>(_ path: String, query: [URLQueryItem]? = nil) async -> Result<T, NetworkingError> {
         return await handle(.delete, path: path, query: query ?? [])
     }
@@ -173,7 +166,6 @@ public extension Networking {
         return result.map { _ in () }
     }
 
-    /// Performs a DELETE request whose query string is built from any flat `Encodable`.
     func delete<Q: Encodable, T: Decodable>(_ path: String, query: Q) async -> Result<T, NetworkingError> {
         return await queryEncodeAndHandle(.delete, path: path, query: query, cachingLevel: .none)
     }
@@ -202,8 +194,8 @@ extension Networking {
         return await handle(requestType, path: path, body: .json(data))
     }
 
-    // Encodes a typed fake response to JSON. Fakes are test fixtures, so a value that can't encode is a
-    // setup bug — fail loudly here rather than silently registering an empty body that breaks later, somewhere less obvious.
+    // A fake whose response can't encode is a test setup bug — fail loudly here rather than silently
+    // registering an empty body that breaks later, somewhere less obvious.
     fileprivate func fakePayload(_ response: some Encodable) -> FakeRequest.Payload {
         do {
             return .data(try Self.requestBodyEncoder.encode(response))
@@ -238,17 +230,14 @@ extension Networking {
 // MARK: - Faking requests
 
 public extension Networking {
-    /// Registers a fake GET response (a typed `Encodable`, JSON-encoded). Every GET to `path` returns it.
     func fakeGET(_ path: String, response: some Encodable, headerFields: [String: String]? = nil, statusCode: Int = 200, delay: Double = 0) {
         registerFake(requestType: .get, path: path, headerFields: headerFields, payload: fakePayload(response), responseType: .json, statusCode: statusCode, delay: delay)
     }
 
-    /// Registers a fake GET with no response body — useful for status-code-only fakes (e.g. 401).
     func fakeGET(_ path: String, headerFields: [String: String]? = nil, statusCode: Int = 200, delay: Double = 0) {
         registerFake(requestType: .get, path: path, headerFields: headerFields, payload: .none, responseType: .json, statusCode: statusCode, delay: delay)
     }
 
-    /// Registers a fake GET response from a bundled file's raw contents.
     func fakeGET(_ path: String, fileName: String, bundle: Bundle = Bundle.main, statusCode: Int = 200, delay: Double = 0) {
         registerFake(requestType: .get, path: path, fileName: fileName, bundle: bundle, statusCode: statusCode, delay: delay)
     }
@@ -306,62 +295,30 @@ public extension Networking {
 
 public extension Networking {
 
-    /// Retrieves an image from the cache or from the filesystem.
-    ///
-    /// - Parameters:
-    ///   - path: The path where the image is located.
-    ///   - cacheName: The cache name used to identify the downloaded image, by default the path is used.
-    /// - Returns: The cached image.
     nonisolated func imageFromCache(_ path: String, cacheName: String? = nil) throws -> Image? {
         let object = try objectFromCache(for: path, cacheName: cacheName, cachingLevel: .memoryAndFile, responseType: .image)
 
         return object as? Image
     }
 
-    /// Downloads an image using the specified path.
-    ///
-    /// - Parameters:
-    ///   - path: The path where the image is located.
-    ///   - cacheName: The cache name used to identify the downloaded image, by default the path is used.
-    ///   - cachingLevel: Enum to control the caching level: .memory, .memoryAndFile, .none
     func downloadImage<T: ImageDownloadable>(_ path: String, cacheName: String? = nil, cachingLevel: CachingLevel = .memoryAndFile) async -> Result<T, NetworkingError> {
         return await handleImageRequest(.get, path: path, cacheName: cacheName, cachingLevel: cachingLevel, responseType: .image)
     }
 
-    /// Cancels the image download request for the specified path. This causes the request to complete with error code URLError.cancelled.
-    ///
-    /// - Parameter path: The path for the cancelled image download request.
+    /// Completes the in-flight download for `path` with `URLError.cancelled`.
     func cancelImageDownload(_ path: String) async throws {
         let url = try composedURL(with: path)
         await cancelRequest(.data, requestType: .get, url: url)
     }
 
-    /// Registers a fake download image request with an image. After registering this, every download request to the path, will return the registered image.
-    ///
-    /// - Parameters:
-    ///   - path: The path for the faked image download request.
-    ///   - image: An image that will be returned when there's a request to the registered path.
-    ///   - statusCode: The status code to be used when faking the request.
     func fakeImageDownload(_ path: String, image: Image, headerFields: [String: String]? = nil, statusCode: Int = 200, delay: Double = 0) {
         registerFake(requestType: .get, path: path, headerFields: headerFields, payload: .image(image), responseType: .image, statusCode: statusCode, delay: delay)
     }
 
-    /// Downloads data from a URL, caching the result.
-    ///
-    /// - Parameters:
-    ///   - path: The path used to download the resource.
-    ///   - cacheName: The cache name used to identify the downloaded data, by default the path is used.
-    ///   - cachingLevel: Enum to control the caching level: .memory, .memoryAndFile, .none
     func downloadData<T: DataDownloadable>(_ path: String, cacheName: String? = nil, cachingLevel: CachingLevel = .memoryAndFile) async -> Result<T, NetworkingError> {
         return await handleDataRequest(.get, path: path, cacheName: cacheName, cachingLevel: cachingLevel, responseType: .data)
     }
 
-    /// Retrieves data from the cache or from the filesystem.
-    ///
-    /// - Parameters:
-    ///   - path: The path where the image is located.
-    ///   - cacheName: The cache name used to identify the downloaded data, by default the path is used.
-    /// - Returns: The cached data.
     nonisolated func dataFromCache(_ path: String, cacheName: String? = nil) throws -> Data? {
         let object = try objectFromCache(for: path, cacheName: cacheName, cachingLevel: .memoryAndFile, responseType: .data)
 

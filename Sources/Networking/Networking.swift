@@ -3,9 +3,6 @@ import os.log
 
 public extension Int {
 
-    /// Categorizes a status code.
-    ///
-    /// - Returns: The NetworkingStatusCodeType of the status code.
     var statusCodeType: Networking.StatusCodeType {
         switch self {
         case URLError.cancelled.rawValue:
@@ -26,9 +23,6 @@ public extension Int {
     }
 }
 
-// An actor: its mutable state (`fakeRequests`, auth/header config, `interceptors`)
-// is isolated, so the compiler guarantees no data races when an instance is shared across tasks.
-// Trade-off vs the old `open class`: no subclassing, and isolated members are accessed with `await`.
 public actor Networking {
     static let domain = "com.3lvis.networking"
 
@@ -55,15 +49,6 @@ public actor Networking {
         }
     }
 
-    /// Categorizes a status code.
-    ///
-    /// - informational: This class of status code indicates a provisional response, consisting only of the Status-Line and optional headers, and is terminated by an empty line.
-    /// - successful: This class of status code indicates that the client's request was successfully received, understood, and accepted.
-    /// - redirection: This class of status code indicates that further action needs to be taken by the user agent in order to fulfill the request.
-    /// - clientError: The 4xx class of status code is intended for cases in which the client seems to have erred.
-    /// - serverError: Response status codes beginning with the digit "5" indicate cases in which the server is aware that it has erred or is incapable of performing the request.
-    /// - cancelled: When a request gets cancelled
-    /// - unknown: This response status code could be used by Foundation for other types of states.
     public enum StatusCodeType {
         case informational, successful, redirection, clientError, serverError, cancelled, unknown
     }
@@ -76,14 +61,10 @@ public actor Networking {
     fileprivate var configuration: URLSessionConfiguration
     nonisolated(unsafe) let cache: NSCache<AnyObject, AnyObject>
 
-    // Live `events()` consumers. Each call to `events()` registers a continuation here; `emit` fans out
-    // to all of them, and `onTermination` drops one when its consumer's task ends.
     private var streamContinuations: [UUID: AsyncStream<NetworkingEvent>.Continuation] = [:]
 
-    /// A stream of observability events — one `.started` then one `.completed` per request (verbs *and*
-    /// downloads). Iterate with `for await event in await networking.events()` to log, accumulate, or
-    /// drive UI. Each call returns its own multicast stream; the buffer keeps the newest 256 events for a
-    /// slow consumer. This is the only consumer hook — the built-in failure logging is separate (below).
+    /// A stream of observability events — one `.started` then one `.completed` per request. Each call
+    /// returns its own multicast stream; the buffer keeps the newest 256 events for a slow consumer.
     public func events() -> AsyncStream<NetworkingEvent> {
         let (stream, continuation) = AsyncStream.makeStream(of: NetworkingEvent.self, bufferingPolicy: .bufferingNewest(256))
         let id = UUID()
@@ -98,26 +79,20 @@ public actor Networking {
         streamContinuations[id] = nil
     }
 
-    /// The single fan-out point: run the built-in (failure-only) logging synchronously, then deliver to
-    /// every live `events()` stream. Logging is driven here — not by an async stream consumer — so it
-    /// stays synchronous and lossless.
     func emit(_ event: NetworkingEvent) {
         for continuation in streamContinuations.values {
             continuation.yield(event)
         }
     }
 
-    /// Which requests the built-in `os.Logger`/file diagnostics cover — `.none` / `.failures` (default) /
-    /// `.all`. Logged requests always get full detail. Gates *only* the built-in logging; `events()`
+    /// Which requests the built-in diagnostics cover. Gates *only* the built-in logging; `events()`
     /// always carries full structured events regardless.
     public var logLevel: LogLevel = .failures
 
-    /// Sets the built-in logging scope (actor-isolated setter).
     public func setLogLevel(_ level: LogLevel) {
         self.logLevel = level
     }
 
-    // Debug builds (dev / local / simulator) show everything; release builds (e.g. the App Store) redact.
     private static let defaultRedactsLogs: Bool = {
         #if DEBUG
         return false
@@ -127,14 +102,10 @@ public actor Networking {
     }()
 
     /// Whether the built-in **logs** redact sensitive content — the request/response body lines *and* the
-    /// `redactedHeaderFields` header values. Defaults to redacting in release builds and showing everything
-    /// in debug, so secrets stay out of production logs while local/dev runs stay fully readable. Override
-    /// either way. This governs the *logs* only — `events()` always carries the real headers (it's your own
-    /// request data). And the scope is bodies + headers, not the server's error message, which the failure
-    /// line includes as diagnostic text regardless.
+    /// `redactedHeaderFields` header values. Defaults to redacting in release and showing everything in
+    /// debug. Governs the *logs* only — `events()` always carries the real headers.
     public var redactsLogs = Networking.defaultRedactsLogs
 
-    /// Sets log redaction for the built-in logs (actor-isolated setter).
     public func setRedactsLogs(_ redacts: Bool) {
         self.redactsLogs = redacts
     }
@@ -144,12 +115,10 @@ public actor Networking {
     /// from the `NETWORKING_LOG_FILE` environment variable, so logs can be captured with no code change.
     public var logFileURL: URL?
 
-    /// Sets (or clears) the diagnostics log file (actor-isolated setter).
     public func setLogFileURL(_ url: URL?) {
         self.logFileURL = url
     }
 
-    /// Emits one built-in diagnostic line to `os.Logger` and, if configured, to the log file.
     func record(_ message: String, level: OSLogType) {
         guard logLevel != .none else { return }
         logger.log(level: level, "\(message, privacy: .public)")
@@ -170,16 +139,14 @@ public actor Networking {
     }
 
     /// Header field names whose values are replaced with `<redacted>` in the built-in **logs** when
-    /// `redactsLogs` is on (the release default). Matched case-insensitively; the active authorization
-    /// header key is always included. `events()` is unaffected — it carries the real header values.
+    /// `redactsLogs` is on. Matched case-insensitively; the active authorization header key is always
+    /// included.
     var redactedHeaderFields: Set<String> = ["Authorization", "Cookie", "Set-Cookie"]
 
-    /// Replaces the set of redacted header names (actor-isolated setter).
     public func setRedactedHeaderFields(_ fields: Set<String>) {
         self.redactedHeaderFields = fields
     }
 
-    /// Redacts sensitive header values for inclusion in the built-in logs.
     func redactedHeaders(_ headers: [String: String]) -> [String: String] {
         let redacted = Set(redactedHeaderFields.union([authorizationHeaderKey]).map { $0.lowercased() })
         return headers.reduce(into: [String: String]()) { result, pair in
@@ -187,14 +154,12 @@ public actor Networking {
         }
     }
 
-    /// The boundary used for multipart requests.
     nonisolated let boundary = String(format: "com.elvisnunez.networking.%08x%08x", arc4random(), arc4random())
 
     lazy var session: URLSession = {
         URLSession(configuration: self.configuration)
     }()
 
-    /// Caching options
     public enum CachingLevel {
         case memory
         case memoryAndFile
@@ -204,12 +169,6 @@ public actor Networking {
     private static let defaultLogger = Logger(subsystem: "com.elvisnunez.networking", category: "network")
 
     let logger: Logger
-    /// Base initializer, it creates an instance of `Networking`.
-    ///
-    /// - Parameters:
-    ///   - baseURL: The base URL for HTTP requests under `Networking`.
-    ///   - configuration: The URLSessionConfiguration configuration to be used
-    ///   - cache: The NSCache to use, it has a built-in default one.
     public init(baseURL: String = "", configuration: URLSessionConfiguration = .default, cache: NSCache<AnyObject, AnyObject>? = nil, logger: Logger? = nil) {
         self.baseURL = baseURL
         self.configuration = configuration
@@ -218,9 +177,8 @@ public actor Networking {
         self.logFileURL = ProcessInfo.processInfo.environment["NETWORKING_LOG_FILE"].flatMap(Networking.resolveLogFileURL)
     }
 
-    /// Resolves the `NETWORKING_LOG_FILE` value to a URL. An absolute/relative path is used as given; a
-    /// bare filename resolves under the app's Caches directory — sandbox-safe in an app (the default
-    /// location CocoaLumberjack uses too) and still readable from a CLI/simulator run.
+    /// A path (containing `/`) is used as given; a bare filename resolves under the app's Caches
+    /// directory — sandbox-safe in an app, still readable from a CLI/simulator run.
     static func resolveLogFileURL(_ value: String) -> URL? {
         guard !value.isEmpty else { return nil }
         if value.contains("/") {
@@ -232,11 +190,7 @@ public actor Networking {
         return caches.appendingPathComponent(value)
     }
 
-    /// Authenticates using Basic Authentication, it converts username:password to Base64 then sets the Authorization header to "Basic \(Base64(username:password))".
-    ///
-    /// - Parameters:
-    ///   - username: The username to be used.
-    ///   - password: The password to be used.
+    /// Sets the `Authorization` header to HTTP Basic credentials (`Basic <base64(username:password)>`).
     public func setAuthorizationHeader(username: String, password: String) {
         let credentialsString = "\(username):\(password)"
         if let credentialsData = credentialsString.data(using: .utf8) {
@@ -248,26 +202,19 @@ public actor Networking {
         }
     }
 
-    /// Authenticates using a Bearer token, sets the Authorization header to "Bearer \(token)".
-    ///
-    /// - Parameter token: The token to be used.
+    /// Sets the `Authorization` header to `Bearer <token>`.
     public func setAuthorizationHeader(token: String) {
         self.token = token
     }
 
-    /// Sets the header fields for every HTTP call.
+    /// Header fields added to every request.
     public var headerFields: [String: String]?
 
-    /// Sets the header fields for every HTTP call (actor-isolated setter).
     public func setHeaderFields(_ headerFields: [String: String]?) {
         self.headerFields = headerFields
     }
 
-    /// Authenticates using a custom HTTP Authorization header.
-    ///
-    /// - Parameters:
-    ///   - headerKey: Sets this value as the key for the HTTP `Authorization` header
-    ///   - headerValue: Sets this value to the HTTP `Authorization` header or to the `headerKey` if you provided that.
+    /// Authenticates using a custom header, defaulting to `Authorization`.
     public func setAuthorizationHeader(headerKey: String = "Authorization", headerValue: String) {
         authorizationHeaderKey = headerKey
         authorizationHeaderValue = headerValue
@@ -276,16 +223,10 @@ public actor Networking {
     /// Interceptors wrapping every verb request, applied outermost first.
     public var interceptors: [HTTPInterceptor] = []
 
-    /// Sets the request interceptor chain (actor-isolated setter).
     public func setInterceptors(_ interceptors: [HTTPInterceptor]) {
         self.interceptors = interceptors
     }
 
-    /// Returns a URL by appending the provided path to the Networking's base URL.
-    ///
-    /// - Parameter path: The path to be appended to the base URL.
-    /// - Returns: A URL generated after appending the path to the base URL.
-    /// - Throws: An error if the URL couldn't be created.
     nonisolated public func composedURL(with path: String) throws -> URL {
         let encodedPath = path.encodeUTF8() ?? path
         guard let url = URL(string: baseURL + encodedPath) else {
@@ -294,13 +235,8 @@ public actor Networking {
         return url
     }
 
-    /// Returns the URL used to store a resource for a certain path. Useful to find where a download image is located.
-    ///
-    /// - Parameters:
-    ///   - path: The path used to download the resource.
-    ///   - cacheName: The alias to be used for storing the resource, if a cache name is provided, this will be used instead of the path.
-    /// - Returns: A URL where a resource has been stored.
-    /// - Throws: An error if the URL couldn't be created.
+    /// The on-disk URL where a downloaded resource is stored. `cacheName`, when given, is used as the
+    /// storage key instead of `path`.
     nonisolated public func destinationURL(for path: String, cacheName: String? = nil) throws -> URL {
         let normalizedCacheName = cacheName?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
         var resourcesPath: String
@@ -335,10 +271,6 @@ public actor Networking {
         }
     }
 
-    /// Splits a url in base url and relative path.
-    ///
-    /// - Parameter path: The full url to be splitted.
-    /// - Returns: A base url and a relative path.
     public static func splitBaseURLAndRelativePath(for path: String) -> (baseURL: String, relativePath: String) {
         guard let encodedPath = path.encodeUTF8() else { fatalError("Couldn't encode path to UTF8: \(path)") }
         guard let url = URL(string: encodedPath) else { fatalError("Path \(encodedPath) can't be converted to url") }
@@ -350,7 +282,7 @@ public actor Networking {
         return (baseURL, relativePath)
     }
 
-    /// Removes the stored credentials and cached data.
+    /// Clears stored credentials, header fields, registered fakes, and cached data.
     public func reset() throws {
         cache.removeAllObjects()
         fakeRequests.removeAll()
@@ -362,7 +294,6 @@ public actor Networking {
         try Networking.deleteCachedFiles()
     }
 
-    /// Deletes the downloaded/cached files.
     public static func deleteCachedFiles() throws {
         let directory = FileManager.SearchPathDirectory.cachesDirectory
         if let cachesURL = FileManager.default.urls(for: directory, in: .userDomainMask).first {
@@ -375,7 +306,6 @@ public actor Networking {
 }
 
 public extension Networking {
-    /// Cancels all the current requests.
     func cancelAllRequests() async {
         let (dataTasks, uploadTasks, downloadTasks) = await session.tasks
         for sessionTask in dataTasks {

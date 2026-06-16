@@ -113,7 +113,7 @@ class GETIntegrationTests: XCTestCase {
     }
 
     // /uuid returns a fresh value per call, so a matching second response proves the first
-    // was served from cache. Also exercises the new statusCode on JSONResponse.
+    // was served from cache.
     func testGETResponseCaching() async throws {
         let cache = NSCache<AnyObject, AnyObject>()
         let networking = Networking(baseURL: baseURL, cache: cache)

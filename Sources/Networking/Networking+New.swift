@@ -2,11 +2,9 @@ import Foundation
 import os.log
 
 extension Networking {
-    // Typed request payload. Replaces the old `parameters: Any?` + `ParameterType` pair: each
-    // case carries exactly the data its encoding needs, so the wrong combination can't be expressed.
     enum RequestBody {
         case none
-        case json(Data)                                       // pre-encoded JSON
+        case json(Data)
         case formURLEncoded([String: String])
         case multipart(fields: [String: String], parts: [FormDataPart])
         case raw(Data, contentType: String)
@@ -33,7 +31,7 @@ extension Networking {
         var statusCode: Int?
         var byteCount = 0
         var metrics: TransactionMetrics?
-        var responseMetadata: ResponseMetadata?   // response headers + body snippet, for full-detail logging
+        var responseMetadata: ResponseMetadata?
 
         do {
             if let fakeRequest = try FakeRequest.find(ofType: requestType, forPath: path, in: fakeRequests) {
@@ -50,9 +48,8 @@ extension Networking {
                 context = requestContext
                 emit(.started(requestContext))
 
-                // Key off the request's full effective URL so distinct requests never collide (e.g.
-                // full-URL GETs to different hosts). Passed as the cacheName so destinationURL uses it
-                // verbatim instead of re-prepending the baseURL.
+                // Key off the request's full effective URL so distinct requests never collide, passed as
+                // the cacheName so destinationURL uses it verbatim instead of re-prepending the baseURL.
                 let cacheKey = cacheKey(for: request, fallbackPath: path)
                 if cachingLevel != .none,
                     let cachedData = try objectFromCache(for: path, cacheName: cacheKey, cachingLevel: cachingLevel, responseType: .json) as? Data,
@@ -66,7 +63,6 @@ extension Networking {
                     byteCount = exchange.data.count
                     responseMetadata = makeResponseMetadata(exchange.response, body: exchange.data)
                 } else {
-                    // The per-task delegate collects URLSessionTaskMetrics for the .completed event.
                     let collector = MetricsCollector()
                     let exchange = try await perform(request, collector: collector)
                     let responseData = exchange.data
@@ -106,10 +102,9 @@ extension Networking {
         return complete(result, context: context, statusCode: statusCode, byteCount: byteCount, metrics: metrics, duration: duration, requestBody: body, responseMetadata: responseMetadata)
     }
 
-    // Runs the interceptor chain. The cache is the innermost layer: on a hit, `cached` is the base result
-    // and no network call happens, but it still flows out through the chain so validators see it (retry/auth
-    // are no-ops on a success). session/collector are read into locals first so the @Sendable chain captures
-    // no actor-isolated state (Swift 6 region isolation).
+    // Runs the interceptor chain. On a cache hit, `cached` is the base result the chain folds around (no
+    // network call), so validators still see it. session/collector are read into locals first so the
+    // @Sendable chain captures no actor-isolated state (Swift 6 region isolation).
     func perform(_ request: URLRequest, collector: MetricsCollector? = nil, cached: HTTPExchange? = nil) async throws -> HTTPExchange {
         let session = self.session
         let base: @Sendable (URLRequest) async throws -> HTTPExchange = { request in
@@ -131,9 +126,8 @@ extension Networking {
         return try await next(request)
     }
 
-    // The single completion path: builds the outcome, runs the built-in logging, and emits `.completed`.
-    // Shared by the verb path, pre-flight failures, and downloads so all report identically. `requestBody`
-    // and `responseMetadata` aren't on the event, so they're threaded here for the full-detail logging.
+    // The single completion path, shared by verbs, pre-flight failures, and downloads. `requestBody` and
+    // `responseMetadata` aren't on the `.completed` event, so they're threaded here for logging only.
     func complete<T>(_ result: Result<T, NetworkingError>, context: RequestContext, statusCode: Int?, byteCount: Int, metrics: TransactionMetrics?, duration: Duration, requestBody: RequestBody? = nil, responseMetadata: ResponseMetadata? = nil) -> Result<T, NetworkingError> {
         let outcome: Outcome
         switch result {
@@ -147,8 +141,6 @@ extension Networking {
         return result
     }
 
-    // Built-in logging (synchronous, lossless): failures at `.failures` and `.all`, successes only at
-    // `.all`, always with full detail (line, request + response headers, request + response bodies).
     private func logCompletion<T>(context: RequestContext, result: Result<T, NetworkingError>, statusCode: Int?, byteCount: Int, duration: Duration, requestBody: RequestBody?, responseMetadata: ResponseMetadata?) {
         guard logLevel != .none else { return }
 
@@ -157,20 +149,20 @@ extension Networking {
         let error: NetworkingError?
         switch result {
         case .success:
-            guard logLevel == .all else { return }   // successes are logged only at .all
+            guard logLevel == .all else { return }
             line = "✓ \(context.method) \(context.url?.absoluteString ?? "") [\(context.id.uuidString)] \(statusCode ?? 0) (\(byteCount) bytes) in \(duration)"
             level = .info
             error = nil
         case let .failure(failure):
-            guard !failure.isCancelled else { return }   // failures logged at .failures and .all
+            guard !failure.isCancelled else { return }
             line = "✗ \(context.method) \(context.url?.absoluteString ?? "") [\(context.id.uuidString)] failed: \(failure.errorDescription ?? "request failed")"
             level = .error
             error = failure
         }
 
         record(line, level: level)
-        // context.headers are the real values (events() needs them); redaction is applied here, in the
-        // log path, only in release builds (redactsLogs).
+        // context.headers carry the real values (events() needs them); redaction happens only here, in
+        // the log path.
         let requestHeaders = redactsLogs ? redactedHeaders(context.headers) : context.headers
         for (key, value) in requestHeaders.sorted(by: { $0.key < $1.key }) {
             record("  → \(key): \(value)", level: level)
@@ -190,7 +182,6 @@ extension Networking {
         }
     }
 
-    // Best-effort string form of a request body for body logging.
     private func requestBodyString(_ body: RequestBody) -> String? {
         switch body {
         case .none:
@@ -204,8 +195,8 @@ extension Networking {
         }
     }
 
-    // A request attempt that fails before reaching the network (e.g. body/parameter encoding) still emits
-    // the same `.started`/`.completed` pair, routed through `complete`, so observers don't miss it.
+    // Emits the `.started`/`.completed` pair for a failure that happens before the network call (e.g.
+    // body encoding), so observers don't miss it.
     func emitPreflightFailure<T: Decodable>(_ requestType: RequestType, path: String, error: NetworkingError) -> Result<T, NetworkingError> {
         let requestID = UUID()
         let context = makeContext(id: requestID, method: requestType.rawValue, url: try? composedURL(with: path), headers: headerFields ?? [:])
@@ -217,7 +208,7 @@ extension Networking {
         RequestContext(id: id, method: method, url: url, headers: headers)
     }
 
-    // Persists the response's status code and headers so a cache hit reproduces real metadata, not fabricated values.
+    // Persists status code and headers alongside the body so a cache hit reproduces real metadata.
     private struct CachedResponse: Codable {
         let statusCode: Int
         let headers: [String: String]
@@ -338,7 +329,6 @@ extension Networking {
         case .cancelled:
             return .failure(.cancelled)
         case .redirection, .clientError, .serverError, .unknown:
-            // Parse a recognized error body into a message; keep the raw (truncated) body in metadata regardless.
             let parsedMessage = (try? JSONDecoder().decode(ErrorResponse.self, from: responseData))?.combinedMessage
             let serverMessage = (parsedMessage?.isEmpty == false) ? parsedMessage : nil
             let error = HTTPError(statusCode: statusCode, metadata: makeResponseMetadata(httpResponse, body: responseData), serverMessage: serverMessage)

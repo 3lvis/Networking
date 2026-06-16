@@ -2,7 +2,6 @@ import Foundation
 import XCTest
 @testable import Networking
 
-// A flat model passed directly as form/query parameters, instead of a pre-stringified [String: String].
 private struct SearchParams: Encodable {
     let term: String
     let page: Int
