@@ -203,6 +203,10 @@ extension DecodingError {
     }
 }
 
+/// Best-effort parse of a JSON error body into a human-readable message, modeled on Rails/ActiveModel
+/// serialization: a top-level `error`/`message`, or `errors: { field: [messages] }` (where `base` holds
+/// record-level errors). Shapes that don't fit — e.g. nested `errors` objects — fail to decode and simply
+/// yield no `serverMessage`; the raw body is still retained in `ResponseMetadata`.
 public struct ErrorResponse: Decodable {
     let error: String?
     let message: String?
