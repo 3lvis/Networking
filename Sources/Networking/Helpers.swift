@@ -61,7 +61,7 @@ extension FileManager {
 }
 
 extension URLRequest {
-    init(url: URL, requestType: Networking.RequestType, path _: String, contentType: String?, responseType: Networking.ResponseType, authorizationHeaderValue: String?, token: String?, authorizationHeaderKey: String, headerFields: [String: String]?) {
+    init(url: URL, requestType: Networking.RequestType, contentType: String?, responseType: Networking.ResponseType, authorizationHeaderValue: String?, token: String?, authorizationHeaderKey: String, headerFields: [String: String]?) {
         self = URLRequest(url: url)
         httpMethod = requestType.rawValue
 

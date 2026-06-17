@@ -274,7 +274,6 @@ extension Networking {
         var request = URLRequest(
             url: url,
             requestType: requestType,
-            path: path,
             contentType: body.contentType(boundary: boundary),
             responseType: .json,
             authorizationHeaderValue: authorizationHeaderValue,
