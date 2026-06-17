@@ -6,7 +6,8 @@ warm-cold expiry) across launches, **without a separate manifest** that can drif
 Two co-located approaches were compared:
 
 - **Option 1 — file `mtime`.** Re-`setAttributes` the file's modification date on a hit; the sweep
-  `stat`s the cache directory. The timestamp lives *on* the file — nothing separate to sync.
+  `stat`s the cache directory. The timestamp lives *on* the file — nothing separate to sync. Also measured
+  **sharded**: split the directory into K subdirectories and sweep one per launch (O(N/K) per launch).
 - **Option 2 — SQLite index.** A row per entry (`key TEXT PRIMARY KEY, ts REAL`, indexed on `ts`);
   `UPSERT` on a hit, an indexed `SELECT` for the sweep.
 
@@ -24,20 +25,22 @@ picture is what matters.
 | **footprint** | **0 bytes** extra | ~650 KB db + `-wal`/`-shm` sidecar |
 | **moving parts** | none (timestamp on the file) | schema, C-API plumbing, a second store that can drift |
 
-### Sweep scaling — where `mtime` spikes
+### Sweep scaling — where `mtime` spikes, and how sharding fixes it
 
 The sweep is the O(n) operation (it must `stat` every file), so it's the one that blows up as the cache
-grows. SQLite answers it with an indexed range query instead:
+grows. **Sharding** the cache directory into K subdirectories and sweeping just one shard per launch makes
+each launch O(N/K); SQLite instead answers with an indexed range query:
 
-| entries | `mtime` scan | SQLite `SELECT` |
-|--:|--:|--:|
-| 10,000 | 39 ms | 0.9 ms |
-| 50,000 | 215 ms | 7 ms |
-| 100,000 | 471 ms | 12 ms |
-| 200,000 | **1,388 ms** | 26 ms |
+| entries | full `mtime` | **sharded 1/16** | SQLite |
+|--:|--:|--:|--:|
+| 10,000 | 40 ms | 3 ms | 1 ms |
+| 50,000 | 198 ms | 13 ms | 5 ms |
+| 100,000 | 412 ms | 24 ms | 12 ms |
+| 200,000 | **864 ms** | **53 ms** | 33 ms |
 
-At 200k entries the `mtime` sweep is **~1.4 s** vs SQLite's 26 ms — ~50×. The hot path, by contrast,
-barely moves with N (per-op), so the *only* place scale hurts is the sweep.
+The full `mtime` scan spikes to ~0.9 s at 200k. Sharded (scan 1 of 16 per launch) cuts that ~16× to
+**53 ms — the same ballpark as SQLite's 33 ms**, with zero dependency. The hot path barely moves with N
+(per-op), so the sweep is the only place scale hurts, and sharding resolves it.
 
 ## Reading it
 
@@ -48,24 +51,27 @@ barely moves with N (per-op), so the *only* place scale hurts is the sweep.
   wins the hot path if you **batch** writes in a transaction (1.5 µs) — but batching means buffering
   access updates and flushing later, which adds a crash-loss window and a flush policy. For the cache's
   bookkeeping that complexity isn't worth it.
-- **Sweep:** here's the real divergence. The `mtime` scan grows with total entries — fine at 10k (~39 ms)
-  but a **0.5 s spike at 100k and ~1.4 s at 200k**, since it must `stat` every file. SQLite's indexed
-  `SELECT` stays in the tens of ms. The sweep runs once per launch on a background task, so single-digit
-  hundreds of ms is tolerable — but a multi-second launch-time scan at 100k+ entries is not. So the answer
-  genuinely depends on cache size: below ~tens of thousands, `mtime` is fine; past ~100k, the indexed
-  query earns its keep.
+- **Sweep:** the `mtime` scan grows with total entries — fine at 10k (~40 ms) but a **0.4–0.9 s spike at
+  100k–200k**, since it must `stat` every file. Two ways to tame it: **shard** (scan 1 of K shard
+  directories per launch → O(N/K)), or **SQLite** (indexed `SELECT`). Sharding at K=16 keeps the
+  per-launch sweep at **~53 ms even at 200k** — within ~1.5× of SQLite — while staying zero-dependency.
+  Its cost is *bounded GC latency*: a never-requested dead file lingers up to K launches before its
+  shard's turn (anything you actually request is expired immediately by the lazy-on-read check, so this
+  only delays garbage collection, never serves stale data), plus a one-integer "next shard" counter (not a
+  per-entry index — nothing to drift) and a shard prefix in the key→path mapping.
 - **Footprint & complexity:** `mtime` adds zero storage and zero moving parts; the timestamp can't drift
   from the file. SQLite adds a ~650 KB DB (+ WAL sidecars), the C-API plumbing, and — crucially — a
   *second store to keep in sync with the files*, which is exactly the manifest problem we set out to avoid.
 
 ## Recommendation
 
-**Option 1 — `mtime`, debounced — for this cache's profile** (an image/blob cache, typically hundreds to
-low-thousands of entries). It ties SQLite on the hot path, is zero-dependency, zero-footprint, and
-self-syncing (no second store to drift). At those sizes the sweep is single-digit-to-tens of ms.
+**Option 1 — `mtime`, debounced** — and that's enough on its own for this cache's profile (an image/blob
+cache, hundreds to low-thousands of entries): it ties SQLite on the hot path, is zero-dependency,
+zero-footprint, and self-syncing (no second store to drift), with a single-digit-ms sweep.
 
-**But the scaling table makes the boundary explicit:** the `mtime` sweep spikes to ~0.5 s at 100k entries
-and ~1.4 s at 200k. If a consumer routinely caches that many items (a long TTL over a media-heavy app),
-the once-per-launch scan becomes a real cost and the indexed query wins. The escape hatch that *doesn't*
-adopt SQLite: shard the cache directory and sweep one shard per launch (amortize the O(n) scan), or cap
-the entry count. Reach for SQLite only if neither fits and 100k+ entries are the norm.
+**If large caches (100k+) are in scope, shard the directory** rather than reach for SQLite. Sharding keeps
+the per-launch sweep in the tens of ms even at 200k (within ~1.5× of SQLite) while preserving every `mtime`
+advantage — no dependency, no extra store, no schema. The only real reason to choose **SQLite** would be
+wanting the absolute-fastest sweep at very large N *and* preferring SQL ergonomics; for a blob cache that
+trade rarely pays for its complexity (a ~650 KB store that can drift from the files). Order of preference:
+`mtime` debounced → add sharding if N gets large → SQLite only as a last resort.

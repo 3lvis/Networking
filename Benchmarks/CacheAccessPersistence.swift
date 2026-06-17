@@ -26,6 +26,15 @@ func col(_ string: String, _ width: Int) -> String {
     string.count >= width ? string : String(repeating: " ", count: width - string.count) + string
 }
 
+func countExpired(in directory: URL, cutoff: Date) -> Int {
+    let urls = (try? FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: [.contentModificationDateKey])) ?? []
+    var expired = 0
+    for url in urls {
+        if let date = try? url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate, date < cutoff { expired += 1 }
+    }
+    return expired
+}
+
 func row(_ name: String, _ total: Double, ops: Int) {
     let nsPerOp = String(format: "%.1f", total / Double(ops) * 1e9)
     let opsPerSec = String(format: "%.0f", Double(ops) / total)
@@ -158,24 +167,27 @@ print("SQLite db file: \(sqliteBytes / 1024) KB for \(entryCount) entries (+ a -
 
 // MARK: - Sweep scaling: the sweep is the O(n) operation, so grow N to find where mtime spikes.
 
-print("\nSweep scaling — total time to find expired (half the entries):\n")
-print("  \(col("entries", 10))  \(col("mtime scan", 14))  \(col("sqlite SELECT", 14))")
+let shardCount = 16
+print("\nSweep scaling — find expired (half the entries). 'sharded' = scan 1 of \(shardCount) shards (one launch's work):\n")
+print("  \(col("entries", 10))  \(col("full mtime", 13))  \(col("sharded 1/\(shardCount)", 14))  \(col("sqlite", 10))")
 for n in [10_000, 50_000, 100_000, 200_000] {
-    // mtime: n real files, half seeded old.
-    let dir = fileManager.temporaryDirectory.appendingPathComponent("sweep-\(n)-\(UUID().uuidString)")
-    try! fileManager.createDirectory(at: dir, withIntermediateDirectories: true)
+    // mtime, sharded layout: n files spread across `shardCount` subdirectories, half seeded old.
+    let root = fileManager.temporaryDirectory.appendingPathComponent("sweep-\(n)-\(UUID().uuidString)")
+    var shards: [URL] = []
+    for shard in 0..<shardCount {
+        let dir = root.appendingPathComponent("shard-\(shard)")
+        try! fileManager.createDirectory(at: dir, withIntermediateDirectories: true)
+        shards.append(dir)
+    }
     for index in 0..<n {
-        let url = dir.appendingPathComponent("e-\(index)")
+        let url = shards[index % shardCount].appendingPathComponent("e-\(index)")
         fileManager.createFile(atPath: url.path, contents: nil)
         if index % 2 == 0 { try! fileManager.setAttributes([.modificationDate: oldDate], ofItemAtPath: url.path) }
     }
-    let mtimeScan = seconds {
-        let urls = (try? fileManager.contentsOfDirectory(at: dir, includingPropertiesForKeys: [.contentModificationDateKey])) ?? []
-        var expired = 0
-        for url in urls where (try? url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate).flatMap({ $0 < mtimeCutoff }) == true { expired += 1 }
-        _ = expired
-    }
-    try? fileManager.removeItem(at: dir)
+    // Full sweep scans every shard; the sharded per-launch sweep scans just one.
+    let fullScan = seconds { for shard in shards { _ = countExpired(in: shard, cutoff: mtimeCutoff) } }
+    let shardedScan = seconds { _ = countExpired(in: shards[0], cutoff: mtimeCutoff) }
+    try? fileManager.removeItem(at: root)
 
     // sqlite: n rows, half old, indexed on ts.
     let dbURL = fileManager.temporaryDirectory.appendingPathComponent("sweep-\(n)-\(UUID().uuidString).sqlite")
@@ -204,7 +216,7 @@ for n in [10_000, 50_000, 100_000, 200_000] {
     sqlite3_close(db)
     try? fileManager.removeItem(at: dbURL)
 
-    print("  \(col(String(n), 10))  \(col(String(format: "%.1f", mtimeScan * 1000), 11)) ms  \(col(String(format: "%.1f", sqliteScan * 1000), 11)) ms")
+    print("  \(col(String(n), 10))  \(col(String(format: "%.1f", fullScan * 1000), 10)) ms  \(col(String(format: "%.1f", shardedScan * 1000), 11)) ms  \(col(String(format: "%.1f", sqliteScan * 1000), 7)) ms")
 }
 
 try? fileManager.removeItem(at: mtimeDir)
