@@ -8,34 +8,26 @@ extension Networking {
         switch cachingLevel {
         case .memory:
             try FileManager.default.remove(at: destinationURL)
-            let object = cache.object(forKey: key as AnyObject)
-            if object != nil { cacheExpiry.recordAccess(key) }
-            return object
+            return cache.object(forKey: key as AnyObject)
         case .memoryAndFile:
-            // Memory is the warm tier — a memory hit is served (and re-warmed) without consulting the TTL.
+            // Memory is the warm tier — a memory hit is served without touching the disk (the NSCache
+            // absorbs repeat reads, so the file's mtime is only re-warmed on a memory miss, below).
             if let object = cache.object(forKey: key as AnyObject) {
-                cacheExpiry.recordAccess(key)
                 return object
             } else if FileManager.default.exists(at: destinationURL) {
-                // A disk entry idle past `cacheTTL` is cold: drop it and report a miss.
+                // A disk entry whose mtime is older than `cacheTTL` is cold: drop it and report a miss.
                 let fileDate = try? destinationURL.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate
-                if cacheExpiry.isExpired(key, fileDate: fileDate) {
+                if cacheExpiry.isExpired(fileDate: fileDate) {
                     try FileManager.default.remove(at: destinationURL)
-                    cacheExpiry.forget(key)
                     return nil
                 }
 
-                var returnedObject: Any?
-
-                let object = destinationURL.getData()
-                if responseType == .image {
-                    returnedObject = Image(data: object)
-                } else {
-                    returnedObject = object
-                }
-                if let returnedObject = returnedObject {
+                let returnedObject: Any? = responseType == .image ? Image(data: destinationURL.getData()) : destinationURL.getData()
+                if let returnedObject {
                     cache.setObject(returnedObject as AnyObject, forKey: key as AnyObject)
-                    cacheExpiry.recordAccess(key)
+                    // Re-warm: bump the file's mtime so an entry in active use never expires. Only happens
+                    // on a memory miss, so it's ~once per entry per launch — no explicit debounce needed.
+                    try? FileManager.default.setAttributes([.modificationDate: Date()], ofItemAtPath: destinationURL.path)
                 }
 
                 return returnedObject
@@ -44,7 +36,6 @@ extension Networking {
             }
         case .none:
             cache.removeObject(forKey: key as AnyObject)
-            cacheExpiry.forget(key)
             try FileManager.default.remove(at: destinationURL)
             return nil
         }
@@ -244,13 +235,12 @@ extension Networking {
             case .none:
                 break
             }
-            cacheExpiry.recordAccess(key)   // writing is a use — re-warm the entry
+            // The disk write itself sets a fresh mtime — that *is* the entry's last-use timestamp.
         } else {
             self.cache.removeObject(forKey: key as AnyObject)
-            cacheExpiry.forget(key)
         }
     }
-    
+
     @discardableResult
     nonisolated func cacheOrPurgeImage(data: Data?, path: String, cacheName: String?, cachingLevel: CachingLevel) throws -> Image? {
         let destinationURL = try self.destinationURL(for: path, cacheName: cacheName)
@@ -267,11 +257,9 @@ extension Networking {
             case .none:
                 break
             }
-            cacheExpiry.recordAccess(key)   // writing is a use — re-warm the entry
             image = nonOptionalImage
         } else {
             self.cache.removeObject(forKey: key as AnyObject)
-            cacheExpiry.forget(key)
         }
 
         return image

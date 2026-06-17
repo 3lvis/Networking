@@ -264,28 +264,30 @@ public actor Networking {
             resourcesPath = url.absoluteString
         }
 
-        let normalizedResourcesPath = Networking.filesystemSafeComponent(resourcesPath.replacingOccurrences(of: "/", with: "-"))
-        let folderPath = Networking.domain
-        let finalPath = "\(folderPath)/\(normalizedResourcesPath)"
+        let component = Networking.filesystemSafeComponent(resourcesPath.replacingOccurrences(of: "/", with: "-"))
+        // Shard the cache directory by a hash of the key so the per-launch sweep is O(N / shardCount), not
+        // O(N). Always sharded — one uniform layout, no migration or size threshold (see `sweepExpiredCacheFiles`).
+        let folderPath = "\(Networking.domain)/\(Networking.shardName(for: component))"
+        let finalPath = "\(folderPath)/\(component)"
 
-        if let url = URL(string: finalPath) {
-            let directory = FileManager.SearchPathDirectory.cachesDirectory
-            if let cachesURL = FileManager.default.urls(for: directory, in: .userDomainMask).first {
-                let folderURL = cachesURL.appendingPathComponent(URL(string: folderPath)!.absoluteString)
-
-                if FileManager.default.exists(at: folderURL) == false {
-                    try FileManager.default.createDirectory(at: folderURL, withIntermediateDirectories: false, attributes: nil)
-                }
-
-                let destinationURL = cachesURL.appendingPathComponent(url.absoluteString)
-
-                return destinationURL
-            } else {
-                throw NSError(domain: Networking.domain, code: 9999, userInfo: [NSLocalizedDescriptionKey: "Couldn't normalize url"])
-            }
-        } else {
-            throw NSError(domain: Networking.domain, code: 9999, userInfo: [NSLocalizedDescriptionKey: "Couldn't create a url using replacedPath: \(finalPath)"])
+        guard let url = URL(string: finalPath),
+              let cachesURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else {
+            throw NSError(domain: Networking.domain, code: 9999, userInfo: [NSLocalizedDescriptionKey: "Couldn't build a cache URL for: \(finalPath)"])
         }
+
+        let folderURL = cachesURL.appendingPathComponent(URL(string: folderPath)!.absoluteString)
+        if FileManager.default.exists(at: folderURL) == false {
+            try FileManager.default.createDirectory(at: folderURL, withIntermediateDirectories: true, attributes: nil)
+        }
+        return cachesURL.appendingPathComponent(url.absoluteString)
+    }
+
+    static let shardCount = 16
+
+    // One hex-nibble shard derived from the key's hash; stable for a given key so reads and writes agree.
+    static func shardName(for component: String) -> String {
+        let byte = Array(SHA256.hash(data: Data(component.utf8))).first ?? 0
+        return String(Int(byte) % shardCount, radix: 16)
     }
 
     public static func splitBaseURLAndRelativePath(for path: String) -> (baseURL: String, relativePath: String) {
@@ -303,7 +305,6 @@ public actor Networking {
     /// disk-only path is gone; clearing must address both tiers or memory keeps serving deleted data.)
     public func clearCache() throws {
         cache.removeAllObjects()
-        cacheExpiry.forgetAll()
         try Networking.deleteCacheFolder()
     }
 
@@ -317,9 +318,15 @@ public actor Networking {
         authorizationHeaderValue = nil
     }
 
+    // Serializes whole-folder mutations of the shared cache directory so the background sweep (which
+    // creates the folder + writes its cursor) can't race `clearCache`/`reset` removing it.
+    static let cacheMutationLock = NSLock()
+
     // Removes the on-disk cache folder (scoped to the networking domain; unrelated files in Caches are
     // untouched). Shared across instances, so it clears the disk cache for all of them.
     static func deleteCacheFolder() throws {
+        cacheMutationLock.lock()
+        defer { cacheMutationLock.unlock() }
         guard let cachesURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else { return }
         let folderURL = cachesURL.appendingPathComponent(URL(string: Networking.domain)!.absoluteString)
         if FileManager.default.exists(at: folderURL) {
@@ -327,20 +334,45 @@ public actor Networking {
         }
     }
 
-    // Deletes cache files whose age exceeds `ttl` (judged by file date — the in-memory access log isn't
-    // persisted across launches). Best-effort and off the request path.
+    static let sweepCursorFileName = ".sweep-shard"
+
+    // Deletes expired files from **one** shard per call (rotated via a tiny cursor file), so each launch's
+    // sweep is O(N / shardCount); everything gets visited over `shardCount` launches. Age is judged by the
+    // file's modification date. Best-effort and off the request path. Also clears any stray files left in
+    // the domain root by a pre-sharding version (one-time migration cleanup).
     static func sweepExpiredCacheFiles(ttl: Duration) {
+        cacheMutationLock.lock()
+        defer { cacheMutationLock.unlock() }
         guard let cachesURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else { return }
-        let folderURL = cachesURL.appendingPathComponent(URL(string: Networking.domain)!.absoluteString)
-        guard let files = try? FileManager.default.contentsOfDirectory(at: folderURL, includingPropertiesForKeys: [.contentModificationDateKey], options: []) else { return }
-        let maxAge = CacheExpiry.seconds(ttl)
+        let domainURL = cachesURL.appendingPathComponent(URL(string: Networking.domain)!.absoluteString)
         let now = Date()
-        for file in files {
-            guard let modified = try? file.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate else { continue }
-            if now.timeIntervalSince(modified) > maxAge {
-                try? FileManager.default.removeItem(at: file)
+        let maxAge = CacheExpiry.seconds(ttl)
+
+        let cursorURL = domainURL.appendingPathComponent(sweepCursorFileName)
+        let cursor = (try? String(contentsOf: cursorURL, encoding: .utf8)).flatMap { Int($0.trimmingCharacters(in: .whitespacesAndNewlines)) } ?? 0
+        let shardURL = domainURL.appendingPathComponent(String(cursor % shardCount, radix: 16))
+
+        if let files = try? FileManager.default.contentsOfDirectory(at: shardURL, includingPropertiesForKeys: [.contentModificationDateKey], options: []) {
+            for file in files {
+                guard let modified = try? file.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate else { continue }
+                if now.timeIntervalSince(modified) > maxAge {
+                    try? FileManager.default.removeItem(at: file)
+                }
             }
         }
+
+        // Pre-sharding versions wrote files directly under the domain root; clear those strays (the cursor
+        // file and the shard subdirectories stay).
+        if let rootEntries = try? FileManager.default.contentsOfDirectory(at: domainURL, includingPropertiesForKeys: [.isRegularFileKey], options: []) {
+            for entry in rootEntries where entry.lastPathComponent != sweepCursorFileName {
+                if (try? entry.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile) == true {
+                    try? FileManager.default.removeItem(at: entry)
+                }
+            }
+        }
+
+        try? FileManager.default.createDirectory(at: domainURL, withIntermediateDirectories: true)
+        try? String(cursor &+ 1).write(to: cursorURL, atomically: true, encoding: .utf8)
     }
 
     // A filesystem path component caps at 255 bytes, which a long URL would overflow. Keep a readable,

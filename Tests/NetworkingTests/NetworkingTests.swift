@@ -95,21 +95,49 @@ class NetworkingTests: XCTestCase {
         XCTAssertEqual(cached, payload)
     }
 
-    // Sliding TTL: the clock is last use. A just-accessed entry is warm; once idle past the TTL it's cold.
-    func testCacheExpirySlidesOnLastAccess() {
-        let expiry = CacheExpiry(ttl: .milliseconds(20))
-        expiry.recordAccess("k")
-        XCTAssertFalse(expiry.isExpired("k", fileDate: nil), "just accessed → warm")
-        Thread.sleep(forTimeInterval: 0.05)
-        XCTAssertTrue(expiry.isExpired("k", fileDate: nil), "idle beyond the TTL → cold")
+    // The clock is the file's modification date: fresh is warm, older-than-TTL is cold, no date is kept.
+    func testCacheExpiryUsesFileDate() {
+        let expiry = CacheExpiry(ttl: .seconds(60))
+        XCTAssertFalse(expiry.isExpired(fileDate: Date()))
+        XCTAssertTrue(expiry.isExpired(fileDate: Date(timeIntervalSinceNow: -120)))
+        XCTAssertFalse(expiry.isExpired(fileDate: nil), "unknown age is kept, not expired")
     }
 
-    // With no in-session access record (e.g. right after launch), expiry falls back to the file's date.
-    func testCacheExpiryFallsBackToFileDate() {
-        let expiry = CacheExpiry(ttl: .seconds(60))
-        XCTAssertFalse(expiry.isExpired("fresh", fileDate: Date()))
-        XCTAssertTrue(expiry.isExpired("stale", fileDate: Date(timeIntervalSinceNow: -120)))
-        XCTAssertFalse(expiry.isExpired("unknown", fileDate: nil), "unknown age is kept, not expired")
+    // A disk entry whose mtime is older than the TTL is cold: dropped and reported as a miss on read.
+    func testColdDiskEntryExpiresOnRead() throws {
+        let networking = Networking(baseURL: baseURL, cacheTTL: .seconds(60))
+        let path = "/cold-entry"
+        try networking.cacheOrPurgeData(data: Data("stale".utf8), path: path, cacheName: nil, cachingLevel: .memoryAndFile)
+        let url = try networking.destinationURL(for: path)
+        networking.cache.removeObject(forKey: url.absoluteString as AnyObject)  // force the disk path
+        try FileManager.default.setAttributes([.modificationDate: Date(timeIntervalSinceNow: -120)], ofItemAtPath: url.path)
+
+        let object = try networking.objectFromCache(for: path, cacheName: nil, cachingLevel: .memoryAndFile, responseType: .data)
+        XCTAssertNil(object, "an entry idle beyond cacheTTL is expired on read")
+    }
+
+    // A disk hit re-warms the file's mtime, so an entry in active use never expires (sliding TTL).
+    func testDiskHitReWarmsFileDate() throws {
+        let networking = Networking(baseURL: baseURL, cacheTTL: .seconds(60))
+        let path = "/warm-entry"
+        try networking.cacheOrPurgeData(data: Data("fresh".utf8), path: path, cacheName: nil, cachingLevel: .memoryAndFile)
+        let url = try networking.destinationURL(for: path)
+        networking.cache.removeObject(forKey: url.absoluteString as AnyObject)  // force the disk path
+        try FileManager.default.setAttributes([.modificationDate: Date(timeIntervalSinceNow: -30)], ofItemAtPath: url.path)
+
+        XCTAssertNotNil(try networking.objectFromCache(for: path, cacheName: nil, cachingLevel: .memoryAndFile, responseType: .data))
+        let mtime = try url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate!
+        XCTAssertLessThan(Date().timeIntervalSince(mtime), 5, "the disk hit should have re-warmed the mtime to ~now")
+    }
+
+    // Cache files live under a one-hex-nibble shard directory so the per-launch sweep is O(N / shardCount).
+    func testCacheFilesAreSharded() throws {
+        let networking = Networking(baseURL: baseURL)
+        let url = try networking.destinationURL(for: "/image/png")
+        let shard = url.deletingLastPathComponent().lastPathComponent
+        XCTAssertEqual(shard.count, 1)
+        XCTAssertTrue(shard.allSatisfy { $0.isHexDigit })
+        XCTAssertEqual(url.deletingLastPathComponent().deletingLastPathComponent().lastPathComponent, Networking.domain)
     }
 
     // clearCache() empties both tiers — the bug the old disk-only static left behind was memory still

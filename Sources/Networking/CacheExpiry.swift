@@ -1,13 +1,12 @@
 import Foundation
 
-// Tracks per-entry last-access for the disk cache's sliding TTL. Lock-synchronized rather than an actor
-// because the cache layer is nonisolated and synchronous (e.g. `imageFromCache`) — an actor would force
-// `await` into that path. It holds only an in-memory map: never persisted (no manifest to keep in sync),
-// and the cached files are never touched on read.
+// Holds the disk cache's TTL and answers "is this entry too old?". The clock is the file's modification
+// date (persisted by the filesystem, re-warmed on a disk hit), so there's no in-memory access map and no
+// manifest to keep in sync. Lock-synchronized rather than an actor because the cache layer is nonisolated
+// and synchronous (e.g. `imageFromCache`) — an actor would force `await` into that path.
 final class CacheExpiry: @unchecked Sendable {
     private let lock = NSLock()
     private var ttlSeconds: Double
-    private var lastAccess: [String: Date] = [:]
 
     init(ttl: Duration) {
         ttlSeconds = Self.seconds(ttl)
@@ -23,27 +22,12 @@ final class CacheExpiry: @unchecked Sendable {
         ttlSeconds = Self.seconds(ttl)
     }
 
-    func recordAccess(_ key: String) {
+    // Cold = the file's last use (its modification date) is older than the TTL. A missing date (no file)
+    // is treated as not-expired so a present-but-unreadable entry isn't dropped spuriously.
+    func isExpired(fileDate: Date?) -> Bool {
+        guard let fileDate else { return false }
         lock.lock(); defer { lock.unlock() }
-        lastAccess[key] = Date()
-    }
-
-    // Cold = idle beyond the TTL. `fileDate` is the on-disk fallback for an entry with no in-session
-    // access record (e.g. right after launch). Unknown age (no record and no file date) → not expired.
-    func isExpired(_ key: String, fileDate: Date?) -> Bool {
-        lock.lock(); defer { lock.unlock() }
-        guard let reference = lastAccess[key] ?? fileDate else { return false }
-        return Date().timeIntervalSince(reference) > ttlSeconds
-    }
-
-    func forget(_ key: String) {
-        lock.lock(); defer { lock.unlock() }
-        lastAccess[key] = nil
-    }
-
-    func forgetAll() {
-        lock.lock(); defer { lock.unlock() }
-        lastAccess.removeAll()
+        return Date().timeIntervalSince(fileDate) > ttlSeconds
     }
 
     static func seconds(_ duration: Duration) -> Double {
