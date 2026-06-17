@@ -524,15 +524,9 @@ let _: Result<Image, NetworkingError> = await networking.downloadImage("/image/p
 // Image from cache
 ```
 
-If you want to remove the downloaded image you can do it like this:
+**Clearing and expiring the cache.** Call `await networking.clearCache()` to empty it — **both** the in-memory layer and the on-disk files. (`reset()` does the same, plus wiping credentials.) To drop a single path, re-request it with `cachingLevel: .none`, which purges both tiers for that entry.
 
-```swift
-let networking = Networking(baseURL: "http://example.com")
-let destinationURL = try networking.destinationURL(for: "/image/png")
-if FileManager.default.fileExists(atPath: destinationURL.path) {
-    try FileManager.default.removeItem(at: destinationURL)
-}
-```
+On-disk entries also expire on their own, so a long-lived cache can't grow without bound. An entry idle longer than `cacheTTL` (default **7 days**; set it via `init(…, cacheTTL:)` or `setCacheTTL(_:)`) is swept. The clock is **last use** — reading or re-caching an entry keeps it warm, so something in active use never expires; only genuinely idle entries are removed. The in-memory layer is the warm tier and is left to `NSCache`'s own memory-pressure eviction.
 
 > **This is a key→blob store, not HTTP caching.** `cachingLevel` caches the downloaded bytes *unconditionally* by path (or `cacheName:`), ignoring `Cache-Control`/`ETag`/`Expires` — which is what you usually want for images and other assets whose hosts often send no cache headers at all. It deliberately does **not** implement HTTP cache semantics (freshness, conditional `304` revalidation, eviction). If you want those, configure a `URLCache` on the session and let `URLSession` handle it per the response headers — it composes with the verb requests:
 >

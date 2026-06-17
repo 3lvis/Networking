@@ -111,7 +111,7 @@ class DownloadIntegrationTests: XCTestCase {
     func testImageFromCacheForPathInCache() async throws {
         let networking = Networking(baseURL: baseURL)
         let path = "/image/png"
-        try Networking.deleteCachedFiles()
+        try await networking.clearCache()
         let result: Result<Image, NetworkingError> = await networking.downloadImage(path)
         switch result {
         case .success:

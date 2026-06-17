@@ -4,14 +4,27 @@ extension Networking {
     nonisolated func objectFromCache(for path: String, cacheName: String?, cachingLevel: CachingLevel, responseType: ResponseType) throws -> Any? {
         let destinationURL = try destinationURL(for: path, cacheName: cacheName)
 
+        let key = destinationURL.absoluteString
         switch cachingLevel {
         case .memory:
             try FileManager.default.remove(at: destinationURL)
-            return cache.object(forKey: destinationURL.absoluteString as AnyObject)
+            let object = cache.object(forKey: key as AnyObject)
+            if object != nil { cacheExpiry.recordAccess(key) }
+            return object
         case .memoryAndFile:
-            if let object = cache.object(forKey: destinationURL.absoluteString as AnyObject) {
+            // Memory is the warm tier — a memory hit is served (and re-warmed) without consulting the TTL.
+            if let object = cache.object(forKey: key as AnyObject) {
+                cacheExpiry.recordAccess(key)
                 return object
             } else if FileManager.default.exists(at: destinationURL) {
+                // A disk entry idle past `cacheTTL` is cold: drop it and report a miss.
+                let fileDate = try? destinationURL.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate
+                if cacheExpiry.isExpired(key, fileDate: fileDate) {
+                    try FileManager.default.remove(at: destinationURL)
+                    cacheExpiry.forget(key)
+                    return nil
+                }
+
                 var returnedObject: Any?
 
                 let object = destinationURL.getData()
@@ -21,7 +34,8 @@ extension Networking {
                     returnedObject = object
                 }
                 if let returnedObject = returnedObject {
-                    cache.setObject(returnedObject as AnyObject, forKey: destinationURL.absoluteString as AnyObject)
+                    cache.setObject(returnedObject as AnyObject, forKey: key as AnyObject)
+                    cacheExpiry.recordAccess(key)
                 }
 
                 return returnedObject
@@ -29,7 +43,8 @@ extension Networking {
                 return nil
             }
         case .none:
-            cache.removeObject(forKey: destinationURL.absoluteString as AnyObject)
+            cache.removeObject(forKey: key as AnyObject)
+            cacheExpiry.forget(key)
             try FileManager.default.remove(at: destinationURL)
             return nil
         }
@@ -217,40 +232,46 @@ extension Networking {
 
     nonisolated func cacheOrPurgeData(data: Data?, path: String, cacheName: String?, cachingLevel: CachingLevel) throws {
         let destinationURL = try self.destinationURL(for: path, cacheName: cacheName)
+        let key = destinationURL.absoluteString
 
         if let returnedData = data, returnedData.count > 0 {
             switch cachingLevel {
             case .memory:
-                self.cache.setObject(returnedData as AnyObject, forKey: destinationURL.absoluteString as AnyObject)
+                self.cache.setObject(returnedData as AnyObject, forKey: key as AnyObject)
             case .memoryAndFile:
                 _ = try returnedData.write(to: destinationURL, options: [.atomic])
-                self.cache.setObject(returnedData as AnyObject, forKey: destinationURL.absoluteString as AnyObject)
+                self.cache.setObject(returnedData as AnyObject, forKey: key as AnyObject)
             case .none:
                 break
             }
+            cacheExpiry.recordAccess(key)   // writing is a use — re-warm the entry
         } else {
-            self.cache.removeObject(forKey: destinationURL.absoluteString as AnyObject)
+            self.cache.removeObject(forKey: key as AnyObject)
+            cacheExpiry.forget(key)
         }
     }
     
     @discardableResult
     nonisolated func cacheOrPurgeImage(data: Data?, path: String, cacheName: String?, cachingLevel: CachingLevel) throws -> Image? {
         let destinationURL = try self.destinationURL(for: path, cacheName: cacheName)
+        let key = destinationURL.absoluteString
 
         var image: Image?
         if let data = data, let nonOptionalImage = Image(data: data), data.count > 0 {
             switch cachingLevel {
             case .memory:
-                self.cache.setObject(nonOptionalImage, forKey: destinationURL.absoluteString as AnyObject)
+                self.cache.setObject(nonOptionalImage, forKey: key as AnyObject)
             case .memoryAndFile:
                 _ = try data.write(to: destinationURL, options: [.atomic])
-                self.cache.setObject(nonOptionalImage, forKey: destinationURL.absoluteString as AnyObject)
+                self.cache.setObject(nonOptionalImage, forKey: key as AnyObject)
             case .none:
                 break
             }
+            cacheExpiry.recordAccess(key)   // writing is a use — re-warm the entry
             image = nonOptionalImage
         } else {
-            self.cache.removeObject(forKey: destinationURL.absoluteString as AnyObject)
+            self.cache.removeObject(forKey: key as AnyObject)
+            cacheExpiry.forget(key)
         }
 
         return image

@@ -45,7 +45,7 @@ class NetworkingIntegrationTests: XCTestCase {
         }
     }
 
-    func testDeleteCachedFilesOnlyRemovesTheNetworkingFolder() async throws {
+    func testClearCacheOnlyRemovesTheNetworkingFolder() async throws {
         let cachesRoot = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
         let networkingFolder = cachesRoot.appendingPathComponent(URL(string: Networking.domain)!.absoluteString)
 
@@ -60,7 +60,7 @@ class NetworkingIntegrationTests: XCTestCase {
         XCTAssertTrue(FileManager.default.exists(at: networkingFolder))
         XCTAssertTrue(FileManager.default.exists(at: unrelatedCachedFile))
 
-        try Networking.deleteCachedFiles()
+        try await networking.clearCache()
 
         XCTAssertTrue(FileManager.default.exists(at: cachesRoot))
         XCTAssertFalse(FileManager.default.exists(at: networkingFolder))

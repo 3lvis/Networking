@@ -82,15 +82,47 @@ class NetworkingTests: XCTestCase {
         XCTAssertEqual(destinationURL.lastPathComponent, "png-png")
     }
 
-    // Documents a known limitation: the cache filename is the whole URL as one path component, so a long
-    // URL exceeds the filesystem's 255-char limit and the file write fails. When the hash-when-too-long
-    // fix lands, flip this to assert the write succeeds.
-    func testCachingALongURLFailsToWriteFile() throws {
+    // A long URL would overflow the filesystem's 255-char filename limit; the cache hashes the component
+    // so the write still succeeds and the entry round-trips.
+    func testCachingALongURLSucceedsViaHashedFilename() throws {
         let networking = Networking(baseURL: baseURL)
         let longPath = "/" + String(repeating: "a", count: 300)
-        XCTAssertThrowsError(
-            try networking.cacheOrPurgeData(data: Data("payload".utf8), path: longPath, cacheName: nil, cachingLevel: .memoryAndFile)
+        let payload = Data("payload".utf8)
+        XCTAssertNoThrow(
+            try networking.cacheOrPurgeData(data: payload, path: longPath, cacheName: nil, cachingLevel: .memoryAndFile)
         )
+        let cached = try networking.objectFromCache(for: longPath, cacheName: nil, cachingLevel: .memoryAndFile, responseType: .data) as? Data
+        XCTAssertEqual(cached, payload)
+    }
+
+    // Sliding TTL: the clock is last use. A just-accessed entry is warm; once idle past the TTL it's cold.
+    func testCacheExpirySlidesOnLastAccess() {
+        let expiry = CacheExpiry(ttl: .milliseconds(20))
+        expiry.recordAccess("k")
+        XCTAssertFalse(expiry.isExpired("k", fileDate: nil), "just accessed → warm")
+        Thread.sleep(forTimeInterval: 0.05)
+        XCTAssertTrue(expiry.isExpired("k", fileDate: nil), "idle beyond the TTL → cold")
+    }
+
+    // With no in-session access record (e.g. right after launch), expiry falls back to the file's date.
+    func testCacheExpiryFallsBackToFileDate() {
+        let expiry = CacheExpiry(ttl: .seconds(60))
+        XCTAssertFalse(expiry.isExpired("fresh", fileDate: Date()))
+        XCTAssertTrue(expiry.isExpired("stale", fileDate: Date(timeIntervalSinceNow: -120)))
+        XCTAssertFalse(expiry.isExpired("unknown", fileDate: nil), "unknown age is kept, not expired")
+    }
+
+    // clearCache() empties both tiers — the bug the old disk-only static left behind was memory still
+    // serving deleted data.
+    func testClearCacheEmptiesMemory() async throws {
+        let networking = Networking(baseURL: baseURL)
+        let path = "/cached"
+        try networking.cacheOrPurgeData(data: Data("hi".utf8), path: path, cacheName: nil, cachingLevel: .memoryAndFile)
+        XCTAssertNotNil(try networking.objectFromCache(for: path, cacheName: nil, cachingLevel: .memoryAndFile, responseType: .data))
+
+        try await networking.clearCache()
+
+        XCTAssertNil(try networking.objectFromCache(for: path, cacheName: nil, cachingLevel: .memoryAndFile, responseType: .data))
     }
 
     func testStatusCodeType() {
