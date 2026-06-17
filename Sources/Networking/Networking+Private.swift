@@ -81,7 +81,7 @@ extension Networking {
         let requestID = UUID()
         let clock = ContinuousClock()
         let startInstant = clock.now
-        let context = makeContext(id: requestID, method: requestType.rawValue, url: try? composedURL(with: path), headers: headerFields ?? [:])
+        let context = RequestContext(id: requestID, method: requestType.rawValue, url: try? composedURL(with: path), headers: headerFields ?? [:])
         emit(.started(context))
 
         let result: Result<T, NetworkingError>
@@ -127,7 +127,7 @@ extension Networking {
         let requestID = UUID()
         let clock = ContinuousClock()
         let startInstant = clock.now
-        let context = makeContext(id: requestID, method: requestType.rawValue, url: try? composedURL(with: path), headers: headerFields ?? [:])
+        let context = RequestContext(id: requestID, method: requestType.rawValue, url: try? composedURL(with: path), headers: headerFields ?? [:])
         emit(.started(context))
 
         let result: Result<T, NetworkingError>

@@ -35,7 +35,7 @@ extension Networking {
 
         do {
             if let fakeRequest = try FakeRequest.find(ofType: requestType, forPath: path, in: fakeRequests) {
-                let fakeContext = makeContext(id: requestID, method: requestType.rawValue, url: try? composedURL(with: path), headers: headerFields ?? [:])
+                let fakeContext = RequestContext(id: requestID, method: requestType.rawValue, url: try? composedURL(with: path), headers: headerFields ?? [:])
                 context = fakeContext
                 emit(.started(fakeContext))
                 let (fakeResult, fakeStatus, fakeBytes): (Result<T, NetworkingError>, Int, Int) = try await handleFakeRequest(fakeRequest, path: path, requestType: requestType)
@@ -44,7 +44,7 @@ extension Networking {
                 byteCount = fakeBytes
             } else {
                 let request = try createRequest(path: path, requestType: requestType, body: body, query: query)
-                let requestContext = makeContext(id: requestID, method: requestType.rawValue, url: request.url, headers: request.allHTTPHeaderFields ?? [:])
+                let requestContext = RequestContext(id: requestID, method: requestType.rawValue, url: request.url, headers: request.allHTTPHeaderFields ?? [:])
                 context = requestContext
                 emit(.started(requestContext))
 
@@ -61,7 +61,7 @@ extension Networking {
                     result = handleResponse(responseData: exchange.data, response: exchange.response, path: path)
                     statusCode = exchange.response.statusCode
                     byteCount = exchange.data.count
-                    responseMetadata = makeResponseMetadata(exchange.response, body: exchange.data)
+                    responseMetadata = ResponseMetadata(response: exchange.response, body: exchange.data)
                 } else {
                     let collector = MetricsCollector()
                     let exchange = try await perform(request, collector: collector)
@@ -82,7 +82,7 @@ extension Networking {
                     byteCount = responseData.count
                     metrics = collector.metrics.flatMap(TransactionMetrics.init)
                     if let httpResponse = response as? HTTPURLResponse {
-                        responseMetadata = makeResponseMetadata(httpResponse, body: responseData)
+                        responseMetadata = ResponseMetadata(response: httpResponse, body: responseData)
                     }
                 }
             }
@@ -90,7 +90,7 @@ extension Networking {
             // A failure before the request context was built (e.g. URL building) still emits a paired
             // .started/.completed so observers see every request.
             if context == nil {
-                let errorContext = makeContext(id: requestID, method: requestType.rawValue, url: nil, headers: headerFields ?? [:])
+                let errorContext = RequestContext(id: requestID, method: requestType.rawValue, url: nil, headers: headerFields ?? [:])
                 context = errorContext
                 emit(.started(errorContext))
             }
@@ -199,13 +199,9 @@ extension Networking {
     // body encoding), so observers don't miss it.
     func emitPreflightFailure<T: Decodable>(_ requestType: RequestType, path: String, error: NetworkingError) -> Result<T, NetworkingError> {
         let requestID = UUID()
-        let context = makeContext(id: requestID, method: requestType.rawValue, url: try? composedURL(with: path), headers: headerFields ?? [:])
+        let context = RequestContext(id: requestID, method: requestType.rawValue, url: try? composedURL(with: path), headers: headerFields ?? [:])
         emit(.started(context))
         return complete(.failure(error), context: context, statusCode: nil, byteCount: 0, metrics: nil, duration: .zero)
-    }
-
-    func makeContext(id: UUID, method: String, url: URL?, headers: [String: String]) -> RequestContext {
-        RequestContext(id: id, method: method, url: url, headers: headers)
     }
 
     // Persists status code and headers alongside the body so a cache hit reproduces real metadata.
@@ -328,7 +324,7 @@ extension Networking {
         case .cancelled:
             return .failure(.cancelled)
         case .redirection, .clientError, .serverError, .unknown:
-            let error = HTTPError(statusCode: statusCode, metadata: makeResponseMetadata(httpResponse, body: responseData))
+            let error = HTTPError(statusCode: statusCode, metadata: ResponseMetadata(response: httpResponse, body: responseData))
             return .failure(.http(error))
         }
     }
@@ -346,7 +342,7 @@ extension Networking {
                 let networkingJSON = JSONResponse(statusCode: httpResponse.statusCode, headers: headers, body: body)
                 return .success(networkingJSON as! T)
             } catch let error as DecodingError {
-                return .failure(.decoding(error, makeResponseMetadata(httpResponse, body: responseData)))
+                return .failure(.decoding(error, ResponseMetadata(response: httpResponse, body: responseData)))
             } catch {
                 return .failure(.invalidResponse) // JSONDecoder only throws DecodingError; unreachable.
             }
@@ -356,15 +352,11 @@ extension Networking {
             do {
                 return .success(try decoder.decode(T.self, from: responseData))
             } catch let error as DecodingError {
-                return .failure(.decoding(error, makeResponseMetadata(httpResponse, body: responseData)))
+                return .failure(.decoding(error, ResponseMetadata(response: httpResponse, body: responseData)))
             } catch {
                 return .failure(.invalidResponse) // JSONDecoder only throws DecodingError; unreachable.
             }
         }
-    }
-
-    private func makeResponseMetadata(_ httpResponse: HTTPURLResponse, body: Data) -> ResponseMetadata {
-        ResponseMetadata(response: httpResponse, body: body)
     }
 
     private func bodySnippet(from data: Data, limit: Int = 512) -> String? {
