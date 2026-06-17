@@ -524,15 +524,9 @@ let _: Result<Image, NetworkingError> = await networking.downloadImage("/image/p
 // Image from cache
 ```
 
-If you want to remove the downloaded image you can do it like this:
+**Clearing and expiring the cache.** Call `await networking.clearCache()` to empty it — **both** the in-memory layer and the on-disk files. (`reset()` does the same, plus wiping credentials.) There's no per-path purge: `clearCache()` clears everything, and stale entries expire on their own (below). For a download, `downloadImage`/`downloadData` with `cachingLevel: .none` force a fresh fetch and drop that cached copy; for the verbs, `.none` simply bypasses the cache (it neither reads nor writes — and is the default, so it never disturbs an entry you cached deliberately).
 
-```swift
-let networking = Networking(baseURL: "http://example.com")
-let destinationURL = try networking.destinationURL(for: "/image/png")
-if FileManager.default.fileExists(atPath: destinationURL.path) {
-    try FileManager.default.removeItem(at: destinationURL)
-}
-```
+On-disk entries expire on their own, so a long-lived cache can't grow without bound. An entry whose **on-disk last use** is older than `cacheTTL` (default **7 days**; set it via `init(…, cacheTTL:)` or `setCacheTTL(_:)`) is swept. The persisted clock is the cache file's modification date, refreshed by **disk reads and writes** — caching an entry, or reading one back after it's left the in-memory layer, re-warms it; only genuinely idle entries are removed. The in-memory layer is the warm tier (served fast, left to `NSCache`'s own memory-pressure eviction) and does **not** re-stamp the disk file on a hit, so an entry kept warm *only* in memory for longer than `cacheTTL` may be re-fetched once it's evicted — in normal use it would have hit disk again first and stayed warm.
 
 > **This is a key→blob store, not HTTP caching.** `cachingLevel` caches the downloaded bytes *unconditionally* by path (or `cacheName:`), ignoring `Cache-Control`/`ETag`/`Expires` — which is what you usually want for images and other assets whose hosts often send no cache headers at all. It deliberately does **not** implement HTTP cache semantics (freshness, conditional `304` revalidation, eviction). If you want those, configure a `URLCache` on the session and let `URLSession` handle it per the response headers — it composes with the verb requests:
 >

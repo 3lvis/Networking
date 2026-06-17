@@ -40,6 +40,11 @@ model, a structured event stream, and composable request interceptors.
   (reject a 2xx that isn't acceptable → `.validation`).
 - **Download envelopes.** `downloadImage` / `downloadData` can return `ImageResponse` / `DataResponse`
   (payload + status code + headers) in addition to the bare `Image` / `Data`.
+- **Cache lifecycle.** `clearCache()` empties **both** the in-memory and on-disk tiers (consistent
+  cleanup); on-disk entries now expire with a sliding TTL (`cacheTTL`, default 7 days, set via
+  `init(…, cacheTTL:)` / `setCacheTTL(_:)`) whose clock is last use, so a long-lived cache no longer
+  grows without bound. Long URLs no longer fail to cache — the filename is hashed past the filesystem's
+  255-byte limit.
 
 ### Changed
 
@@ -59,6 +64,8 @@ model, a structured event stream, and composable request interceptors.
   `events()` and `logLevel`.
 - `unauthorizedRequestCallback` / `setUnauthorizedRequestCallback` — replaced by
   `AuthRefreshInterceptor` (pure "notify me on 401" is available on `events()`).
+- The static `Networking.deleteCachedFiles()` — replaced by the instance `clearCache()`, which clears
+  both the in-memory and on-disk tiers (the static cleared only disk, leaving memory serving stale data).
 
 ---
 
