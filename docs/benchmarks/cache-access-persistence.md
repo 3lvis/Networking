@@ -65,13 +65,18 @@ The full `mtime` scan spikes to ~0.9 s at 200k. Sharded (scan 1 of 16 per launch
 
 ## Recommendation
 
-**Option 1 — `mtime`, debounced** — and that's enough on its own for this cache's profile (an image/blob
-cache, hundreds to low-thousands of entries): it ties SQLite on the hot path, is zero-dependency,
-zero-footprint, and self-syncing (no second store to drift), with a single-digit-ms sweep.
+**Option 1 — `mtime`, debounced, sharded from the start.** `mtime` ties SQLite on the hot path, is
+zero-dependency, zero-footprint, and self-syncing (no second store to drift). Shard the cache directory
+**unconditionally** (derive the shard from the low bits of the key hash that `destinationURL` already
+computes for the 255-char fix) and sweep one shard per launch — the per-launch sweep stays in the tens of
+ms at any size, so the spike never happens.
 
-**If large caches (100k+) are in scope, shard the directory** rather than reach for SQLite. Sharding keeps
-the per-launch sweep in the tens of ms even at 200k (within ~1.5× of SQLite) while preserving every `mtime`
-advantage — no dependency, no extra store, no schema. The only real reason to choose **SQLite** would be
-wanting the absolute-fastest sweep at very large N *and* preferring SQL ergonomics; for a blob cache that
-trade rarely pays for its complexity (a ~650 KB store that can drift from the files). Order of preference:
-`mtime` debounced → add sharding if N gets large → SQLite only as a last resort.
+Shard from the start, not on-the-fly: an always-sharded layout is *one* code path with no migration, no
+entry-count tracking, and no threshold to tune, whereas switching layouts at runtime needs an O(N) reorg
+and two code paths. The small-cache cost is negligible (a few mostly-empty subdirectories; dead files GC
+over ~K launches, while lazy-on-read expires anything you actually request immediately). It's how git's
+`objects/` and browser caches lay out from the first entry.
+
+**SQLite** would only win if you wanted the absolute-fastest sweep at very large N *and* preferred SQL
+ergonomics; for a blob cache that rarely pays for its complexity (a ~650 KB store that can drift from the
+files). Order of preference: `mtime` debounced + sharded → SQLite only as a last resort.
