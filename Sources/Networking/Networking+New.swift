@@ -35,7 +35,7 @@ extension Networking {
 
         do {
             if let fakeRequest = try FakeRequest.find(ofType: requestType, forPath: path, in: fakeRequests) {
-                let fakeContext = RequestContext(id: requestID, method: requestType.rawValue, url: try? composedURL(with: path), headers: headerFields ?? [:])
+                let fakeContext = RequestContext(id: requestID, requestType: requestType, url: try? composedURL(with: path), headers: headerFields)
                 context = fakeContext
                 emit(.started(fakeContext))
                 let (fakeResult, fakeStatus, fakeBytes): (Result<T, NetworkingError>, Int, Int) = try await handleFakeRequest(fakeRequest, path: path, requestType: requestType)
@@ -44,7 +44,7 @@ extension Networking {
                 byteCount = fakeBytes
             } else {
                 let request = try createRequest(path: path, requestType: requestType, body: body, query: query)
-                let requestContext = RequestContext(id: requestID, method: requestType.rawValue, url: request.url, headers: request.allHTTPHeaderFields ?? [:])
+                let requestContext = RequestContext(id: requestID, requestType: requestType, url: request.url, headers: request.allHTTPHeaderFields)
                 context = requestContext
                 emit(.started(requestContext))
 
@@ -90,7 +90,7 @@ extension Networking {
             // A failure before the request context was built (e.g. URL building) still emits a paired
             // .started/.completed so observers see every request.
             if context == nil {
-                let errorContext = RequestContext(id: requestID, method: requestType.rawValue, url: nil, headers: headerFields ?? [:])
+                let errorContext = RequestContext(id: requestID, requestType: requestType, url: nil, headers: headerFields)
                 context = errorContext
                 emit(.started(errorContext))
             }
@@ -199,7 +199,7 @@ extension Networking {
     // body encoding), so observers don't miss it.
     func emitPreflightFailure<T: Decodable>(_ requestType: RequestType, path: String, error: NetworkingError) -> Result<T, NetworkingError> {
         let requestID = UUID()
-        let context = RequestContext(id: requestID, method: requestType.rawValue, url: try? composedURL(with: path), headers: headerFields ?? [:])
+        let context = RequestContext(id: requestID, requestType: requestType, url: try? composedURL(with: path), headers: headerFields)
         emit(.started(context))
         return complete(.failure(error), context: context, statusCode: nil, byteCount: 0, metrics: nil, duration: .zero)
     }
