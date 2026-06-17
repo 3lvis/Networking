@@ -57,4 +57,8 @@ External review: the foundation is solid, but a top-tier Swift HTTP library woul
 
 8. **Package polish & release.** ✅ **CHANGELOG + semver notes** (`CHANGELOG.md`, v8 major bump from 7.0.0) and a real README *Installing* section (SPM + platform requirements) landed. Remaining (deferred, cluster around DocC): DocC docs + Swift Package Index `.spi.yml`, an examples app/package, and a compatibility/benchmark matrix — add once the v8 tag is cut and there's appetite (per the iOS convention: DocC comes late and stays gated).
 
+9. **Follow-ups.**
+    - **Cache filename 255-char limit (latent bug).** `destinationURL` turns the whole URL into one filename component, so a long URL (many query params) exceeds the filesystem's 255-char limit and the cache write throws — silently swallowed on the verb path (`try?`), so the response just isn't cached. Pinned today by `testCachingALongURLFailsToWriteFile`. Fix: when the component is too long, hash it (keep a readable prefix + a hash suffix so distinct URLs can't collide), then flip the test to assert the write succeeds.
+    - **Error-body interpretation stays consumer-side — revisit only with a consumer.** The core hands back the full body (`ResponseMetadata.body` + `decode(_:)`) and makes no assumption about its shape — no `serverMessage`, no in-core parser, no Rails-specific anything. If a real consumer ever needs *structured* errors surfaced through `NetworkingError` (e.g. field-level validation for form UIs), add a general `middleware(Error)` seam so an interceptor can throw its own typed error — but build it only with that consumer in hand, not speculatively.
+
 Each item is its own PR (some a short series).
