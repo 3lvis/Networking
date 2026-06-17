@@ -19,10 +19,25 @@ picture is what matters.
 
 | Operation | Option 1 — `mtime` | Option 2 — SQLite |
 |---|--:|--:|
-| **recordAccess** (hot path, per read) | 26.3 µs touch · **14.9 µs** debounced (stat only) | **30.8 µs** autocommit · 1.5 µs batched (1 txn) |
-| **sweep** (once per launch, 10k entries) | 4.2 µs/entry — **~42 ms** | 0.1 µs/entry — **~1 ms** |
+| **recordAccess** (hot path, per read) | 25 µs touch · **15 µs** debounced (stat only) | **34 µs** autocommit · 2 µs batched (1 txn) |
+| **sweep** (once per launch, 10k entries) | **~39 ms** | **~1 ms** |
 | **footprint** | **0 bytes** extra | ~650 KB db + `-wal`/`-shm` sidecar |
 | **moving parts** | none (timestamp on the file) | schema, C-API plumbing, a second store that can drift |
+
+### Sweep scaling — where `mtime` spikes
+
+The sweep is the O(n) operation (it must `stat` every file), so it's the one that blows up as the cache
+grows. SQLite answers it with an indexed range query instead:
+
+| entries | `mtime` scan | SQLite `SELECT` |
+|--:|--:|--:|
+| 10,000 | 39 ms | 0.9 ms |
+| 50,000 | 215 ms | 7 ms |
+| 100,000 | 471 ms | 12 ms |
+| 200,000 | **1,388 ms** | 26 ms |
+
+At 200k entries the `mtime` sweep is **~1.4 s** vs SQLite's 26 ms — ~50×. The hot path, by contrast,
+barely moves with N (per-op), so the *only* place scale hurts is the sweep.
 
 ## Reading it
 
@@ -33,17 +48,24 @@ picture is what matters.
   wins the hot path if you **batch** writes in a transaction (1.5 µs) — but batching means buffering
   access updates and flushing later, which adds a crash-loss window and a flush policy. For the cache's
   bookkeeping that complexity isn't worth it.
-- **Sweep:** SQLite's indexed `SELECT` is ~40× faster and scales as O(log n). But the sweep runs **once
-  per launch on a background task**, and 42 ms for 10k entries (≈420 ms for 100k) is fine there. It only
-  becomes a problem at very large populations (100k+), which isn't this library's profile (an image/blob
-  cache — typically hundreds to low thousands).
+- **Sweep:** here's the real divergence. The `mtime` scan grows with total entries — fine at 10k (~39 ms)
+  but a **0.5 s spike at 100k and ~1.4 s at 200k**, since it must `stat` every file. SQLite's indexed
+  `SELECT` stays in the tens of ms. The sweep runs once per launch on a background task, so single-digit
+  hundreds of ms is tolerable — but a multi-second launch-time scan at 100k+ entries is not. So the answer
+  genuinely depends on cache size: below ~tens of thousands, `mtime` is fine; past ~100k, the indexed
+  query earns its keep.
 - **Footprint & complexity:** `mtime` adds zero storage and zero moving parts; the timestamp can't drift
   from the file. SQLite adds a ~650 KB DB (+ WAL sidecars), the C-API plumbing, and — crucially — a
   *second store to keep in sync with the files*, which is exactly the manifest problem we set out to avoid.
 
 ## Recommendation
 
-**Option 1 — `mtime`, debounced.** It ties SQLite on the hot path, is zero-dependency and zero-footprint,
-and is self-syncing. SQLite's only clear win (the sweep) is a rare background op that's already fast
-enough at realistic cache sizes. SQLite would only pay off at very large entry counts where an O(n)
-directory scan hurts — revisit only if that ever becomes this cache's reality.
+**Option 1 — `mtime`, debounced — for this cache's profile** (an image/blob cache, typically hundreds to
+low-thousands of entries). It ties SQLite on the hot path, is zero-dependency, zero-footprint, and
+self-syncing (no second store to drift). At those sizes the sweep is single-digit-to-tens of ms.
+
+**But the scaling table makes the boundary explicit:** the `mtime` sweep spikes to ~0.5 s at 100k entries
+and ~1.4 s at 200k. If a consumer routinely caches that many items (a long TTL over a media-heavy app),
+the once-per-launch scan becomes a real cost and the indexed query wins. The escape hatch that *doesn't*
+adopt SQLite: shard the cache directory and sweep one shard per launch (amortize the O(n) scan), or cap
+the entry count. Reach for SQLite only if neither fits and 100k+ entries are the norm.
