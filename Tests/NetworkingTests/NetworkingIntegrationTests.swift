@@ -45,26 +45,25 @@ class NetworkingIntegrationTests: XCTestCase {
         }
     }
 
-    func testDeleteCachedFiles() async throws {
-        let directory = FileManager.SearchPathDirectory.cachesDirectory
-        let cachesURL = FileManager.default.urls(for: directory, in: .userDomainMask).first!
-        let folderURL = cachesURL.appendingPathComponent(URL(string: Networking.domain)!.absoluteString)
+    func testDeleteCachedFilesOnlyRemovesTheNetworkingFolder() async throws {
+        let cachesRoot = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
+        let networkingFolder = cachesRoot.appendingPathComponent(URL(string: Networking.domain)!.absoluteString)
 
         let networking = Networking(baseURL: baseURL)
         let _: Result<Image, NetworkingError> = await networking.downloadImage("/image/png")
         let image = Image.find(named: "sample.jpg", inBundle: .module)
         let data = image.jpgData()
-        let filename = cachesURL.appendingPathComponent("sample.jpg")
-        ((try data?.write(to: filename)) as ()??)
+        let unrelatedCachedFile = cachesRoot.appendingPathComponent("sample.jpg")
+        ((try data?.write(to: unrelatedCachedFile)) as ()??)
 
-        XCTAssertTrue(FileManager.default.exists(at: cachesURL))
-        XCTAssertTrue(FileManager.default.exists(at: folderURL))
-        XCTAssertTrue(FileManager.default.exists(at: filename))
+        XCTAssertTrue(FileManager.default.exists(at: cachesRoot))
+        XCTAssertTrue(FileManager.default.exists(at: networkingFolder))
+        XCTAssertTrue(FileManager.default.exists(at: unrelatedCachedFile))
 
         try Networking.deleteCachedFiles()
 
-        XCTAssertTrue(FileManager.default.exists(at: cachesURL))
-        XCTAssertFalse(FileManager.default.exists(at: folderURL))
-        XCTAssertTrue(FileManager.default.exists(at: filename))
+        XCTAssertTrue(FileManager.default.exists(at: cachesRoot))
+        XCTAssertFalse(FileManager.default.exists(at: networkingFolder))
+        XCTAssertTrue(FileManager.default.exists(at: unrelatedCachedFile))
     }
 }
