@@ -130,22 +130,9 @@ class NetworkingTests: XCTestCase {
         XCTAssertLessThan(Date().timeIntervalSince(mtime), 5, "the disk hit should have re-warmed the mtime to ~now")
     }
 
-    // A memory hit serves fast and does NOT re-stamp the disk mtime (the persisted TTL tracks disk I/O,
-    // not memory reads). Complements testDiskHitReWarmsFileDate.
-    func testMemoryHitDoesNotReWarmFileDate() throws {
-        let networking = Networking(baseURL: baseURL, cacheTTL: .seconds(60))
-        let path = "/mem-hit"
-        try networking.cacheOrPurgeData(data: Data("x".utf8), path: path, cacheName: nil, cachingLevel: .memoryAndFile)
-        let url = try networking.destinationURL(for: path)
-        let backdated = Date(timeIntervalSinceNow: -30)
-        try FileManager.default.setAttributes([.modificationDate: backdated], ofItemAtPath: url.path)
-
-        // The entry is still in NSCache, so this is a memory hit — no disk touch.
-        XCTAssertNotNil(try networking.objectFromCache(for: path, cacheName: nil, cachingLevel: .memoryAndFile, responseType: .data))
-
-        let mtime = try url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate!
-        XCTAssertEqual(mtime.timeIntervalSince1970, backdated.timeIntervalSince1970, accuracy: 1, "a memory hit must not re-stamp the disk file")
-    }
+    // (No test for "a memory hit doesn't re-stamp the disk mtime": NSCache can evict at any time, so a
+    // memory hit can't be forced deterministically — on eviction the read becomes a disk hit that *does*
+    // re-warm. The behavior is documented; testDiskHitReWarmsFileDate covers the deterministic disk path.)
 
     // Cache files live under a one-hex-nibble shard directory so the per-launch sweep is O(N / shardCount).
     func testCacheFilesAreSharded() throws {
