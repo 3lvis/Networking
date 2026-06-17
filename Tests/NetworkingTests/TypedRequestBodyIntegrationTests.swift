@@ -2,7 +2,6 @@ import Foundation
 import XCTest
 @testable import Networking
 
-// A typed request body the caller encodes directly, instead of an `Any?` dictionary.
 private struct Credentials: Codable, Equatable {
     let username: String
     let age: Int

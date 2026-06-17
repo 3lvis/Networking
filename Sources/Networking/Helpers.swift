@@ -2,7 +2,7 @@ import Foundation
 
 extension CharacterSet {
     static var urlQueryParametersAllowed: CharacterSet {
-        /// Does not include "?" or "/" due to RFC 3986 - Section 3.4
+        // Excludes "?" and "/" per RFC 3986 §3.4.
         let generalDelimitersToEncode = ":#[]@"
         let subDelimitersToEncode = "!$&'()*+,;="
 
@@ -15,10 +15,6 @@ extension CharacterSet {
 
 public extension Dictionary where Key: ExpressibleByStringLiteral {
 
-    /// Encodes the contents of the dictionary
-    ///
-    /// - Returns: Returns the parameters in using URL-enconding, for example ["username": "Michael", "age": 20] will become "username=Michael&age=20".
-    /// - Throws: Returns an error if it wasn't able to encode the dictionary.
     func urlEncodedString() throws -> String {
 
         let pairs = try reduce([]) { current, keyValuePair -> [String] in

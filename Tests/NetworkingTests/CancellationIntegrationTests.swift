@@ -5,8 +5,8 @@ import XCTest
 class CancellationIntegrationTests: XCTestCase {
     let baseURL = TestConfig.httpbinBaseURL
 
-    // Cancelling the Task running a new-API request surfaces `.cancelled`. go-httpbin's
-    // `/delay/{n}` keeps the request in flight long enough to cancel it deterministically.
+    // Cancelling the Task running a request surfaces `.cancelled`. go-httpbin's `/delay/{n}` keeps the
+    // request in flight long enough to cancel it deterministically.
 
     func testCancelGET() async throws {
         let networking = Networking(baseURL: baseURL)
@@ -79,9 +79,7 @@ class CancellationIntegrationTests: XCTestCase {
         assertCancelled(await task.value)
     }
 
-    // Two requests to the SAME url: cancelling one Task cancels only that request, the other
-    // completes. This is the precise per-request cancellation the old requestID/taskDescription
-    // mechanism existed for — now provided natively by the Task handle, no extra plumbing.
+    // Two requests to the SAME url: cancelling one Task cancels only that request, the other completes.
     func testCancelOneOfTwoConcurrentRequestsToSameURL() async throws {
         let networking = Networking(baseURL: baseURL)
         let cancelled = Task { () -> Result<JSONResponse, NetworkingError> in

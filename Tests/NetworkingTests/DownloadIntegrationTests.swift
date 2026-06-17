@@ -108,7 +108,6 @@ class DownloadIntegrationTests: XCTestCase {
         }
     }
 
-    // Test `imageFromCache` using path, expecting image from Cache
     func testImageFromCacheForPathInCache() async throws {
         let networking = Networking(baseURL: baseURL)
         let path = "/image/png"
@@ -124,7 +123,6 @@ class DownloadIntegrationTests: XCTestCase {
         }
     }
 
-    // Test `imageFromCache` using cacheName instead of path, expecting image from Cache
     func testImageFromCacheForCustomCacheNameInCache() async throws {
         let networking = Networking(baseURL: baseURL)
         let path = "/image/png"
@@ -136,7 +134,6 @@ class DownloadIntegrationTests: XCTestCase {
         XCTAssertEqual(pigImage.pngData(), image?.pngData())
     }
 
-    // Test `imageFromCache` using path, expecting image from file
     func testImageFromCacheForPathInFile() async throws {
         let networking = Networking(baseURL: baseURL)
         let path = "/image/png"
@@ -155,7 +152,6 @@ class DownloadIntegrationTests: XCTestCase {
         }
     }
 
-    // Test `imageFromCache` using cacheName instead of path, expecting image from file
     func testImageFromCacheForCustomCacheNameInFile() async throws {
         let networking = Networking(baseURL: baseURL)
         let path = "/image/png"
@@ -175,7 +171,6 @@ class DownloadIntegrationTests: XCTestCase {
         }
     }
 
-    // Test `imageFromCache` using path, but then clearing cache, and removing files, expecting nil
     func testImageFromCacheNilImage() async throws {
         let networking = Networking(baseURL: baseURL)
         let path = "/image/png"

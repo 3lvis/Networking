@@ -82,6 +82,17 @@ class NetworkingTests: XCTestCase {
         XCTAssertEqual(destinationURL.lastPathComponent, "png-png")
     }
 
+    // Documents a known limitation: the cache filename is the whole URL as one path component, so a long
+    // URL exceeds the filesystem's 255-char limit and the file write fails. When the hash-when-too-long
+    // fix lands, flip this to assert the write succeeds.
+    func testCachingALongURLFailsToWriteFile() throws {
+        let networking = Networking(baseURL: baseURL)
+        let longPath = "/" + String(repeating: "a", count: 300)
+        XCTAssertThrowsError(
+            try networking.cacheOrPurgeData(data: Data("payload".utf8), path: longPath, cacheName: nil, cachingLevel: .memoryAndFile)
+        )
+    }
+
     func testStatusCodeType() {
         XCTAssertEqual((URLError.cancelled.rawValue).statusCodeType, Networking.StatusCodeType.cancelled)
         XCTAssertEqual(99.statusCodeType, Networking.StatusCodeType.unknown)

@@ -2,9 +2,6 @@ import Foundation
 
 extension Networking {
     nonisolated func objectFromCache(for path: String, cacheName: String?, cachingLevel: CachingLevel, responseType: ResponseType) throws -> Any? {
-        /// Workaround: Remove URL parameters from path. That can lead to writing cached files with names longer than
-        /// 255 characters, resulting in error. Another option to explore is to use a hash version of the url if it's
-        /// longer than 255 characters.
         let destinationURL = try destinationURL(for: path, cacheName: cacheName)
 
         switch cachingLevel {
@@ -45,7 +42,6 @@ extension Networking {
               let data = try? Data(contentsOf: URL(fileURLWithPath: filePath)) else {
             fatalError("We couldn't find \(fileName), are you sure is there?")
         }
-        // Store the file's raw bytes as the fake response; the async fake path serves Data as-is.
         registerFake(requestType: requestType, path: path, headerFields: nil, payload: .data(data), responseType: .json, statusCode: statusCode, delay: delay)
     }
 
@@ -131,7 +127,7 @@ extension Networking {
 
         let result: Result<T, NetworkingError>
         var statusCode: Int?
-        var byteCount = 0 // bytes received off the network; 0 for cache/fake hits
+        var byteCount = 0
         do {
             if let fakeRequests = fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
                 let (fakeResponse, _) = try handleFakeRequest(fakeRequest, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
@@ -176,8 +172,8 @@ extension Networking {
 
     private func downloadError(forStatusCode statusCode: Int) -> NetworkingError {
         // Downloads don't retain the response body/headers at this point, so the metadata is status-only.
-        let metadata = ResponseMetadata(statusCode: statusCode, headers: [:], bodySnippet: nil)
-        return .http(HTTPError(statusCode: statusCode, metadata: metadata, serverMessage: nil))
+        let metadata = ResponseMetadata(statusCode: statusCode, headers: [:], body: Data())
+        return .http(HTTPError(statusCode: statusCode, metadata: metadata))
     }
 
     private func downloadError(_ error: Error) -> NetworkingError {

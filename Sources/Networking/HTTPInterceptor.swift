@@ -152,7 +152,6 @@ public struct ResponseValidatorInterceptor: HTTPInterceptor {
         next: @Sendable (URLRequest) async throws -> HTTPExchange
     ) async throws -> HTTPExchange {
         let exchange = try await next(request)
-        // Only scrutinize successes — let non-2xx flow through to become .http errors.
         guard (200..<300).contains(exchange.response.statusCode) else { return exchange }
         switch validate(exchange) {
         case .valid:

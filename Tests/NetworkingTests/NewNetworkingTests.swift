@@ -6,6 +6,8 @@ import CoreLocation
 class NewNetworkingTests: XCTestCase {
     let baseURL = TestConfig.httpbinBaseURL
 
+    struct ValidationErrors: Decodable { let errors: [String: [String]] }
+
     func testErrorNetworkingJSON() async throws {
         let networking = Networking(baseURL: baseURL)
 
@@ -18,9 +20,15 @@ class NewNetworkingTests: XCTestCase {
 
         let result: Result<JSONResponse, NetworkingError> = await networking.post("/auth")
         switch result {
-        case .success(_): break
-        case .failure(let response):
-            XCTAssertTrue(response.errorDescription!.contains("has already been taken"))
+        case .success:
+            XCTFail("expected a 422 failure")
+        case .failure(let error):
+            guard case let .http(httpError) = error else {
+                return XCTFail("expected an HTTP error, got \(error)")
+            }
+            XCTAssertEqual(httpError.statusCode, 422)
+            let decoded = try httpError.metadata.decode(ValidationErrors.self)
+            XCTAssertEqual(decoded.errors["phone_number"], ["has already been taken"])
         }
     }
 }

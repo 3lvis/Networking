@@ -6,25 +6,20 @@ public enum NetworkingError: Error {
     /// The request couldn't be built or its body/parameters couldn't be encoded — a caller-side bug.
     case invalidRequest(InvalidRequestReason)
     /// The request never produced an HTTP response: offline, DNS failure, TLS failure, timeout, etc.
-    /// Carries the underlying `URLError`.
     case transport(URLError)
-    /// An HTTP response arrived with a non-2xx status code. Carries the status, response metadata, and
-    /// any message parsed from the error body.
+    /// An HTTP response arrived with a non-2xx status code.
     case http(HTTPError)
-    /// A response arrived but its body couldn't be decoded into the requested type. Carries the
-    /// underlying `DecodingError` and the response metadata for debugging.
+    /// A response arrived but its body couldn't be decoded into the requested type.
     case decoding(DecodingError, ResponseMetadata)
-    /// A 2xx response failed a registered validator (wrong content-type, bad envelope, …) — structurally
-    /// fine but not acceptable. Carries the reason and the response metadata.
+    /// A 2xx response failed a registered validator — structurally fine but not acceptable.
     case validation(reason: String, ResponseMetadata)
     /// The response wasn't an HTTP response at all.
     case invalidResponse
-    /// The request was cancelled.
     case cancelled
 }
 
 public extension NetworkingError {
-    /// The HTTP status code, when the failure carries one (`.http` or `.decoding`).
+    /// The HTTP status code, when the failure carries one.
     var statusCode: Int? {
         switch self {
         case let .http(error): return error.statusCode
@@ -34,13 +29,12 @@ public extension NetworkingError {
         }
     }
 
-    /// Whether this is a cancellation — used to skip logging intentional cancels as errors.
     var isCancelled: Bool {
         if case .cancelled = self { return true }
         return false
     }
 
-    /// The response metadata, when the failure carries a response (`.http` or `.decoding`).
+    /// The response metadata, when the failure carries a response.
     var responseMetadata: ResponseMetadata? {
         switch self {
         case let .http(error): return error.metadata
@@ -63,9 +57,8 @@ public extension NetworkingError {
         }
     }
 
-    /// Whether retrying the request might plausibly succeed. Conservative: only transient transport
-    /// failures and a small set of HTTP status codes (408, 429, 500, 502, 503, 504) — never 4xx
-    /// (other than 408/429), decoding, invalid-request, invalid-response, or cancellation.
+    /// Whether retrying might plausibly succeed. Conservative: only transient transport failures and
+    /// `retryableStatusCodes` — never decoding, invalid-request, invalid-response, or cancellation.
     var isRetryable: Bool {
         switch self {
         case let .transport(error):
@@ -90,39 +83,42 @@ public enum InvalidRequestReason: Sendable, Equatable {
 public struct HTTPError: Error, Sendable {
     public let statusCode: Int
     public let metadata: ResponseMetadata
-    /// A human-readable message parsed from a recognized error body, when present.
-    public let serverMessage: String?
 
-    public init(statusCode: Int, metadata: ResponseMetadata, serverMessage: String?) {
+    public init(statusCode: Int, metadata: ResponseMetadata) {
         self.statusCode = statusCode
         self.metadata = metadata
-        self.serverMessage = serverMessage
     }
 
     public var isClientError: Bool { (400 ..< 500).contains(statusCode) }
     public var isServerError: Bool { (500 ..< 600).contains(statusCode) }
 }
 
-/// Metadata about an HTTP response, retained on failures for logging and debugging.
+/// Metadata about an HTTP response, retained on failures for inspection, logging, and debugging.
 public struct ResponseMetadata: Sendable {
     public let statusCode: Int
     public let headers: [String: String]
-    /// A truncated, log-friendly snippet of the response body — not the full payload. May still contain
-    /// sensitive data, so treat it as you would any request/response contents.
-    public let bodySnippet: String?
+    public let body: Data
 
-    public init(statusCode: Int, headers: [String: String], bodySnippet: String?) {
+    public init(statusCode: Int, headers: [String: String], body: Data) {
         self.statusCode = statusCode
         self.headers = headers
-        self.bodySnippet = bodySnippet
+        self.body = body
     }
 
-    /// Builds metadata from a response and its body, truncating the body to a log-friendly snippet.
     public init(response: HTTPURLResponse, body: Data) {
         let headers = Dictionary(uniqueKeysWithValues: response.allHeaderFields.compactMap { key, value in
             (key as? String).map { ($0, "\(value)") }
         })
-        self.init(statusCode: response.statusCode, headers: headers, bodySnippet: Self.bodySnippet(from: body))
+        self.init(statusCode: response.statusCode, headers: headers, body: body)
+    }
+
+    public func decode<T: Decodable>(_ type: T.Type, using decoder: JSONDecoder = JSONDecoder()) throws -> T {
+        try decoder.decode(type, from: body)
+    }
+
+    /// A truncated, log-friendly excerpt of `body` for logging — `nil` for an empty or non-UTF-8 body.
+    public var bodySnippet: String? {
+        Self.bodySnippet(from: body)
     }
 
     static func bodySnippet(from data: Data, limit: Int = 512) -> String? {
@@ -147,9 +143,6 @@ extension NetworkingError: LocalizedError {
         case let .transport(error):
             return "A network error occurred: \(error.localizedDescription)"
         case let .http(error):
-            if let serverMessage = error.serverMessage, !serverMessage.isEmpty {
-                return "The server returned status \(error.statusCode): \(serverMessage)"
-            }
             return "The server returned status \(error.statusCode) (\(HTTPURLResponse.localizedString(forStatusCode: error.statusCode)))."
         case let .decoding(error, metadata):
             return "Failed to decode the response (status \(metadata.statusCode)): \(error.detailedMessage)"
@@ -210,175 +203,3 @@ extension DecodingError {
         return errorMessage
     }
 }
-
-public struct ErrorResponse: Decodable {
-    let error: String?
-    let message: String?
-    let errors: [String: [String]]?
-
-    var combinedMessage: String {
-        var messages = [String]()
-        if let error = error {
-            messages.append(error)
-        }
-        if let message = message {
-            messages.append(message)
-        }
-        if let errors = errors {
-            for (_, messagesArray) in errors {
-                let combinedFieldMessages = messagesArray.joined(separator: ", ")
-                messages.append(combinedFieldMessages)
-            }
-        }
-        return messages.joined(separator: "; ")
-    }
-}
-
-/*
- 1. Validation Errors
- These occur when user input does not meet validation criteria.
-{
-    "errors": {
-        "start_time": ["Start time can't be blank"],
-        "end_time": ["End time can't be blank"],
-        "base": ["Availability duration must be at least 240 minutes."]
-    }
-}
-
-2. Authentication Errors
-These occur when authentication credentials are missing or invalid.
-{
-    "errors": {
-        "authentication": ["Invalid credentials", "Token has expired"]
-    }
-}
-
-3. Authorization Errors
-These occur when a user tries to access a resource they don't have permission to access.
-{
-    "errors": {
-        "authorization": ["You do not have permission to access this resource"]
-    }
-}
-
-4. Resource Not Found Errors
-These occur when a requested resource cannot be found.
-{
-    "errors": {
-        "not_found": ["Resource not found"]
-    }
-}
-
-5. Conflict Errors
-These occur when there is a conflict with the current state of the resource.
-
-
-{
-    "errors": {
-        "conflict": ["Resource already exists", "Update conflict detected"]
-    }
-}
-
-6. Rate Limiting Errors
-These occur when a user exceeds the rate limit for API requests.
-
-{
-    "errors": {
-        "rate_limit": ["Too many requests, please try again later"]
-    }
-}
-
-7. Server Errors
-These occur when there is an internal server error.
-
-{
-    "errors": {
-        "server": ["An internal server error occurred. Please try again later"]
-    }
-}
-
-8. Service Unavailable Errors
-These occur when the service is temporarily unavailable.
-
-{
-    "errors": {
-        "service_unavailable": ["The service is temporarily unavailable. Please try again later"]
-    }
-}
-
-9. Bad Request Errors
-These occur when the server cannot process the request due to client error (e.g., malformed request syntax).
-
-{
-    "errors": {
-        "bad_request": ["Invalid request format", "Missing required parameters"]
-    }
-}
-
-10. Unsupported Media Type Errors
-These occur when the media type of the request is not supported by the server.
-
-{
-    "errors": {
-        "unsupported_media_type": ["The media type is not supported"]
-    }
-}
-
-11. Unprocessable Entity Errors
-These occur when the server understands the content type of the request entity but was unable to process the contained instructions.
-
-{
-    "errors": {
-        "unprocessable_entity": ["Validation failed", "Invalid data format"]
-    }
-}
-
-12. Dependency Errors
-These occur when the application depends on an external service which fails.
-
-{
-    "errors": {
-        "dependency": ["External service error. Please try again later"]
-    }
-}
-
-13. Method Not Allowed Errors
-These occur when the HTTP method is not allowed for the requested resource.
-
-{
-    "errors": {
-        "method_not_allowed": ["The HTTP method is not allowed for this resource"]
-    }
-}
-
-14. Gone Errors
-These occur when the resource requested is no longer available and will not be available again.
-
-{
-    "errors": {
-        "gone": ["The resource requested is no longer available"]
-    }
-}
-
-15. Custom Application Errors
-These occur when the application defines specific custom errors.
-
-{
-    "errors": {
-        "custom_error": ["Custom application-specific error message"]
-    }
-}
-
-Combining Multiple Error Types
-In some cases, you may need to include multiple types of errors in a single response.
-
-{
-    "errors": {
-        "validation": {
-            "start_time": ["Start time can't be blank"],
-            "end_time": ["End time can't be blank"]
-        },
-        "authentication": ["Invalid token"]
-    }
-}
-*/

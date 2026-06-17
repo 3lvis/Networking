@@ -1,11 +1,8 @@
 import Foundation
 
 public extension Networking {
-    /// Scope of the built-in diagnostics. Logged requests always get *full* detail (line, request +
-    /// response headers, request + response bodies — truncated); the level just chooses which requests:
-    /// - `.none` — nothing.
-    /// - `.failures` (default) — every failure. Rare, so full detail is cheap and it's the case you debug.
-    /// - `.all` — every request, success or failure. The opt-in firehose for deep debugging.
+    /// Scope of the built-in diagnostics. Logged requests always get *full* detail; the level only
+    /// chooses *which* requests: `.none` (nothing), `.failures` (the default), or `.all`.
     enum LogLevel: Sendable {
         case none
         case failures
@@ -20,11 +17,10 @@ public struct RequestContext: Sendable {
     public let id: UUID
     public let method: String
     public let url: URL?
-    /// Request headers with sensitive values replaced by `<redacted>` (see `setRedactedHeaderFields`).
+    /// The real request headers, unredacted — redaction applies only to the built-in logs, not here.
     public let headers: [String: String]
 }
 
-/// How a request finished.
 public enum Outcome: Sendable {
     case success(statusCode: Int, byteCount: Int)
     case failure(NetworkingError)
@@ -33,11 +29,11 @@ public enum Outcome: Sendable {
 /// A `Sendable` distillation of `URLSessionTaskMetrics` — the per-request timing breakdown. Each
 /// interval is `nil` when the phase didn't happen (e.g. a reused connection has no DNS/TLS phase).
 public struct TransactionMetrics: Sendable {
-    public let domainLookup: TimeInterval?      // DNS
-    public let connect: TimeInterval?           // TCP (+ TLS) connect
-    public let secureConnection: TimeInterval?  // TLS handshake
-    public let request: TimeInterval?           // sending the request
-    public let response: TimeInterval?          // receiving the response
+    public let domainLookup: TimeInterval?
+    public let connect: TimeInterval?
+    public let secureConnection: TimeInterval?
+    public let request: TimeInterval?
+    public let response: TimeInterval?
     public let countOfRequestBodyBytesSent: Int64
     public let countOfResponseBodyBytesReceived: Int64
     public let redirectCount: Int
@@ -62,8 +58,7 @@ public struct TransactionMetrics: Sendable {
 }
 
 /// A structured observability event. Iterate `events()` to receive one `.started` and one `.completed`
-/// per request — for logging, analytics, a network-activity indicator, etc. (The built-in failure
-/// logging is derived from these same events, synchronously, inside `emit`.)
+/// per request — for logging, analytics, a network-activity indicator, etc.
 public enum NetworkingEvent: Sendable {
     /// Emitted just before a request is sent.
     case started(RequestContext)

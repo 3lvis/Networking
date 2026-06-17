@@ -1,32 +1,17 @@
 import Foundation
 
-/// The type of the form data part.
-///
-/// - data: Plain data, it uses "application/octet-stream" as the Content-Type.
-/// - png: PNG image, it uses "image/png" as the Content-Type.
-/// - jpg: JPG image, it uses "image/jpeg" as the Content-Type.
-/// - custom: Sends your parameters as plain data, sets your `Content-Type` to the value inside `custom`.
-public enum FormDataPartType {
-    case data
-    case png
-    case jpg
-    case custom(String)
+public struct FormDataPartType: Sendable {
+    public let contentType: String
 
-    var contentType: String {
-        switch self {
-        case .data:
-            return "application/octet-stream"
-        case .png:
-            return "image/png"
-        case .jpg:
-            return "image/jpeg"
-        case let .custom(value):
-            return value
-        }
+    public init(_ contentType: String) {
+        self.contentType = contentType
     }
+
+    public static let octetStream = FormDataPartType("application/octet-stream")
+    public static let png = FormDataPartType("image/png")
+    public static let jpeg = FormDataPartType("image/jpeg")
 }
 
-/// The form data part.
 public struct FormDataPart {
     fileprivate let data: Data
     fileprivate let parameterName: String
@@ -53,7 +38,7 @@ public struct FormDataPart {
         return bodyData as Data
     }
 
-    public init(type: FormDataPartType = .data, data: Data, parameterName: String, filename: String? = nil) {
+    public init(type: FormDataPartType = .octetStream, data: Data, parameterName: String, filename: String? = nil) {
         self.type = type
         self.data = data
         self.parameterName = parameterName
