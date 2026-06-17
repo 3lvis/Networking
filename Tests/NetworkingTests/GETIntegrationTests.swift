@@ -133,6 +133,28 @@ class GETIntegrationTests: XCTestCase {
         )
     }
 
+    // `.none` is the default for `get`, so it must *bypass* the cache, never purge it — otherwise a plain
+    // `get(path)` would wipe an entry deliberately cached with `.memoryAndFile`. /uuid (fresh per call)
+    // proves the primed entry survives the `.none` request.
+    func testNoneCachingLevelDoesNotPurgeAnExistingEntry() async throws {
+        let cache = NSCache<AnyObject, AnyObject>()
+        let networking = Networking(baseURL: baseURL, cache: cache)
+
+        let primed: Result<JSONResponse, NetworkingError> = await networking.get("/uuid", cachingLevel: .memoryAndFile)
+        let _: Result<JSONResponse, NetworkingError> = await networking.get("/uuid", cachingLevel: .none)
+        let afterwards: Result<JSONResponse, NetworkingError> = await networking.get("/uuid", cachingLevel: .memoryAndFile)
+
+        guard case let .success(primedResponse) = primed, case let .success(afterwardsResponse) = afterwards else {
+            return XCTFail("expected both cached requests to succeed")
+        }
+        XCTAssertNotNil(primedResponse.body.string(for: "uuid"))
+        XCTAssertEqual(
+            primedResponse.body.string(for: "uuid"),
+            afterwardsResponse.body.string(for: "uuid"),
+            "the .none request must not have purged the primed cache entry"
+        )
+    }
+
     // Different query parameters on the same path must not share a cache entry.
     func testGETCacheKeyIncludesParameters() async throws {
         let cache = NSCache<AnyObject, AnyObject>()
