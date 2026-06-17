@@ -172,9 +172,9 @@ public actor Networking {
 
     let logger: Logger
 
-    /// How long an unused on-disk cache entry survives. Each read or write re-warms the entry (resets its
-    /// clock), so something in active use never expires; only entries idle past `cacheTTL` are swept.
-    /// Default 7 days. Memory (`NSCache`) is unaffected — it's the warm tier, evicted under memory pressure.
+    /// How long an unused on-disk cache entry survives. A disk read or write re-warms the entry (its
+    /// clock is the file's modification date), so something in active use never expires; only entries
+    /// idle past `cacheTTL` are swept. Default 7 days. Memory (`NSCache`) is the warm tier, pressure-evicted.
     nonisolated public var cacheTTL: Duration { cacheExpiry.ttl }
 
     public func setCacheTTL(_ ttl: Duration) {
@@ -188,9 +188,8 @@ public actor Networking {
         self.cacheExpiry = CacheExpiry(ttl: cacheTTL)
         self.logger = logger ?? Networking.defaultLogger
         self.logFileURL = ProcessInfo.processInfo.environment["NETWORKING_LOG_FILE"].flatMap(Networking.resolveLogFileURL)
-        // Bulk-sweep files older than the TTL off the request path, so the disk cache can't grow without
-        // bound. This judges by file age (access recency lives in an in-memory log that isn't persisted —
-        // see `objectFromCache`), so warmth is a within-session refinement on top of this age bound.
+        // Sweep aged-out files off the request path so the disk cache can't grow without bound (one shard
+        // per launch — see `sweepExpiredCacheFiles`).
         Task.detached(priority: .utility) { Networking.sweepExpiredCacheFiles(ttl: cacheTTL) }
     }
 
@@ -301,8 +300,8 @@ public actor Networking {
         return (baseURL, relativePath)
     }
 
-    /// Empties the cache — both the in-memory `NSCache` and the on-disk files. (The static
-    /// disk-only path is gone; clearing must address both tiers or memory keeps serving deleted data.)
+    /// Empties **both** the in-memory `NSCache` and the on-disk files (clearing only one tier would
+    /// leave the other serving deleted data).
     public func clearCache() throws {
         cache.removeAllObjects()
         try Networking.deleteCacheFolder()
@@ -337,9 +336,8 @@ public actor Networking {
     static let sweepCursorFileName = ".sweep-shard"
 
     // Deletes expired files from **one** shard per call (rotated via a tiny cursor file), so each launch's
-    // sweep is O(N / shardCount); everything gets visited over `shardCount` launches. Age is judged by the
-    // file's modification date. Best-effort and off the request path. Also clears any stray files left in
-    // the domain root by a pre-sharding version (one-time migration cleanup).
+    // sweep is O(N / shardCount) and everything gets visited over `shardCount` launches. Age is judged by
+    // the file's modification date. Best-effort and off the request path.
     static func sweepExpiredCacheFiles(ttl: Duration) {
         cacheMutationLock.lock()
         defer { cacheMutationLock.unlock() }

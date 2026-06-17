@@ -15,7 +15,6 @@ extension Networking {
             if let object = cache.object(forKey: key as AnyObject) {
                 return object
             } else if FileManager.default.exists(at: destinationURL) {
-                // A disk entry whose mtime is older than `cacheTTL` is cold: drop it and report a miss.
                 let fileDate = try? destinationURL.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate
                 if cacheExpiry.isExpired(fileDate: fileDate) {
                     try FileManager.default.remove(at: destinationURL)
