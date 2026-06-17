@@ -11,13 +11,14 @@ final class EventStreamIntegrationTests: XCTestCase {
 
         let _: Result<JSONResponse, NetworkingError> = await networking.get("/get")
 
+        let eventsPerRequest = 2
         var collected: [NetworkingEvent] = []
         for await event in stream {
             collected.append(event)
-            if collected.count == 2 { break }    // .started + .completed
+            if collected.count == eventsPerRequest { break }
         }
 
-        XCTAssertEqual(collected.count, 2)
+        XCTAssertEqual(collected.count, eventsPerRequest)
         guard case .started = collected.first, case let .completed(_, outcome, _, _) = collected.last else {
             return XCTFail("expected .started then .completed, got \(collected)")
         }
