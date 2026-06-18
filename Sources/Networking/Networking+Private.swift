@@ -21,7 +21,11 @@ extension Networking {
                     return nil
                 }
 
-                let returnedObject: Any? = responseType == .image ? Image(data: destinationURL.getData()) : destinationURL.getData()
+                // The file can vanish between the exists() check above and this read — the background
+                // sweep runs concurrently and doesn't share a lock with reads — so a read failure is a
+                // cache miss, not a crash.
+                guard let data = FileManager.default.contents(atPath: destinationURL.path) else { return nil }
+                let returnedObject: Any? = responseType == .image ? Image(data: data) : data
                 if let returnedObject {
                     cache.setObject(returnedObject as AnyObject, forKey: key as AnyObject)
                     // Re-warm: bump the file's mtime so an entry in active use never expires. Only happens

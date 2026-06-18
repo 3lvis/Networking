@@ -173,12 +173,12 @@ class NetworkingTests: XCTestCase {
         XCTAssertEqual(600.statusCodeType, Networking.StatusCodeType.unknown)
     }
 
-    func testSplitBaseURLAndRelativePath() {
-        let (baseURL1, relativePath1) = Networking.splitBaseURLAndRelativePath(for: "https://rescuejuice.com/wp-content/uploads/2015/11/døgnvillburgere.jpg")
+    func testSplitBaseURLAndRelativePath() throws {
+        let (baseURL1, relativePath1) = try XCTUnwrap(Networking.splitBaseURLAndRelativePath(for: "https://rescuejuice.com/wp-content/uploads/2015/11/døgnvillburgere.jpg"))
         XCTAssertEqual(baseURL1, "https://rescuejuice.com")
         XCTAssertEqual(relativePath1, "/wp-content/uploads/2015/11/døgnvillburgere.jpg")
 
-        let (baseURL2, relativePath2) = Networking.splitBaseURLAndRelativePath(for: "http://example.com/basic-auth/user/passwd")
+        let (baseURL2, relativePath2) = try XCTUnwrap(Networking.splitBaseURLAndRelativePath(for: "http://example.com/basic-auth/user/passwd"))
         XCTAssertEqual(baseURL2, "http://example.com")
         XCTAssertEqual(relativePath2, "/basic-auth/user/passwd")
     }
