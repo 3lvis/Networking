@@ -1,7 +1,6 @@
 import Foundation
 
 extension Duration {
-    // Whole + fractional seconds as a Double, for TimeInterval / age arithmetic.
     var seconds: Double {
         let (wholeSeconds, attoseconds) = components
         return Double(wholeSeconds) + Double(attoseconds) / 1e18
