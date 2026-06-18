@@ -7,7 +7,9 @@ extension Networking {
         let key = destinationURL.absoluteString
         switch cachingLevel {
         case .memory:
-            try FileManager.default.remove(at: destinationURL)
+            // A pure read: serve from the warm tier only. It must not delete the on-disk copy — that file
+            // is the cold tier of an earlier .memoryAndFile write, and destroying it on a read is data loss
+            // the moment the warm tier is evicted. Purging is the write path's and clearCache's job.
             return cache.object(forKey: key as AnyObject)
         case .memoryAndFile:
             // Memory is the warm tier — a memory hit is served without touching the disk (the NSCache

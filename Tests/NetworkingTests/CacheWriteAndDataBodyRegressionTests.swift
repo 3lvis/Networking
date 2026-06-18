@@ -30,6 +30,33 @@ final class CacheWriteAndDataBodyRegressionTests: XCTestCase {
         )
     }
 
+    // A read at `.memory` must not destroy the durable on-disk copy a prior `.memoryAndFile` write
+    // created. Disk is the cold tier that outlives memory eviction; a pure read deleting it is data loss
+    // the moment the warm tier is evicted under pressure.
+    func testMemoryReadDoesNotDeleteDiskTierFromEarlierMemoryAndFileWrite() async throws {
+        let networking = Networking(baseURL: baseURL)
+        let path = "/bytes/16"
+
+        try await networking.clearCache()
+        try Helper.removeFileIfNeeded(networking, path: path, cacheName: nil)
+
+        // Prime the durable (disk) tier via a default .memoryAndFile download.
+        let primed: Result<Data, NetworkingError> = await networking.downloadData(path, cachingLevel: .memoryAndFile)
+        guard case .success = primed else { return XCTFail("expected the priming download to succeed, got \(primed)") }
+
+        let diskURL = try networking.destinationURL(for: path, cacheName: nil)
+        XCTAssertTrue(FileManager.default.exists(at: diskURL), "priming a .memoryAndFile download should write a disk copy")
+
+        // A read at .memory must leave that durable disk copy intact — the `.memory` branch deletes it
+        // unconditionally, so this fails whether or not the warm tier was evicted.
+        let _: Result<Data, NetworkingError> = await networking.downloadData(path, cachingLevel: .memory)
+
+        XCTAssertTrue(
+            FileManager.default.exists(at: diskURL),
+            "a .memory read deleted the disk copy a prior .memoryAndFile write created"
+        )
+    }
+
     // A verb with `T == Data` must hand back the response body, not an empty `Data`.
     func testDataVerbReturnsResponseBody() async {
         let networking = Networking(baseURL: "https://example.com")
