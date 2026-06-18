@@ -10,8 +10,6 @@ import CryptoKit
 final class CacheStore: @unchecked Sendable {
     let memory: NSCache<AnyObject, AnyObject>
     let expiry: CacheExpiry
-    // The cache's folder name under `Caches/` (the networking domain), passed in so the store stays
-    // self-contained and independently testable.
     let folderName: String
 
     init(memory: NSCache<AnyObject, AnyObject>, ttl: Duration, folderName: String) {

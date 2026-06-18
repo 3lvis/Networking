@@ -1,11 +1,7 @@
 import XCTest
 @testable import Networking
 
-// Regressions for two bugs found in review:
-//  1. The download path wrote the payload to the cache twice — once inside `requestData` under the
-//     path-derived key (which no read path uses when a `cacheName` is given) and again under the real
-//     `cacheName`, leaving a stray file behind.
-//  2. A verb whose result type is `Data` returned an empty `Data` on success instead of the response body.
+// Regressions for cache-write and Data-body bugs found in review; each test names the contract it guards.
 final class CacheWriteAndDataBodyRegressionTests: XCTestCase {
     let baseURL = TestConfig.httpbinBaseURL
 
@@ -40,15 +36,14 @@ final class CacheWriteAndDataBodyRegressionTests: XCTestCase {
         try await networking.clearCache()
         try Helper.removeFileIfNeeded(networking, path: path, cacheName: nil)
 
-        // Prime the durable (disk) tier via a default .memoryAndFile download.
         let primed: Result<Data, NetworkingError> = await networking.downloadData(path, cachingLevel: .memoryAndFile)
         guard case .success = primed else { return XCTFail("expected the priming download to succeed, got \(primed)") }
 
         let diskURL = try networking.destinationURL(for: path, cacheName: nil)
         XCTAssertTrue(FileManager.default.exists(at: diskURL), "priming a .memoryAndFile download should write a disk copy")
 
-        // A read at .memory must leave that durable disk copy intact — the `.memory` branch deletes it
-        // unconditionally, so this fails whether or not the warm tier was evicted.
+        // No eviction step needed: the bug deleted the disk file unconditionally on read, so a warm hit
+        // still proves it.
         let _: Result<Data, NetworkingError> = await networking.downloadData(path, cachingLevel: .memory)
 
         XCTAssertTrue(
@@ -81,7 +76,6 @@ final class CacheWriteAndDataBodyRegressionTests: XCTestCase {
         )
     }
 
-    // A verb with `T == Data` must hand back the response body, not an empty `Data`.
     func testDataVerbReturnsResponseBody() async {
         let networking = Networking(baseURL: "https://example.com")
         await networking.fakeGET("/payload", response: ["message": "hello"])

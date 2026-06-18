@@ -260,8 +260,7 @@ public actor Networking {
         try cacheStore.destinationURL(forResource: cacheResource(for: path, cacheName: cacheName))
     }
 
-    // Resolves the cache key string the store keys on: a percent-encoded `cacheName` verbatim, else the
-    // request's full effective URL (`baseURL` + path). The store itself is baseURL-agnostic.
+    // The cache key: a percent-encoded `cacheName` verbatim, else the request's full effective URL.
     nonisolated func cacheResource(for path: String, cacheName: String?) throws -> String {
         if let normalizedCacheName = cacheName?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
             return normalizedCacheName
