@@ -289,10 +289,12 @@ public actor Networking {
         return String(Int(byte) % shardCount, radix: 16)
     }
 
-    public static func splitBaseURLAndRelativePath(for path: String) -> (baseURL: String, relativePath: String) {
-        guard let encodedPath = path.encodeUTF8() else { fatalError("Couldn't encode path to UTF8: \(path)") }
-        guard let url = URL(string: encodedPath) else { fatalError("Path \(encodedPath) can't be converted to url") }
-        guard let baseURLWithDash = URL(string: "/", relativeTo: url)?.absoluteURL.absoluteString else { fatalError("Can't find absolute url of url: \(url)") }
+    public static func splitBaseURLAndRelativePath(for path: String) -> (baseURL: String, relativePath: String)? {
+        guard let encodedPath = path.encodeUTF8(),
+              let url = URL(string: encodedPath),
+              let baseURLWithDash = URL(string: "/", relativeTo: url)?.absoluteURL.absoluteString else {
+            return nil
+        }
         let index = baseURLWithDash.index(before: baseURLWithDash.endIndex)
         let baseURL = String(baseURLWithDash[..<index])
         let relativePath = path.replacingOccurrences(of: baseURL, with: "")

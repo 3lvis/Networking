@@ -61,7 +61,7 @@ extension FileManager {
 }
 
 extension URLRequest {
-    init(url: URL, requestType: Networking.RequestType, path _: String, contentType: String?, responseType: Networking.ResponseType, authorizationHeaderValue: String?, token: String?, authorizationHeaderKey: String, headerFields: [String: String]?) {
+    init(url: URL, requestType: Networking.RequestType, contentType: String?, responseType: Networking.ResponseType, authorizationHeaderValue: String?, token: String?, authorizationHeaderKey: String, headerFields: [String: String]?) {
         self = URLRequest(url: url)
         httpMethod = requestType.rawValue
 
@@ -84,15 +84,6 @@ extension URLRequest {
                 setValue(value, forHTTPHeaderField: key)
             }
         }
-    }
-}
-
-extension URL {
-    func getData() -> Data {
-        let path = self.path
-        guard let data = FileManager.default.contents(atPath: path) else { fatalError("Couldn't get image in destination url: \(self)") }
-
-        return data
     }
 }
 

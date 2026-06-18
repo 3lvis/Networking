@@ -21,7 +21,11 @@ extension Networking {
                     return nil
                 }
 
-                let returnedObject: Any? = responseType == .image ? Image(data: destinationURL.getData()) : destinationURL.getData()
+                // The file can vanish between the exists() check above and this read — the background
+                // sweep runs concurrently and doesn't share a lock with reads — so a read failure is a
+                // cache miss, not a crash.
+                guard let data = FileManager.default.contents(atPath: destinationURL.path) else { return nil }
+                let returnedObject: Any? = responseType == .image ? Image(data: data) : data
                 if let returnedObject {
                     cache.setObject(returnedObject as AnyObject, forKey: key as AnyObject)
                     // Re-warm: bump the file's mtime so an entry in active use never expires. Only happens
@@ -81,7 +85,7 @@ extension Networking {
         let requestID = UUID()
         let clock = ContinuousClock()
         let startInstant = clock.now
-        let context = makeContext(id: requestID, method: requestType.rawValue, url: try? composedURL(with: path), headers: headerFields ?? [:])
+        let context = RequestContext(id: requestID, requestType: requestType, url: try? composedURL(with: path), headers: headerFields)
         emit(.started(context))
 
         let result: Result<T, NetworkingError>
@@ -127,7 +131,7 @@ extension Networking {
         let requestID = UUID()
         let clock = ContinuousClock()
         let startInstant = clock.now
-        let context = makeContext(id: requestID, method: requestType.rawValue, url: try? composedURL(with: path), headers: headerFields ?? [:])
+        let context = RequestContext(id: requestID, requestType: requestType, url: try? composedURL(with: path), headers: headerFields)
         emit(.started(context))
 
         let result: Result<T, NetworkingError>
@@ -192,7 +196,7 @@ extension Networking {
     }
 
     func requestData(_ requestType: RequestType, path: String, cachingLevel: CachingLevel, responseType: ResponseType) async throws -> (Data, HTTPURLResponse) {
-        let request = URLRequest(url: try composedURL(with: path), requestType: requestType, path: path, contentType: nil, responseType: responseType, authorizationHeaderValue: authorizationHeaderValue, token: token, authorizationHeaderKey: authorizationHeaderKey, headerFields: headerFields)
+        let request = URLRequest(url: try composedURL(with: path), requestType: requestType, contentType: nil, responseType: responseType, authorizationHeaderValue: authorizationHeaderValue, token: token, authorizationHeaderKey: authorizationHeaderKey, headerFields: headerFields)
 
         // Route through the interceptor chain so retry/auth-refresh apply to downloads too.
         let exchange = try await perform(request)
