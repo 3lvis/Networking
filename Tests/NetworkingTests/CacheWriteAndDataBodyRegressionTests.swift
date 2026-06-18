@@ -57,6 +57,30 @@ final class CacheWriteAndDataBodyRegressionTests: XCTestCase {
         )
     }
 
+    // A `.none` *download* must not delete a durable disk copy a prior `.memoryAndFile` write created.
+    // The verb path already bypasses the cache for `.none`, but the download path reads through
+    // `objectFromCache`, which used to purge both tiers — wiping an entry deliberately cached elsewhere.
+    func testNoneDownloadDoesNotDeleteDiskTierFromEarlierMemoryAndFileWrite() async throws {
+        let networking = Networking(baseURL: baseURL)
+        let path = "/bytes/16"
+
+        try await networking.clearCache()
+        try Helper.removeFileIfNeeded(networking, path: path, cacheName: nil)
+
+        let primed: Result<Data, NetworkingError> = await networking.downloadData(path, cachingLevel: .memoryAndFile)
+        guard case .success = primed else { return XCTFail("expected the priming download to succeed, got \(primed)") }
+
+        let diskURL = try networking.destinationURL(for: path, cacheName: nil)
+        XCTAssertTrue(FileManager.default.exists(at: diskURL), "priming a .memoryAndFile download should write a disk copy")
+
+        let _: Result<Data, NetworkingError> = await networking.downloadData(path, cachingLevel: .none)
+
+        XCTAssertTrue(
+            FileManager.default.exists(at: diskURL),
+            "a .none download deleted the disk copy a prior .memoryAndFile write created"
+        )
+    }
+
     // A verb with `T == Data` must hand back the response body, not an empty `Data`.
     func testDataVerbReturnsResponseBody() async {
         let networking = Networking(baseURL: "https://example.com")

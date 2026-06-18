@@ -40,8 +40,8 @@ extension Networking {
                 return nil
             }
         case .none:
-            cache.removeObject(forKey: key as AnyObject)
-            try FileManager.default.remove(at: destinationURL)
+            // A pure read: no caching requested, so report a miss without touching either tier. Purging an
+            // entry another call cached at .memoryAndFile is data loss; clearCache is the way to evict.
             return nil
         }
     }
