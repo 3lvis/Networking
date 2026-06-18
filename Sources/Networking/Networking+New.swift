@@ -318,7 +318,7 @@ extension Networking {
 
         let statusCode = httpResponse.statusCode
 
-        switch statusCode.statusCodeType {
+        switch StatusCodeType(statusCode: statusCode) {
         case .informational, .successful:
             return handleSuccessfulResponse(responseData: responseData, path: path, httpResponse: httpResponse)
         case .cancelled:
@@ -381,7 +381,8 @@ extension Networking {
             }
             return .failure(.transport(urlError))
         }
-        // composedURL throws an NSError in our domain when the URL can't be built from baseURL + path.
+        // Fallback for the rare internal NSError still in our domain (cache path-build, param encoding);
+        // composedURL now throws a typed NetworkingError caught above.
         if (error as NSError).domain == Networking.domain {
             return .failure(.invalidRequest(.invalidURL(path)))
         }

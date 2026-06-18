@@ -9,7 +9,7 @@ final class CacheExpiry: @unchecked Sendable {
     private var ttlSeconds: Double
 
     init(ttl: Duration) {
-        ttlSeconds = Self.seconds(ttl)
+        ttlSeconds = ttl.seconds
     }
 
     var ttl: Duration {
@@ -19,7 +19,7 @@ final class CacheExpiry: @unchecked Sendable {
 
     func setTTL(_ ttl: Duration) {
         lock.lock(); defer { lock.unlock() }
-        ttlSeconds = Self.seconds(ttl)
+        ttlSeconds = ttl.seconds
     }
 
     // Cold = the file's last use (its modification date) is older than the TTL. A missing date (no file)
@@ -28,10 +28,5 @@ final class CacheExpiry: @unchecked Sendable {
         guard let fileDate else { return false }
         lock.lock(); defer { lock.unlock() }
         return Date().timeIntervalSince(fileDate) > ttlSeconds
-    }
-
-    static func seconds(_ duration: Duration) -> Double {
-        let (wholeSeconds, attoseconds) = duration.components
-        return Double(wholeSeconds) + Double(attoseconds) / 1e18
     }
 }

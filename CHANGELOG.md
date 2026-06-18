@@ -54,6 +54,10 @@ model, a structured event stream, and composable request interceptors.
 - **Fakes take `Encodable`** (`fakeGET` / `fakePOST` / …), with a no-body overload and the existing
   `fileName:` variant — no more `Any`.
 - Minimum platforms raised to iOS 18 / macOS 15 / tvOS 18 / watchOS 11; Swift 6.2 language mode.
+- HTTP status-code classification moved off `Int` onto the type it describes:
+  `Networking.StatusCodeType(statusCode:)` replaces the `Int.statusCodeType` property.
+- `composedURL(with:)` now throws a typed `NetworkingError.invalidRequest(.invalidURL)` instead of an
+  untyped `NSError` when a URL can't be built.
 
 ### Removed
 
@@ -66,6 +70,8 @@ model, a structured event stream, and composable request interceptors.
   `AuthRefreshInterceptor` (pure "notify me on 401" is available on `events()`).
 - The static `Networking.deleteCachedFiles()` — replaced by the instance `clearCache()`, which clears
   both the in-memory and on-disk tiers (the static cleared only disk, leaving memory serving stale data).
+- The public `Int.statusCodeType` extension (it polluted every consumer's `Int`) — use
+  `Networking.StatusCodeType(statusCode:)`.
 
 ---
 

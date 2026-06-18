@@ -192,7 +192,7 @@ final class CacheStore: @unchecked Sendable {
         defer { Self.mutationLock.unlock() }
         guard let domainURL = Self.folderURL(named: folderName) else { return }
         let now = Date()
-        let maxAge = CacheExpiry.seconds(expiry.ttl)
+        let maxAge = expiry.ttl.seconds
 
         let cursorURL = domainURL.appendingPathComponent(Self.sweepCursorFileName)
         let cursor = (try? String(contentsOf: cursorURL, encoding: .utf8)).flatMap { Int($0.trimmingCharacters(in: .whitespacesAndNewlines)) } ?? 0
