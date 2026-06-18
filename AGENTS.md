@@ -1,28 +1,64 @@
 # Networking — repo notes
 
 Async HTTP client for Apple platforms. **iOS 18+ / Swift 6** (`swift-tools 6.2`, language mode `[.v6]`).
+The iOS-shared and global conventions in the parent `AGENTS.md` files still apply; this layer adds only
+what's specific to this repo. Release history and the v8 (major) notes live in `CHANGELOG.md`.
 
 ## Build & test
 
-- `make test` — spins up go-httpbin in Docker, runs the full suite against it, tears it down. **Requires Docker.**
-- `make httpbin` / `make httpbin-stop` — run go-httpbin on `:8080` while you iterate with plain `swift test`.
-- Integration tests need a server speaking the httpbin protocol; `TestConfig.httpbinBaseURL` defaults to `http://127.0.0.1:8080` (CI sets the same). The offline / `fake*` suites need no server. Without go-httpbin running, integration tests fail fast (connection refused) — that's intended, not a flake.
-- CI: `macos-15` / Xcode 26.3 / Swift 6.2.x.
+- `make test` — spins up go-httpbin in Docker, runs the full suite, tears it down. **Requires Docker.**
+- `make httpbin` / `make httpbin-stop` — run go-httpbin on `:8080` to iterate with plain `swift test`.
+- `swift build` — library only; CI also fails on any first-party `warning:`.
+- Integration tests need go-httpbin (`TestConfig.httpbinBaseURL`, default `http://127.0.0.1:8080`). Without it
+  they fail fast (connection refused) — intended, not a flake. The offline / `fake*` suites need no server.
+- CI: `macos-15` / Xcode 26.3 / Swift 6.2.x (stricter region-isolation than local 6.3 — CI is the gate).
 
-## Architecture (current)
+## Source map
 
-- **`Networking` is a `public actor`.** Safe to share one instance across tasks; isolated members are accessed with `await`. Config is via async setters — `setAuthorizationHeader`, `setHeaderFields`, `setInterceptors`, `setRedactedHeaderFields`, `setLogLevel`, `setLogFileURL`, `setCacheTTL` (actors forbid external property mutation). No subclassing.
-- **Verbs:** `get`/`post`/`put`/`patch`/`delete` → `Result<T, NetworkingError>`. Pick `T`: any `Decodable` model, `Data`, `Void`, or `JSONResponse` (`{ statusCode, headers, body }`) when you want metadata.
-- **Typed bodies — no `Any`.** The encoding is chosen by the method, not an untyped `parameters:`/`parameterType:` pair (`Networking+HTTPRequests.swift`): `post`/`put`/`patch` take `body:` (any `Encodable` → JSON, ISO-8601 dates), `form:` (any flat `Encodable` → url-encoded), `parts:`+`fields:` (multipart), or `data:contentType:` (raw); `get`/`delete` take `query:` (a `[URLQueryItem]` for ordering/dupes, or any flat `Encodable`). `form:`/`query:` flatten an `Encodable` to `[String: String]` via `formFields` in `Networking+FormEncoding.swift` (JSON bridge + scalar re-decode so `Bool`→"true", not NSNumber "1"). Bodies flow through the typed `RequestBody` enum in `Networking+New.swift`.
-- **Downloads:** `downloadImage`/`downloadData` → `Result<T, NetworkingError>` where `T` is the payload (`Image`/`Data`) or an envelope (`ImageResponse`/`DataResponse`).
-- **Cache lifecycle (`CacheStore.swift`, `CacheExpiry.swift`):** the whole two-tier cache subsystem lives in **`CacheStore`** — a non-actor `@unchecked Sendable` keyed by an already-resolved resource string (composing a key from baseURL + path stays the networking layer's job; `Networking.cacheResource(for:cacheName:)` does it and `destinationURL`/`objectFromCache`/`cacheOrPurgeData`/`cacheOrPurgeImage` are now thin nonisolated shims that delegate). The store is an in-memory `NSCache` (the **warm** tier, pressure-evicted by iOS, no exposed limits — assume it can be wiped at any time) over on-disk files; `Networking` holds the same `NSCache` by reference so it stays injectable/inspectable. **Reads are pure** (`CacheStore.object`): `.memory` serves the warm tier only and `.none` reports a miss — neither touches disk, so a read can't destroy a durable `.memoryAndFile` copy (purging is the write path's and `clearCache`'s job). Cleanup is symmetric: `clearCache()` → `cacheStore.clear()` empties **both** tiers (the old disk-only static `deleteCachedFiles()` is gone — it left memory serving deleted data); `reset()` = `clearCache()` + wipe credentials/headers/fakes. On-disk entries carry a **sliding TTL** (`cacheTTL`, default 7 days) whose clock is the **file's modification date** — persisted, no in-memory map, no manifest. The store drops a disk entry whose mtime is older than the TTL (`CacheExpiry.isExpired(fileDate:)`); a disk hit (memory miss) re-warms by bumping the mtime — and since `NSCache` absorbs repeat reads, that touch is ~once per entry per launch, so no explicit debounce is needed. (Memory hits deliberately don't re-stamp the disk file, so an entry kept warm *only* in memory past `cacheTTL` can read as cold once evicted — accepted; normal use cycles through disk hits that re-warm it.) **Sharded from the start:** `CacheStore.destinationURL(forResource:)` lays files out under `domain/<shard>/<file>` where the shard is one hex nibble of the key hash (`shardName`, `shardCount` = 16); a detached `CacheStore.sweepExpired` runs once per init and sweeps **one shard per launch** (rotated via a `.sweep-shard` cursor file), so per-launch work is O(N / shardCount) and a full pass takes `shardCount` launches (it also clears pre-sharding strays at the domain root). Sweep and `clear` serialize on `CacheStore.mutationLock` (a static, shared across instances) so the background sweep can't race a clear. `destinationURL` also hashes the filename component past the filesystem's 255-byte limit (readable prefix + SHA-256 suffix, `filesystemSafeComponent`).
-- **Fakes (testing):** `fakeGET`/`fakePOST`/… take `response:` over any `Encodable` (encoded to JSON), a no-body overload for status-only fakes, or `fileName:` for bundled raw `Data`; `FakeRequest` holds a typed `Payload` enum.
-- **Errors (`NetworkingError.swift`):** categorized by where the failure happened — `invalidRequest(InvalidRequestReason)`, `transport(URLError)`, `http(HTTPError)`, `decoding(DecodingError, ResponseMetadata)`, `validation(reason:ResponseMetadata)` (a 2xx rejected by a `ResponseValidatorInterceptor`), `invalidResponse`, `cancelled`. `HTTPError` carries `statusCode`/`isClientError`/`isServerError`/`metadata`; cross-cutting `statusCode`, `responseMetadata`, and conservative `isRetryable` (transient transport + 408/429/5xx). **The core makes no assumption about the error body's shape** — `ResponseMetadata` retains the **full** `body: Data` (with `bodySnippet` a derived, truncated log excerpt and `decode(_:)` a convenience over `body`), so a caller decodes its own error envelope; there's no `serverMessage`/in-core parse. `ResponseMetadata(response:body:)` is the single source for metadata extraction. Construction lives in `Networking+New.swift` (`handleResponse`/`handleSuccessfulResponse`/`mapThrownError`).
-- **Observability (`NetworkingEvent.swift`):** no `print`, no closure observer. One consumer hook — `events()`, an `AsyncStream<NetworkingEvent>` (multi-consumer, `for await` accumulation without `Box`/`@unchecked`; continuations registry + `onTermination` cleanup on the actor). Every request emits `.started(RequestContext)` then `.completed(RequestContext, outcome:duration:metrics:)` — verbs via `handle`/`emitPreflightFailure`, downloads via `handleDataRequest`/`handleImageRequest` (all share `complete`/`makeContext` in `Networking+New.swift`; downloads inline the emit/complete rather than a closure, to satisfy Swift 6.2 region isolation). `RequestContext`: per-request id + the real request headers (raw — redaction is a log-path concern); `TransactionMetrics` distills `URLSessionTaskMetrics` (via `MetricsCollector`, a lock-synchronized per-task delegate).
-- **Interceptors / middleware (`HTTPInterceptor.swift`):** an async `HTTPInterceptor.intercept(_:next:)` seam (the swift-openapi `ClientMiddleware` onion shape, not Alamofire's adapt/retry split) wrapping every *verb* request. It sits **below** the generic `Result<T>` decode layer — operating on a raw `HTTPExchange` (`Data` + `HTTPURLResponse`), so one interceptor serves all response types. Registered outermost-first via `setInterceptors`; folded around the real `URLSession` call in `perform` (`Networking+New.swift`), which reads `session`/`collector` into locals first so the `@Sendable` chain captures no actor state (the Swift 6.2 region-isolation trap). Calling `next` again replays the request. A thrown `NetworkingError` from an interceptor passes through `mapThrownError` intact. Built-in interceptors: **`AuthRefreshInterceptor`** (replaced the old `unauthorizedRequestCallback`) — on 401/403 refreshes the credential and replays once, concurrent refreshes deduped through a `RefreshCoordinator` actor (single-flight, vs the token-refresh stampede); **`RetryInterceptor`** — retries transient transport failures + `retryableStatusCodes` (default `NetworkingError.retryableStatusCodes` = 408/429/5xx) with exponential backoff + full jitter, honoring `Retry-After` (seconds or HTTP-date), and **only idempotent methods** (`retryableMethods`, default GET/HEAD/PUT/DELETE/OPTIONS/TRACE) so a retry can't duplicate a POST/PATCH side effect — opt non-idempotent methods in explicitly. The retryability predicates (`retryableStatusCodes`, `isRetryableTransport`) live on `NetworkingError` as the single source of truth shared with `isRetryable`. **`ResponseValidatorInterceptor`** — runs a `(HTTPExchange) -> .valid/.invalid(reason:)` check on **2xx only** (non-2xx flows through to stay `.http`); a rejection throws `.validation(reason:metadata:)`. Register outermost (before retry) to validate the final response. **Downloads route through the chain too** — `requestData` (`Networking+Private.swift`) calls `perform`, so retry/auth apply to `downloadImage`/`downloadData` as well. **The cache is the innermost layer:** a GET cache hit is fed into `perform(…, cached:)` as the base result rather than bypassing it, so it flows back out through the chain (validators see it; retry/auth are no-ops on a success). Errors that were 401/403-only callback sites are gone from `handleResponse`/fake/download paths.
-- **Built-in logging** runs synchronously in the completion funnel (`complete` → `logCompletion`), gated by `logLevel` (`Networking.LogLevel`: `.none` / `.failures` default / `.all`, `setLogLevel`). `.failures` logs every failure; `.all` also logs successes; both with `✗`/`✓ METHOD url [id] …` line + request & response headers + request & response bodies (truncated). The request body and success response metadata aren't on the event, so they're threaded into `complete`; downloads pass no response metadata (binary payload) so they log line + request headers only. **Log redaction:** `redactsLogs` (`setRedactsLogs`) replaces both the request/response **body lines** *and* the `redactedHeaderFields` header values with `<redacted>` in the logs; defaults via `#if DEBUG` (shown in debug, redacted in release). Redaction lives in the log path (`logCompletion`), not `makeContext` — so `events()` `RequestContext.headers` carries the **real** values (your own request data). The one thing it doesn't cover: `events()` (raw by design). `record(_:level:)` writes to `os.Logger` and, when `logFileURL` is set (`setLogFileURL` or `NETWORKING_LOG_FILE`), mirrors to a text file — how a CLI/agent reads logs, since `os.Logger` isn't in stdout.
+- `Networking.swift` — the `public actor`: config (auth/headers/interceptors/log/`cacheTTL` via async
+  setters), `events()`, URL composition, public cache entry points (`clearCache`/`reset`/`destinationURL`).
+- `Networking+HTTPRequests.swift` — the public surface: verb overloads (`get`/`post`/…), `downloadImage`/
+  `downloadData`, and the `fake*` helpers.
+- `Networking+New.swift` — request execution: the `RequestBody` enum, `createRequest`, the interceptor fold
+  (`perform`), response→`Result` mapping, the completion funnel (`complete`/`logCompletion`), `mapThrownError`.
+- `Networking+Private.swift` — download handlers + the cache shims that delegate to `CacheStore`.
+- `Networking+FormEncoding.swift` — flat-`Encodable` → `[String: String]` for forms/queries.
+- `CacheStore.swift` / `CacheExpiry.swift` — the two-tier disk cache (layout, sharding, sweep, TTL).
+- `HTTPInterceptor.swift` — the middleware seam + `AuthRefreshInterceptor` / `RetryInterceptor` /
+  `ResponseValidatorInterceptor`.
+- `NetworkingError.swift` — the categorized error model + `ResponseMetadata`.
+- `NetworkingEvent.swift` — the `events()` types (`NetworkingEvent` / `RequestContext` / `Outcome` /
+  `TransactionMetrics`).
+- `JSONResponse` · `DownloadResponse` · `FakeRequest` · `FormDataPart` · `Image` · `Helpers` — supporting types.
 
-## Conventions
+## Architecture invariants
 
-- **Public-API change → update the README in the same PR.** Its snippets are copy-paste docs and must compile under the actor (isolated members need `await`).
-- These were breaking changes vs the last release (7.0.0); the next tag is a major bump. Release notes live in `CHANGELOG.md`.
+Cross-file contracts an agent must hold; the *why* lives in each file's comments.
+
+- **Actor isolation.** `Networking` is an actor — isolated members need `await`, config is async setters
+  (no external property mutation), no subclassing.
+- **Typed bodies, no `Any`.** The method picks the encoding (`body:` JSON / `form:` url-encoded /
+  `parts:`+`fields:` multipart / `data:contentType:` raw; `query:` for get/delete), via the `RequestBody`
+  enum. `T` ∈ any `Decodable` · `Data` · `Void` · `JSONResponse`.
+- **Errors say *where* it failed**, never a stringified catch-all; the core never parses the error body —
+  `ResponseMetadata.body` is the full bytes, the caller decodes its own envelope.
+- **Interceptors are an onion *below* the decode layer**, over a raw `HTTPExchange`; registered
+  outermost-first, `next` replays. Downloads route through too; a GET cache hit flows back out through the
+  chain (the cache is the innermost layer).
+- **Cache reads are pure.** `.memory`/`.none` never touch disk, so a read can't destroy a durable
+  `.memoryAndFile` copy — purging belongs to the write path and `clearCache`. Sliding TTL keyed on file
+  mtime; sharded layout; one-shard-per-launch background sweep. The `NSCache` warm tier can be evicted by
+  iOS at any time — disk is the durable fallback.
+- **Observability is one hook:** `events()` (multi-consumer `AsyncStream`). Built-in logging is separate,
+  synchronous, gated by `logLevel`; redaction is log-path only, so `events()` carries the real headers.
+- **Region-isolation trap (Swift 6.2):** before building the `@Sendable` interceptor chain, read actor
+  state (`session`/`collector`) into locals so the closure captures none.
+
+## Boundaries
+
+- **Always** run `make test` (Docker) to green and keep the build warning-free before claiming done.
+- **Always** update `README.md` and `CHANGELOG.md` in the same PR as any public-API change — the README
+  snippets are copy-paste docs and must compile under the actor (`await`).
+- **Ask first** before adding a third-party dependency — the core is intentionally dependency-free.
+- **Never** put cache purging back on the read path: `.memory`/`.none` reads must stay pure, or an
+  evicted warm tier turns a recoverable miss into permanent loss.
