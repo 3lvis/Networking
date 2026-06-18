@@ -1,24 +1,24 @@
 import Foundation
 import os.log
 
-public extension Int {
-
-    var statusCodeType: Networking.StatusCodeType {
-        switch self {
+public extension Networking.StatusCodeType {
+    /// Classifies an HTTP status code (with `URLError.cancelled` mapped to `.cancelled`).
+    init(statusCode: Int) {
+        switch statusCode {
         case URLError.cancelled.rawValue:
-            return .cancelled
+            self = .cancelled
         case 100 ..< 200:
-            return .informational
+            self = .informational
         case 200 ..< 300:
-            return .successful
+            self = .successful
         case 300 ..< 400:
-            return .redirection
+            self = .redirection
         case 400 ..< 500:
-            return .clientError
+            self = .clientError
         case 500 ..< 600:
-            return .serverError
+            self = .serverError
         default:
-            return .unknown
+            self = .unknown
         }
     }
 }
@@ -249,7 +249,7 @@ public actor Networking {
     nonisolated public func composedURL(with path: String) throws -> URL {
         let encodedPath = path.encodeUTF8() ?? path
         guard let url = URL(string: baseURL + encodedPath) else {
-            throw NSError(domain: Networking.domain, code: 0, userInfo: [NSLocalizedDescriptionKey: "Couldn't create a url using baseURL: \(baseURL) and encodedPath: \(encodedPath)"])
+            throw NetworkingError.invalidRequest(.invalidURL(path))
         }
         return url
     }

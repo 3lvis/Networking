@@ -26,7 +26,7 @@ extension Networking {
         let url = try composedURL(with: path)
         let response = HTTPURLResponse(url: url, headerFields: fakeRequest.headerFields, statusCode: fakeRequest.statusCode)
 
-        if fakeRequest.statusCode.statusCodeType != .successful {
+        if StatusCodeType(statusCode: fakeRequest.statusCode) != .successful {
             error = NSError(statusCode: fakeRequest.statusCode)
         }
 
@@ -59,7 +59,7 @@ extension Networking {
                     try? await Task.sleep(nanoseconds: UInt64(fakeRequest.delay * 1_000_000_000))
                 }
                 statusCode = fakeResponse.statusCode
-                if fakeResponse.statusCode.statusCodeType != .successful {
+                if StatusCodeType(statusCode: fakeResponse.statusCode) != .successful {
                     result = .failure(downloadError(forStatusCode: fakeResponse.statusCode))
                 } else if case let .data(fakeData) = fakeRequest.payload {
                     byteCount = fakeData.count
@@ -75,7 +75,7 @@ extension Networking {
                 let (downloaded, networkResponse) = try await requestData(requestType, path: path, responseType: responseType)
                 try cacheOrPurgeData(data: downloaded, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
                 statusCode = networkResponse.statusCode
-                if networkResponse.statusCode.statusCodeType != .successful {
+                if StatusCodeType(statusCode: networkResponse.statusCode) != .successful {
                     result = .failure(downloadError(forStatusCode: networkResponse.statusCode))
                 } else {
                     byteCount = downloaded.count
@@ -105,7 +105,7 @@ extension Networking {
                     try? await Task.sleep(nanoseconds: UInt64(fakeRequest.delay * 1_000_000_000))
                 }
                 statusCode = fakeResponse.statusCode
-                if fakeResponse.statusCode.statusCodeType != .successful {
+                if StatusCodeType(statusCode: fakeResponse.statusCode) != .successful {
                     result = .failure(downloadError(forStatusCode: fakeResponse.statusCode))
                 } else if case let .image(fakeImage) = fakeRequest.payload {
                     result = .success(T.makeDownloadResult(image: fakeImage, statusCode: fakeResponse.statusCode, headers: headerFields(from: fakeResponse)))
@@ -119,7 +119,7 @@ extension Networking {
             } else {
                 let (data, networkResponse) = try await requestData(requestType, path: path, responseType: responseType)
                 statusCode = networkResponse.statusCode
-                if networkResponse.statusCode.statusCodeType != .successful {
+                if StatusCodeType(statusCode: networkResponse.statusCode) != .successful {
                     result = .failure(downloadError(forStatusCode: networkResponse.statusCode))
                 } else if let downloaded = try cacheOrPurgeImage(data: data, path: path, cacheName: cacheName, cachingLevel: cachingLevel) {
                     byteCount = data.count

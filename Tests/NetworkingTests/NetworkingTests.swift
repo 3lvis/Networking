@@ -101,19 +101,20 @@ class NetworkingTests: XCTestCase {
     }
 
     func testStatusCodeType() {
-        XCTAssertEqual((URLError.cancelled.rawValue).statusCodeType, Networking.StatusCodeType.cancelled)
-        XCTAssertEqual(99.statusCodeType, Networking.StatusCodeType.unknown)
-        XCTAssertEqual(100.statusCodeType, Networking.StatusCodeType.informational)
-        XCTAssertEqual(199.statusCodeType, Networking.StatusCodeType.informational)
-        XCTAssertEqual(200.statusCodeType, Networking.StatusCodeType.successful)
-        XCTAssertEqual(299.statusCodeType, Networking.StatusCodeType.successful)
-        XCTAssertEqual(300.statusCodeType, Networking.StatusCodeType.redirection)
-        XCTAssertEqual(399.statusCodeType, Networking.StatusCodeType.redirection)
-        XCTAssertEqual(400.statusCodeType, Networking.StatusCodeType.clientError)
-        XCTAssertEqual(499.statusCodeType, Networking.StatusCodeType.clientError)
-        XCTAssertEqual(500.statusCodeType, Networking.StatusCodeType.serverError)
-        XCTAssertEqual(599.statusCodeType, Networking.StatusCodeType.serverError)
-        XCTAssertEqual(600.statusCodeType, Networking.StatusCodeType.unknown)
+        typealias StatusCodeType = Networking.StatusCodeType
+        XCTAssertEqual(StatusCodeType(statusCode: URLError.cancelled.rawValue), .cancelled)
+        XCTAssertEqual(StatusCodeType(statusCode: 99), .unknown)
+        XCTAssertEqual(StatusCodeType(statusCode: 100), .informational)
+        XCTAssertEqual(StatusCodeType(statusCode: 199), .informational)
+        XCTAssertEqual(StatusCodeType(statusCode: 200), .successful)
+        XCTAssertEqual(StatusCodeType(statusCode: 299), .successful)
+        XCTAssertEqual(StatusCodeType(statusCode: 300), .redirection)
+        XCTAssertEqual(StatusCodeType(statusCode: 399), .redirection)
+        XCTAssertEqual(StatusCodeType(statusCode: 400), .clientError)
+        XCTAssertEqual(StatusCodeType(statusCode: 499), .clientError)
+        XCTAssertEqual(StatusCodeType(statusCode: 500), .serverError)
+        XCTAssertEqual(StatusCodeType(statusCode: 599), .serverError)
+        XCTAssertEqual(StatusCodeType(statusCode: 600), .unknown)
     }
 
     func testSplitBaseURLAndRelativePath() throws {

@@ -125,13 +125,6 @@ public struct RetryInterceptor: HTTPInterceptor {
     }
 }
 
-private extension Duration {
-    var seconds: Double {
-        let (wholeSeconds, attoseconds) = components
-        return Double(wholeSeconds) + Double(attoseconds) / 1e18
-    }
-}
-
 /// Validates a successful (2xx) response beyond its status code — content-type, envelope shape — turning a
 /// "2xx but wrong" response into a typed `.validation` failure. Non-2xx responses pass through untouched so
 /// they still surface as `.http` errors. Register it outermost (before retry) to validate the final result.
