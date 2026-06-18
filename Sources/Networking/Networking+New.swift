@@ -331,7 +331,7 @@ extension Networking {
 
     private func handleSuccessfulResponse<T: Decodable>(responseData: Data, path: String, httpResponse: HTTPURLResponse) -> Result<T, NetworkingError> {
         if T.self == Data.self {
-            return .success(Data() as! T)
+            return .success(responseData as! T)
         } else if T.self == JSONResponse.self {
             let headers = Dictionary(uniqueKeysWithValues: httpResponse.allHeaderFields.compactMap { key, value in
                 (key as? String).map { ($0, AnyCodable(value)) }

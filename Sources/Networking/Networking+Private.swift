@@ -2,46 +2,7 @@ import Foundation
 
 extension Networking {
     nonisolated func objectFromCache(for path: String, cacheName: String?, cachingLevel: CachingLevel, responseType: ResponseType) throws -> Any? {
-        let destinationURL = try destinationURL(for: path, cacheName: cacheName)
-
-        let key = destinationURL.absoluteString
-        switch cachingLevel {
-        case .memory:
-            try FileManager.default.remove(at: destinationURL)
-            return cache.object(forKey: key as AnyObject)
-        case .memoryAndFile:
-            // Memory is the warm tier — a memory hit is served without touching the disk (the NSCache
-            // absorbs repeat reads, so the file's mtime is only re-warmed on a memory miss, below).
-            if let object = cache.object(forKey: key as AnyObject) {
-                return object
-            } else if FileManager.default.exists(at: destinationURL) {
-                let fileDate = try? destinationURL.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate
-                if cacheExpiry.isExpired(fileDate: fileDate) {
-                    try FileManager.default.remove(at: destinationURL)
-                    return nil
-                }
-
-                // The file can vanish between the exists() check above and this read — the background
-                // sweep runs concurrently and doesn't share a lock with reads — so a read failure is a
-                // cache miss, not a crash.
-                guard let data = FileManager.default.contents(atPath: destinationURL.path) else { return nil }
-                let returnedObject: Any? = responseType == .image ? Image(data: data) : data
-                if let returnedObject {
-                    cache.setObject(returnedObject as AnyObject, forKey: key as AnyObject)
-                    // Re-warm: bump the file's mtime so an entry in active use never expires. Only happens
-                    // on a memory miss, so it's ~once per entry per launch — no explicit debounce needed.
-                    try? FileManager.default.setAttributes([.modificationDate: Date()], ofItemAtPath: destinationURL.path)
-                }
-
-                return returnedObject
-            } else {
-                return nil
-            }
-        case .none:
-            cache.removeObject(forKey: key as AnyObject)
-            try FileManager.default.remove(at: destinationURL)
-            return nil
-        }
+        try cacheStore.object(forResource: cacheResource(for: path, cacheName: cacheName), level: cachingLevel, asImage: responseType == .image)
     }
 
     func registerFake(requestType: RequestType, path: String, fileName: String, bundle: Bundle, statusCode: Int, delay: Double) {
@@ -111,7 +72,7 @@ extension Networking {
                 statusCode = 200
                 result = .success(T.makeDownloadResult(data: cached, statusCode: 200, headers: headerFields(from: response)))
             } else {
-                let (downloaded, networkResponse) = try await requestData(requestType, path: path, cachingLevel: cachingLevel, responseType: responseType)
+                let (downloaded, networkResponse) = try await requestData(requestType, path: path, responseType: responseType)
                 try cacheOrPurgeData(data: downloaded, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
                 statusCode = networkResponse.statusCode
                 if networkResponse.statusCode.statusCodeType != .successful {
@@ -156,7 +117,7 @@ extension Networking {
                 statusCode = 200
                 result = .success(T.makeDownloadResult(image: cached, statusCode: 200, headers: headerFields(from: response)))
             } else {
-                let (data, networkResponse) = try await requestData(requestType, path: path, cachingLevel: cachingLevel, responseType: responseType)
+                let (data, networkResponse) = try await requestData(requestType, path: path, responseType: responseType)
                 statusCode = networkResponse.statusCode
                 if networkResponse.statusCode.statusCodeType != .successful {
                     result = .failure(downloadError(forStatusCode: networkResponse.statusCode))
@@ -195,12 +156,13 @@ extension Networking {
         return .transport(URLError(.unknown))
     }
 
-    func requestData(_ requestType: RequestType, path: String, cachingLevel: CachingLevel, responseType: ResponseType) async throws -> (Data, HTTPURLResponse) {
+    func requestData(_ requestType: RequestType, path: String, responseType: ResponseType) async throws -> (Data, HTTPURLResponse) {
         let request = URLRequest(url: try composedURL(with: path), requestType: requestType, contentType: nil, responseType: responseType, authorizationHeaderValue: authorizationHeaderValue, token: token, authorizationHeaderKey: authorizationHeaderKey, headerFields: headerFields)
 
-        // Route through the interceptor chain so retry/auth-refresh apply to downloads too.
+        // Route through the interceptor chain so retry/auth-refresh apply to downloads too. Caching is the
+        // caller's job (handleDataRequest/handleImageRequest write under the real cacheName) — writing here
+        // too would double-write under nil and orphan a file when a cacheName is given.
         let exchange = try await perform(request)
-        try self.cacheOrPurgeData(data: exchange.data, path: path, cacheName: nil, cachingLevel: cachingLevel)
         return (exchange.data, exchange.response)
     }
 
@@ -225,46 +187,11 @@ extension Networking {
     }
 
     nonisolated func cacheOrPurgeData(data: Data?, path: String, cacheName: String?, cachingLevel: CachingLevel) throws {
-        let destinationURL = try self.destinationURL(for: path, cacheName: cacheName)
-        let key = destinationURL.absoluteString
-
-        if let returnedData = data, returnedData.count > 0 {
-            switch cachingLevel {
-            case .memory:
-                self.cache.setObject(returnedData as AnyObject, forKey: key as AnyObject)
-            case .memoryAndFile:
-                _ = try returnedData.write(to: destinationURL, options: [.atomic])
-                self.cache.setObject(returnedData as AnyObject, forKey: key as AnyObject)
-            case .none:
-                break
-            }
-            // The disk write itself sets a fresh mtime — that *is* the entry's last-use timestamp.
-        } else {
-            self.cache.removeObject(forKey: key as AnyObject)
-        }
+        try cacheStore.storeData(data, forResource: cacheResource(for: path, cacheName: cacheName), level: cachingLevel)
     }
 
     @discardableResult
     nonisolated func cacheOrPurgeImage(data: Data?, path: String, cacheName: String?, cachingLevel: CachingLevel) throws -> Image? {
-        let destinationURL = try self.destinationURL(for: path, cacheName: cacheName)
-        let key = destinationURL.absoluteString
-
-        var image: Image?
-        if let data = data, let nonOptionalImage = Image(data: data), data.count > 0 {
-            switch cachingLevel {
-            case .memory:
-                self.cache.setObject(nonOptionalImage, forKey: key as AnyObject)
-            case .memoryAndFile:
-                _ = try data.write(to: destinationURL, options: [.atomic])
-                self.cache.setObject(nonOptionalImage, forKey: key as AnyObject)
-            case .none:
-                break
-            }
-            image = nonOptionalImage
-        } else {
-            self.cache.removeObject(forKey: key as AnyObject)
-        }
-
-        return image
+        try cacheStore.storeImage(data: data, forResource: cacheResource(for: path, cacheName: cacheName), level: cachingLevel)
     }
 }

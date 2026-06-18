@@ -37,23 +37,6 @@ public struct AnyCodable: Decodable, @unchecked Sendable {
         }
     }
 
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.singleValueContainer()
-
-        if self.value is NSNull {
-            try container.encodeNil()
-        } else if let value = self.value as? Bool {
-            try container.encode(value)
-        } else if let value = self.value as? Int {
-            try container.encode(value)
-        } else if let value = self.value as? Double {
-            try container.encode(value)
-        } else if let value = self.value as? String {
-            try container.encode(value)
-        } else {
-            throw EncodingError.invalidValue(value, EncodingError.Context(codingPath: container.codingPath, debugDescription: "The value cannot be encoded"))
-        }
-    }
 }
 
 extension AnyCodable: Hashable {
