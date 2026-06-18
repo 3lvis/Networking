@@ -111,7 +111,7 @@ extension Networking {
                 statusCode = 200
                 result = .success(T.makeDownloadResult(data: cached, statusCode: 200, headers: headerFields(from: response)))
             } else {
-                let (downloaded, networkResponse) = try await requestData(requestType, path: path, cachingLevel: cachingLevel, responseType: responseType)
+                let (downloaded, networkResponse) = try await requestData(requestType, path: path, responseType: responseType)
                 try cacheOrPurgeData(data: downloaded, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
                 statusCode = networkResponse.statusCode
                 if networkResponse.statusCode.statusCodeType != .successful {
@@ -156,7 +156,7 @@ extension Networking {
                 statusCode = 200
                 result = .success(T.makeDownloadResult(image: cached, statusCode: 200, headers: headerFields(from: response)))
             } else {
-                let (data, networkResponse) = try await requestData(requestType, path: path, cachingLevel: cachingLevel, responseType: responseType)
+                let (data, networkResponse) = try await requestData(requestType, path: path, responseType: responseType)
                 statusCode = networkResponse.statusCode
                 if networkResponse.statusCode.statusCodeType != .successful {
                     result = .failure(downloadError(forStatusCode: networkResponse.statusCode))
@@ -195,12 +195,13 @@ extension Networking {
         return .transport(URLError(.unknown))
     }
 
-    func requestData(_ requestType: RequestType, path: String, cachingLevel: CachingLevel, responseType: ResponseType) async throws -> (Data, HTTPURLResponse) {
+    func requestData(_ requestType: RequestType, path: String, responseType: ResponseType) async throws -> (Data, HTTPURLResponse) {
         let request = URLRequest(url: try composedURL(with: path), requestType: requestType, contentType: nil, responseType: responseType, authorizationHeaderValue: authorizationHeaderValue, token: token, authorizationHeaderKey: authorizationHeaderKey, headerFields: headerFields)
 
-        // Route through the interceptor chain so retry/auth-refresh apply to downloads too.
+        // Route through the interceptor chain so retry/auth-refresh apply to downloads too. Caching is the
+        // caller's job (handleDataRequest/handleImageRequest write under the real cacheName) — writing here
+        // too would double-write under nil and orphan a file when a cacheName is given.
         let exchange = try await perform(request)
-        try self.cacheOrPurgeData(data: exchange.data, path: path, cacheName: nil, cachingLevel: cachingLevel)
         return (exchange.data, exchange.response)
     }
 
