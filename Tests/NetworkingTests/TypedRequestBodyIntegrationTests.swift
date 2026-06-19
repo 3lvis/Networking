@@ -1,5 +1,6 @@
 import Foundation
 import XCTest
+
 @testable import Networking
 
 private struct Credentials: Codable, Equatable {
@@ -23,10 +24,10 @@ final class TypedRequestBodyIntegrationTests: XCTestCase {
         let body = Credentials(username: "jameson", age: 20, active: true)
         let result: Result<BodyEcho, NetworkingError> = await networking.post("/post", body: body)
         switch result {
-        case let .success(echo):
+        case .success(let echo):
             XCTAssertEqual(echo.json, body)
             XCTAssertEqual(echo.headers["Content-Type"]?.first, "application/json")
-        case let .failure(error):
+        case .failure(let error):
             XCTFail(error.localizedDescription)
         }
     }
@@ -35,7 +36,7 @@ final class TypedRequestBodyIntegrationTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         let body = Credentials(username: "jameson", age: 20, active: true)
         let result: Result<Void, NetworkingError> = await networking.post("/post", body: body)
-        if case let .failure(error) = result {
+        if case .failure(let error) = result {
             XCTFail(error.localizedDescription)
         }
     }
@@ -45,9 +46,9 @@ final class TypedRequestBodyIntegrationTests: XCTestCase {
         let body = Credentials(username: "ada", age: 36, active: false)
         let result: Result<BodyEcho, NetworkingError> = await networking.put("/put", body: body)
         switch result {
-        case let .success(echo):
+        case .success(let echo):
             XCTAssertEqual(echo.json, body)
-        case let .failure(error):
+        case .failure(let error):
             XCTFail(error.localizedDescription)
         }
     }
@@ -57,9 +58,9 @@ final class TypedRequestBodyIntegrationTests: XCTestCase {
         let body = Credentials(username: "grace", age: 45, active: true)
         let result: Result<BodyEcho, NetworkingError> = await networking.patch("/patch", body: body)
         switch result {
-        case let .success(echo):
+        case .success(let echo):
             XCTAssertEqual(echo.json, body)
-        case let .failure(error):
+        case .failure(let error):
             XCTFail(error.localizedDescription)
         }
     }

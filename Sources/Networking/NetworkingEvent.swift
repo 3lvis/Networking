@@ -1,9 +1,9 @@
 import Foundation
 
-public extension Networking {
+extension Networking {
     /// Scope of the built-in diagnostics. Logged requests always get *full* detail; the level only
     /// chooses *which* requests: `.none` (nothing), `.failures` (the default), or `.all`.
-    enum LogLevel: Sendable {
+    public enum LogLevel: Sendable {
         case none
         case failures
         case all
@@ -84,12 +84,14 @@ final class MetricsCollector: NSObject, URLSessionTaskDelegate, @unchecked Senda
     private var collected: URLSessionTaskMetrics?
 
     var metrics: URLSessionTaskMetrics? {
-        lock.lock(); defer { lock.unlock() }
+        lock.lock()
+        defer { lock.unlock() }
         return collected
     }
 
     func urlSession(_ session: URLSession, task: URLSessionTask, didFinishCollecting metrics: URLSessionTaskMetrics) {
-        lock.lock(); defer { lock.unlock() }
+        lock.lock()
+        defer { lock.unlock() }
         collected = metrics
     }
 }

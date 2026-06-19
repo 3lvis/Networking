@@ -1,5 +1,6 @@
 import Foundation
 import XCTest
+
 @testable import Networking
 
 class GETIntegrationTests: XCTestCase {
@@ -9,10 +10,10 @@ class GETIntegrationTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         let result: Result<JSONResponse, NetworkingError> = await networking.get("/get")
         switch result {
-        case let .success(response):
+        case .success(let response):
             XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/get")
             XCTAssertNil(httpbinEchoedMap(response, "headers")["Content-Type"])
-        case let .failure(error):
+        case .failure(let error):
             XCTFail(error.localizedDescription)
         }
     }
@@ -21,10 +22,10 @@ class GETIntegrationTests: XCTestCase {
         let networking = Networking()
         let result: Result<JSONResponse, NetworkingError> = await networking.get("\(TestConfig.httpbinBaseURL)/get")
         switch result {
-        case let .success(response):
+        case .success(let response):
             XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/get")
             XCTAssertNil(httpbinEchoedMap(response, "headers")["Content-Type"])
-        case let .failure(error):
+        case .failure(let error):
             XCTFail(error.localizedDescription)
         }
     }
@@ -33,10 +34,10 @@ class GETIntegrationTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         let result: Result<JSONResponse, NetworkingError> = await networking.get("/get")
         switch result {
-        case let .success(response):
+        case .success(let response):
             XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/get")
             XCTAssertTrue(response.headers.string(for: "Content-Type")?.hasPrefix("application/json") ?? false)
-        case let .failure(error):
+        case .failure(let error):
             XCTFail(error.localizedDescription)
         }
     }
@@ -47,8 +48,8 @@ class GETIntegrationTests: XCTestCase {
         switch result {
         case .success:
             XCTFail()
-        case let .failure(error):
-            guard case let .http(httpError) = error else {
+        case .failure(let error):
+            guard case .http(let httpError) = error else {
                 return XCTFail("expected an HTTP error, got \(error)")
             }
             XCTAssertEqual(httpError.statusCode, 404)
@@ -60,11 +61,11 @@ class GETIntegrationTests: XCTestCase {
 
         // 2xx succeeds (empty body, so decode as Data).
         let ok: Result<Data, NetworkingError> = await networking.get("/status/200")
-        if case let .failure(error) = ok { XCTFail("200 should succeed, got \(error)") }
+        if case .failure(let error) = ok { XCTFail("200 should succeed, got \(error)") }
 
         // 4xx -> .http carrying the status code, flagged as a client error.
         let clientError: Result<Data, NetworkingError> = await networking.get("/status/404")
-        guard case let .failure(.http(clientHTTPError)) = clientError else {
+        guard case .failure(.http(let clientHTTPError)) = clientError else {
             return XCTFail("expected an HTTP error")
         }
         XCTAssertEqual(clientHTTPError.statusCode, 404)
@@ -72,7 +73,7 @@ class GETIntegrationTests: XCTestCase {
 
         // 5xx -> .http carrying the status code, flagged as a server error.
         let serverError: Result<Data, NetworkingError> = await networking.get("/status/500")
-        guard case let .failure(.http(serverHTTPError)) = serverError else {
+        guard case .failure(.http(let serverHTTPError)) = serverError else {
             return XCTFail("expected a server error")
         }
         XCTAssertEqual(serverHTTPError.statusCode, 500)
@@ -81,33 +82,36 @@ class GETIntegrationTests: XCTestCase {
 
     func testGETWithURLEncodedParameters() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result: Result<JSONResponse, NetworkingError> = await networking.get("/get", query: [URLQueryItem(name: "count", value: "25")])
+        let result: Result<JSONResponse, NetworkingError> = await networking.get(
+            "/get", query: [URLQueryItem(name: "count", value: "25")])
         switch result {
-        case let .success(response):
+        case .success(let response):
             XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/get?count=25")
-        case let .failure(error):
+        case .failure(let error):
             XCTFail(error.localizedDescription)
         }
     }
 
     func testGETWithURLEncodedParametersWithExistingQuery() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result: Result<JSONResponse, NetworkingError> = await networking.get("/get?accountId=123", query: [URLQueryItem(name: "userId", value: "5")])
+        let result: Result<JSONResponse, NetworkingError> = await networking.get(
+            "/get?accountId=123", query: [URLQueryItem(name: "userId", value: "5")])
         switch result {
-        case let .success(response):
+        case .success(let response):
             XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/get?accountId=123&userId=5")
-        case let .failure(error):
+        case .failure(let error):
             XCTFail(error.localizedDescription)
         }
     }
 
     func testGETWithURLEncodedParametersWithPercentEncoding() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result: Result<JSONResponse, NetworkingError> = await networking.get("/get", query: [URLQueryItem(name: "name", value: "Elvis Nuñez")])
+        let result: Result<JSONResponse, NetworkingError> = await networking.get(
+            "/get", query: [URLQueryItem(name: "name", value: "Elvis Nuñez")])
         switch result {
-        case let .success(response):
+        case .success(let response):
             XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/get?name=Elvis%20Nu%C3%B1ez")
-        case let .failure(error):
+        case .failure(let error):
             XCTFail(error.localizedDescription)
         }
     }
@@ -121,7 +125,7 @@ class GETIntegrationTests: XCTestCase {
         let first: Result<JSONResponse, NetworkingError> = await networking.get("/uuid", cachingLevel: .memory)
         let second: Result<JSONResponse, NetworkingError> = await networking.get("/uuid", cachingLevel: .memory)
 
-        guard case let .success(firstResponse) = first, case let .success(secondResponse) = second else {
+        guard case .success(let firstResponse) = first, case .success(let secondResponse) = second else {
             return XCTFail("expected both requests to succeed")
         }
         XCTAssertEqual(firstResponse.statusCode, 200)
@@ -142,9 +146,10 @@ class GETIntegrationTests: XCTestCase {
 
         let primed: Result<JSONResponse, NetworkingError> = await networking.get("/uuid", cachingLevel: .memoryAndFile)
         let _: Result<JSONResponse, NetworkingError> = await networking.get("/uuid", cachingLevel: .none)
-        let afterwards: Result<JSONResponse, NetworkingError> = await networking.get("/uuid", cachingLevel: .memoryAndFile)
+        let afterwards: Result<JSONResponse, NetworkingError> = await networking.get(
+            "/uuid", cachingLevel: .memoryAndFile)
 
-        guard case let .success(primedResponse) = primed, case let .success(afterwardsResponse) = afterwards else {
+        guard case .success(let primedResponse) = primed, case .success(let afterwardsResponse) = afterwards else {
             return XCTFail("expected both cached requests to succeed")
         }
         XCTAssertNotNil(primedResponse.body.string(for: "uuid"))
@@ -160,10 +165,12 @@ class GETIntegrationTests: XCTestCase {
         let cache = NSCache<AnyObject, AnyObject>()
         let networking = Networking(baseURL: baseURL, cache: cache)
 
-        let first: Result<JSONResponse, NetworkingError> = await networking.get("/get", query: [URLQueryItem(name: "value", value: "1")], cachingLevel: .memory)
-        let second: Result<JSONResponse, NetworkingError> = await networking.get("/get", query: [URLQueryItem(name: "value", value: "2")], cachingLevel: .memory)
+        let first: Result<JSONResponse, NetworkingError> = await networking.get(
+            "/get", query: [URLQueryItem(name: "value", value: "1")], cachingLevel: .memory)
+        let second: Result<JSONResponse, NetworkingError> = await networking.get(
+            "/get", query: [URLQueryItem(name: "value", value: "2")], cachingLevel: .memory)
 
-        guard case let .success(firstResponse) = first, case let .success(secondResponse) = second else {
+        guard case .success(let firstResponse) = first, case .success(let secondResponse) = second else {
             return XCTFail("expected both requests to succeed")
         }
         XCTAssertEqual(firstResponse.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/get?value=1")
@@ -177,15 +184,20 @@ class GETIntegrationTests: XCTestCase {
         let cache = NSCache<AnyObject, AnyObject>()
         let networking = Networking(baseURL: baseURL, cache: cache)
 
-        let _: Result<JSONResponse, NetworkingError> = await networking.get("/get", query: [URLQueryItem(name: "a", value: "1&b=2")], cachingLevel: .memory)
-        let second: Result<JSONResponse, NetworkingError> = await networking.get("/get", query: [URLQueryItem(name: "a", value: "1"), URLQueryItem(name: "b", value: "2")], cachingLevel: .memory)
+        let _: Result<JSONResponse, NetworkingError> = await networking.get(
+            "/get", query: [URLQueryItem(name: "a", value: "1&b=2")], cachingLevel: .memory)
+        let second: Result<JSONResponse, NetworkingError> = await networking.get(
+            "/get", query: [URLQueryItem(name: "a", value: "1"), URLQueryItem(name: "b", value: "2")],
+            cachingLevel: .memory)
 
-        guard case let .success(secondResponse) = second else {
+        guard case .success(let secondResponse) = second else {
             return XCTFail("expected the second request to succeed")
         }
         let url = secondResponse.body.string(for: "url") ?? ""
         XCTAssertFalse(url.contains("%26"), "the second request must not be served the first request's cached body")
-        XCTAssertTrue(url.contains("a=1") && url.contains("b=2"), "the second request must reflect its own parameters, got: \(url)")
+        XCTAssertTrue(
+            url.contains("a=1") && url.contains("b=2"),
+            "the second request must reflect its own parameters, got: \(url)")
     }
 
     // Full-URL GETs to different hosts but the same path must not collide. A key built from only
@@ -210,11 +222,13 @@ class GETIntegrationTests: XCTestCase {
         let _: Result<JSONResponse, NetworkingError> = await networking.get("\(base)/get", cachingLevel: .memory)
         let second: Result<JSONResponse, NetworkingError> = await networking.get("\(alias)/get", cachingLevel: .memory)
 
-        guard case let .success(secondResponse) = second else {
+        guard case .success(let secondResponse) = second else {
             return XCTFail("expected the second request to succeed")
         }
         let url = secondResponse.body.string(for: "url") ?? ""
-        XCTAssertTrue(url.contains(aliasHost), "a request to a different host must not receive the first host's cached body, got: \(url)")
+        XCTAssertTrue(
+            url.contains(aliasHost),
+            "a request to a different host must not receive the first host's cached body, got: \(url)")
     }
 
     // A cache hit must carry the original response's status code and headers, not fabricated ones.
@@ -225,7 +239,7 @@ class GETIntegrationTests: XCTestCase {
         let _: Result<JSONResponse, NetworkingError> = await networking.get("/get", cachingLevel: .memory)
         let cached: Result<JSONResponse, NetworkingError> = await networking.get("/get", cachingLevel: .memory)
 
-        guard case let .success(response) = cached else {
+        guard case .success(let response) = cached else {
             return XCTFail("expected the cached request to succeed")
         }
         XCTAssertEqual(response.statusCode, 200)

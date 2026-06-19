@@ -1,5 +1,6 @@
 import Foundation
 import XCTest
+
 @testable import Networking
 
 final class DownloadEventsIntegrationTests: XCTestCase {
@@ -16,8 +17,9 @@ final class DownloadEventsIntegrationTests: XCTestCase {
 
         let events = await stream.collect(2)
         XCTAssertEqual(events.count, 2, "downloadImage should emit .started and .completed; got \(events)")
-        guard case let .started(startContext) = events.first,
-              case let .completed(endContext, outcome, _, _) = events.last else {
+        guard case .started(let startContext) = events.first,
+            case .completed(let endContext, let outcome, _, _) = events.last
+        else {
             return XCTFail("expected .started then .completed, got \(events)")
         }
         XCTAssertEqual(startContext.id, endContext.id)
@@ -35,10 +37,10 @@ final class DownloadEventsIntegrationTests: XCTestCase {
         let _: Result<Image, NetworkingError> = await networking.downloadImage("/image/png")
 
         let events = await stream.collect(2)
-        guard case let .completed(_, outcome, _, _) = events.last else {
+        guard case .completed(_, let outcome, _, _) = events.last else {
             return XCTFail("expected a .completed event, got \(events)")
         }
-        guard case let .failure(error) = outcome, case .http = error else {
+        guard case .failure(let error) = outcome, case .http = error else {
             return XCTFail("expected an HTTP failure outcome, got \(outcome)")
         }
     }

@@ -1,5 +1,6 @@
 import Foundation
 import XCTest
+
 @testable import Networking
 
 final class EventStreamIntegrationTests: XCTestCase {
@@ -7,7 +8,7 @@ final class EventStreamIntegrationTests: XCTestCase {
 
     func testEventsStreamDeliversStartedAndCompleted() async throws {
         let networking = Networking(baseURL: baseURL)
-        let stream = await networking.events()   // registered before the request, so it buffers the events
+        let stream = await networking.events()  // registered before the request, so it buffers the events
 
         let _: Result<JSONResponse, NetworkingError> = await networking.get("/get")
 
@@ -19,10 +20,10 @@ final class EventStreamIntegrationTests: XCTestCase {
         }
 
         XCTAssertEqual(collected.count, eventsPerRequest)
-        guard case .started = collected.first, case let .completed(_, outcome, _, _) = collected.last else {
+        guard case .started = collected.first, case .completed(_, let outcome, _, _) = collected.last else {
             return XCTFail("expected .started then .completed, got \(collected)")
         }
-        guard case let .success(statusCode, _) = outcome else {
+        guard case .success(let statusCode, _) = outcome else {
             return XCTFail("expected a success outcome, got \(outcome)")
         }
         XCTAssertEqual(statusCode, 200)

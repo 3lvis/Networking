@@ -1,21 +1,21 @@
 import Foundation
 import os.log
 
-public extension Networking.StatusCodeType {
+extension Networking.StatusCodeType {
     /// Classifies an HTTP status code (with `URLError.cancelled` mapped to `.cancelled`).
-    init(statusCode: Int) {
+    public init(statusCode: Int) {
         switch statusCode {
         case URLError.cancelled.rawValue:
             self = .cancelled
-        case 100 ..< 200:
+        case 100..<200:
             self = .informational
-        case 200 ..< 300:
+        case 200..<300:
             self = .successful
-        case 300 ..< 400:
+        case 300..<400:
             self = .redirection
-        case 400 ..< 500:
+        case 400..<500:
             self = .clientError
-        case 500 ..< 600:
+        case 500..<600:
             self = .serverError
         default:
             self = .unknown
@@ -27,7 +27,11 @@ public actor Networking {
     static let domain = "com.3lvis.networking"
 
     enum RequestType: String {
-        case get = "GET", post = "POST", put = "PUT", patch = "PATCH", delete = "DELETE"
+        case get = "GET"
+        case post = "POST"
+        case put = "PUT"
+        case patch = "PATCH"
+        case delete = "DELETE"
     }
 
     enum SessionTaskType: String {
@@ -69,7 +73,8 @@ public actor Networking {
     /// A stream of observability events — one `.started` then one `.completed` per request. Each call
     /// returns its own multicast stream; the buffer keeps the newest 256 events for a slow consumer.
     public func events() -> AsyncStream<NetworkingEvent> {
-        let (stream, continuation) = AsyncStream.makeStream(of: NetworkingEvent.self, bufferingPolicy: .bufferingNewest(256))
+        let (stream, continuation) = AsyncStream.makeStream(
+            of: NetworkingEvent.self, bufferingPolicy: .bufferingNewest(256))
         let id = UUID()
         streamContinuations[id] = continuation
         continuation.onTermination = { [weak self] _ in
@@ -98,9 +103,9 @@ public actor Networking {
 
     private static let defaultRedactsLogs: Bool = {
         #if DEBUG
-        return false
+            return false
         #else
-        return true
+            return true
         #endif
     }()
 
@@ -182,14 +187,19 @@ public actor Networking {
         cacheStore.setTTL(ttl)
     }
 
-    public init(baseURL: String = "", configuration: URLSessionConfiguration = .default, cache: NSCache<AnyObject, AnyObject>? = nil, logger: Logger? = nil, cacheTTL: Duration = .seconds(7 * 24 * 60 * 60)) {
+    public init(
+        baseURL: String = "", configuration: URLSessionConfiguration = .default,
+        cache: NSCache<AnyObject, AnyObject>? = nil, logger: Logger? = nil,
+        cacheTTL: Duration = .seconds(7 * 24 * 60 * 60)
+    ) {
         self.baseURL = baseURL
         self.configuration = configuration
         let memoryCache = cache ?? NSCache()
         self.cache = memoryCache
         self.cacheStore = CacheStore(memory: memoryCache, ttl: cacheTTL, folderName: Networking.domain)
         self.logger = logger ?? Networking.defaultLogger
-        self.logFileURL = ProcessInfo.processInfo.environment["NETWORKING_LOG_FILE"].flatMap(Networking.resolveLogFileURL)
+        self.logFileURL = ProcessInfo.processInfo.environment["NETWORKING_LOG_FILE"].flatMap(
+            Networking.resolveLogFileURL)
         // Sweep aged-out files off the request path so the disk cache can't grow without bound (one shard
         // per launch — see `CacheStore.sweepExpired`).
         let store = self.cacheStore
@@ -270,8 +280,9 @@ public actor Networking {
 
     public static func splitBaseURLAndRelativePath(for path: String) -> (baseURL: String, relativePath: String)? {
         guard let encodedPath = path.encodeUTF8(),
-              let url = URL(string: encodedPath),
-              let baseURLWithDash = URL(string: "/", relativeTo: url)?.absoluteURL.absoluteString else {
+            let url = URL(string: encodedPath),
+            let baseURLWithDash = URL(string: "/", relativeTo: url)?.absoluteURL.absoluteString
+        else {
             return nil
         }
         let index = baseURLWithDash.index(before: baseURLWithDash.endIndex)
@@ -298,8 +309,8 @@ public actor Networking {
     }
 }
 
-public extension Networking {
-    func cancelAllRequests() async {
+extension Networking {
+    public func cancelAllRequests() async {
         let (dataTasks, uploadTasks, downloadTasks) = await session.tasks
         for sessionTask in dataTasks {
             sessionTask.cancel()

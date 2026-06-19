@@ -13,6 +13,19 @@ env:
   DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
 
 jobs:
+  swift-format-check:
+    name: swift-format check
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check formatting
+        run: |
+          swift format --in-place --recursive Sources Tests
+          if ! git diff --exit-code; then
+            echo "::error::Code is not formatted. Run: swift format --in-place --recursive Sources Tests (and commit)."
+            exit 1
+          fi
+
   build-and-test:
     name: macOS Swift Build & Test
     runs-on: macos-15
@@ -40,3 +53,27 @@ jobs:
         env:
           HTTPBIN_BASE_URL: http://127.0.0.1:8080
         run: swift test -v
+
+  warnings:
+    name: Warnings gate
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v5
+      # No SPM cache on purpose: a fresh build recompiles everything so warnings are
+      # actually re-emitted (an incremental build would skip unchanged files).
+      - name: Build and fail on first-party warnings
+        run: |
+          set -o pipefail
+          swift build --build-tests 2>&1 | tee build.log
+          if grep -E "warning:" build.log | grep -vE "\.build/(checkouts|artifacts)"; then
+            echo "::error::Build emitted warnings in first-party code. Fix them (the lines above)."
+            exit 1
+          fi
+
+  doc-links:
+    name: Doc link check
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check relative markdown links resolve
+        run: python3 scripts/check-doc-links.py

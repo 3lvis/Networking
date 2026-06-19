@@ -16,7 +16,7 @@ extension Image {
             return UIImage(named: name, in: bundle, compatibleWith: nil)!
         #endif
     }
- 
+
     #if os(macOS)
         func data(_ type: NSBitmapImageRep.FileType) -> Data? {
             let imageData = tiffRepresentation!
@@ -27,9 +27,9 @@ extension Image {
     #endif
 
     #if os(macOS)
-    func pngData() -> Data? {
-        return data(.png)
-    }
+        func pngData() -> Data? {
+            return data(.png)
+        }
     #endif
 
     func jpgData() -> Data? {

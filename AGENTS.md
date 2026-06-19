@@ -11,7 +11,11 @@ what's specific to this repo. Release history and the v8 (major) notes live in `
 - `swift build` — library only; CI also fails on any first-party `warning:`.
 - Integration tests need go-httpbin (`TestConfig.httpbinBaseURL`, default `http://127.0.0.1:8080`). Without it
   they fail fast (connection refused) — intended, not a flake. The offline / `fake*` suites need no server.
+- Formatting: `.swift-format` (120 cols, 4-space). Run `./scripts/setup.sh` once per clone to enable the
+  `.githooks/pre-commit` hook (formats staged Swift files); CI's format check is the backstop.
 - CI: `macos-15` / Xcode 26.3 / Swift 6.2.x (stricter region-isolation than local 6.3 — CI is the gate).
+  Jobs: swift-format check, build & test (go-httpbin), a warnings gate, and a dead-doc-link check
+  (`scripts/check-doc-links.py`).
 
 ## Source map
 

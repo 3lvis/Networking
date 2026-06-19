@@ -1,5 +1,6 @@
 import Foundation
 import XCTest
+
 @testable import Networking
 
 class NetworkingTests: XCTestCase {
@@ -11,10 +12,10 @@ class NetworkingTests: XCTestCase {
         await networking.setAuthorizationHeader(headerValue: value)
         let result: Result<JSONResponse, NetworkingError> = await networking.post("/post")
         switch result {
-        case let .success(response):
+        case .success(let response):
             let headers = httpbinEchoedMap(response, "headers")
             XCTAssertEqual(value, headers["Authorization"])
-        case let .failure(error):
+        case .failure(let error):
             XCTFail(error.localizedDescription)
         }
     }
@@ -26,10 +27,10 @@ class NetworkingTests: XCTestCase {
         await networking.setAuthorizationHeader(headerKey: key, headerValue: value)
         let result: Result<JSONResponse, NetworkingError> = await networking.post("/post")
         switch result {
-        case let .success(response):
+        case .success(let response):
             let headers = httpbinEchoedMap(response, "headers")
             XCTAssertEqual(value, headers[key])
-        case let .failure(error):
+        case .failure(let error):
             XCTFail(error.localizedDescription)
         }
     }
@@ -118,11 +119,14 @@ class NetworkingTests: XCTestCase {
     }
 
     func testSplitBaseURLAndRelativePath() throws {
-        let (baseURL1, relativePath1) = try XCTUnwrap(Networking.splitBaseURLAndRelativePath(for: "https://rescuejuice.com/wp-content/uploads/2015/11/døgnvillburgere.jpg"))
+        let (baseURL1, relativePath1) = try XCTUnwrap(
+            Networking.splitBaseURLAndRelativePath(
+                for: "https://rescuejuice.com/wp-content/uploads/2015/11/døgnvillburgere.jpg"))
         XCTAssertEqual(baseURL1, "https://rescuejuice.com")
         XCTAssertEqual(relativePath1, "/wp-content/uploads/2015/11/døgnvillburgere.jpg")
 
-        let (baseURL2, relativePath2) = try XCTUnwrap(Networking.splitBaseURLAndRelativePath(for: "http://example.com/basic-auth/user/passwd"))
+        let (baseURL2, relativePath2) = try XCTUnwrap(
+            Networking.splitBaseURLAndRelativePath(for: "http://example.com/basic-auth/user/passwd"))
         XCTAssertEqual(baseURL2, "http://example.com")
         XCTAssertEqual(relativePath2, "/basic-auth/user/passwd")
     }

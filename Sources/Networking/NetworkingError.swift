@@ -18,37 +18,37 @@ public enum NetworkingError: Error {
     case cancelled
 }
 
-public extension NetworkingError {
+extension NetworkingError {
     /// The HTTP status code, when the failure carries one.
-    var statusCode: Int? {
+    public var statusCode: Int? {
         switch self {
-        case let .http(error): return error.statusCode
-        case let .decoding(_, metadata): return metadata.statusCode
-        case let .validation(_, metadata): return metadata.statusCode
+        case .http(let error): return error.statusCode
+        case .decoding(_, let metadata): return metadata.statusCode
+        case .validation(_, let metadata): return metadata.statusCode
         default: return nil
         }
     }
 
-    var isCancelled: Bool {
+    public var isCancelled: Bool {
         if case .cancelled = self { return true }
         return false
     }
 
     /// The response metadata, when the failure carries a response.
-    var responseMetadata: ResponseMetadata? {
+    public var responseMetadata: ResponseMetadata? {
         switch self {
-        case let .http(error): return error.metadata
-        case let .decoding(_, metadata): return metadata
-        case let .validation(_, metadata): return metadata
+        case .http(let error): return error.metadata
+        case .decoding(_, let metadata): return metadata
+        case .validation(_, let metadata): return metadata
         default: return nil
         }
     }
 
     /// The default statuses `RetryInterceptor` retries, and the source of truth for `isRetryable`.
-    static let retryableStatusCodes: Set<Int> = [408, 429, 500, 502, 503, 504]
+    public static let retryableStatusCodes: Set<Int> = [408, 429, 500, 502, 503, 504]
 
     /// Whether a transport failure is transient (a dropped connection or timeout) and so worth retrying.
-    static func isRetryableTransport(_ error: URLError) -> Bool {
+    public static func isRetryableTransport(_ error: URLError) -> Bool {
         switch error.code {
         case .timedOut, .networkConnectionLost, .cannotConnectToHost, .dnsLookupFailed:
             return true
@@ -59,11 +59,11 @@ public extension NetworkingError {
 
     /// Whether retrying might plausibly succeed. Conservative: only transient transport failures and
     /// `retryableStatusCodes` — never decoding, invalid-request, invalid-response, or cancellation.
-    var isRetryable: Bool {
+    public var isRetryable: Bool {
         switch self {
-        case let .transport(error):
+        case .transport(let error):
             return Self.isRetryableTransport(error)
-        case let .http(error):
+        case .http(let error):
             return Self.retryableStatusCodes.contains(error.statusCode)
         case .invalidRequest, .decoding, .validation, .invalidResponse, .cancelled:
             return false
@@ -89,8 +89,8 @@ public struct HTTPError: Error, Sendable {
         self.metadata = metadata
     }
 
-    public var isClientError: Bool { (400 ..< 500).contains(statusCode) }
-    public var isServerError: Bool { (500 ..< 600).contains(statusCode) }
+    public var isClientError: Bool { (400..<500).contains(statusCode) }
+    public var isServerError: Bool { (500..<600).contains(statusCode) }
 }
 
 /// Metadata about an HTTP response, retained on failures for inspection, logging, and debugging.
@@ -106,9 +106,10 @@ public struct ResponseMetadata: Sendable {
     }
 
     public init(response: HTTPURLResponse, body: Data) {
-        let headers = Dictionary(uniqueKeysWithValues: response.allHeaderFields.compactMap { key, value in
-            (key as? String).map { ($0, "\(value)") }
-        })
+        let headers = Dictionary(
+            uniqueKeysWithValues: response.allHeaderFields.compactMap { key, value in
+                (key as? String).map { ($0, "\(value)") }
+            })
         self.init(statusCode: response.statusCode, headers: headers, body: body)
     }
 
@@ -131,22 +132,23 @@ public struct ResponseMetadata: Sendable {
 extension NetworkingError: LocalizedError {
     public var errorDescription: String? {
         switch self {
-        case let .invalidRequest(reason):
+        case .invalidRequest(let reason):
             switch reason {
-            case let .invalidURL(path):
+            case .invalidURL(let path):
                 return "The request URL is invalid: \(path)."
-            case let .bodyEncodingFailed(message):
+            case .bodyEncodingFailed(let message):
                 return "Failed to encode the request body: \(message)"
-            case let .parameterEncodingFailed(message):
+            case .parameterEncodingFailed(let message):
                 return "Failed to encode the request parameters: \(message)"
             }
-        case let .transport(error):
+        case .transport(let error):
             return "A network error occurred: \(error.localizedDescription)"
-        case let .http(error):
-            return "The server returned status \(error.statusCode) (\(HTTPURLResponse.localizedString(forStatusCode: error.statusCode)))."
-        case let .decoding(error, metadata):
+        case .http(let error):
+            return
+                "The server returned status \(error.statusCode) (\(HTTPURLResponse.localizedString(forStatusCode: error.statusCode)))."
+        case .decoding(let error, let metadata):
             return "Failed to decode the response (status \(metadata.statusCode)): \(error.detailedMessage)"
-        case let .validation(reason, metadata):
+        case .validation(let reason, let metadata):
             return "The response (status \(metadata.statusCode)) failed validation: \(reason)"
         case .invalidResponse:
             return "The server returned a response that wasn't valid HTTP."

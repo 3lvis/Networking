@@ -13,12 +13,14 @@ final class CacheExpiry: @unchecked Sendable {
     }
 
     var ttl: Duration {
-        lock.lock(); defer { lock.unlock() }
+        lock.lock()
+        defer { lock.unlock() }
         return .seconds(ttlSeconds)
     }
 
     func setTTL(_ ttl: Duration) {
-        lock.lock(); defer { lock.unlock() }
+        lock.lock()
+        defer { lock.unlock() }
         ttlSeconds = ttl.seconds
     }
 
@@ -26,7 +28,8 @@ final class CacheExpiry: @unchecked Sendable {
     // is treated as not-expired so a present-but-unreadable entry isn't dropped spuriously.
     func isExpired(fileDate: Date?) -> Bool {
         guard let fileDate else { return false }
-        lock.lock(); defer { lock.unlock() }
+        lock.lock()
+        defer { lock.unlock() }
         return Date().timeIntervalSince(fileDate) > ttlSeconds
     }
 }

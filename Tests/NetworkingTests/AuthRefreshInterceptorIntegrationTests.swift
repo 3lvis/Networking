@@ -1,5 +1,6 @@
 import Foundation
 import XCTest
+
 @testable import Networking
 
 // go-httpbin's /bearer returns 401 without an `Authorization: Bearer …` header and 200 with one — so it
@@ -18,9 +19,9 @@ final class AuthRefreshInterceptorIntegrationTests: XCTestCase {
         let result: Result<JSONResponse, NetworkingError> = await networking.get("/bearer")
 
         switch result {
-        case let .success(response):
+        case .success(let response):
             XCTAssertEqual(response.statusCode, 200, "the replay with a fresh credential should succeed")
-        case let .failure(error):
+        case .failure(let error):
             XCTFail("expected the refreshed replay to succeed, got \(error)")
         }
     }

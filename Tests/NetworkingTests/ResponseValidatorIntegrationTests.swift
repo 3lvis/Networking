@@ -1,5 +1,6 @@
 import Foundation
 import XCTest
+
 @testable import Networking
 
 // go-httpbin's /xml returns 200 with application/xml and /json returns 200 with application/json, so a
@@ -24,7 +25,7 @@ final class ResponseValidatorIntegrationTests: XCTestCase {
 
         let result: Result<Data, NetworkingError> = await networking.get("/xml")
 
-        guard case let .failure(.validation(reason, metadata)) = result else {
+        guard case .failure(.validation(let reason, let metadata)) = result else {
             return XCTFail("expected a .validation failure, got \(result)")
         }
         XCTAssertTrue(reason.contains("application/json"), "the reason should explain the expectation; got \(reason)")
@@ -41,7 +42,9 @@ final class ResponseValidatorIntegrationTests: XCTestCase {
 
         let result: Result<Data, NetworkingError> = await networking.get("/status/500")
 
-        guard case let .failure(.http(error)) = result else { return XCTFail("expected an .http failure, got \(result)") }
+        guard case .failure(.http(let error)) = result else {
+            return XCTFail("expected an .http failure, got \(result)")
+        }
         XCTAssertEqual(error.statusCode, 500)
     }
 
@@ -52,7 +55,7 @@ final class ResponseValidatorIntegrationTests: XCTestCase {
 
         // Prime the cache with no validator installed: /xml (200, application/xml) gets stored.
         let primed: Result<Data, NetworkingError> = await networking.get("/xml", cachingLevel: .memory)
-        if case let .failure(error) = primed { return XCTFail("priming the cache should succeed, got \(error)") }
+        if case .failure(let error) = primed { return XCTFail("priming the cache should succeed, got \(error)") }
 
         await requireJSON(networking)
         // Same request → a cache hit → must still run the JSON validator and be rejected.
@@ -69,6 +72,6 @@ final class ResponseValidatorIntegrationTests: XCTestCase {
 
         let result: Result<JSONResponse, NetworkingError> = await networking.get("/json")
 
-        if case let .failure(error) = result { XCTFail("expected the JSON response to pass validation, got \(error)") }
+        if case .failure(let error) = result { XCTFail("expected the JSON response to pass validation, got \(error)") }
     }
 }

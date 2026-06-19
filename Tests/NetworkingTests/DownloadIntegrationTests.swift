@@ -1,5 +1,6 @@
 import Foundation
 import XCTest
+
 @testable import Networking
 
 // @MainActor so the local `NSCache` (non-Sendable) used across the `downloadImage` await stays on
@@ -16,10 +17,10 @@ class DownloadIntegrationTests: XCTestCase {
 
         let result: Result<Image, NetworkingError> = await networking.downloadImage(path)
         switch result {
-        case let .success(image):
+        case .success(let image):
             let pigImage = Image.find(named: "pig.png", inBundle: .module)
             XCTAssertEqual(pigImage.pngData(), image.pngData())
-        case let .failure(error):
+        case .failure(let error):
             XCTFail(error.localizedDescription)
         }
     }
@@ -33,11 +34,11 @@ class DownloadIntegrationTests: XCTestCase {
 
         let result: Result<ImageResponse, NetworkingError> = await networking.downloadImage(path)
         switch result {
-        case let .success(response):
+        case .success(let response):
             XCTAssertEqual(response.statusCode, 200)
             let pigImage = Image.find(named: "pig.png", inBundle: .module)
             XCTAssertEqual(pigImage.pngData(), response.image.pngData())
-        case let .failure(error):
+        case .failure(let error):
             XCTFail(error.localizedDescription)
         }
     }
@@ -80,10 +81,13 @@ class DownloadIntegrationTests: XCTestCase {
         case .success:
             let destinationURL = try networking.destinationURL(for: path)
             let absoluteString = destinationURL.absoluteString
-            guard let image = networking.cache.object(forKey: absoluteString as AnyObject) as? Image else { XCTFail(); return }
+            guard let image = networking.cache.object(forKey: absoluteString as AnyObject) as? Image else {
+                XCTFail()
+                return
+            }
             let pigImage = Image.find(named: "pig.png", inBundle: .module)
             XCTAssertEqual(pigImage.pngData(), image.pngData())
-        case let .failure(error):
+        case .failure(let error):
             XCTFail(error.localizedDescription)
         }
     }
@@ -100,10 +104,13 @@ class DownloadIntegrationTests: XCTestCase {
         case .success:
             let destinationURL = try networking.destinationURL(for: path, cacheName: cacheName)
             let absoluteString = destinationURL.absoluteString
-            guard let image = networking.cache.object(forKey: absoluteString as AnyObject) as? Image else { XCTFail(); return }
+            guard let image = networking.cache.object(forKey: absoluteString as AnyObject) as? Image else {
+                XCTFail()
+                return
+            }
             let pigImage = Image.find(named: "pig.png", inBundle: .module)
             XCTAssertEqual(pigImage.pngData(), image.pngData())
-        case let .failure(error):
+        case .failure(let error):
             XCTFail(error.localizedDescription)
         }
     }
@@ -118,7 +125,7 @@ class DownloadIntegrationTests: XCTestCase {
             let image = try networking.imageFromCache(path)
             let pigImage = Image.find(named: "pig.png", inBundle: .module)
             XCTAssertEqual(pigImage.pngData(), image?.pngData())
-        case let .failure(error):
+        case .failure(let error):
             XCTFail(error.localizedDescription)
         }
     }
@@ -144,10 +151,13 @@ class DownloadIntegrationTests: XCTestCase {
             let destinationURL = try networking.destinationURL(for: path)
             let absoluteString = destinationURL.absoluteString
             networking.cache.removeObject(forKey: absoluteString as AnyObject)
-            guard let image = try networking.imageFromCache(path) else { XCTFail(); return }
+            guard let image = try networking.imageFromCache(path) else {
+                XCTFail()
+                return
+            }
             let pigImage = Image.find(named: "pig.png", inBundle: .module)
             XCTAssertEqual(pigImage.pngData(), image.pngData())
-        case let .failure(error):
+        case .failure(let error):
             XCTFail(error.localizedDescription)
         }
     }
@@ -163,10 +173,13 @@ class DownloadIntegrationTests: XCTestCase {
             let destinationURL = try networking.destinationURL(for: path, cacheName: cacheName)
             let absoluteString = destinationURL.absoluteString
             networking.cache.removeObject(forKey: absoluteString as AnyObject)
-            guard let image = try networking.imageFromCache(path, cacheName: cacheName) else { XCTFail(); return }
+            guard let image = try networking.imageFromCache(path, cacheName: cacheName) else {
+                XCTFail()
+                return
+            }
             let pigImage = Image.find(named: "pig.png", inBundle: .module)
             XCTAssertEqual(pigImage.pngData(), image.pngData())
-        case let .failure(error):
+        case .failure(let error):
             XCTFail(error.localizedDescription)
         }
     }
@@ -184,7 +197,7 @@ class DownloadIntegrationTests: XCTestCase {
             try Helper.removeFileIfNeeded(networking, path: path)
             let image = try networking.imageFromCache(path)
             XCTAssertNil(image)
-        case let .failure(error):
+        case .failure(let error):
             XCTFail(error.localizedDescription)
         }
     }
@@ -195,9 +208,9 @@ class DownloadIntegrationTests: XCTestCase {
         try Helper.removeFileIfNeeded(networking, path: path)
         let result: Result<Data, NetworkingError> = await networking.downloadData(path)
         switch result {
-        case let .success(data):
+        case .success(let data):
             XCTAssertEqual(data.count, 8090)
-        case let .failure(error):
+        case .failure(let error):
             XCTFail(error.localizedDescription)
         }
     }
@@ -209,10 +222,10 @@ class DownloadIntegrationTests: XCTestCase {
         try Helper.removeFileIfNeeded(networking, path: path)
         let result: Result<DataResponse, NetworkingError> = await networking.downloadData(path)
         switch result {
-        case let .success(response):
+        case .success(let response):
             XCTAssertEqual(response.statusCode, 200)
             XCTAssertEqual(response.data.count, 8090)
-        case let .failure(error):
+        case .failure(let error):
             XCTFail(error.localizedDescription)
         }
     }
@@ -224,13 +237,13 @@ class DownloadIntegrationTests: XCTestCase {
 
         let result: Result<Data, NetworkingError> = await networking.downloadData(path)
         switch result {
-        case let .success(data):
+        case .success(let data):
             if let cacheData = try networking.dataFromCache(path) {
                 XCTAssert(data == cacheData)
             } else {
                 XCTFail()
             }
-        case let .failure(error):
+        case .failure(let error):
             XCTFail(error.localizedDescription)
         }
     }

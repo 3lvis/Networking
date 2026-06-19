@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import Networking
 
 // Unit tests for the cache store itself — layout, the sliding-TTL expiry, the pure-read contracts, and
@@ -7,7 +8,9 @@ import XCTest
 final class CacheStoreTests: XCTestCase {
     private let folderName = "com.3lvis.networking.cachestoretests"
 
-    private func makeStore(ttl: Duration = .seconds(7 * 24 * 60 * 60)) throws -> (store: CacheStore, memory: NSCache<AnyObject, AnyObject>) {
+    private func makeStore(ttl: Duration = .seconds(7 * 24 * 60 * 60)) throws -> (
+        store: CacheStore, memory: NSCache<AnyObject, AnyObject>
+    ) {
         let memory = NSCache<AnyObject, AnyObject>()
         let store = CacheStore(memory: memory, ttl: ttl, folderName: folderName)
         try store.clear()
@@ -39,7 +42,8 @@ final class CacheStoreTests: XCTestCase {
 
         let url = try store.destinationURL(forResource: resource)
         memory.removeObject(forKey: url.absoluteString as AnyObject)  // force the disk path
-        try FileManager.default.setAttributes([.modificationDate: Date(timeIntervalSinceNow: -120)], ofItemAtPath: url.path)
+        try FileManager.default.setAttributes(
+            [.modificationDate: Date(timeIntervalSinceNow: -120)], ofItemAtPath: url.path)
 
         XCTAssertNil(
             try store.object(forResource: resource, level: .memoryAndFile, asImage: false),
@@ -55,7 +59,8 @@ final class CacheStoreTests: XCTestCase {
 
         let url = try store.destinationURL(forResource: resource)
         memory.removeObject(forKey: url.absoluteString as AnyObject)  // force the disk path
-        try FileManager.default.setAttributes([.modificationDate: Date(timeIntervalSinceNow: -30)], ofItemAtPath: url.path)
+        try FileManager.default.setAttributes(
+            [.modificationDate: Date(timeIntervalSinceNow: -30)], ofItemAtPath: url.path)
 
         XCTAssertNotNil(try store.object(forResource: resource, level: .memoryAndFile, asImage: false))
         let mtime = try url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate!

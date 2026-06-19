@@ -15,7 +15,10 @@ struct FakeRequest {
     let statusCode: Int
     let delay: Double
 
-    init(payload: Payload, responseType: Networking.ResponseType, headerFields: [String : String]?, statusCode: Int, delay: Double) {
+    init(
+        payload: Payload, responseType: Networking.ResponseType, headerFields: [String: String]?, statusCode: Int,
+        delay: Double
+    ) {
         self.payload = payload
         self.responseType = responseType
         self.headerFields = headerFields
@@ -23,7 +26,10 @@ struct FakeRequest {
         self.delay = delay
     }
 
-    static func find(ofType type: Networking.RequestType, forPath path: String, in collection: [Networking.RequestType: [String: FakeRequest]]) throws -> FakeRequest? {
+    static func find(
+        ofType type: Networking.RequestType, forPath path: String,
+        in collection: [Networking.RequestType: [String: FakeRequest]]
+    ) throws -> FakeRequest? {
         guard let requests = collection[type] else { return nil }
         guard path.count > 0 else { return nil }
 
@@ -60,15 +66,19 @@ struct FakeRequest {
                 }
                 guard replacedPath == path else { continue }
                 // Substitute the captured path values into the JSON body string (e.g. "{userID}" -> "10").
-                guard case let .data(data) = fakeRequest.payload,
-                      var responseString = String(data: data, encoding: .utf8) else { continue }
+                guard case .data(let data) = fakeRequest.payload,
+                    var responseString = String(data: data, encoding: .utf8)
+                else { continue }
 
                 for (key, value) in replacedValues {
                     responseString = responseString.replacingOccurrences(of: key, with: value)
                 }
 
                 guard let stringData = responseString.data(using: .utf8) else { continue }
-                return FakeRequest(payload: .data(stringData), responseType: fakeRequest.responseType, headerFields: fakeRequest.headerFields, statusCode: fakeRequest.statusCode, delay: fakeRequest.delay)
+                return FakeRequest(
+                    payload: .data(stringData), responseType: fakeRequest.responseType,
+                    headerFields: fakeRequest.headerFields, statusCode: fakeRequest.statusCode, delay: fakeRequest.delay
+                )
             }
         }
 

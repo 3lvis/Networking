@@ -33,7 +33,8 @@ public struct AnyCodable: Decodable, @unchecked Sendable {
         } else if let value = try? container.decode([AnyCodable].self) {
             self.value = value
         } else {
-            throw DecodingError.dataCorruptedError(in: container, debugDescription: "The container contains nothing serializable")
+            throw DecodingError.dataCorruptedError(
+                in: container, debugDescription: "The container contains nothing serializable")
         }
     }
 

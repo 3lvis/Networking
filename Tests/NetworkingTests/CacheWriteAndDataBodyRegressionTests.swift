@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import Networking
 
 // Regressions for cache-write and Data-body bugs found in review; each test names the contract it guards.
@@ -34,7 +35,7 @@ final class CacheWriteAndDataBodyRegressionTests: XCTestCase {
         await networking.fakeGET("/payload", response: ["message": "hello"])
 
         let result: Result<Data, NetworkingError> = await networking.get("/payload")
-        guard case let .success(data) = result else { return XCTFail("expected success, got \(result)") }
+        guard case .success(let data) = result else { return XCTFail("expected success, got \(result)") }
 
         let decoded = try? JSONDecoder().decode([String: String].self, from: data)
         XCTAssertEqual(decoded?["message"], "hello", "a verb with T == Data must return the response body")

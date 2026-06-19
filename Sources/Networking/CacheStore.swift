@@ -1,5 +1,5 @@
-import Foundation
 import CryptoKit
+import Foundation
 
 // Owns both cache tiers: the in-memory `NSCache` (warm, pressure-evicted by iOS) over the on-disk shard
 // layout (cold, durable). A non-actor, synchronous type so the nonisolated cache reads
@@ -33,8 +33,11 @@ final class CacheStore: @unchecked Sendable {
         let finalPath = "\(folderPath)/\(component)"
 
         guard let url = URL(string: finalPath),
-              let cachesURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else {
-            throw NSError(domain: folderName, code: 9999, userInfo: [NSLocalizedDescriptionKey: "Couldn't build a cache URL for: \(finalPath)"])
+            let cachesURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
+        else {
+            throw NSError(
+                domain: folderName, code: 9999,
+                userInfo: [NSLocalizedDescriptionKey: "Couldn't build a cache URL for: \(finalPath)"])
         }
 
         let folderURL = cachesURL.appendingPathComponent(URL(string: folderPath)!.absoluteString)
@@ -87,7 +90,8 @@ final class CacheStore: @unchecked Sendable {
             if let object = memory.object(forKey: key as AnyObject) {
                 return object
             } else if FileManager.default.exists(at: destinationURL) {
-                let fileDate = try? destinationURL.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate
+                let fileDate = try? destinationURL.resourceValues(forKeys: [.contentModificationDateKey])
+                    .contentModificationDate
                 if expiry.isExpired(fileDate: fileDate) {
                     try FileManager.default.remove(at: destinationURL)
                     return nil
@@ -102,7 +106,8 @@ final class CacheStore: @unchecked Sendable {
                     memory.setObject(returnedObject as AnyObject, forKey: key as AnyObject)
                     // Re-warm: bump the file's mtime so an entry in active use never expires. Only happens
                     // on a memory miss, so it's ~once per entry per launch — no explicit debounce needed.
-                    try? FileManager.default.setAttributes([.modificationDate: Date()], ofItemAtPath: destinationURL.path)
+                    try? FileManager.default.setAttributes(
+                        [.modificationDate: Date()], ofItemAtPath: destinationURL.path)
                 }
 
                 return returnedObject
@@ -180,7 +185,9 @@ final class CacheStore: @unchecked Sendable {
     }
 
     private static func folderURL(named folderName: String) -> URL? {
-        guard let cachesURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else { return nil }
+        guard let cachesURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else {
+            return nil
+        }
         return cachesURL.appendingPathComponent(URL(string: folderName)!.absoluteString)
     }
 
@@ -195,12 +202,20 @@ final class CacheStore: @unchecked Sendable {
         let maxAge = expiry.ttl.seconds
 
         let cursorURL = domainURL.appendingPathComponent(Self.sweepCursorFileName)
-        let cursor = (try? String(contentsOf: cursorURL, encoding: .utf8)).flatMap { Int($0.trimmingCharacters(in: .whitespacesAndNewlines)) } ?? 0
+        let cursor =
+            (try? String(contentsOf: cursorURL, encoding: .utf8)).flatMap {
+                Int($0.trimmingCharacters(in: .whitespacesAndNewlines))
+            } ?? 0
         let shardURL = domainURL.appendingPathComponent(String(cursor % Self.shardCount, radix: 16))
 
-        if let files = try? FileManager.default.contentsOfDirectory(at: shardURL, includingPropertiesForKeys: [.contentModificationDateKey], options: []) {
+        if let files = try? FileManager.default.contentsOfDirectory(
+            at: shardURL, includingPropertiesForKeys: [.contentModificationDateKey], options: [])
+        {
             for file in files {
-                guard let modified = try? file.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate else { continue }
+                guard
+                    let modified = try? file.resourceValues(forKeys: [.contentModificationDateKey])
+                        .contentModificationDate
+                else { continue }
                 if now.timeIntervalSince(modified) > maxAge {
                     try? FileManager.default.removeItem(at: file)
                 }
@@ -209,7 +224,9 @@ final class CacheStore: @unchecked Sendable {
 
         // Pre-sharding versions wrote files directly under the domain root; clear those strays (the cursor
         // file and the shard subdirectories stay).
-        if let rootEntries = try? FileManager.default.contentsOfDirectory(at: domainURL, includingPropertiesForKeys: [.isRegularFileKey], options: []) {
+        if let rootEntries = try? FileManager.default.contentsOfDirectory(
+            at: domainURL, includingPropertiesForKeys: [.isRegularFileKey], options: [])
+        {
             for entry in rootEntries where entry.lastPathComponent != Self.sweepCursorFileName {
                 if (try? entry.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile) == true {
                     try? FileManager.default.removeItem(at: entry)
