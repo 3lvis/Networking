@@ -1,5 +1,6 @@
 import Foundation
 import XCTest
+
 @testable import Networking
 
 // Downloads should run through the same interceptor chain as the verbs, so retry/auth-refresh apply to
@@ -14,7 +15,9 @@ final class DownloadInterceptorIntegrationTests: XCTestCase {
 
     private struct CountingPassthroughInterceptor: HTTPInterceptor {
         let counter: Counter
-        func intercept(_ request: URLRequest, next: @Sendable (URLRequest) async throws -> HTTPExchange) async throws -> HTTPExchange {
+        func intercept(_ request: URLRequest, next: @Sendable (URLRequest) async throws -> HTTPExchange) async throws
+            -> HTTPExchange
+        {
             await counter.tick()
             return try await next(request)
         }
@@ -27,7 +30,7 @@ final class DownloadInterceptorIntegrationTests: XCTestCase {
 
         let result: Result<Data, NetworkingError> = await networking.downloadData("/bytes/16", cachingLevel: .none)
 
-        if case let .failure(error) = result { XCTFail("expected the download to succeed, got \(error)") }
+        if case .failure(let error) = result { XCTFail("expected the download to succeed, got \(error)") }
         let count = await counter.count
         XCTAssertGreaterThanOrEqual(count, 1, "a download must pass through the interceptor chain")
     }

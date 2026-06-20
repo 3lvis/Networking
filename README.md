@@ -638,7 +638,7 @@ In your `Package.swift`:
 
 …and add `"Networking"` to your target's dependencies. In Xcode, use **File ▸ Add Package Dependencies…** and enter `https://github.com/3lvis/Networking.git`.
 
-> **Upgrading from 7.x?** 8.0.0 is a major, breaking release (async/`await` + `Result`, Swift 6, typed request bodies, a categorized error model, an event stream, and request interceptors). See [`CHANGELOG.md`](CHANGELOG.md) for the full migration.
+> **Upgrading from 7.x?** 8.0.0 is a major, breaking release (async/`await` + `Result`, Swift 6, typed request bodies, a categorized error model, an event stream, and request interceptors). See the [release notes](https://github.com/3lvis/Networking/releases) for the full migration.
 
 ## Running the tests
 

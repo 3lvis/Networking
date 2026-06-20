@@ -1,5 +1,6 @@
 import Foundation
 import XCTest
+
 @testable import Networking
 
 class PATCHIntegrationTests: XCTestCase {
@@ -7,16 +8,17 @@ class PATCHIntegrationTests: XCTestCase {
 
     func testPATCH() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result: Result<JSONResponse, NetworkingError> = await networking.patch("/patch", body: ["username": "jameson", "password": "secret"])
+        let result: Result<JSONResponse, NetworkingError> = await networking.patch(
+            "/patch", body: ["username": "jameson", "password": "secret"])
         switch result {
-        case let .success(response):
+        case .success(let response):
             let json = httpbinEchoedMap(response, "json")
             XCTAssertEqual(json["username"], "jameson")
             XCTAssertEqual(json["password"], "secret")
 
             let headers = httpbinEchoedMap(response, "headers")
             XCTAssertEqual(headers["Content-Type"], "application/json")
-        case let .failure(error):
+        case .failure(let error):
             XCTFail(error.localizedDescription)
         }
     }
@@ -25,22 +27,23 @@ class PATCHIntegrationTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         let result: Result<JSONResponse, NetworkingError> = await networking.patch("/patch")
         switch result {
-        case let .success(response):
+        case .success(let response):
             XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/patch")
             XCTAssertTrue(response.headers.string(for: "Content-Type")?.hasPrefix("application/json") ?? false)
-        case let .failure(error):
+        case .failure(let error):
             XCTFail(error.localizedDescription)
         }
     }
 
     func testPATCHWithIvalidPath() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result: Result<JSONResponse, NetworkingError> = await networking.patch("/posdddddt", body: ["username": "jameson", "password": "secret"])
+        let result: Result<JSONResponse, NetworkingError> = await networking.patch(
+            "/posdddddt", body: ["username": "jameson", "password": "secret"])
         switch result {
         case .success:
             XCTFail()
-        case let .failure(error):
-            guard case let .http(httpError) = error else {
+        case .failure(let error):
+            guard case .http(let httpError) = error else {
                 return XCTFail("expected an HTTP error, got \(error)")
             }
             XCTAssertEqual(httpError.statusCode, 404)

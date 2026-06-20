@@ -35,16 +35,20 @@ private enum FormScalar: Decodable {
         } else if let string = try? container.decode(String.self) {
             self = .string(string)
         } else {
-            throw DecodingError.dataCorruptedError(in: container, debugDescription: "form/query values must be String, Int, Double, or Bool — nested objects and arrays aren't supported")
+            throw DecodingError.dataCorruptedError(
+                in: container,
+                debugDescription:
+                    "form/query values must be String, Int, Double, or Bool — nested objects and arrays aren't supported"
+            )
         }
     }
 
     var stringValue: String {
         switch self {
-        case let .string(value): return value
-        case let .int(value): return String(value)
-        case let .double(value): return String(value)
-        case let .bool(value): return String(value)
+        case .string(let value): return value
+        case .int(let value): return String(value)
+        case .double(let value): return String(value)
+        case .bool(let value): return String(value)
         }
     }
 }

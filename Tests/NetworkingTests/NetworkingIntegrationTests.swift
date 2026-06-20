@@ -1,5 +1,6 @@
 import Foundation
 import XCTest
+
 @testable import Networking
 
 class NetworkingIntegrationTests: XCTestCase {
@@ -10,10 +11,10 @@ class NetworkingIntegrationTests: XCTestCase {
         await networking.setAuthorizationHeader(username: "user", password: "passwd")
         let result: Result<JSONResponse, NetworkingError> = await networking.get("/basic-auth/user/passwd")
         switch result {
-        case let .success(response):
+        case .success(let response):
             XCTAssertEqual(response.body.string(for: "user"), "user")
             XCTAssertEqual(response.body.bool(for: "authenticated"), true)
-        case let .failure(error):
+        case .failure(let error):
             XCTFail(error.localizedDescription)
         }
     }
@@ -24,10 +25,10 @@ class NetworkingIntegrationTests: XCTestCase {
         await networking.setAuthorizationHeader(token: token)
         let result: Result<JSONResponse, NetworkingError> = await networking.post("/post")
         switch result {
-        case let .success(response):
+        case .success(let response):
             let headers = httpbinEchoedMap(response, "headers")
             XCTAssertEqual("Bearer \(token)", headers["Authorization"])
-        case let .failure(error):
+        case .failure(let error):
             XCTFail(error.localizedDescription)
         }
     }
@@ -37,10 +38,10 @@ class NetworkingIntegrationTests: XCTestCase {
         await networking.setHeaderFields(["HeaderKey": "HeaderValue"])
         let result: Result<JSONResponse, NetworkingError> = await networking.post("/post")
         switch result {
-        case let .success(response):
+        case .success(let response):
             let headers = httpbinEchoedMap(response, "headers")
             XCTAssertEqual("HeaderValue", headers["Headerkey"])
-        case let .failure(error):
+        case .failure(let error):
             XCTFail(error.localizedDescription)
         }
     }

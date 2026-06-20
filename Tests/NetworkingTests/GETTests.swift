@@ -1,5 +1,6 @@
 import Foundation
 import XCTest
+
 @testable import Networking
 
 struct Friend: Decodable {
@@ -16,9 +17,9 @@ class GETTests: XCTestCase {
         await networking.fakeGET("/get", response: ["key": "value1"])
         let firstResult: Result<JSONResponse, NetworkingError> = await networking.get("/get", cachingLevel: .memory)
         switch firstResult {
-        case let .success(response):
+        case .success(let response):
             XCTAssertEqual(response.body.string(for: "key"), "value1")
-        case let .failure(error):
+        case .failure(let error):
             XCTFail(error.localizedDescription)
         }
 
@@ -26,9 +27,9 @@ class GETTests: XCTestCase {
 
         let secondResult: Result<JSONResponse, NetworkingError> = await networking.get("/get", cachingLevel: .memory)
         switch secondResult {
-        case let .success(response):
+        case .success(let response):
             XCTAssertEqual(response.body.string(for: "key"), "value2")
-        case let .failure(error):
+        case .failure(let error):
             XCTFail(error.localizedDescription)
         }
     }
@@ -37,20 +38,22 @@ class GETTests: XCTestCase {
         let cache = NSCache<AnyObject, AnyObject>()
         let networking = Networking(baseURL: baseURL, configuration: .default, cache: cache)
         await networking.fakeGET("/get", response: ["key": "value1"])
-        let firstResult: Result<JSONResponse, NetworkingError> = await networking.get("/get", cachingLevel: .memoryAndFile)
+        let firstResult: Result<JSONResponse, NetworkingError> = await networking.get(
+            "/get", cachingLevel: .memoryAndFile)
         switch firstResult {
-        case let .success(response):
+        case .success(let response):
             XCTAssertEqual(response.body.string(for: "key"), "value1")
-        case let .failure(error):
+        case .failure(let error):
             XCTFail(error.localizedDescription)
         }
 
         await networking.fakeGET("/get", response: ["key": "value2"])
-        let secondResult: Result<JSONResponse, NetworkingError> = await networking.get("/get", cachingLevel: .memoryAndFile)
+        let secondResult: Result<JSONResponse, NetworkingError> = await networking.get(
+            "/get", cachingLevel: .memoryAndFile)
         switch secondResult {
-        case let .success(response):
+        case .success(let response):
             XCTAssertEqual(response.body.string(for: "key"), "value2")
-        case let .failure(error):
+        case .failure(let error):
             XCTFail(error.localizedDescription)
         }
     }
@@ -61,18 +64,18 @@ class GETTests: XCTestCase {
         await networking.fakeGET("/get", response: ["key": "value1"])
         let firstResult: Result<JSONResponse, NetworkingError> = await networking.get("/get", cachingLevel: .none)
         switch firstResult {
-        case let .success(response):
+        case .success(let response):
             XCTAssertEqual(response.body.string(for: "key"), "value1")
-        case let .failure(error):
+        case .failure(let error):
             XCTFail(error.localizedDescription)
         }
 
         await networking.fakeGET("/get", response: ["key": "value2"])
         let secondResult: Result<JSONResponse, NetworkingError> = await networking.get("/get", cachingLevel: .none)
         switch secondResult {
-        case let .success(response):
+        case .success(let response):
             XCTAssertEqual(response.body.string(for: "key"), "value2")
-        case let .failure(error):
+        case .failure(let error):
             XCTFail(error.localizedDescription)
         }
     }

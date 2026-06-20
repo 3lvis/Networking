@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import Networking
 
 class ResponseIntegrationTests: XCTestCase {
@@ -10,9 +11,9 @@ class ResponseIntegrationTests: XCTestCase {
         await networking.setHeaderFields(["user-agent": expectedUserAgent])
         let result: Result<JSONResponse, NetworkingError> = await networking.get("/user-agent")
         switch result {
-        case let .success(response):
+        case .success(let response):
             XCTAssertEqual(response.body.string(for: "user-agent"), expectedUserAgent)
-        case let .failure(error):
+        case .failure(let error):
             XCTFail(error.localizedDescription)
         }
     }

@@ -20,15 +20,19 @@ extension CharacterSet {
     }
 }
 
-public extension Dictionary where Key: ExpressibleByStringLiteral {
+extension Dictionary where Key: ExpressibleByStringLiteral {
 
-    func urlEncodedString() throws -> String {
+    public func urlEncodedString() throws -> String {
 
         let pairs = try reduce([]) { current, keyValuePair -> [String] in
-            if let encodedValue = "\(keyValuePair.value)".addingPercentEncoding(withAllowedCharacters: .urlQueryParametersAllowed) {
+            if let encodedValue = "\(keyValuePair.value)".addingPercentEncoding(
+                withAllowedCharacters: .urlQueryParametersAllowed)
+            {
                 return current + ["\(keyValuePair.key)=\(encodedValue)"]
             } else {
-                throw NSError(domain: Networking.domain, code: 0, userInfo: [NSLocalizedDescriptionKey: "Couldn't encode \(keyValuePair.value)"])
+                throw NSError(
+                    domain: Networking.domain, code: 0,
+                    userInfo: [NSLocalizedDescriptionKey: "Couldn't encode \(keyValuePair.value)"])
             }
         }
 
@@ -68,7 +72,11 @@ extension FileManager {
 }
 
 extension URLRequest {
-    init(url: URL, requestType: Networking.RequestType, contentType: String?, responseType: Networking.ResponseType, authorizationHeaderValue: String?, token: String?, authorizationHeaderKey: String, headerFields: [String: String]?) {
+    init(
+        url: URL, requestType: Networking.RequestType, contentType: String?, responseType: Networking.ResponseType,
+        authorizationHeaderValue: String?, token: String?, authorizationHeaderKey: String,
+        headerFields: [String: String]?
+    ) {
         self = URLRequest(url: url)
         httpMethod = requestType.rawValue
 
@@ -95,13 +103,15 @@ extension URLRequest {
 }
 
 extension HTTPURLResponse {
-    convenience init(url: URL, headerFields: [String : String]? = nil, statusCode: Int) {
+    convenience init(url: URL, headerFields: [String: String]? = nil, statusCode: Int) {
         self.init(url: url, statusCode: statusCode, httpVersion: nil, headerFields: headerFields)!
     }
 }
 
 extension NSError {
     convenience init(statusCode: Int) {
-        self.init(domain: Networking.domain, code: statusCode, userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: statusCode)])
+        self.init(
+            domain: Networking.domain, code: statusCode,
+            userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: statusCode)])
     }
 }

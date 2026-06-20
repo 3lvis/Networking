@@ -1,6 +1,7 @@
+import CoreLocation
 import Foundation
 import XCTest
-import CoreLocation
+
 @testable import Networking
 
 class NewNetworkingTests: XCTestCase {
@@ -23,7 +24,7 @@ class NewNetworkingTests: XCTestCase {
         case .success:
             XCTFail("expected a 422 failure")
         case .failure(let error):
-            guard case let .http(httpError) = error else {
+            guard case .http(let httpError) = error else {
                 return XCTFail("expected an HTTP error, got \(error)")
             }
             XCTAssertEqual(httpError.statusCode, 422)

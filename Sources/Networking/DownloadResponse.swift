@@ -1,4 +1,5 @@
 import Foundation
+
 #if os(macOS)
     import AppKit.NSImage
 #else
@@ -38,7 +39,8 @@ public struct ImageResponse: ImageDownloadable, @unchecked Sendable {
     public let headers: [String: AnyCodable]
     public let image: Image
 
-    public static func makeDownloadResult(image: Image, statusCode: Int, headers: [String: AnyCodable]) -> ImageResponse {
+    public static func makeDownloadResult(image: Image, statusCode: Int, headers: [String: AnyCodable]) -> ImageResponse
+    {
         ImageResponse(statusCode: statusCode, headers: headers, image: image)
     }
 }

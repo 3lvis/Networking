@@ -91,11 +91,14 @@ public struct RetryInterceptor: HTTPInterceptor {
                 let exchange = try await next(request)
                 let shouldRetry = methodAllowsRetry && retryableStatusCodes.contains(exchange.response.statusCode)
                 guard shouldRetry, attempt < maxAttempts else { return exchange }
-                let delay = Self.retryAfterDelay(from: exchange.response).map { Swift.min($0, maxDelay) }
+                let delay =
+                    Self.retryAfterDelay(from: exchange.response).map { Swift.min($0, maxDelay) }
                     ?? backoffDelay(forAttempt: attempt)
                 try await Task.sleep(for: delay)
                 attempt += 1
-            } catch let error as URLError where attempt < maxAttempts && methodAllowsRetry && NetworkingError.isRetryableTransport(error) {
+            } catch let error as URLError
+                where attempt < maxAttempts && methodAllowsRetry && NetworkingError.isRetryableTransport(error)
+            {
                 try await Task.sleep(for: backoffDelay(forAttempt: attempt))
                 attempt += 1
             }
@@ -112,7 +115,8 @@ public struct RetryInterceptor: HTTPInterceptor {
     // Retry-After is either a count of seconds or an HTTP-date (RFC 9110).
     static func retryAfterDelay(from response: HTTPURLResponse) -> Duration? {
         guard let value = response.value(forHTTPHeaderField: "Retry-After")?.trimmingCharacters(in: .whitespaces),
-              !value.isEmpty else { return nil }
+            !value.isEmpty
+        else { return nil }
         if let seconds = Int(value) {
             return .seconds(max(0, seconds))
         }
@@ -149,8 +153,9 @@ public struct ResponseValidatorInterceptor: HTTPInterceptor {
         switch validate(exchange) {
         case .valid:
             return exchange
-        case let .invalid(reason):
-            throw NetworkingError.validation(reason: reason, ResponseMetadata(response: exchange.response, body: exchange.data))
+        case .invalid(let reason):
+            throw NetworkingError.validation(
+                reason: reason, ResponseMetadata(response: exchange.response, body: exchange.data))
         }
     }
 }
