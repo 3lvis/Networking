@@ -8,6 +8,9 @@ what's specific to this repo. Release history and the v8 (major) notes live in `
 file of its own, `LEARNINGS/<YYYY-MM-DD-HHMM>-<slug>.md`, so branches writing at once stay clear of each
 other. Leave the filing, the grouping and the graduating to the periodic pass that document describes.
 
+[`VOICE.md`](VOICE.md) is how we write — PRs, commits, comments, docs, error copy — and it carries the
+Swift API Design Guidelines whole, so a naming question is answered by reading it. Read it before you write.
+
 ## Build & test
 
 - `make test` — spins up go-httpbin in Docker, runs the full suite, tears it down. **Requires Docker.**
