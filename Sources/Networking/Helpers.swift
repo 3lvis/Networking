@@ -113,12 +113,10 @@ extension HTTPURLResponse {
         headerFields: [String: String]? = nil,
         statusCode: Int
     ) {
-        self.init(
-            url: url,
-            statusCode: statusCode,
-            httpVersion: nil,
-            headerFields: headerFields
-        )!
+        // composedURL has already parsed this URL and thrown on anything that would not, so the only
+        // input Foundation refuses cannot reach here.
+        // oida:disable:next force_unwrapping
+        self.init(url: url, statusCode: statusCode, httpVersion: nil, headerFields: headerFields)!
     }
 }
 

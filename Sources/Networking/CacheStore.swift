@@ -43,7 +43,12 @@ final class CacheStore: @unchecked Sendable {
                 userInfo: [NSLocalizedDescriptionKey: "Couldn't build a cache URL for: \(finalPath)"])
         }
 
-        let folderURL = cachesURL.appendingPathComponent(URL(string: folderPath)!.absoluteString)
+        guard let folderComponent = URL(string: folderPath)?.absoluteString else {
+            throw NSError(
+                domain: folderName, code: 9999,
+                userInfo: [NSLocalizedDescriptionKey: "Couldn't build a cache URL for: \(folderPath)"])
+        }
+        let folderURL = cachesURL.appendingPathComponent(folderComponent)
         if FileManager.default.exists(at: folderURL) == false {
             try FileManager.default.createDirectory(
                 at: folderURL,
@@ -204,7 +209,10 @@ final class CacheStore: @unchecked Sendable {
         guard let cachesURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else {
             return nil
         }
-        return cachesURL.appendingPathComponent(URL(string: folderName)!.absoluteString)
+        guard let folderComponent = URL(string: folderName)?.absoluteString else {
+            return nil
+        }
+        return cachesURL.appendingPathComponent(folderComponent)
     }
 
     // Deletes expired files from **one** shard per call (rotated via a tiny cursor file), so each launch's

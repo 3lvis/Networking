@@ -34,12 +34,7 @@ final class RetryInterceptorTests: XCTestCase {
             switch outcomeForAttempt(attempt) {
             case .status(let code, let headers):
                 let url = request.url ?? URL(string: "https://example.com")!
-                let response = HTTPURLResponse(
-                    url: url,
-                    statusCode: code,
-                    httpVersion: nil,
-                    headerFields: headers
-                )!
+                let response = HTTPURLResponse(url: url, headerFields: headers, statusCode: code)
                 return HTTPExchange(data: Data(), response: response)
             case .throwTransport(let code):
                 throw URLError(code)

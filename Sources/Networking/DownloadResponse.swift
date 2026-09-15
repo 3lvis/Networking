@@ -33,6 +33,8 @@ extension Image: ImageDownloadable {
         statusCode: Int,
         headers: [String: AnyCodable]
     ) -> Self {
+        // Self is the concrete type the caller asked for, and Image is the only case that reaches here.
+        // oida:disable:next force_cast
         return image as! Self
     }
 }

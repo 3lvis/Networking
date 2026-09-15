@@ -98,12 +98,12 @@ final class POSTIntegrationTests: XCTestCase {
         let item1 = "FIRSTDATA"
         let item2 = "SECONDDATA"
         let part1 = FormDataPart(
-            data: item1.data(using: .utf8)!,
+            data: Data(item1.utf8),
             parameterName: item1,
             filename: "\(item1).png"
         )
         let part2 = FormDataPart(
-            data: item2.data(using: .utf8)!,
+            data: Data(item2.utf8),
             parameterName: item2,
             filename: "\(item2).png"
         )
@@ -141,7 +141,7 @@ final class POSTIntegrationTests: XCTestCase {
 
         let item1 = "FIRSTDATA"
         let part1 = FormDataPart(
-            data: item1.data(using: .utf8)!,
+            data: Data(item1.utf8),
             parameterName: item1,
             filename: "\(item1).png"
         )

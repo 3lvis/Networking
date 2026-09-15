@@ -31,7 +31,7 @@ public struct FormDataPart {
         body += "Content-Type: \(type.contentType)\r\n\r\n"
 
         var bodyData = Data()
-        bodyData.append(body.data(using: .utf8)!)
+        bodyData.append(Data(body.utf8))
         bodyData.append(data)
         bodyData.append(Data("\r\n".utf8))
 

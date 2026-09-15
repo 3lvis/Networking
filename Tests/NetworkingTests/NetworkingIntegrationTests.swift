@@ -47,8 +47,9 @@ final class NetworkingIntegrationTests: XCTestCase {
     }
 
     func testClearCacheOnlyRemovesTheNetworkingFolder() async throws {
-        let cachesRoot = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
-        let networkingFolder = cachesRoot.appendingPathComponent(URL(string: Networking.domain)!.absoluteString)
+        let cachesRoot = try XCTUnwrap(FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first)
+        let domainComponent = try XCTUnwrap(URL(string: Networking.domain)?.absoluteString)
+        let networkingFolder = cachesRoot.appendingPathComponent(domainComponent)
 
         let networking = Networking(baseURL: baseURL)
         let _: Result<Image, NetworkingError> = await networking.downloadImage("/image/png")

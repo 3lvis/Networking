@@ -407,7 +407,7 @@ extension Networking {
                 body += "--\(boundary)\r\n"
                 body += "Content-Disposition: form-data; name=\"\(key)\""
                 body += "\r\n\r\n\(value)\r\n"
-                bodyData.append(body.data(using: .utf8)!)
+                bodyData.append(Data(body.utf8))
             }
             for var part in parts {
                 part.boundary = boundary
@@ -457,6 +457,8 @@ extension Networking {
         -> Result<T, NetworkingError>
     {
         if T.self == Data.self {
+            // Guarded by the test on the line above: T is Data here.
+            // oida:disable:next force_cast
             return .success(responseData as! T)
         } else if T.self == JSONResponse.self {
             let headers = Dictionary(
@@ -472,6 +474,8 @@ extension Networking {
                     headers: headers,
                     body: body
                 )
+                // Guarded by the `T.self == JSONResponse.self` test this branch is under.
+                // oida:disable:next force_cast
                 return .success(networkingJSON as! T)
             } catch let error as DecodingError {
                 return .failure(.decoding(error, ResponseMetadata(response: httpResponse, body: responseData)))
