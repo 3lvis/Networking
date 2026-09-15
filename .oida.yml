@@ -14,7 +14,6 @@ opt_in_rules:
   - multiline_string_opens_on_its_own_line
   # What gets written too much of: a helper with one caller that returns nothing, a comment whose every
   # word is already in the code below it, a banner naming what the declarations already name.
-  - no_single_use_void_functions
   - comment_adds_no_word
   - no_mark_comments
   # Auto-fixable and mechanical — `bin/lint --fix` applies these, no judgement needed.
@@ -82,8 +81,6 @@ excluded:
 comment_adds_no_word:
   severity: error
 no_mark_comments:
-  severity: error
-no_single_use_void_functions:
   severity: error
 
 cyclomatic_complexity:
