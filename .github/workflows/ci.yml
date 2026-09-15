@@ -10,12 +10,12 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
+  DEVELOPER_DIR: /Applications/Xcode_27.0.app/Contents/Developer
 
 jobs:
   swift-format-check:
     name: swift-format check
-    runs-on: macos-15
+    runs-on: xcode-27
     steps:
       - uses: actions/checkout@v5
       - name: Check formatting
@@ -28,7 +28,7 @@ jobs:
 
   build-and-test:
     name: macOS Swift Build & Test
-    runs-on: macos-15
+    runs-on: xcode-27
     steps:
       - uses: actions/checkout@v5
 
@@ -56,7 +56,7 @@ jobs:
 
   warnings:
     name: Warnings gate
-    runs-on: macos-15
+    runs-on: xcode-27
     steps:
       - uses: actions/checkout@v5
       # No SPM cache on purpose: a fresh build recompiles everything so warnings are
@@ -72,7 +72,7 @@ jobs:
 
   doc-links:
     name: Doc link check
-    runs-on: macos-15
+    runs-on: xcode-27
     steps:
       - uses: actions/checkout@v5
       - name: Check relative markdown links resolve
