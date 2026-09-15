@@ -15,19 +15,9 @@ struct FakeRequest {
     let statusCode: Int
     let delay: Double
 
-    init(
-        payload: Payload, responseType: Networking.ResponseType, headerFields: [String: String]?, statusCode: Int,
-        delay: Double
-    ) {
-        self.payload = payload
-        self.responseType = responseType
-        self.headerFields = headerFields
-        self.statusCode = statusCode
-        self.delay = delay
-    }
-
     static func find(
-        ofType type: Networking.RequestType, forPath path: String,
+        ofType type: Networking.RequestType,
+        forPath path: String,
         in collection: [Networking.RequestType: [String: FakeRequest]]
     ) throws -> FakeRequest? {
         guard let requests = collection[type] else { return nil }

@@ -29,7 +29,11 @@ final class ResponseValidatorIntegrationTests: XCTestCase {
             return XCTFail("expected a .validation failure, got \(result)")
         }
         XCTAssertTrue(reason.contains("application/json"), "the reason should explain the expectation; got \(reason)")
-        XCTAssertEqual(metadata.statusCode, 200, "validation carries the offending response's metadata")
+        XCTAssertEqual(
+            metadata.statusCode,
+            200,
+            "validation carries the offending response's metadata"
+        )
     }
 
     // A validator scrutinizes successes, not errors: a non-2xx response must still surface as its .http

@@ -13,7 +13,11 @@ extension Image {
         #elseif os(watchOS)
             return UIImage(named: name)!
         #else
-            return UIImage(named: name, in: bundle, compatibleWith: nil)!
+            return UIImage(
+                named: name,
+                in: bundle,
+                compatibleWith: nil
+            )!
         #endif
     }
 

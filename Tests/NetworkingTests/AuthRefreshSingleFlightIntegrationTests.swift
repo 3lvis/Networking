@@ -34,6 +34,10 @@ final class AuthRefreshSingleFlightIntegrationTests: XCTestCase {
         }
 
         let count = await counter.count
-        XCTAssertEqual(count, 1, "concurrent 401s should share a single refresh, but it ran \(count) times")
+        XCTAssertEqual(
+            count,
+            1,
+            "concurrent 401s should share a single refresh, but it ran \(count) times"
+        )
     }
 }

@@ -8,12 +8,16 @@ struct Friend: Decodable {
     let title: String
 }
 
-class GETTests: XCTestCase {
+final class GETTests: XCTestCase {
     let baseURL = TestConfig.httpbinBaseURL
 
     func testGETCachedFromMemory() async throws {
         let cache = NSCache<AnyObject, AnyObject>()
-        let networking = Networking(baseURL: baseURL, configuration: .default, cache: cache)
+        let networking = Networking(
+            baseURL: baseURL,
+            configuration: .default,
+            cache: cache
+        )
         await networking.fakeGET("/get", response: ["key": "value1"])
         let firstResult: Result<JSONResponse, NetworkingError> = await networking.get("/get", cachingLevel: .memory)
         switch firstResult {
@@ -36,7 +40,11 @@ class GETTests: XCTestCase {
 
     func testGETCachedFromFile() async throws {
         let cache = NSCache<AnyObject, AnyObject>()
-        let networking = Networking(baseURL: baseURL, configuration: .default, cache: cache)
+        let networking = Networking(
+            baseURL: baseURL,
+            configuration: .default,
+            cache: cache
+        )
         await networking.fakeGET("/get", response: ["key": "value1"])
         let firstResult: Result<JSONResponse, NetworkingError> = await networking.get(
             "/get", cachingLevel: .memoryAndFile)
@@ -60,7 +68,11 @@ class GETTests: XCTestCase {
 
     func testGETCachedNone() async throws {
         let cache = NSCache<AnyObject, AnyObject>()
-        let networking = Networking(baseURL: baseURL, configuration: .default, cache: cache)
+        let networking = Networking(
+            baseURL: baseURL,
+            configuration: .default,
+            cache: cache
+        )
         await networking.fakeGET("/get", response: ["key": "value1"])
         let firstResult: Result<JSONResponse, NetworkingError> = await networking.get("/get", cachingLevel: .none)
         switch firstResult {

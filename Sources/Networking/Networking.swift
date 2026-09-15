@@ -162,7 +162,11 @@ public actor Networking {
         }
     }
 
-    nonisolated let boundary = String(format: "com.elvisnunez.networking.%08x%08x", arc4random(), arc4random())
+    nonisolated let boundary = String(
+        format: "com.elvisnunez.networking.%08x%08x",
+        arc4random(),
+        arc4random()
+    )
 
     lazy var session: URLSession = {
         URLSession(configuration: self.configuration)
@@ -188,15 +192,21 @@ public actor Networking {
     }
 
     public init(
-        baseURL: String = "", configuration: URLSessionConfiguration = .default,
-        cache: NSCache<AnyObject, AnyObject>? = nil, logger: Logger? = nil,
+        baseURL: String = "",
+        configuration: URLSessionConfiguration = .default,
+        cache: NSCache<AnyObject, AnyObject>? = nil,
+        logger: Logger? = nil,
         cacheTTL: Duration = .seconds(7 * 24 * 60 * 60)
     ) {
         self.baseURL = baseURL
         self.configuration = configuration
         let memoryCache = cache ?? NSCache()
         self.cache = memoryCache
-        self.cacheStore = CacheStore(memory: memoryCache, ttl: cacheTTL, folderName: Networking.domain)
+        self.cacheStore = CacheStore(
+            memory: memoryCache,
+            ttl: cacheTTL,
+            folderName: Networking.domain
+        )
         self.logger = logger ?? Networking.defaultLogger
         self.logFileURL = ProcessInfo.processInfo.environment["NETWORKING_LOG_FILE"].flatMap(
             Networking.resolveLogFileURL)

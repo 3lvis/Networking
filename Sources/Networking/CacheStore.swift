@@ -12,7 +12,11 @@ final class CacheStore: @unchecked Sendable {
     let expiry: CacheExpiry
     let folderName: String
 
-    init(memory: NSCache<AnyObject, AnyObject>, ttl: Duration, folderName: String) {
+    init(
+        memory: NSCache<AnyObject, AnyObject>,
+        ttl: Duration,
+        folderName: String
+    ) {
         self.memory = memory
         self.expiry = CacheExpiry(ttl: ttl)
         self.folderName = folderName
@@ -42,7 +46,11 @@ final class CacheStore: @unchecked Sendable {
 
         let folderURL = cachesURL.appendingPathComponent(URL(string: folderPath)!.absoluteString)
         if FileManager.default.exists(at: folderURL) == false {
-            try FileManager.default.createDirectory(at: folderURL, withIntermediateDirectories: true, attributes: nil)
+            try FileManager.default.createDirectory(
+                at: folderURL,
+                withIntermediateDirectories: true,
+                attributes: nil
+            )
         }
         return cachesURL.appendingPathComponent(url.absoluteString)
     }
@@ -78,7 +86,11 @@ final class CacheStore: @unchecked Sendable {
     /// A pure read: serve from the warm tier, falling back to a non-expired disk entry (which re-warms both
     /// tiers). Never mutates a tier except to drop an entry it finds expired. `.memory`/`.none` never touch
     /// disk, so a read can't destroy a durable copy written at `.memoryAndFile`.
-    func object(forResource resource: String, level: Networking.CachingLevel, asImage: Bool) throws -> Any? {
+    func object(
+        forResource resource: String,
+        level: Networking.CachingLevel,
+        asImage: Bool
+    ) throws -> Any? {
         let destinationURL = try destinationURL(forResource: resource)
         let key = destinationURL.absoluteString
         switch level {
@@ -121,7 +133,11 @@ final class CacheStore: @unchecked Sendable {
 
     // MARK: - Write
 
-    func storeData(_ data: Data?, forResource resource: String, level: Networking.CachingLevel) throws {
+    func storeData(
+        _ data: Data?,
+        forResource resource: String,
+        level: Networking.CachingLevel
+    ) throws {
         let destinationURL = try destinationURL(forResource: resource)
         let key = destinationURL.absoluteString
 
@@ -142,12 +158,19 @@ final class CacheStore: @unchecked Sendable {
     }
 
     @discardableResult
-    func storeImage(data: Data?, forResource resource: String, level: Networking.CachingLevel) throws -> Image? {
+    func storeImage(
+        data: Data?,
+        forResource resource: String,
+        level: Networking.CachingLevel
+    ) throws -> Image? {
         let destinationURL = try destinationURL(forResource: resource)
         let key = destinationURL.absoluteString
 
         var image: Image?
-        if let data = data, let nonOptionalImage = Image(data: data), data.count > 0 {
+        if let data = data,
+            let nonOptionalImage = Image(data: data),
+            data.count > 0
+        {
             switch level {
             case .memory:
                 memory.setObject(nonOptionalImage, forKey: key as AnyObject)
@@ -235,6 +258,10 @@ final class CacheStore: @unchecked Sendable {
         }
 
         try? FileManager.default.createDirectory(at: domainURL, withIntermediateDirectories: true)
-        try? String(cursor &+ 1).write(to: cursorURL, atomically: true, encoding: .utf8)
+        try? String(cursor &+ 1).write(
+            to: cursorURL,
+            atomically: true,
+            encoding: .utf8
+        )
     }
 }

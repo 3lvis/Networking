@@ -15,10 +15,8 @@ public struct HTTPExchange: Sendable {
 /// A composable hook wrapping every verb request. `next` runs the rest of the chain (innermost is the real
 /// network call); calling it again replays the request — the basis for retry and auth-refresh.
 public protocol HTTPInterceptor: Sendable {
-    func intercept(
-        _ request: URLRequest,
-        next: @Sendable (URLRequest) async throws -> HTTPExchange
-    ) async throws -> HTTPExchange
+    func intercept(_ request: URLRequest, next: @Sendable (URLRequest) async throws -> HTTPExchange) async throws
+        -> HTTPExchange
 }
 
 /// On an unauthorized response, refresh the credential and replay the request once.
@@ -39,10 +37,9 @@ public struct AuthRefreshInterceptor: HTTPInterceptor {
         self.coordinator = RefreshCoordinator(refresh)
     }
 
-    public func intercept(
-        _ request: URLRequest,
-        next: @Sendable (URLRequest) async throws -> HTTPExchange
-    ) async throws -> HTTPExchange {
+    public func intercept(_ request: URLRequest, next: @Sendable (URLRequest) async throws -> HTTPExchange) async throws
+        -> HTTPExchange
+    {
         let exchange = try await next(request)
         guard triggeringStatusCodes.contains(exchange.response.statusCode) else { return exchange }
         guard let refreshedValue = try await coordinator.refreshOnce() else { return exchange }
@@ -80,10 +77,9 @@ public struct RetryInterceptor: HTTPInterceptor {
         self.retryableMethods = Set(retryableMethods.map { $0.uppercased() })
     }
 
-    public func intercept(
-        _ request: URLRequest,
-        next: @Sendable (URLRequest) async throws -> HTTPExchange
-    ) async throws -> HTTPExchange {
+    public func intercept(_ request: URLRequest, next: @Sendable (URLRequest) async throws -> HTTPExchange) async throws
+        -> HTTPExchange
+    {
         let methodAllowsRetry = retryableMethods.contains((request.httpMethod ?? "GET").uppercased())
         var attempt = 1
         while true {
@@ -144,10 +140,9 @@ public struct ResponseValidatorInterceptor: HTTPInterceptor {
         self.validate = validate
     }
 
-    public func intercept(
-        _ request: URLRequest,
-        next: @Sendable (URLRequest) async throws -> HTTPExchange
-    ) async throws -> HTTPExchange {
+    public func intercept(_ request: URLRequest, next: @Sendable (URLRequest) async throws -> HTTPExchange) async throws
+        -> HTTPExchange
+    {
         let exchange = try await next(request)
         guard (200..<300).contains(exchange.response.statusCode) else { return exchange }
         switch validate(exchange) {

@@ -3,7 +3,7 @@ import XCTest
 
 @testable import Networking
 
-class PUTIntegrationTests: XCTestCase {
+final class PUTIntegrationTests: XCTestCase {
     let baseURL = TestConfig.httpbinBaseURL
 
     func testPUT() async throws {

@@ -4,7 +4,7 @@ import XCTest
 
 @testable import Networking
 
-class NewNetworkingIntegrationTests: XCTestCase {
+final class NewNetworkingIntegrationTests: XCTestCase {
     let baseURL = TestConfig.httpbinBaseURL
 
     func testNewGET() async throws {
@@ -13,7 +13,7 @@ class NewNetworkingIntegrationTests: XCTestCase {
         let result: Result<Friend, NetworkingError> = await networking.get("/get")
 
         switch result {
-        case .success(_):
+        case .success:
             print("worked")
         case .failure(let failure):
             print(failure.localizedDescription)
@@ -36,7 +36,7 @@ class NewNetworkingIntegrationTests: XCTestCase {
         let result: Result<Friend, NetworkingError> = await networking.get("/get", query: query)
 
         switch result {
-        case .success(_):
+        case .success:
             print("Test passed")
         case .failure(let error):
             print("error \(error)")
@@ -49,7 +49,7 @@ class NewNetworkingIntegrationTests: XCTestCase {
         let result: Result<Void, NetworkingError> = await networking.post("/get", body: ["String": "String"])
 
         switch result {
-        case .success(_):
+        case .success:
             print("worked")
         case .failure(let failure):
             print(failure.localizedDescription)

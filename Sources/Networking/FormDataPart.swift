@@ -38,7 +38,12 @@ public struct FormDataPart {
         return bodyData as Data
     }
 
-    public init(type: FormDataPartType = .octetStream, data: Data, parameterName: String, filename: String? = nil) {
+    public init(
+        type: FormDataPartType = .octetStream,
+        data: Data,
+        parameterName: String,
+        filename: String? = nil
+    ) {
         self.type = type
         self.data = data
         self.parameterName = parameterName

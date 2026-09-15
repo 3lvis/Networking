@@ -2,7 +2,10 @@ import Foundation
 
 extension Networking {
     nonisolated func objectFromCache(
-        for path: String, cacheName: String?, cachingLevel: CachingLevel, responseType: ResponseType
+        for path: String,
+        cacheName: String?,
+        cachingLevel: CachingLevel,
+        responseType: ResponseType
     ) throws -> Any? {
         try cacheStore.object(
             forResource: cacheResource(for: path, cacheName: cacheName), level: cachingLevel,
@@ -10,7 +13,12 @@ extension Networking {
     }
 
     func registerFake(
-        requestType: RequestType, path: String, fileName: String, bundle: Bundle, statusCode: Int, delay: Double
+        requestType: RequestType,
+        path: String,
+        fileName: String,
+        bundle: Bundle,
+        statusCode: Int,
+        delay: Double
     ) {
         let url = URL(string: fileName)
         guard let resource = url?.deletingPathExtension().absoluteString,
@@ -25,8 +33,13 @@ extension Networking {
     }
 
     func registerFake(
-        requestType: RequestType, path: String, headerFields: [String: String]?, payload: FakeRequest.Payload,
-        responseType: ResponseType, statusCode: Int, delay: Double
+        requestType: RequestType,
+        path: String,
+        headerFields: [String: String]?,
+        payload: FakeRequest.Payload,
+        responseType: ResponseType,
+        statusCode: Int,
+        delay: Double
     ) {
         var requests = fakeRequests[requestType] ?? [String: FakeRequest]()
         requests[path] = FakeRequest(
@@ -35,7 +48,12 @@ extension Networking {
         fakeRequests[requestType] = requests
     }
 
-    func handleFakeRequest(_ fakeRequest: FakeRequest, path: String, cacheName: String?, cachingLevel: CachingLevel)
+    func handleFakeRequest(
+        _ fakeRequest: FakeRequest,
+        path: String,
+        cacheName: String?,
+        cachingLevel: CachingLevel
+    )
         throws -> (HTTPURLResponse, NSError?)
     {
         var error: NSError?
@@ -51,15 +69,28 @@ extension Networking {
         let data: Data? = { if case .data(let data) = fakeRequest.payload { return data } else { return nil } }()
         switch fakeRequest.responseType {
         case .image:
-            try cacheOrPurgeImage(data: nil, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
+            try cacheOrPurgeImage(
+                data: nil,
+                path: path,
+                cacheName: cacheName,
+                cachingLevel: cachingLevel
+            )
         case .data, .json:
-            try cacheOrPurgeData(data: data, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
+            try cacheOrPurgeData(
+                data: data,
+                path: path,
+                cacheName: cacheName,
+                cachingLevel: cachingLevel
+            )
         }
         return (response, error)
     }
 
     func handleDataRequest<T: DataDownloadable>(
-        _ requestType: RequestType, path: String, cacheName: String?, cachingLevel: CachingLevel,
+        _ requestType: RequestType,
+        path: String,
+        cacheName: String?,
+        cachingLevel: CachingLevel,
         responseType: ResponseType
     ) async -> Result<T, NetworkingError> {
         let requestID = UUID()
@@ -97,11 +128,20 @@ extension Networking {
                 let response = HTTPURLResponse(url: try composedURL(with: path), statusCode: 200)
                 statusCode = 200
                 result = .success(
-                    T.makeDownloadResult(data: cached, statusCode: 200, headers: headerFields(from: response)))
+                    T.makeDownloadResult(
+                        data: cached,
+                        statusCode: 200,
+                        headers: headerFields(from: response)
+                    ))
             } else {
                 let (downloaded, networkResponse) = try await requestData(
                     requestType, path: path, responseType: responseType)
-                try cacheOrPurgeData(data: downloaded, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
+                try cacheOrPurgeData(
+                    data: downloaded,
+                    path: path,
+                    cacheName: cacheName,
+                    cachingLevel: cachingLevel
+                )
                 statusCode = networkResponse.statusCode
                 if StatusCodeType(statusCode: networkResponse.statusCode) != .successful {
                     result = .failure(downloadError(forStatusCode: networkResponse.statusCode))
@@ -122,7 +162,10 @@ extension Networking {
     }
 
     func handleImageRequest<T: ImageDownloadable>(
-        _ requestType: RequestType, path: String, cacheName: String?, cachingLevel: CachingLevel,
+        _ requestType: RequestType,
+        path: String,
+        cacheName: String?,
+        cachingLevel: CachingLevel,
         responseType: ResponseType
     ) async -> Result<T, NetworkingError> {
         let requestID = UUID()
@@ -159,9 +202,17 @@ extension Networking {
                 let response = HTTPURLResponse(url: try composedURL(with: path), statusCode: 200)
                 statusCode = 200
                 result = .success(
-                    T.makeDownloadResult(image: cached, statusCode: 200, headers: headerFields(from: response)))
+                    T.makeDownloadResult(
+                        image: cached,
+                        statusCode: 200,
+                        headers: headerFields(from: response)
+                    ))
             } else {
-                let (data, networkResponse) = try await requestData(requestType, path: path, responseType: responseType)
+                let (data, networkResponse) = try await requestData(
+                    requestType,
+                    path: path,
+                    responseType: responseType
+                )
                 statusCode = networkResponse.statusCode
                 if StatusCodeType(statusCode: networkResponse.statusCode) != .successful {
                     result = .failure(downloadError(forStatusCode: networkResponse.statusCode))
@@ -194,7 +245,11 @@ extension Networking {
 
     private func downloadError(forStatusCode statusCode: Int) -> NetworkingError {
         // Downloads don't retain the response body/headers at this point, so the metadata is status-only.
-        let metadata = ResponseMetadata(statusCode: statusCode, headers: [:], body: Data())
+        let metadata = ResponseMetadata(
+            statusCode: statusCode,
+            headers: [:],
+            body: Data()
+        )
         return .http(HTTPError(statusCode: statusCode, metadata: metadata))
     }
 
@@ -208,7 +263,11 @@ extension Networking {
         return .transport(URLError(.unknown))
     }
 
-    func requestData(_ requestType: RequestType, path: String, responseType: ResponseType) async throws -> (
+    func requestData(
+        _ requestType: RequestType,
+        path: String,
+        responseType: ResponseType
+    ) async throws -> (
         Data, HTTPURLResponse
     ) {
         let request = URLRequest(
@@ -223,7 +282,11 @@ extension Networking {
         return (exchange.data, exchange.response)
     }
 
-    func cancelRequest(_ sessionTaskType: SessionTaskType, requestType: RequestType, url: URL) async {
+    func cancelRequest(
+        _ sessionTaskType: SessionTaskType,
+        requestType: RequestType,
+        url: URL
+    ) async {
         let (dataTasks, uploadTasks, downloadTasks) = await session.tasks
         var sessionTasks = [URLSessionTask]()
         switch sessionTaskType {
@@ -245,13 +308,26 @@ extension Networking {
         }
     }
 
-    nonisolated func cacheOrPurgeData(data: Data?, path: String, cacheName: String?, cachingLevel: CachingLevel) throws
-    {
-        try cacheStore.storeData(data, forResource: cacheResource(for: path, cacheName: cacheName), level: cachingLevel)
+    nonisolated func cacheOrPurgeData(
+        data: Data?,
+        path: String,
+        cacheName: String?,
+        cachingLevel: CachingLevel
+    ) throws {
+        try cacheStore.storeData(
+            data,
+            forResource: cacheResource(for: path, cacheName: cacheName),
+            level: cachingLevel
+        )
     }
 
     @discardableResult
-    nonisolated func cacheOrPurgeImage(data: Data?, path: String, cacheName: String?, cachingLevel: CachingLevel) throws
+    nonisolated func cacheOrPurgeImage(
+        data: Data?,
+        path: String,
+        cacheName: String?,
+        cachingLevel: CachingLevel
+    ) throws
         -> Image?
     {
         try cacheStore.storeImage(

@@ -3,7 +3,7 @@ import XCTest
 
 @testable import Networking
 
-class GETIntegrationTests: XCTestCase {
+final class GETIntegrationTests: XCTestCase {
     let baseURL = TestConfig.httpbinBaseURL
 
     func testGET() async throws {

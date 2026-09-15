@@ -99,7 +99,11 @@ public struct ResponseMetadata: Sendable {
     public let headers: [String: String]
     public let body: Data
 
-    public init(statusCode: Int, headers: [String: String], body: Data) {
+    public init(
+        statusCode: Int,
+        headers: [String: String],
+        body: Data
+    ) {
         self.statusCode = statusCode
         self.headers = headers
         self.body = body
@@ -110,7 +114,11 @@ public struct ResponseMetadata: Sendable {
             uniqueKeysWithValues: response.allHeaderFields.compactMap { key, value in
                 (key as? String).map { ($0, "\(value)") }
             })
-        self.init(statusCode: response.statusCode, headers: headers, body: body)
+        self.init(
+            statusCode: response.statusCode,
+            headers: headers,
+            body: body
+        )
     }
 
     public func decode<T: Decodable>(_ type: T.Type, using decoder: JSONDecoder = JSONDecoder()) throws -> T {

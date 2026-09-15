@@ -14,8 +14,16 @@ final class CacheWriteAndDataBodyRegressionTests: XCTestCase {
         let cacheName = "orphan-regression-key"
 
         try await networking.clearCache()
-        try Helper.removeFileIfNeeded(networking, path: path, cacheName: nil)
-        try Helper.removeFileIfNeeded(networking, path: path, cacheName: cacheName)
+        try Helper.removeFileIfNeeded(
+            networking,
+            path: path,
+            cacheName: nil
+        )
+        try Helper.removeFileIfNeeded(
+            networking,
+            path: path,
+            cacheName: cacheName
+        )
 
         let result: Result<Data, NetworkingError> = await networking.downloadData(path, cacheName: cacheName)
         guard case .success = result else { return XCTFail("expected a successful download, got \(result)") }
@@ -23,8 +31,7 @@ final class CacheWriteAndDataBodyRegressionTests: XCTestCase {
         let orphanURL = try networking.destinationURL(for: path, cacheName: nil)
         XCTAssertFalse(
             FileManager.default.exists(at: orphanURL),
-            "downloadData wrote a stray cache file under the path key that no read path uses"
-        )
+            "downloadData wrote a stray cache file under the path key that no read path uses")
     }
 
     // The `.memory`/`.none` pure-read contracts (a read must not destroy a durable `.memoryAndFile` copy)
@@ -38,6 +45,10 @@ final class CacheWriteAndDataBodyRegressionTests: XCTestCase {
         guard case .success(let data) = result else { return XCTFail("expected success, got \(result)") }
 
         let decoded = try? JSONDecoder().decode([String: String].self, from: data)
-        XCTAssertEqual(decoded?["message"], "hello", "a verb with T == Data must return the response body")
+        XCTAssertEqual(
+            decoded?["message"],
+            "hello",
+            "a verb with T == Data must return the response body"
+        )
     }
 }

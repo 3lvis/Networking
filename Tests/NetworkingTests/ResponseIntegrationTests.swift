@@ -2,7 +2,7 @@ import XCTest
 
 @testable import Networking
 
-class ResponseIntegrationTests: XCTestCase {
+final class ResponseIntegrationTests: XCTestCase {
     let baseURL = TestConfig.httpbinBaseURL
 
     func testReflectsRequestHeaderInBody() async throws {

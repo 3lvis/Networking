@@ -1,0 +1,131 @@
+# The linter is oida (github.com/kolonialno/oida-swift), a SwiftLint fork carrying the rules we
+# actually want. bin/lint fetches the pinned release and runs it; there is no baseline, so the tree
+# is kept at zero and any violation fails.
+
+opt_in_rules:
+  # The shape of every argument list, parameter list and condition: three or more elements go one per
+  # line, two or fewer go on one line, and both directions hold.
+  - multiline_call_arguments
+  - multiline_parameters
+  - multiline_conditions
+  # Imports in three groups — Apple, ours, third-party — alphabetical inside each. Correctable.
+  - grouped_imports
+  - key_path_only_where_the_api_takes_one
+  - multiline_string_opens_on_its_own_line
+  # What gets written too much of: a helper with one caller that returns nothing, a comment whose every
+  # word is already in the code below it, a banner naming what the declarations already name.
+  - no_single_use_void_functions
+  - comment_adds_no_word
+  - no_mark_comments
+  # Auto-fixable and mechanical — `bin/lint --fix` applies these, no judgement needed.
+  - modifier_order
+  - self_binding
+  - toggle_bool
+  - optional_enum_case_matching
+  - period_spacing
+  - prefer_zero_over_explicit_init
+  - redundant_type_annotation
+  - explicit_init
+  - comma_inheritance
+  - final_test_case
+  - unneeded_override
+  - closure_spacing
+  - contains_over_first_not_nil
+  - fatal_error_message
+  - joined_default_parameter
+  - let_var_whitespace
+  - operator_usage_whitespace
+  - redundant_nil_coalescing
+  - unneeded_parentheses_in_closure_argument
+  - unowned_variable_capture
+  - yoda_condition
+  - unhandled_throwing_task
+  - file_header
+  - force_cast
+  - force_try
+  - force_unwrapping
+  # VOICE.md's own contract, enforced on every root document.
+  - document_says_what_is
+  - document_avoids_retired_words
+  - document_links_resolve
+
+disabled_rules:
+  # `.swift-format` owns whitespace, and it is the formatter oida hands the files to, so these three
+  # would demand the alignment it removes.
+  - closure_end_indentation
+  - literal_expression_end_indentation
+  - vertical_parameter_alignment_on_call
+  # grouped_imports owns import order; this rule would flatten its groups into one alphabetical run.
+  - sorted_imports
+  - todo # work is tracked in PRs and LEARNINGS, not in-code markers
+  - unused_closure_parameter
+  # Length is not a defect. A long function is refactored for a reason, never for a count.
+  - file_length
+  - type_body_length
+  - line_length
+  - function_body_length
+  - large_tuple
+  - function_parameter_count
+
+excluded:
+  # Never lint vendored or generated code, wherever the build puts it. Matched by location, not path,
+  # so an in-repo `-derivedDataPath` does not drag SPM checkouts into scope.
+  - DerivedData
+  - build
+  - "**/.build"
+  - "**/SourcePackages"
+  - "**/GeneratedSources"
+  - "**/Intermediates.noindex"
+
+# Errors, not warnings: what these find is written by whoever is not reading the code around it, and a
+# warning is what a reader scrolls past.
+comment_adds_no_word:
+  severity: error
+no_mark_comments:
+  severity: error
+no_single_use_void_functions:
+  severity: error
+
+cyclomatic_complexity:
+  ignores_case_statements: true
+
+opening_brace:
+  # A condition spanning several lines gets its brace on its own line, so the body is not mistaken
+  # for another condition. That is what the formatter emits.
+  ignore_multiline_statement_conditions: true
+
+identifier_name:
+  min_length: 1
+  max_length: 70
+
+type_name:
+  max_length: 45
+
+nesting:
+  type_level:
+    warning: 2
+
+file_header:
+  severity: error
+  forbidden_pattern: 'Copyright © \d|Created by .+ on '
+
+force_unwrapping:
+  severity: error
+
+multiline_call_arguments:
+  max_number_of_single_line_parameters: 2
+  requires_single_line: true
+
+multiline_parameters:
+  max_number_of_single_line_parameters: 2
+  requires_single_line: true
+
+multiline_conditions:
+  max_number_of_single_line_parameters: 2
+  requires_single_line: true
+
+grouped_imports:
+  # This package ships one product and takes no dependencies, so "ours" is the module itself and its
+  # test target, which is only ever @testable-imported.
+  our_modules:
+    - Networking

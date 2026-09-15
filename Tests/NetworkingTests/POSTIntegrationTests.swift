@@ -3,7 +3,7 @@ import XCTest
 
 @testable import Networking
 
-class POSTIntegrationTests: XCTestCase {
+final class POSTIntegrationTests: XCTestCase {
     let baseURL = TestConfig.httpbinBaseURL
 
     func testPOSTWithoutBody() async throws {
@@ -28,7 +28,13 @@ class POSTIntegrationTests: XCTestCase {
         }
         // Distinct values so an Int/Double/Bool encoding mix-up would actually fail the assertions.
         let result: Result<PostJSONEcho, NetworkingError> = await networking.post(
-            "/post", body: Payload(string: "valueA", int: 20, double: 20.5, bool: false))
+            "/post",
+            body: Payload(
+                string: "valueA",
+                int: 20,
+                double: 20.5,
+                bool: false
+            ))
         switch result {
         case .success(let response):
             XCTAssertEqual(response.json.string, "valueA")
@@ -91,8 +97,16 @@ class POSTIntegrationTests: XCTestCase {
 
         let item1 = "FIRSTDATA"
         let item2 = "SECONDDATA"
-        let part1 = FormDataPart(data: item1.data(using: .utf8)!, parameterName: item1, filename: "\(item1).png")
-        let part2 = FormDataPart(data: item2.data(using: .utf8)!, parameterName: item2, filename: "\(item2).png")
+        let part1 = FormDataPart(
+            data: item1.data(using: .utf8)!,
+            parameterName: item1,
+            filename: "\(item1).png"
+        )
+        let part2 = FormDataPart(
+            data: item2.data(using: .utf8)!,
+            parameterName: item2,
+            filename: "\(item2).png"
+        )
         let fields = [
             "string": "valueA",
             "int": "20",
@@ -126,7 +140,11 @@ class POSTIntegrationTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
 
         let item1 = "FIRSTDATA"
-        let part1 = FormDataPart(data: item1.data(using: .utf8)!, parameterName: item1, filename: "\(item1).png")
+        let part1 = FormDataPart(
+            data: item1.data(using: .utf8)!,
+            parameterName: item1,
+            filename: "\(item1).png"
+        )
         let result: Result<JSONResponse, NetworkingError> = await networking.post("/post", parts: [part1])
         switch result {
         case .success(let response):
@@ -147,7 +165,11 @@ class POSTIntegrationTests: XCTestCase {
 
         let imageURL = try XCTUnwrap(Bundle.module.url(forResource: "pig", withExtension: "png"))
         let imageData = try Data(contentsOf: imageURL)
-        let imagePart = FormDataPart(data: imageData, parameterName: "file", filename: "pig.png")
+        let imagePart = FormDataPart(
+            data: imageData,
+            parameterName: "file",
+            filename: "pig.png"
+        )
 
         let result: Result<JSONResponse, NetworkingError> = await networking.post(
             "/post", parts: [imagePart], fields: ["public_id": "pig"])

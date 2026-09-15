@@ -3,7 +3,7 @@ import XCTest
 
 @testable import Networking
 
-class CancellationIntegrationTests: XCTestCase {
+final class CancellationIntegrationTests: XCTestCase {
     let baseURL = TestConfig.httpbinBaseURL
 
     // Cancelling the Task running a request surfaces `.cancelled`. go-httpbin's `/delay/{n}` keeps the

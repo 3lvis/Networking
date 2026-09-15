@@ -73,8 +73,13 @@ extension FileManager {
 
 extension URLRequest {
     init(
-        url: URL, requestType: Networking.RequestType, contentType: String?, responseType: Networking.ResponseType,
-        authorizationHeaderValue: String?, token: String?, authorizationHeaderKey: String,
+        url: URL,
+        requestType: Networking.RequestType,
+        contentType: String?,
+        responseType: Networking.ResponseType,
+        authorizationHeaderValue: String?,
+        token: String?,
+        authorizationHeaderKey: String,
         headerFields: [String: String]?
     ) {
         self = URLRequest(url: url)
@@ -103,8 +108,17 @@ extension URLRequest {
 }
 
 extension HTTPURLResponse {
-    convenience init(url: URL, headerFields: [String: String]? = nil, statusCode: Int) {
-        self.init(url: url, statusCode: statusCode, httpVersion: nil, headerFields: headerFields)!
+    convenience init(
+        url: URL,
+        headerFields: [String: String]? = nil,
+        statusCode: Int
+    ) {
+        self.init(
+            url: url,
+            statusCode: statusCode,
+            httpVersion: nil,
+            headerFields: headerFields
+        )!
     }
 }
 

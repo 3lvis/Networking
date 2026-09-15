@@ -32,6 +32,10 @@ final class DownloadInterceptorIntegrationTests: XCTestCase {
 
         if case .failure(let error) = result { XCTFail("expected the download to succeed, got \(error)") }
         let count = await counter.count
-        XCTAssertGreaterThanOrEqual(count, 1, "a download must pass through the interceptor chain")
+        XCTAssertGreaterThanOrEqual(
+            count,
+            1,
+            "a download must pass through the interceptor chain"
+        )
     }
 }

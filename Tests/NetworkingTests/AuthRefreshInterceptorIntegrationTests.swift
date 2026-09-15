@@ -20,7 +20,11 @@ final class AuthRefreshInterceptorIntegrationTests: XCTestCase {
 
         switch result {
         case .success(let response):
-            XCTAssertEqual(response.statusCode, 200, "the replay with a fresh credential should succeed")
+            XCTAssertEqual(
+                response.statusCode,
+                200,
+                "the replay with a fresh credential should succeed"
+            )
         case .failure(let error):
             XCTFail("expected the refreshed replay to succeed, got \(error)")
         }

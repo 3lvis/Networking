@@ -3,7 +3,7 @@ import XCTest
 
 @testable import Networking
 
-class NetworkingIntegrationTests: XCTestCase {
+final class NetworkingIntegrationTests: XCTestCase {
     let baseURL = TestConfig.httpbinBaseURL
 
     func testSetAuthorizationHeaderWithUsernameAndPassword() async throws {

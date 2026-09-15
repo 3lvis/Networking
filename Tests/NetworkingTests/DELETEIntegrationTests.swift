@@ -3,7 +3,7 @@ import XCTest
 
 @testable import Networking
 
-class DELETEIntegrationTests: XCTestCase {
+final class DELETEIntegrationTests: XCTestCase {
     let baseURL = TestConfig.httpbinBaseURL
 
     func testDELETE() async throws {
