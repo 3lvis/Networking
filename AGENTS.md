@@ -4,6 +4,10 @@ Async HTTP client for Apple platforms. **iOS 18+ / Swift 6** (`swift-tools 6.2`,
 The iOS-shared and global conventions in the parent `AGENTS.md` files still apply; this layer adds only
 what's specific to this repo. Release history and the v8 (major) notes live in `CHANGELOG.md`.
 
+[`LEARNINGS.md`](LEARNINGS.md) holds what sessions keep running into, searched by symptom. Yours goes in a
+file of its own, `LEARNINGS/<YYYY-MM-DD-HHMM>-<slug>.md`, so branches writing at once stay clear of each
+other. Leave the filing, the grouping and the graduating to the periodic pass that document describes.
+
 ## Build & test
 
 - `make test` — spins up go-httpbin in Docker, runs the full suite, tears it down. **Requires Docker.**
