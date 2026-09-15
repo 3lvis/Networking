@@ -13,7 +13,7 @@ what's specific to this repo. Release history and the v8 (major) notes live in `
   they fail fast (connection refused) — intended, not a flake. The offline / `fake*` suites need no server.
 - Formatting: `.swift-format` (120 cols, 4-space). Run `./scripts/setup.sh` once per clone to enable the
   `.githooks/pre-commit` hook (formats staged Swift files); CI's format check is the backstop.
-- CI: `macos-15` / Xcode 26.3 / Swift 6.2.x (stricter region-isolation than local 6.3 — CI is the gate).
+- CI: the `xcode-27` runner image / Xcode 27 / Swift 6.4, the same toolchain as local — CI is the gate.
   Jobs: swift-format check, build & test (go-httpbin), a warnings gate, and a dead-doc-link check
   (`scripts/check-doc-links.py`).
 
