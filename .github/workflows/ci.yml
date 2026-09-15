@@ -13,18 +13,15 @@ env:
   DEVELOPER_DIR: /Applications/Xcode_27.0.app/Contents/Developer
 
 jobs:
-  swift-format-check:
-    name: swift-format check
+  lint:
+    name: Lint
     runs-on: xcode-27
     steps:
       - uses: actions/checkout@v5
-      - name: Check formatting
-        run: |
-          swift format --in-place --recursive Sources Tests
-          if ! git diff --exit-code; then
-            echo "::error::Code is not formatted. Run: swift format --in-place --recursive Sources Tests (and commit)."
-            exit 1
-          fi
+      # oida lints and then hands the files to swift-format, so one job covers both. There is no
+      # baseline: any violation fails.
+      - name: bin/lint --check
+        run: ./bin/lint --check
 
   build-and-test:
     name: macOS Swift Build & Test
