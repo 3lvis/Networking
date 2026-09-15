@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "Networking",
     platforms: [
-        .iOS(.v18), .macOS(.v15), .tvOS(.v18), .watchOS(.v11),
+        .iOS(.v18), .macOS(.v15), .tvOS(.v18), .watchOS(.v11)
     ],
     products: [
         .library(name: "Networking", targets: ["Networking"])
@@ -22,7 +22,7 @@ let package = Package(
             dependencies: ["Networking"],
             path: "Tests",
             resources: [.process("NetworkingTests/Resources")]
-        ),
+        )
     ],
     swiftLanguageModes: [.v6]
 )

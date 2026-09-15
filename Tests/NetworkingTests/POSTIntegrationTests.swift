@@ -76,7 +76,7 @@ final class POSTIntegrationTests: XCTestCase {
             "int": "20",
             "double": "20.0",
             "bool": "true",
-            "date": "2016-11-02T13:55:28+01:00",
+            "date": "2016-11-02T13:55:28+01:00"
         ]
         let result: Result<JSONResponse, NetworkingError> = await networking.post("/post", form: parameters)
         switch result {
@@ -111,7 +111,7 @@ final class POSTIntegrationTests: XCTestCase {
             "string": "valueA",
             "int": "20",
             "double": "20.0",
-            "bool": "true",
+            "bool": "true"
         ]
         let result: Result<JSONResponse, NetworkingError> = await networking.post(
             "/post", parts: [part1, part2], fields: fields)
@@ -211,7 +211,7 @@ final class POSTIntegrationTests: XCTestCase {
             "/posdddddt", body: ["username": "jameson", "password": "secret"])
         switch result {
         case .success:
-            XCTFail()
+            XCTFail("a POST to a path that does not exist must fail")
         case .failure(let error):
             guard case .http(let httpError) = error else {
                 return XCTFail("expected an HTTP error, got \(error)")

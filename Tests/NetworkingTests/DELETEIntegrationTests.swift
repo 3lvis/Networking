@@ -35,7 +35,7 @@ final class DELETEIntegrationTests: XCTestCase {
         let result: Result<JSONResponse, NetworkingError> = await networking.delete("/invalidpath")
         switch result {
         case .success:
-            XCTFail()
+            XCTFail("a DELETE to a path that does not exist must fail")
         case .failure(let error):
             guard case .http(let httpError) = error else {
                 return XCTFail("expected an HTTP error, got \(error)")

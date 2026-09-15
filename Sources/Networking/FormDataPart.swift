@@ -33,7 +33,7 @@ public struct FormDataPart {
         var bodyData = Data()
         bodyData.append(body.data(using: .utf8)!)
         bodyData.append(data)
-        bodyData.append("\r\n".data(using: .utf8)!)
+        bodyData.append(Data("\r\n".utf8))
 
         return bodyData as Data
     }

@@ -413,7 +413,7 @@ extension Networking {
                 part.boundary = boundary
                 bodyData.append(part.formData as Data)
             }
-            bodyData.append("--\(boundary)--\r\n".data(using: .utf8)!)
+            bodyData.append(Data("--\(boundary)--\r\n".utf8))
             return bodyData
         case .raw(let data, _):
             return data

@@ -86,7 +86,7 @@ final class DownloadIntegrationTests: XCTestCase {
             let destinationURL = try networking.destinationURL(for: path)
             let absoluteString = destinationURL.absoluteString
             guard let image = networking.cache.object(forKey: absoluteString as AnyObject) as? Image else {
-                XCTFail()
+                XCTFail("the downloaded image should be in the memory cache")
                 return
             }
             let pigImage = Image.find(named: "pig.png", inBundle: .module)
@@ -113,7 +113,7 @@ final class DownloadIntegrationTests: XCTestCase {
             let destinationURL = try networking.destinationURL(for: path, cacheName: cacheName)
             let absoluteString = destinationURL.absoluteString
             guard let image = networking.cache.object(forKey: absoluteString as AnyObject) as? Image else {
-                XCTFail()
+                XCTFail("the downloaded image should be in the memory cache under its custom name")
                 return
             }
             let pigImage = Image.find(named: "pig.png", inBundle: .module)
@@ -164,7 +164,7 @@ final class DownloadIntegrationTests: XCTestCase {
             let absoluteString = destinationURL.absoluteString
             networking.cache.removeObject(forKey: absoluteString as AnyObject)
             guard let image = try networking.imageFromCache(path) else {
-                XCTFail()
+                XCTFail("the image should come back from the file cache")
                 return
             }
             let pigImage = Image.find(named: "pig.png", inBundle: .module)
@@ -190,7 +190,7 @@ final class DownloadIntegrationTests: XCTestCase {
             let absoluteString = destinationURL.absoluteString
             networking.cache.removeObject(forKey: absoluteString as AnyObject)
             guard let image = try networking.imageFromCache(path, cacheName: cacheName) else {
-                XCTFail()
+                XCTFail("the image should come back from the file cache under its custom name")
                 return
             }
             let pigImage = Image.find(named: "pig.png", inBundle: .module)
@@ -257,7 +257,7 @@ final class DownloadIntegrationTests: XCTestCase {
             if let cacheData = try networking.dataFromCache(path) {
                 XCTAssert(data == cacheData)
             } else {
-                XCTFail()
+                XCTFail("the data should come back from the cache")
             }
         case .failure(let error):
             XCTFail(error.localizedDescription)

@@ -100,7 +100,7 @@ final class FakeRequestTests: XCTestCase {
                 "/users/cedos": request,
                 "/users/tedos": request,
                 "/users/melos": request,
-                "/users/{userID}": request,
+                "/users/{userID}": request
             ]
         ]
         let result = try FakeRequest.find(
@@ -119,7 +119,7 @@ final class FakeRequestTests: XCTestCase {
     func testTwoLevelFind() throws {
         let json = [
             "user": "User {userID}",
-            "company": "Company {companyID}",
+            "company": "Company {companyID}"
         ]
         let request = FakeRequest(
             payload: .data(try JSONSerialization.data(withJSONObject: json)), responseType: .json, headerFields: nil,
@@ -133,7 +133,7 @@ final class FakeRequestTests: XCTestCase {
 
         let expected = [
             "user": "User 10",
-            "company": "Company 20",
+            "company": "Company 20"
         ]
 
         XCTAssertEqual(decodedDictionary(result), expected as NSDictionary)
@@ -143,7 +143,7 @@ final class FakeRequestTests: XCTestCase {
         let json = [
             "user": "User {userID}",
             "company": "Company {companyID}",
-            "product": "Product {productID}",
+            "product": "Product {productID}"
         ]
         let request = FakeRequest(
             payload: .data(try JSONSerialization.data(withJSONObject: json)), responseType: .json, headerFields: nil,
@@ -157,7 +157,7 @@ final class FakeRequestTests: XCTestCase {
                 "/users/{userID}/companies/{companyID}/products/{productID}": request,
                 "/users/{userID}/companies/{companyID}/products/e": request,
                 "/users/{userID}/companies/{companyID}/products/f": request,
-                "/users/{userID}/companies/{companyID}/products/g": request,
+                "/users/{userID}/companies/{companyID}/products/g": request
             ]
         ]
         let result = try FakeRequest.find(
@@ -166,7 +166,7 @@ final class FakeRequestTests: XCTestCase {
         let expected = [
             "user": "User 10",
             "company": "Company 20",
-            "product": "Product 30",
+            "product": "Product 30"
         ]
 
         XCTAssertEqual(decodedDictionary(result), expected as NSDictionary)
@@ -183,7 +183,7 @@ final class FakeRequestTests: XCTestCase {
             "resource7": "Resource {resourceID7}",
             "resource8": "Resource {resourceID8}",
             "resource9": "Resource {resourceID9}",
-            "resource10": "Resource {resourceID10}",
+            "resource10": "Resource {resourceID10}"
         ]
 
         let request = FakeRequest(
@@ -210,7 +210,7 @@ final class FakeRequestTests: XCTestCase {
             "resource7": "Resource 7",
             "resource8": "Resource 8",
             "resource9": "Resource 9",
-            "resource10": "Resource 10",
+            "resource10": "Resource 10"
         ]
         XCTAssertEqual(decodedDictionary(result), expected as NSDictionary)
     }
@@ -268,7 +268,7 @@ extension FakeRequestTests {
         let result: Result<JSONResponse, NetworkingError> = await networking.get("/stories")
         switch result {
         case .success:
-            XCTFail()
+            XCTFail("a faked GET carrying a failing status code must fail")
         case .failure(let error):
             guard case .http(let httpError) = error else {
                 return XCTFail("expected an HTTP error, got \(error)")
@@ -291,7 +291,7 @@ extension FakeRequestTests {
         let result: Result<JSONResponse, NetworkingError> = await networking.get("/stories")
         switch result {
         case .success:
-            XCTFail()
+            XCTFail("a faked GET on an unregistered path must fail")
         case .failure(let error):
             guard case .http(let httpError) = error else {
                 return XCTFail("expected an HTTP error, got \(error)")
@@ -438,7 +438,7 @@ extension FakeRequestTests {
         let result: Result<JSONResponse, NetworkingError> = await networking.post("/story")
         switch result {
         case .success:
-            XCTFail()
+            XCTFail("a faked POST carrying a failing status code must fail")
         case .failure(let error):
             guard case .http(let httpError) = error else {
                 return XCTFail("expected an HTTP error, got \(error)")
@@ -528,7 +528,7 @@ extension FakeRequestTests {
         let result: Result<JSONResponse, NetworkingError> = await networking.put("/story")
         switch result {
         case .success:
-            XCTFail()
+            XCTFail("a faked PUT carrying a failing status code must fail")
         case .failure(let error):
             guard case .http(let httpError) = error else {
                 return XCTFail("expected an HTTP error, got \(error)")
@@ -595,7 +595,7 @@ extension FakeRequestTests {
         let result: Result<JSONResponse, NetworkingError> = await networking.patch("/story")
         switch result {
         case .success:
-            XCTFail()
+            XCTFail("a faked PATCH carrying a failing status code must fail")
         case .failure(let error):
             guard case .http(let httpError) = error else {
                 return XCTFail("expected an HTTP error, got \(error)")
@@ -685,7 +685,7 @@ extension FakeRequestTests {
         let result: Result<JSONResponse, NetworkingError> = await networking.delete("/story")
         switch result {
         case .success:
-            XCTFail()
+            XCTFail("a faked DELETE carrying a failing status code must fail")
         case .failure(let error):
             guard case .http(let httpError) = error else {
                 return XCTFail("expected an HTTP error, got \(error)")
@@ -782,7 +782,7 @@ extension FakeRequestTests {
         let result: Result<Image, NetworkingError> = await networking.downloadImage("/image/png")
         switch result {
         case .success:
-            XCTFail()
+            XCTFail("a faked image download carrying a failing status code must fail")
         case .failure(let error):
             guard case .http(let httpError) = error else {
                 return XCTFail("expected an HTTP error, got \(error)")
@@ -822,12 +822,12 @@ extension FakeRequestTests {
                 "client": "aClient",
                 "access-token": "anAccessToken",
                 "uid": "aUID",
-                "Authorization": "authorization",
+                "Authorization": "authorization"
             ])
 
         let parameters = [
             "phone_number": "phoneNumber",
-            "confirmation_code": "confirmationCode",
+            "confirmation_code": "confirmationCode"
         ]
 
         let result: Result<JSONResponse, NetworkingError> = await networking.post(

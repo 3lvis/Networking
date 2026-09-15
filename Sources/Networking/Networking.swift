@@ -164,8 +164,8 @@ public actor Networking {
 
     nonisolated let boundary = String(
         format: "com.elvisnunez.networking.%08x%08x",
-        arc4random(),
-        arc4random()
+        UInt32.random(in: .min ... .max),
+        UInt32.random(in: .min ... .max)
     )
 
     lazy var session: URLSession = {
