@@ -23,9 +23,8 @@ final class CacheStore: @unchecked Sendable {
     }
 
     var ttl: Duration { expiry.ttl }
-    func setTTL(_ ttl: Duration) { expiry.setTTL(ttl) }
 
-    // MARK: - Layout
+    func setTTL(_ ttl: Duration) { expiry.setTTL(ttl) }
 
     /// The on-disk URL for a resolved resource key, laid out under `folderName/<shard>/<file>`. Creates the
     /// shard directory if needed.
@@ -81,8 +80,6 @@ final class CacheStore: @unchecked Sendable {
         return "\(prefix)-\(hash)"
     }
 
-    // MARK: - Read
-
     /// A pure read: serve from the warm tier, falling back to a non-expired disk entry (which re-warms both
     /// tiers). Never mutates a tier except to drop an entry it finds expired. `.memory`/`.none` never touch
     /// disk, so a read can't destroy a durable copy written at `.memoryAndFile`.
@@ -130,8 +127,6 @@ final class CacheStore: @unchecked Sendable {
             return nil
         }
     }
-
-    // MARK: - Write
 
     func storeData(
         _ data: Data?,
@@ -187,8 +182,6 @@ final class CacheStore: @unchecked Sendable {
 
         return image
     }
-
-    // MARK: - Clear & sweep
 
     // Serializes whole-folder mutations of the shared cache directory so the background sweep (which
     // creates the folder + writes its cursor) can't race a clear.

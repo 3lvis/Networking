@@ -10,11 +10,13 @@ final class DownloadInterceptorIntegrationTests: XCTestCase {
 
     private actor Counter {
         private(set) var count = 0
+
         func tick() { count += 1 }
     }
 
     private struct CountingPassthroughInterceptor: HTTPInterceptor {
         let counter: Counter
+
         func intercept(_ request: URLRequest, next: @Sendable (URLRequest) async throws -> HTTPExchange) async throws
             -> HTTPExchange
         {

@@ -2,8 +2,6 @@ import Foundation
 
 extension Networking {
 
-    // MARK: GET
-
     public func get<T: Decodable>(
         _ path: String,
         query: [URLQueryItem]? = nil,
@@ -33,8 +31,6 @@ extension Networking {
             cachingLevel: cachingLevel
         )
     }
-
-    // MARK: POST
 
     public func post<T: Decodable>(_ path: String) async -> Result<T, NetworkingError> {
         return await handle(.post, path: path)
@@ -129,8 +125,6 @@ extension Networking {
         return result.map { _ in () }
     }
 
-    // MARK: PUT
-
     public func put<T: Decodable>(_ path: String) async -> Result<T, NetworkingError> {
         return await handle(.put, path: path)
     }
@@ -222,8 +216,6 @@ extension Networking {
         return result.map { _ in () }
     }
 
-    // MARK: PATCH
-
     public func patch<T: Decodable>(_ path: String) async -> Result<T, NetworkingError> {
         return await handle(.patch, path: path)
     }
@@ -314,8 +306,6 @@ extension Networking {
             .patch, path: path, body: .raw(data, contentType: contentType))
         return result.map { _ in () }
     }
-
-    // MARK: DELETE
 
     public func delete<T: Decodable>(_ path: String, query: [URLQueryItem]? = nil) async -> Result<T, NetworkingError> {
         return await handle(
@@ -436,8 +426,6 @@ extension Networking {
         )
     }
 }
-
-// MARK: - Faking requests
 
 extension Networking {
     public func fakeGET(
@@ -610,8 +598,6 @@ extension Networking {
             requestType: .delete, path: path, fileName: fileName, bundle: bundle, statusCode: statusCode, delay: delay)
     }
 }
-
-// MARK: - Downloads
 
 extension Networking {
 

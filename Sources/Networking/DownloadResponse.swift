@@ -47,9 +47,9 @@ extension Data: DataDownloadable {
     }
 }
 
-/// A downloaded image plus the response metadata, for callers that need the status/headers.
 // @unchecked: immutable struct; the only non-Sendable-provable field is the platform `Image`,
 // which is effectively read-only once downloaded.
+/// A downloaded image plus the response metadata, for callers that need the status/headers.
 public struct ImageResponse: ImageDownloadable, @unchecked Sendable {
     public let statusCode: Int
     public let headers: [String: AnyCodable]

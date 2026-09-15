@@ -229,5 +229,6 @@ private struct PostJSONEcho: Decodable {
         let double: Double
         let bool: Bool
     }
+
     let json: Payload
 }

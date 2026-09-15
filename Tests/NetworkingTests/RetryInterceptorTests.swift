@@ -11,6 +11,7 @@ final class RetryInterceptorTests: XCTestCase {
 
     actor CallCounter {
         private(set) var count = 0
+
         func tick() -> Int {
             count += 1
             return count
