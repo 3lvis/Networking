@@ -6,7 +6,7 @@ import XCTest
 // @MainActor so the local `NSCache` (non-Sendable) used across the `downloadImage` await stays on
 // one actor and doesn't trip strict-concurrency "sending" checks.
 @MainActor
-class DownloadIntegrationTests: XCTestCase {
+final class DownloadIntegrationTests: XCTestCase {
     let baseURL = TestConfig.httpbinBaseURL
 
     func testImageDownload() async throws {
@@ -61,7 +61,11 @@ class DownloadIntegrationTests: XCTestCase {
         let path = "/image/png"
         let cacheName = "png/png"
 
-        try Helper.removeFileIfNeeded(networking, path: path, cacheName: cacheName)
+        try Helper.removeFileIfNeeded(
+            networking,
+            path: path,
+            cacheName: cacheName
+        )
 
         let _: Result<Image, NetworkingError> = await networking.downloadImage(path, cacheName: cacheName)
         let destinationURL = try networking.destinationURL(for: path, cacheName: cacheName)
@@ -82,7 +86,7 @@ class DownloadIntegrationTests: XCTestCase {
             let destinationURL = try networking.destinationURL(for: path)
             let absoluteString = destinationURL.absoluteString
             guard let image = networking.cache.object(forKey: absoluteString as AnyObject) as? Image else {
-                XCTFail()
+                XCTFail("the downloaded image should be in the memory cache")
                 return
             }
             let pigImage = Image.find(named: "pig.png", inBundle: .module)
@@ -97,7 +101,11 @@ class DownloadIntegrationTests: XCTestCase {
         let path = "/image/png"
         let cacheName = "png/png"
 
-        try Helper.removeFileIfNeeded(networking, path: path, cacheName: cacheName)
+        try Helper.removeFileIfNeeded(
+            networking,
+            path: path,
+            cacheName: cacheName
+        )
 
         let result: Result<Image, NetworkingError> = await networking.downloadImage(path, cacheName: cacheName)
         switch result {
@@ -105,7 +113,7 @@ class DownloadIntegrationTests: XCTestCase {
             let destinationURL = try networking.destinationURL(for: path, cacheName: cacheName)
             let absoluteString = destinationURL.absoluteString
             guard let image = networking.cache.object(forKey: absoluteString as AnyObject) as? Image else {
-                XCTFail()
+                XCTFail("the downloaded image should be in the memory cache under its custom name")
                 return
             }
             let pigImage = Image.find(named: "pig.png", inBundle: .module)
@@ -134,7 +142,11 @@ class DownloadIntegrationTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         let path = "/image/png"
         let cacheName = "hello"
-        try Helper.removeFileIfNeeded(networking, path: path, cacheName: cacheName)
+        try Helper.removeFileIfNeeded(
+            networking,
+            path: path,
+            cacheName: cacheName
+        )
         let _: Result<Image, NetworkingError> = await networking.downloadImage(path, cacheName: cacheName)
         let image = try networking.imageFromCache(path, cacheName: cacheName)
         let pigImage = Image.find(named: "pig.png", inBundle: .module)
@@ -152,7 +164,7 @@ class DownloadIntegrationTests: XCTestCase {
             let absoluteString = destinationURL.absoluteString
             networking.cache.removeObject(forKey: absoluteString as AnyObject)
             guard let image = try networking.imageFromCache(path) else {
-                XCTFail()
+                XCTFail("the image should come back from the file cache")
                 return
             }
             let pigImage = Image.find(named: "pig.png", inBundle: .module)
@@ -166,7 +178,11 @@ class DownloadIntegrationTests: XCTestCase {
         let networking = Networking(baseURL: baseURL)
         let path = "/image/png"
         let cacheName = "hello"
-        try Helper.removeFileIfNeeded(networking, path: path, cacheName: cacheName)
+        try Helper.removeFileIfNeeded(
+            networking,
+            path: path,
+            cacheName: cacheName
+        )
         let result: Result<Image, NetworkingError> = await networking.downloadImage(path, cacheName: cacheName)
         switch result {
         case .success:
@@ -174,7 +190,7 @@ class DownloadIntegrationTests: XCTestCase {
             let absoluteString = destinationURL.absoluteString
             networking.cache.removeObject(forKey: absoluteString as AnyObject)
             guard let image = try networking.imageFromCache(path, cacheName: cacheName) else {
-                XCTFail()
+                XCTFail("the image should come back from the file cache under its custom name")
                 return
             }
             let pigImage = Image.find(named: "pig.png", inBundle: .module)
@@ -241,7 +257,7 @@ class DownloadIntegrationTests: XCTestCase {
             if let cacheData = try networking.dataFromCache(path) {
                 XCTAssert(data == cacheData)
             } else {
-                XCTFail()
+                XCTFail("the data should come back from the cache")
             }
         case .failure(let error):
             XCTFail(error.localizedDescription)

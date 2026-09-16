@@ -15,19 +15,9 @@ struct FakeRequest {
     let statusCode: Int
     let delay: Double
 
-    init(
-        payload: Payload, responseType: Networking.ResponseType, headerFields: [String: String]?, statusCode: Int,
-        delay: Double
-    ) {
-        self.payload = payload
-        self.responseType = responseType
-        self.headerFields = headerFields
-        self.statusCode = statusCode
-        self.delay = delay
-    }
-
     static func find(
-        ofType type: Networking.RequestType, forPath path: String,
+        ofType type: Networking.RequestType,
+        forPath path: String,
         in collection: [Networking.RequestType: [String: FakeRequest]]
     ) throws -> FakeRequest? {
         guard let requests = collection[type] else { return nil }
@@ -35,58 +25,70 @@ struct FakeRequest {
 
         if let result = requests[path] {
             return result
-        } else {
-            var evaluatedPath = path
-            evaluatedPath.removeFirstLetterIfDash()
-            evaluatedPath.removeLastLetterIfDash()
-            let lookupPathParts = evaluatedPath.components(separatedBy: "/")
+        }
+        return templated(forPath: path, in: requests)
+    }
 
-            for (originalFakedPath, fakeRequest) in requests {
-                guard originalFakedPath.contains("{") else { continue }
+    // A faked path may carry placeholders — "/users/{userID}" answers "/users/10" — so a lookup that
+    // missed exactly walks the templated ones, and the values it captured are substituted into the body
+    // as well as the path.
+    private static func templated(forPath path: String, in requests: [String: FakeRequest]) -> FakeRequest? {
+        var evaluatedPath = path
+        evaluatedPath.removeFirstLetterIfDash()
+        evaluatedPath.removeLastLetterIfDash()
+        let lookupPathParts = evaluatedPath.components(separatedBy: "/")
 
-                var fakedPath = originalFakedPath
-                fakedPath.removeFirstLetterIfDash()
-                fakedPath.removeLastLetterIfDash()
-                let fakePathParts = fakedPath.components(separatedBy: "/")
+        for (originalFakedPath, fakeRequest) in requests {
+            guard let replacedValues = captures(from: originalFakedPath, matching: lookupPathParts),
+                originalFakedPath.replacing(replacedValues) == path
+            else { continue }
 
-                guard lookupPathParts.count == fakePathParts.count else { continue }
-                guard lookupPathParts.first == fakePathParts.first else { continue }
-                guard lookupPathParts.count != 1 && fakePathParts.count != 1 else { continue }
+            guard case .data(let data) = fakeRequest.payload, let responseString = String(data: data, encoding: .utf8)
+            else { continue }
 
-                var replacedValues = [String: String]()
-                for (index, fakePathPart) in fakePathParts.enumerated() {
-                    if fakePathPart.contains("{") {
-                        replacedValues[fakePathPart] = lookupPathParts[index]
-                    }
-                }
-
-                var replacedPath = originalFakedPath
-                for (key, value) in replacedValues {
-                    replacedPath = replacedPath.replacingOccurrences(of: key, with: value)
-                }
-                guard replacedPath == path else { continue }
-                // Substitute the captured path values into the JSON body string (e.g. "{userID}" -> "10").
-                guard case .data(let data) = fakeRequest.payload,
-                    var responseString = String(data: data, encoding: .utf8)
-                else { continue }
-
-                for (key, value) in replacedValues {
-                    responseString = responseString.replacingOccurrences(of: key, with: value)
-                }
-
-                guard let stringData = responseString.data(using: .utf8) else { continue }
-                return FakeRequest(
-                    payload: .data(stringData), responseType: fakeRequest.responseType,
-                    headerFields: fakeRequest.headerFields, statusCode: fakeRequest.statusCode, delay: fakeRequest.delay
-                )
-            }
+            let substituted = responseString.replacing(replacedValues)
+            guard let stringData = substituted.data(using: .utf8) else { continue }
+            return FakeRequest(
+                payload: .data(stringData),
+                responseType: fakeRequest.responseType,
+                headerFields: fakeRequest.headerFields,
+                statusCode: fakeRequest.statusCode,
+                delay: fakeRequest.delay
+            )
         }
 
         return nil
     }
+    // The values a templated path captures from a lookup — "/users/{userID}" against "/users/10" gives
+    // ["{userID}": "10"] — or nil where the two do not describe the same path at all.
+    private static func captures(from fakedPath: String, matching lookupPathParts: [String]) -> [String: String]? {
+        guard fakedPath.contains("{") else { return nil }
+
+        var trimmed = fakedPath
+        trimmed.removeFirstLetterIfDash()
+        trimmed.removeLastLetterIfDash()
+        let fakePathParts = trimmed.components(separatedBy: "/")
+
+        guard lookupPathParts.count == fakePathParts.count,
+            lookupPathParts.first == fakePathParts.first,
+            lookupPathParts.count != 1
+        else { return nil }
+
+        var captured = [String: String]()
+        for (index, fakePathPart) in fakePathParts.enumerated() where fakePathPart.contains("{") {
+            captured[fakePathPart] = lookupPathParts[index]
+        }
+        return captured
+    }
+
 }
 
 extension String {
+
+    // Placeholder -> captured value, applied to whichever string carries the placeholders.
+    func replacing(_ values: [String: String]) -> String {
+        values.reduce(self) { $0.replacingOccurrences(of: $1.key, with: $1.value) }
+    }
 
     mutating func removeFirstLetterIfDash() {
         let initialCharacter = String(self[..<index(after: startIndex)])

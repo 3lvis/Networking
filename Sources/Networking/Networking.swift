@@ -83,6 +83,9 @@ public actor Networking {
         return stream
     }
 
+    // The hop that makes an actor-isolated write legal from a nonisolated termination handler.
+    // Inlining it fails to compile: 'actor-isolated property ... can not be mutated'.
+    // oida:disable:next no_single_use_void_functions
     private func removeContinuation(_ id: UUID) {
         streamContinuations[id] = nil
     }
@@ -130,10 +133,7 @@ public actor Networking {
     func record(_ message: String, level: OSLogType) {
         guard logLevel != .none else { return }
         logger.log(level: level, "\(message, privacy: .public)")
-        appendToLogFile(message)
-    }
 
-    private func appendToLogFile(_ message: String) {
         guard let logFileURL else { return }
         let entry = "\(Date().ISO8601Format()) \(message)\n"
         guard let data = entry.data(using: .utf8) else { return }
@@ -162,7 +162,11 @@ public actor Networking {
         }
     }
 
-    nonisolated let boundary = String(format: "com.elvisnunez.networking.%08x%08x", arc4random(), arc4random())
+    nonisolated let boundary = String(
+        format: "com.elvisnunez.networking.%08x%08x",
+        UInt32.random(in: .min ... .max),
+        UInt32.random(in: .min ... .max)
+    )
 
     lazy var session: URLSession = {
         URLSession(configuration: self.configuration)
@@ -188,15 +192,21 @@ public actor Networking {
     }
 
     public init(
-        baseURL: String = "", configuration: URLSessionConfiguration = .default,
-        cache: NSCache<AnyObject, AnyObject>? = nil, logger: Logger? = nil,
+        baseURL: String = "",
+        configuration: URLSessionConfiguration = .default,
+        cache: NSCache<AnyObject, AnyObject>? = nil,
+        logger: Logger? = nil,
         cacheTTL: Duration = .seconds(7 * 24 * 60 * 60)
     ) {
         self.baseURL = baseURL
         self.configuration = configuration
         let memoryCache = cache ?? NSCache()
         self.cache = memoryCache
-        self.cacheStore = CacheStore(memory: memoryCache, ttl: cacheTTL, folderName: Networking.domain)
+        self.cacheStore = CacheStore(
+            memory: memoryCache,
+            ttl: cacheTTL,
+            folderName: Networking.domain
+        )
         self.logger = logger ?? Networking.defaultLogger
         self.logFileURL = ProcessInfo.processInfo.environment["NETWORKING_LOG_FILE"].flatMap(
             Networking.resolveLogFileURL)

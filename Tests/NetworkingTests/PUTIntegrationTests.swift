@@ -3,7 +3,7 @@ import XCTest
 
 @testable import Networking
 
-class PUTIntegrationTests: XCTestCase {
+final class PUTIntegrationTests: XCTestCase {
     let baseURL = TestConfig.httpbinBaseURL
 
     func testPUT() async throws {
@@ -41,7 +41,7 @@ class PUTIntegrationTests: XCTestCase {
             "/posdddddt", body: ["username": "jameson", "password": "secret"])
         switch result {
         case .success:
-            XCTFail()
+            XCTFail("a PUT to a path that does not exist must fail")
         case .failure(let error):
             guard case .http(let httpError) = error else {
                 return XCTFail("expected an HTTP error, got \(error)")

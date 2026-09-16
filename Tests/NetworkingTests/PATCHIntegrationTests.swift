@@ -3,7 +3,7 @@ import XCTest
 
 @testable import Networking
 
-class PATCHIntegrationTests: XCTestCase {
+final class PATCHIntegrationTests: XCTestCase {
     let baseURL = TestConfig.httpbinBaseURL
 
     func testPATCH() async throws {
@@ -41,7 +41,7 @@ class PATCHIntegrationTests: XCTestCase {
             "/posdddddt", body: ["username": "jameson", "password": "secret"])
         switch result {
         case .success:
-            XCTFail()
+            XCTFail("a PATCH to a path that does not exist must fail")
         case .failure(let error):
             guard case .http(let httpError) = error else {
                 return XCTFail("expected an HTTP error, got \(error)")

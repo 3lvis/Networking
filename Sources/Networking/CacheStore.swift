@@ -12,16 +12,21 @@ final class CacheStore: @unchecked Sendable {
     let expiry: CacheExpiry
     let folderName: String
 
-    init(memory: NSCache<AnyObject, AnyObject>, ttl: Duration, folderName: String) {
+    init(
+        memory: NSCache<AnyObject, AnyObject>,
+        ttl: Duration,
+        folderName: String
+    ) {
         self.memory = memory
         self.expiry = CacheExpiry(ttl: ttl)
         self.folderName = folderName
     }
 
     var ttl: Duration { expiry.ttl }
-    func setTTL(_ ttl: Duration) { expiry.setTTL(ttl) }
 
-    // MARK: - Layout
+    // Forwards to an expiry the caller cannot reach, since it is private to the store.
+    // oida:disable:next no_single_use_void_functions
+    func setTTL(_ ttl: Duration) { expiry.setTTL(ttl) }
 
     /// The on-disk URL for a resolved resource key, laid out under `folderName/<shard>/<file>`. Creates the
     /// shard directory if needed.
@@ -36,13 +41,26 @@ final class CacheStore: @unchecked Sendable {
             let cachesURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
         else {
             throw NSError(
-                domain: folderName, code: 9999,
-                userInfo: [NSLocalizedDescriptionKey: "Couldn't build a cache URL for: \(finalPath)"])
+                domain: folderName,
+                code: 9999,
+                userInfo: [NSLocalizedDescriptionKey: "Couldn't build a cache URL for: \(finalPath)"]
+            )
         }
 
-        let folderURL = cachesURL.appendingPathComponent(URL(string: folderPath)!.absoluteString)
+        guard let folderComponent = URL(string: folderPath)?.absoluteString else {
+            throw NSError(
+                domain: folderName,
+                code: 9999,
+                userInfo: [NSLocalizedDescriptionKey: "Couldn't build a cache URL for: \(folderPath)"]
+            )
+        }
+        let folderURL = cachesURL.appendingPathComponent(folderComponent)
         if FileManager.default.exists(at: folderURL) == false {
-            try FileManager.default.createDirectory(at: folderURL, withIntermediateDirectories: true, attributes: nil)
+            try FileManager.default.createDirectory(
+                at: folderURL,
+                withIntermediateDirectories: true,
+                attributes: nil
+            )
         }
         return cachesURL.appendingPathComponent(url.absoluteString)
     }
@@ -73,12 +91,14 @@ final class CacheStore: @unchecked Sendable {
         return "\(prefix)-\(hash)"
     }
 
-    // MARK: - Read
-
     /// A pure read: serve from the warm tier, falling back to a non-expired disk entry (which re-warms both
     /// tiers). Never mutates a tier except to drop an entry it finds expired. `.memory`/`.none` never touch
     /// disk, so a read can't destroy a durable copy written at `.memoryAndFile`.
-    func object(forResource resource: String, level: Networking.CachingLevel, asImage: Bool) throws -> Any? {
+    func object(
+        forResource resource: String,
+        level: Networking.CachingLevel,
+        asImage: Bool
+    ) throws -> Any? {
         let destinationURL = try destinationURL(forResource: resource)
         let key = destinationURL.absoluteString
         switch level {
@@ -119,9 +139,13 @@ final class CacheStore: @unchecked Sendable {
         }
     }
 
-    // MARK: - Write
-
-    func storeData(_ data: Data?, forResource resource: String, level: Networking.CachingLevel) throws {
+    // The store's write seam, reached from Networking and driven directly by six tests.
+    // oida:disable:next no_single_use_void_functions
+    func storeData(
+        _ data: Data?,
+        forResource resource: String,
+        level: Networking.CachingLevel
+    ) throws {
         let destinationURL = try destinationURL(forResource: resource)
         let key = destinationURL.absoluteString
 
@@ -142,12 +166,19 @@ final class CacheStore: @unchecked Sendable {
     }
 
     @discardableResult
-    func storeImage(data: Data?, forResource resource: String, level: Networking.CachingLevel) throws -> Image? {
+    func storeImage(
+        data: Data?,
+        forResource resource: String,
+        level: Networking.CachingLevel
+    ) throws -> Image? {
         let destinationURL = try destinationURL(forResource: resource)
         let key = destinationURL.absoluteString
 
         var image: Image?
-        if let data = data, let nonOptionalImage = Image(data: data), data.count > 0 {
+        if let data = data,
+            let nonOptionalImage = Image(data: data),
+            data.count > 0
+        {
             switch level {
             case .memory:
                 memory.setObject(nonOptionalImage, forKey: key as AnyObject)
@@ -165,13 +196,13 @@ final class CacheStore: @unchecked Sendable {
         return image
     }
 
-    // MARK: - Clear & sweep
-
     // Serializes whole-folder mutations of the shared cache directory so the background sweep (which
     // creates the folder + writes its cursor) can't race a clear.
     static let mutationLock = NSLock()
     static let sweepCursorFileName = ".sweep-shard"
 
+    // The store's clear seam, reached from Networking and driven directly by three tests.
+    // oida:disable no_single_use_void_functions
     /// Empties **both** tiers (clearing only one would leave the other serving deleted data). Scoped to the
     /// networking folder; unrelated files in Caches are untouched.
     func clear() throws {
@@ -183,17 +214,23 @@ final class CacheStore: @unchecked Sendable {
             _ = try FileManager.default.remove(at: folderURL)
         }
     }
+    // oida:enable no_single_use_void_functions
 
     private static func folderURL(named folderName: String) -> URL? {
         guard let cachesURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else {
             return nil
         }
-        return cachesURL.appendingPathComponent(URL(string: folderName)!.absoluteString)
+        guard let folderComponent = URL(string: folderName)?.absoluteString else {
+            return nil
+        }
+        return cachesURL.appendingPathComponent(folderComponent)
     }
 
     // Deletes expired files from **one** shard per call (rotated via a tiny cursor file), so each launch's
     // sweep is O(N / shardCount) and everything gets visited over `shardCount` launches. Age is judged by
     // the file's modification date. Best-effort and off the request path.
+    // The store's sweep seam, reached from Networking on a detached task.
+    // oida:disable:next no_single_use_void_functions
     func sweepExpired() {
         Self.mutationLock.lock()
         defer { Self.mutationLock.unlock() }
@@ -209,8 +246,10 @@ final class CacheStore: @unchecked Sendable {
         let shardURL = domainURL.appendingPathComponent(String(cursor % Self.shardCount, radix: 16))
 
         if let files = try? FileManager.default.contentsOfDirectory(
-            at: shardURL, includingPropertiesForKeys: [.contentModificationDateKey], options: [])
-        {
+            at: shardURL,
+            includingPropertiesForKeys: [.contentModificationDateKey],
+            options: []
+        ) {
             for file in files {
                 guard
                     let modified = try? file.resourceValues(forKeys: [.contentModificationDateKey])
@@ -225,8 +264,10 @@ final class CacheStore: @unchecked Sendable {
         // Pre-sharding versions wrote files directly under the domain root; clear those strays (the cursor
         // file and the shard subdirectories stay).
         if let rootEntries = try? FileManager.default.contentsOfDirectory(
-            at: domainURL, includingPropertiesForKeys: [.isRegularFileKey], options: [])
-        {
+            at: domainURL,
+            includingPropertiesForKeys: [.isRegularFileKey],
+            options: []
+        ) {
             for entry in rootEntries where entry.lastPathComponent != Self.sweepCursorFileName {
                 if (try? entry.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile) == true {
                     try? FileManager.default.removeItem(at: entry)
@@ -235,6 +276,10 @@ final class CacheStore: @unchecked Sendable {
         }
 
         try? FileManager.default.createDirectory(at: domainURL, withIntermediateDirectories: true)
-        try? String(cursor &+ 1).write(to: cursorURL, atomically: true, encoding: .utf8)
+        try? String(cursor &+ 1).write(
+            to: cursorURL,
+            atomically: true,
+            encoding: .utf8
+        )
     }
 }

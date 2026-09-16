@@ -31,8 +31,10 @@ extension Dictionary where Key: ExpressibleByStringLiteral {
                 return current + ["\(keyValuePair.key)=\(encodedValue)"]
             } else {
                 throw NSError(
-                    domain: Networking.domain, code: 0,
-                    userInfo: [NSLocalizedDescriptionKey: "Couldn't encode \(keyValuePair.value)"])
+                    domain: Networking.domain,
+                    code: 0,
+                    userInfo: [NSLocalizedDescriptionKey: "Couldn't encode \(keyValuePair.value)"]
+                )
             }
         }
 
@@ -73,8 +75,13 @@ extension FileManager {
 
 extension URLRequest {
     init(
-        url: URL, requestType: Networking.RequestType, contentType: String?, responseType: Networking.ResponseType,
-        authorizationHeaderValue: String?, token: String?, authorizationHeaderKey: String,
+        url: URL,
+        requestType: Networking.RequestType,
+        contentType: String?,
+        responseType: Networking.ResponseType,
+        authorizationHeaderValue: String?,
+        token: String?,
+        authorizationHeaderKey: String,
         headerFields: [String: String]?
     ) {
         self = URLRequest(url: url)
@@ -103,15 +110,28 @@ extension URLRequest {
 }
 
 extension HTTPURLResponse {
-    convenience init(url: URL, headerFields: [String: String]? = nil, statusCode: Int) {
-        self.init(url: url, statusCode: statusCode, httpVersion: nil, headerFields: headerFields)!
+    convenience init(
+        url: URL,
+        headerFields: [String: String]? = nil,
+        statusCode: Int
+    ) {
+        // composedURL has already parsed this URL and thrown on anything that would not, so the only
+        // input Foundation refuses cannot reach here.
+        self.init(
+            url: url,
+            statusCode: statusCode,
+            httpVersion: nil,
+            headerFields: headerFields
+        )!
     }
 }
 
 extension NSError {
     convenience init(statusCode: Int) {
         self.init(
-            domain: Networking.domain, code: statusCode,
-            userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: statusCode)])
+            domain: Networking.domain,
+            code: statusCode,
+            userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: statusCode)]
+        )
     }
 }

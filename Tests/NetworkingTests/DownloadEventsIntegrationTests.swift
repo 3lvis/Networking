@@ -16,7 +16,11 @@ final class DownloadEventsIntegrationTests: XCTestCase {
         let _: Result<Image, NetworkingError> = await networking.downloadImage("/image/png")
 
         let events = await stream.collect(2)
-        XCTAssertEqual(events.count, 2, "downloadImage should emit .started and .completed; got \(events)")
+        XCTAssertEqual(
+            events.count,
+            2,
+            "downloadImage should emit .started and .completed; got \(events)"
+        )
         guard case .started(let startContext) = events.first,
             case .completed(let endContext, let outcome, _, _) = events.last
         else {
@@ -31,7 +35,11 @@ final class DownloadEventsIntegrationTests: XCTestCase {
     func testDownloadImageEmitsFailureForBadStatus() async {
         let networking = Networking(baseURL: baseURL)
         let pigImage = Image.find(named: "pig.png", inBundle: .module)
-        await networking.fakeImageDownload("/image/png", image: pigImage, statusCode: 404)
+        await networking.fakeImageDownload(
+            "/image/png",
+            image: pigImage,
+            statusCode: 404
+        )
         let stream = await networking.events()
 
         let _: Result<Image, NetworkingError> = await networking.downloadImage("/image/png")

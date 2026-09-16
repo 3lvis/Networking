@@ -22,7 +22,10 @@ extension Networking {
     }
 
     func handle<T: Decodable>(
-        _ requestType: RequestType, path: String, body: RequestBody = .none, query: [URLQueryItem] = [],
+        _ requestType: RequestType,
+        path: String,
+        body: RequestBody = .none,
+        query: [URLQueryItem] = [],
         cachingLevel: CachingLevel = .none
     ) async -> Result<T, NetworkingError> {
         let requestID = UUID()
@@ -37,20 +40,41 @@ extension Networking {
         var responseMetadata: ResponseMetadata?
 
         do {
-            if let fakeRequest = try FakeRequest.find(ofType: requestType, forPath: path, in: fakeRequests) {
+            if let fakeRequest = try FakeRequest.find(
+                ofType: requestType,
+                forPath: path,
+                in: fakeRequests
+            ) {
                 let fakeContext = RequestContext(
-                    id: requestID, requestType: requestType, url: try? composedURL(with: path), headers: headerFields)
+                    id: requestID,
+                    requestType: requestType,
+                    url: try? composedURL(with: path),
+                    headers: headerFields
+                )
                 context = fakeContext
                 emit(.started(fakeContext))
                 let (fakeResult, fakeStatus, fakeBytes): (Result<T, NetworkingError>, Int, Int) =
-                    try await handleFakeRequest(fakeRequest, path: path, requestType: requestType)
+                    try await handleFakeRequest(
+                        fakeRequest,
+                        path: path,
+                        requestType: requestType
+                    )
                 result = fakeResult
                 statusCode = fakeStatus
                 byteCount = fakeBytes
             } else {
-                let request = try createRequest(path: path, requestType: requestType, body: body, query: query)
+                let request = try createRequest(
+                    path: path,
+                    requestType: requestType,
+                    body: body,
+                    query: query
+                )
                 let requestContext = RequestContext(
-                    id: requestID, requestType: requestType, url: request.url, headers: request.allHTTPHeaderFields)
+                    id: requestID,
+                    requestType: requestType,
+                    url: request.url,
+                    headers: request.allHTTPHeaderFields
+                )
                 context = requestContext
                 emit(.started(requestContext))
 
@@ -59,16 +83,28 @@ extension Networking {
                 let cacheKey = cacheKey(for: request, fallbackPath: path)
                 if cachingLevel != .none,
                     let cachedData = try objectFromCache(
-                        for: path, cacheName: cacheKey, cachingLevel: cachingLevel, responseType: .json) as? Data,
+                        for: path,
+                        cacheName: cacheKey,
+                        cachingLevel: cachingLevel,
+                        responseType: .json
+                    ) as? Data,
                     let cached = try? JSONDecoder().decode(CachedResponse.self, from: cachedData),
                     let url = request.url,
                     let cachedResponse = HTTPURLResponse(
-                        url: url, statusCode: cached.statusCode, httpVersion: nil, headerFields: cached.headers)
+                        url: url,
+                        statusCode: cached.statusCode,
+                        httpVersion: nil,
+                        headerFields: cached.headers
+                    )
                 {
                     // Run the cache hit back out through the interceptor chain so validators apply to it too.
                     let exchange = try await perform(
                         request, cached: HTTPExchange(data: cached.body, response: cachedResponse))
-                    result = handleResponse(responseData: exchange.data, response: exchange.response, path: path)
+                    result = handleResponse(
+                        responseData: exchange.data,
+                        response: exchange.response,
+                        path: path
+                    )
                     statusCode = exchange.response.statusCode
                     byteCount = exchange.data.count
                     responseMetadata = ResponseMetadata(response: exchange.response, body: exchange.data)
@@ -78,8 +114,12 @@ extension Networking {
                     let responseData = exchange.data
                     let response: URLResponse = exchange.response
                     let networkResult: Result<T, NetworkingError> = handleResponse(
-                        responseData: responseData, response: response, path: path)
-                    if cachingLevel != .none, case .success = networkResult,
+                        responseData: responseData,
+                        response: response,
+                        path: path
+                    )
+                    if cachingLevel != .none,
+                        case .success = networkResult,
                         let httpResponse = response as? HTTPURLResponse
                     {
                         let headers = Dictionary(
@@ -87,10 +127,17 @@ extension Networking {
                                 (key as? String).map { ($0, "\(value)") }
                             })
                         let envelope = CachedResponse(
-                            statusCode: httpResponse.statusCode, headers: headers, body: responseData)
+                            statusCode: httpResponse.statusCode,
+                            headers: headers,
+                            body: responseData
+                        )
                         if let encoded = try? JSONEncoder().encode(envelope) {
                             try? cacheOrPurgeData(
-                                data: encoded, path: path, cacheName: cacheKey, cachingLevel: cachingLevel)
+                                data: encoded,
+                                path: path,
+                                cacheName: cacheKey,
+                                cachingLevel: cachingLevel
+                            )
                         }
                     }
                     result = networkResult
@@ -107,7 +154,11 @@ extension Networking {
             // .started/.completed so observers see every request.
             if context == nil {
                 let errorContext = RequestContext(
-                    id: requestID, requestType: requestType, url: nil, headers: headerFields)
+                    id: requestID,
+                    requestType: requestType,
+                    url: nil,
+                    headers: headerFields
+                )
                 context = errorContext
                 emit(.started(errorContext))
             }
@@ -117,14 +168,25 @@ extension Networking {
         let duration = clock.now - startInstant
         guard let context else { return result }
         return complete(
-            result, context: context, statusCode: statusCode, byteCount: byteCount, metrics: metrics,
-            duration: duration, requestBody: body, responseMetadata: responseMetadata)
+            result,
+            context: context,
+            statusCode: statusCode,
+            byteCount: byteCount,
+            metrics: metrics,
+            duration: duration,
+            requestBody: body,
+            responseMetadata: responseMetadata
+        )
     }
 
     // Runs the interceptor chain. On a cache hit, `cached` is the base result the chain folds around (no
     // network call), so validators still see it. session/collector are read into locals first so the
     // @Sendable chain captures no actor-isolated state (Swift 6 region isolation).
-    func perform(_ request: URLRequest, collector: MetricsCollector? = nil, cached: HTTPExchange? = nil) async throws
+    func perform(
+        _ request: URLRequest,
+        collector: MetricsCollector? = nil,
+        cached: HTTPExchange? = nil
+    ) async throws
         -> HTTPExchange
     {
         let session = self.session
@@ -150,8 +212,13 @@ extension Networking {
     // The single completion path, shared by verbs, pre-flight failures, and downloads. `requestBody` and
     // `responseMetadata` aren't on the `.completed` event, so they're threaded here for logging only.
     func complete<T>(
-        _ result: Result<T, NetworkingError>, context: RequestContext, statusCode: Int?, byteCount: Int,
-        metrics: TransactionMetrics?, duration: Duration, requestBody: RequestBody? = nil,
+        _ result: Result<T, NetworkingError>,
+        context: RequestContext,
+        statusCode: Int?,
+        byteCount: Int,
+        metrics: TransactionMetrics?,
+        duration: Duration,
+        requestBody: RequestBody? = nil,
         responseMetadata: ResponseMetadata? = nil
     ) -> Result<T, NetworkingError> {
         let outcome: Outcome
@@ -162,15 +229,35 @@ extension Networking {
             outcome = .failure(error)
         }
         logCompletion(
-            context: context, result: result, statusCode: statusCode, byteCount: byteCount, duration: duration,
-            requestBody: requestBody, responseMetadata: responseMetadata)
-        emit(.completed(context, outcome: outcome, duration: duration, metrics: metrics))
+            context: context,
+            result: result,
+            statusCode: statusCode,
+            byteCount: byteCount,
+            duration: duration,
+            requestBody: requestBody,
+            responseMetadata: responseMetadata
+        )
+        emit(
+            .completed(
+                context,
+                outcome: outcome,
+                duration: duration,
+                metrics: metrics
+            ))
         return result
     }
 
+    // Fifty lines of logging behind a name, and three early exits the caller must never inherit —
+    // returning from complete would skip emit and the result.
+    // oida:disable:next no_single_use_void_functions
     private func logCompletion<T>(
-        context: RequestContext, result: Result<T, NetworkingError>, statusCode: Int?, byteCount: Int,
-        duration: Duration, requestBody: RequestBody?, responseMetadata: ResponseMetadata?
+        context: RequestContext,
+        result: Result<T, NetworkingError>,
+        statusCode: Int?,
+        byteCount: Int,
+        duration: Duration,
+        requestBody: RequestBody?,
+        responseMetadata: ResponseMetadata?
     ) {
         guard logLevel != .none else { return }
 
@@ -229,14 +316,29 @@ extension Networking {
 
     // Emits the `.started`/`.completed` pair for a failure that happens before the network call (e.g.
     // body encoding), so observers don't miss it.
-    func emitPreflightFailure<T: Decodable>(_ requestType: RequestType, path: String, error: NetworkingError) -> Result<
+    func emitPreflightFailure<T: Decodable>(
+        _ requestType: RequestType,
+        path: String,
+        error: NetworkingError
+    ) -> Result<
         T, NetworkingError
     > {
         let requestID = UUID()
         let context = RequestContext(
-            id: requestID, requestType: requestType, url: try? composedURL(with: path), headers: headerFields)
+            id: requestID,
+            requestType: requestType,
+            url: try? composedURL(with: path),
+            headers: headerFields
+        )
         emit(.started(context))
-        return complete(.failure(error), context: context, statusCode: nil, byteCount: 0, metrics: nil, duration: .zero)
+        return complete(
+            .failure(error),
+            context: context,
+            statusCode: nil,
+            byteCount: 0,
+            metrics: nil,
+            duration: .zero
+        )
     }
 
     // Persists status code and headers alongside the body so a cache hit reproduces real metadata.
@@ -247,9 +349,7 @@ extension Networking {
     }
 
     private func cacheKey(for request: URLRequest, fallbackPath: String) -> String {
-        guard let url = request.url,
-            var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
-        else {
+        guard let url = request.url, var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
             return fallbackPath
         }
         // Sort the *encoded* query components so parameter order doesn't change the key (a cache
@@ -260,10 +360,19 @@ extension Networking {
         return components.string ?? url.absoluteString
     }
 
-    private func handleFakeRequest<T: Decodable>(_ fakeRequest: FakeRequest, path: String, requestType: RequestType)
+    private func handleFakeRequest<T: Decodable>(
+        _ fakeRequest: FakeRequest,
+        path: String,
+        requestType: RequestType
+    )
         async throws -> (Result<T, NetworkingError>, statusCode: Int, byteCount: Int)
     {
-        let (response, _) = try handleFakeRequest(fakeRequest, path: path, cacheName: nil, cachingLevel: .none)
+        let (response, _) = try handleFakeRequest(
+            fakeRequest,
+            path: path,
+            cacheName: nil,
+            cachingLevel: .none
+        )
 
         if fakeRequest.delay > 0 {
             try? await Task.sleep(nanoseconds: UInt64(fakeRequest.delay * 1_000_000_000))
@@ -277,16 +386,28 @@ extension Networking {
             responseData = Data()
         }
         let result: Result<T, NetworkingError> = handleResponse(
-            responseData: responseData, response: response, path: path)
+            responseData: responseData,
+            response: response,
+            path: path
+        )
         return (result, response.statusCode, responseData.count)
     }
 
-    private func createRequest(path: String, requestType: RequestType, body: RequestBody, query: [URLQueryItem]) throws
+    private func createRequest(
+        path: String,
+        requestType: RequestType,
+        body: RequestBody,
+        query: [URLQueryItem]
+    ) throws
         -> URLRequest
     {
         // Split a query embedded in the path so it survives URL building instead of being
         // percent-encoded into the path (encodeUTF8 uses .urlPathAllowed, which escapes "?").
-        let pathParts = path.split(separator: "?", maxSplits: 1, omittingEmptySubsequences: false)
+        let pathParts = path.split(
+            separator: "?",
+            maxSplits: 1,
+            omittingEmptySubsequences: false
+        )
         let rawPath = String(pathParts[0])
         let pathQuery = pathParts.count > 1 ? String(pathParts[1]) : nil
 
@@ -339,20 +460,24 @@ extension Networking {
                 body += "--\(boundary)\r\n"
                 body += "Content-Disposition: form-data; name=\"\(key)\""
                 body += "\r\n\r\n\(value)\r\n"
-                bodyData.append(body.data(using: .utf8)!)
+                bodyData.append(Data(body.utf8))
             }
             for var part in parts {
                 part.boundary = boundary
                 bodyData.append(part.formData as Data)
             }
-            bodyData.append("--\(boundary)--\r\n".data(using: .utf8)!)
+            bodyData.append(Data("--\(boundary)--\r\n".utf8))
             return bodyData
         case .raw(let data, _):
             return data
         }
     }
 
-    private func handleResponse<T: Decodable>(responseData: Data, response: URLResponse, path: String) -> Result<
+    private func handleResponse<T: Decodable>(
+        responseData: Data,
+        response: URLResponse,
+        path: String
+    ) -> Result<
         T, NetworkingError
     > {
         guard let httpResponse = response as? HTTPURLResponse else {
@@ -363,7 +488,11 @@ extension Networking {
 
         switch StatusCodeType(statusCode: statusCode) {
         case .informational, .successful:
-            return handleSuccessfulResponse(responseData: responseData, path: path, httpResponse: httpResponse)
+            return handleSuccessfulResponse(
+                responseData: responseData,
+                path: path,
+                httpResponse: httpResponse
+            )
         case .cancelled:
             return .failure(.cancelled)
         case .redirection, .clientError, .serverError, .unknown:
@@ -373,10 +502,16 @@ extension Networking {
         }
     }
 
-    private func handleSuccessfulResponse<T: Decodable>(responseData: Data, path: String, httpResponse: HTTPURLResponse)
+    private func handleSuccessfulResponse<T: Decodable>(
+        responseData: Data,
+        path: String,
+        httpResponse: HTTPURLResponse
+    )
         -> Result<T, NetworkingError>
     {
         if T.self == Data.self {
+            // Guarded by the test on the line above: T is Data here.
+            // oida:disable:next force_cast
             return .success(responseData as! T)
         } else if T.self == JSONResponse.self {
             let headers = Dictionary(
@@ -387,7 +522,13 @@ extension Networking {
                 // An empty body (e.g. 204 No Content) is a success — decoding empty data would fail, so use an empty body.
                 let body =
                     responseData.isEmpty ? [:] : try JSONDecoder().decode([String: AnyCodable].self, from: responseData)
-                let networkingJSON = JSONResponse(statusCode: httpResponse.statusCode, headers: headers, body: body)
+                let networkingJSON = JSONResponse(
+                    statusCode: httpResponse.statusCode,
+                    headers: headers,
+                    body: body
+                )
+                // Guarded by the `T.self == JSONResponse.self` test this branch is under.
+                // oida:disable:next force_cast
                 return .success(networkingJSON as! T)
             } catch let error as DecodingError {
                 return .failure(.decoding(error, ResponseMetadata(response: httpResponse, body: responseData)))

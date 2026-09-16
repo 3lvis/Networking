@@ -12,13 +12,21 @@ final class CacheStoreTests: XCTestCase {
         store: CacheStore, memory: NSCache<AnyObject, AnyObject>
     ) {
         let memory = NSCache<AnyObject, AnyObject>()
-        let store = CacheStore(memory: memory, ttl: ttl, folderName: folderName)
+        let store = CacheStore(
+            memory: memory,
+            ttl: ttl,
+            folderName: folderName
+        )
         try store.clear()
         return (store, memory)
     }
 
     override func tearDown() {
-        try? CacheStore(memory: NSCache(), ttl: .seconds(1), folderName: folderName).clear()
+        try? CacheStore(
+            memory: NSCache(),
+            ttl: .seconds(1),
+            folderName: folderName
+        ).clear()
         super.tearDown()
     }
 
@@ -29,8 +37,17 @@ final class CacheStoreTests: XCTestCase {
         let resource = "http://example.com/" + String(repeating: "a", count: 300)
         let payload = Data("payload".utf8)
 
-        try store.storeData(payload, forResource: resource, level: .memoryAndFile)
-        let cached = try store.object(forResource: resource, level: .memoryAndFile, asImage: false) as? Data
+        try store.storeData(
+            payload,
+            forResource: resource,
+            level: .memoryAndFile
+        )
+        let cached =
+            try store.object(
+                forResource: resource,
+                level: .memoryAndFile,
+                asImage: false
+            ) as? Data
         XCTAssertEqual(cached, payload)
     }
 
@@ -38,7 +55,11 @@ final class CacheStoreTests: XCTestCase {
     func testColdDiskEntryExpiresOnRead() throws {
         let (store, memory) = try makeStore(ttl: .seconds(60))
         let resource = "http://example.com/cold-entry"
-        try store.storeData(Data("stale".utf8), forResource: resource, level: .memoryAndFile)
+        try store.storeData(
+            Data("stale".utf8),
+            forResource: resource,
+            level: .memoryAndFile
+        )
 
         let url = try store.destinationURL(forResource: resource)
         memory.removeObject(forKey: url.absoluteString as AnyObject)  // force the disk path
@@ -46,7 +67,11 @@ final class CacheStoreTests: XCTestCase {
             [.modificationDate: Date(timeIntervalSinceNow: -120)], ofItemAtPath: url.path)
 
         XCTAssertNil(
-            try store.object(forResource: resource, level: .memoryAndFile, asImage: false),
+            try store.object(
+                forResource: resource,
+                level: .memoryAndFile,
+                asImage: false
+            ),
             "an entry idle beyond the TTL is expired on read"
         )
     }
@@ -55,16 +80,29 @@ final class CacheStoreTests: XCTestCase {
     func testDiskHitReWarmsFileDate() throws {
         let (store, memory) = try makeStore(ttl: .seconds(60))
         let resource = "http://example.com/warm-entry"
-        try store.storeData(Data("fresh".utf8), forResource: resource, level: .memoryAndFile)
+        try store.storeData(
+            Data("fresh".utf8),
+            forResource: resource,
+            level: .memoryAndFile
+        )
 
         let url = try store.destinationURL(forResource: resource)
         memory.removeObject(forKey: url.absoluteString as AnyObject)  // force the disk path
         try FileManager.default.setAttributes(
             [.modificationDate: Date(timeIntervalSinceNow: -30)], ofItemAtPath: url.path)
 
-        XCTAssertNotNil(try store.object(forResource: resource, level: .memoryAndFile, asImage: false))
-        let mtime = try url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate!
-        XCTAssertLessThan(Date().timeIntervalSince(mtime), 5, "the disk hit should have re-warmed the mtime to ~now")
+        XCTAssertNotNil(
+            try store.object(
+                forResource: resource,
+                level: .memoryAndFile,
+                asImage: false
+            ))
+        let mtime = try XCTUnwrap(url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate)
+        XCTAssertLessThan(
+            Date().timeIntervalSince(mtime),
+            5,
+            "the disk hit should have re-warmed the mtime to ~now"
+        )
     }
 
     // (No memory-hit-rewarm test: NSCache can evict at any time, so a memory hit can't be forced
@@ -75,15 +113,27 @@ final class CacheStoreTests: XCTestCase {
     func testMemoryReadNeverDeletesTheDiskTier() throws {
         let (store, memory) = try makeStore()
         let resource = "http://example.com/durable-memory"
-        try store.storeData(Data("durable".utf8), forResource: resource, level: .memoryAndFile)
+        try store.storeData(
+            Data("durable".utf8),
+            forResource: resource,
+            level: .memoryAndFile
+        )
         let url = try store.destinationURL(forResource: resource)
 
         memory.removeAllObjects()  // simulate iOS evicting the warm tier
-        _ = try store.object(forResource: resource, level: .memory, asImage: false)
+        _ = try store.object(
+            forResource: resource,
+            level: .memory,
+            asImage: false
+        )
 
         XCTAssertTrue(FileManager.default.exists(at: url), "a .memory read deleted the durable disk copy")
         XCTAssertEqual(
-            try store.object(forResource: resource, level: .memoryAndFile, asImage: false) as? Data,
+            try store.object(
+                forResource: resource,
+                level: .memoryAndFile,
+                asImage: false
+            ) as? Data,
             Data("durable".utf8),
             "the disk copy should still be readable after the .memory read"
         )
@@ -93,10 +143,19 @@ final class CacheStoreTests: XCTestCase {
     func testNoneReadNeverDeletesTheDiskTier() throws {
         let (store, _) = try makeStore()
         let resource = "http://example.com/durable-none"
-        try store.storeData(Data("durable".utf8), forResource: resource, level: .memoryAndFile)
+        try store.storeData(
+            Data("durable".utf8),
+            forResource: resource,
+            level: .memoryAndFile
+        )
         let url = try store.destinationURL(forResource: resource)
 
-        XCTAssertNil(try store.object(forResource: resource, level: .none, asImage: false))
+        XCTAssertNil(
+            try store.object(
+                forResource: resource,
+                level: .none,
+                asImage: false
+            ))
         XCTAssertTrue(FileManager.default.exists(at: url), "a .none read deleted the durable disk copy")
     }
 
@@ -105,11 +164,25 @@ final class CacheStoreTests: XCTestCase {
     func testClearEmptiesBothTiers() throws {
         let (store, _) = try makeStore()
         let resource = "http://example.com/cached"
-        try store.storeData(Data("hi".utf8), forResource: resource, level: .memoryAndFile)
-        XCTAssertNotNil(try store.object(forResource: resource, level: .memoryAndFile, asImage: false))
+        try store.storeData(
+            Data("hi".utf8),
+            forResource: resource,
+            level: .memoryAndFile
+        )
+        XCTAssertNotNil(
+            try store.object(
+                forResource: resource,
+                level: .memoryAndFile,
+                asImage: false
+            ))
 
         try store.clear()
 
-        XCTAssertNil(try store.object(forResource: resource, level: .memoryAndFile, asImage: false))
+        XCTAssertNil(
+            try store.object(
+                forResource: resource,
+                level: .memoryAndFile,
+                asImage: false
+            ))
     }
 }

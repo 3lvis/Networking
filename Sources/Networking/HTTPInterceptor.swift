@@ -18,7 +18,8 @@ public protocol HTTPInterceptor: Sendable {
     func intercept(
         _ request: URLRequest,
         next: @Sendable (URLRequest) async throws -> HTTPExchange
-    ) async throws -> HTTPExchange
+    ) async throws
+        -> HTTPExchange
 }
 
 /// On an unauthorized response, refresh the credential and replay the request once.
@@ -42,7 +43,9 @@ public struct AuthRefreshInterceptor: HTTPInterceptor {
     public func intercept(
         _ request: URLRequest,
         next: @Sendable (URLRequest) async throws -> HTTPExchange
-    ) async throws -> HTTPExchange {
+    ) async throws
+        -> HTTPExchange
+    {
         let exchange = try await next(request)
         guard triggeringStatusCodes.contains(exchange.response.statusCode) else { return exchange }
         guard let refreshedValue = try await coordinator.refreshOnce() else { return exchange }
@@ -83,7 +86,9 @@ public struct RetryInterceptor: HTTPInterceptor {
     public func intercept(
         _ request: URLRequest,
         next: @Sendable (URLRequest) async throws -> HTTPExchange
-    ) async throws -> HTTPExchange {
+    ) async throws
+        -> HTTPExchange
+    {
         let methodAllowsRetry = retryableMethods.contains((request.httpMethod ?? "GET").uppercased())
         var attempt = 1
         while true {
@@ -147,7 +152,9 @@ public struct ResponseValidatorInterceptor: HTTPInterceptor {
     public func intercept(
         _ request: URLRequest,
         next: @Sendable (URLRequest) async throws -> HTTPExchange
-    ) async throws -> HTTPExchange {
+    ) async throws
+        -> HTTPExchange
+    {
         let exchange = try await next(request)
         guard (200..<300).contains(exchange.response.statusCode) else { return exchange }
         switch validate(exchange) {

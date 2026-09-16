@@ -13,13 +13,21 @@ final class ObservabilityIntegrationTests: XCTestCase {
         let _: Result<JSONResponse, NetworkingError> = await networking.get("/get")
 
         let events = await stream.collect(2)
-        XCTAssertEqual(events.count, 2, "expected a .started and a .completed event")
+        XCTAssertEqual(
+            events.count,
+            2,
+            "expected a .started and a .completed event"
+        )
         guard case .started(let startContext) = events.first,
             case .completed(let endContext, let outcome, let duration, let metrics) = events.last
         else {
             return XCTFail("expected .started then .completed, got \(events)")
         }
-        XCTAssertEqual(startContext.id, endContext.id, "the two events should share a request id")
+        XCTAssertEqual(
+            startContext.id,
+            endContext.id,
+            "the two events should share a request id"
+        )
         XCTAssertEqual(startContext.method, "GET")
         XCTAssertGreaterThan(duration, .zero)
         guard case .success(let statusCode, let byteCount) = outcome else {
@@ -60,7 +68,11 @@ final class ObservabilityIntegrationTests: XCTestCase {
         guard case .started(let context) = events.first else {
             return XCTFail("expected a .started event, got \(events)")
         }
-        XCTAssertEqual(context.headers["Authorization"], "Bearer supersecret", "events() carries the real header value")
+        XCTAssertEqual(
+            context.headers["Authorization"],
+            "Bearer supersecret",
+            "events() carries the real header value"
+        )
         XCTAssertEqual(context.headers["Cookie"], "session=abc")
         XCTAssertEqual(context.headers["X-Trace"], "trace-123")
     }
@@ -75,13 +87,21 @@ final class ObservabilityIntegrationTests: XCTestCase {
         let _: Result<Data, NetworkingError> = await networking.post("/post", body: Unencodable())
 
         let events = await stream.collect(2)
-        XCTAssertEqual(events.count, 2, "an encode failure must still emit .started and .completed; got \(events)")
+        XCTAssertEqual(
+            events.count,
+            2,
+            "an encode failure must still emit .started and .completed; got \(events)"
+        )
         guard case .started(let startContext) = events.first,
             case .completed(let endContext, let outcome, _, _) = events.last
         else {
             return XCTFail("expected .started then .completed, got \(events)")
         }
-        XCTAssertEqual(startContext.id, endContext.id, "both events should share a request id")
+        XCTAssertEqual(
+            startContext.id,
+            endContext.id,
+            "both events should share a request id"
+        )
         guard case .failure(let error) = outcome, case .invalidRequest = error else {
             return XCTFail("expected an .invalidRequest failure outcome, got \(outcome)")
         }

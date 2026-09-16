@@ -10,12 +10,17 @@ final class DownloadInterceptorIntegrationTests: XCTestCase {
 
     private actor Counter {
         private(set) var count = 0
+
         func tick() { count += 1 }
     }
 
     private struct CountingPassthroughInterceptor: HTTPInterceptor {
         let counter: Counter
-        func intercept(_ request: URLRequest, next: @Sendable (URLRequest) async throws -> HTTPExchange) async throws
+
+        func intercept(
+            _ request: URLRequest,
+            next: @Sendable (URLRequest) async throws -> HTTPExchange
+        ) async throws
             -> HTTPExchange
         {
             await counter.tick()
@@ -32,6 +37,10 @@ final class DownloadInterceptorIntegrationTests: XCTestCase {
 
         if case .failure(let error) = result { XCTFail("expected the download to succeed, got \(error)") }
         let count = await counter.count
-        XCTAssertGreaterThanOrEqual(count, 1, "a download must pass through the interceptor chain")
+        XCTAssertGreaterThanOrEqual(
+            count,
+            1,
+            "a download must pass through the interceptor chain"
+        )
     }
 }

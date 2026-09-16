@@ -3,7 +3,7 @@ import XCTest
 
 @testable import Networking
 
-class Dictionary_FormURLEncodedTests: XCTestCase {
+final class DictionaryFormURLEncodedTests: XCTestCase {
 
     func testFormatting() throws {
         let parameters = ["username": "elvis", "password": "secret"]

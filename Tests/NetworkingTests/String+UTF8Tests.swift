@@ -3,7 +3,7 @@ import XCTest
 
 @testable import Networking
 
-class String_UTF8Tests: XCTestCase {
+final class StringUTF8Tests: XCTestCase {
 
     func testEncodeUTF8WithNorwegianCharacters() {
         let encodedString = "døgnvillburgere.jpg".encodeUTF8()

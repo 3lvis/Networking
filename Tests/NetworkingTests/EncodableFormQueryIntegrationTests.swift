@@ -15,7 +15,12 @@ final class EncodableFormQueryIntegrationTests: XCTestCase {
     func testPOSTFormFromEncodableModel() async throws {
         let networking = Networking(baseURL: baseURL)
         let result: Result<JSONResponse, NetworkingError> = await networking.post(
-            "/post", form: SearchParams(term: "swift & co", page: 2, exact: true))
+            "/post",
+            form: SearchParams(
+                term: "swift & co",
+                page: 2,
+                exact: true
+            ))
         switch result {
         case .success(let response):
             let form = httpbinEchoedMap(response, "form")
@@ -33,7 +38,12 @@ final class EncodableFormQueryIntegrationTests: XCTestCase {
     func testGETQueryFromEncodableModel() async throws {
         let networking = Networking(baseURL: baseURL)
         let result: Result<JSONResponse, NetworkingError> = await networking.get(
-            "/get", query: SearchParams(term: "swift", page: 2, exact: false))
+            "/get",
+            query: SearchParams(
+                term: "swift",
+                page: 2,
+                exact: false
+            ))
         switch result {
         case .success(let response):
             let args = httpbinEchoedMap(response, "args")
@@ -48,7 +58,12 @@ final class EncodableFormQueryIntegrationTests: XCTestCase {
     func testDELETEQueryFromEncodableModel() async throws {
         let networking = Networking(baseURL: baseURL)
         let result: Result<JSONResponse, NetworkingError> = await networking.delete(
-            "/delete", query: SearchParams(term: "swift", page: 5, exact: true))
+            "/delete",
+            query: SearchParams(
+                term: "swift",
+                page: 5,
+                exact: true
+            ))
         switch result {
         case .success(let response):
             let args = httpbinEchoedMap(response, "args")

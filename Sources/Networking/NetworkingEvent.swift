@@ -25,8 +25,18 @@ extension RequestContext {
     // Owns the two normalizations every call site repeated: the HTTP method string and a nil header
     // set. The URL stays a caller concern — it's resolved differently per site (best-effort
     // `composedURL` from a path, a built request's URL, or nil on a pre-flight failure).
-    init(id: UUID, requestType: Networking.RequestType, url: URL?, headers: [String: String]?) {
-        self.init(id: id, method: requestType.rawValue, url: url, headers: headers ?? [:])
+    init(
+        id: UUID,
+        requestType: Networking.RequestType,
+        url: URL?,
+        headers: [String: String]?
+    ) {
+        self.init(
+            id: id,
+            method: requestType.rawValue,
+            url: url,
+            headers: headers ?? [:]
+        )
     }
 }
 
@@ -89,7 +99,11 @@ final class MetricsCollector: NSObject, URLSessionTaskDelegate, @unchecked Senda
         return collected
     }
 
-    func urlSession(_ session: URLSession, task: URLSessionTask, didFinishCollecting metrics: URLSessionTaskMetrics) {
+    func urlSession(
+        _ session: URLSession,
+        task: URLSessionTask,
+        didFinishCollecting metrics: URLSessionTaskMetrics
+    ) {
         lock.lock()
         defer { lock.unlock() }
         collected = metrics

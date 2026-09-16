@@ -21,7 +21,11 @@ final class TypedRequestBodyIntegrationTests: XCTestCase {
 
     func testPOSTWithTypedBodyRoundTrips() async throws {
         let networking = Networking(baseURL: baseURL)
-        let body = Credentials(username: "jameson", age: 20, active: true)
+        let body = Credentials(
+            username: "jameson",
+            age: 20,
+            active: true
+        )
         let result: Result<BodyEcho, NetworkingError> = await networking.post("/post", body: body)
         switch result {
         case .success(let echo):
@@ -34,7 +38,11 @@ final class TypedRequestBodyIntegrationTests: XCTestCase {
 
     func testPOSTWithTypedBodyVoidReturn() async throws {
         let networking = Networking(baseURL: baseURL)
-        let body = Credentials(username: "jameson", age: 20, active: true)
+        let body = Credentials(
+            username: "jameson",
+            age: 20,
+            active: true
+        )
         let result: Result<Void, NetworkingError> = await networking.post("/post", body: body)
         if case .failure(let error) = result {
             XCTFail(error.localizedDescription)
@@ -43,7 +51,11 @@ final class TypedRequestBodyIntegrationTests: XCTestCase {
 
     func testPUTWithTypedBodyRoundTrips() async throws {
         let networking = Networking(baseURL: baseURL)
-        let body = Credentials(username: "ada", age: 36, active: false)
+        let body = Credentials(
+            username: "ada",
+            age: 36,
+            active: false
+        )
         let result: Result<BodyEcho, NetworkingError> = await networking.put("/put", body: body)
         switch result {
         case .success(let echo):
@@ -55,7 +67,11 @@ final class TypedRequestBodyIntegrationTests: XCTestCase {
 
     func testPATCHWithTypedBodyRoundTrips() async throws {
         let networking = Networking(baseURL: baseURL)
-        let body = Credentials(username: "grace", age: 45, active: true)
+        let body = Credentials(
+            username: "grace",
+            age: 45,
+            active: true
+        )
         let result: Result<BodyEcho, NetworkingError> = await networking.patch("/patch", body: body)
         switch result {
         case .success(let echo):

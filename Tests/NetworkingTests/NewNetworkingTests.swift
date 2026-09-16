@@ -4,7 +4,7 @@ import XCTest
 
 @testable import Networking
 
-class NewNetworkingTests: XCTestCase {
+final class NewNetworkingTests: XCTestCase {
     let baseURL = TestConfig.httpbinBaseURL
 
     struct ValidationErrors: Decodable { let errors: [String: [String]] }
@@ -17,7 +17,11 @@ class NewNetworkingTests: XCTestCase {
                 "phone_number": ["has already been taken"]
             ]
         ]
-        await networking.fakePOST("/auth", response: response, statusCode: 422)
+        await networking.fakePOST(
+            "/auth",
+            response: response,
+            statusCode: 422
+        )
 
         let result: Result<JSONResponse, NetworkingError> = await networking.post("/auth")
         switch result {

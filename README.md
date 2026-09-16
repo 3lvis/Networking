@@ -4,7 +4,7 @@
 
 - Friendly API
 - Singleton free
-- No external dependencies
+- Dependency-free
 - Minimal implementation
 - Fully unit tested
 - Simple request cancellation
@@ -47,7 +47,7 @@ Initializing an instance of **Networking** means you have to select a [URLSessio
 
  - `.default`: The default session configuration uses a persistent disk-based cache (except when the result is downloaded to a file) and stores credentials in the user’s keychain.
 
-- `.ephemeral`: An ephemeral session configuration object is similar to a default session configuration object except that the corresponding session object does not store caches, credential stores, or any session-related data to disk. Instead, session-related data is stored in RAM. The only time an ephemeral session writes data to disk is when you tell it to write the contents of a URL to a file. The main advantage to using ephemeral sessions is privacy. By not writing potentially sensitive data to disk, you make it less likely that the data will be intercepted and used later. For this reason, ephemeral sessions are ideal for private browsing modes in web browsers and other similar situations.
+- `.ephemeral`: Keeps everything in RAM — caches, credential stores and session data all live there, and the one thing it writes to disk is a URL you explicitly ask it to save to a file. Privacy is the point: data that stays out of the file system stays out of reach later, which is what makes this the configuration behind private browsing modes.
 
 - `.background`: This configuration type is suitable for transferring data files while the app runs in the background. A session configured with this object hands control of the transfers over to the system, which handles the transfers in a separate process. In iOS, this configuration makes it possible for transfers to continue even when the app itself is suspended or terminated.
 
@@ -65,7 +65,7 @@ let networking = Networking(baseURL: "http://example.com", configuration: .ephem
 
 You can set the `headerFields` in any networking object.
 
-This will append (if not found) or overwrite (if found) what NSURLSession sends on each request.
+This sets what `URLSession` sends on each request: a header it already carries is overwritten, and a new one is added.
 
 ```swift
 await networking.setHeaderFields(["User-Agent": "your new user agent"])
@@ -130,7 +130,7 @@ await networking.setInterceptors([
 ])
 ```
 
-Concurrent requests that all hit `401` at once share a **single** refresh — they wait on the one in flight instead of each firing their own (no token-refresh stampede). For pure *notification* of a `401` (no replay), you don't need an interceptor — it's already a `.completed(_, .failure)` with `error.statusCode == 401` on [`events()`](#observing-requests).
+Concurrent requests that all hit `401` at once share a **single** refresh — they wait on the one in flight, so a single token refresh serves them all. For pure *notification* of a `401`, where a replay is beside the point, [`events()`](#observing-requests) already carries it as a `.completed(_, .failure)` with `error.statusCode == 401`, which is enough on its own.
 
 `AuthRefreshInterceptor` is one implementation of the general `HTTPInterceptor` seam — an async `intercept(_:next:)` hook that wraps every verb request. Calling `next` runs the rest of the chain (the innermost being the real network call); calling it again replays.
 
@@ -163,7 +163,7 @@ Interceptors apply to **downloads** (`downloadImage`/`downloadData`) as well as 
 
 ### Validating the response
 
-A `2xx` isn't always a *correct* response — the server might return the wrong content-type or a malformed envelope. `ResponseValidatorInterceptor` runs your check on each successful response and turns a failure into a typed `NetworkingError.validation(reason:_:)` (carrying the response metadata). Non-2xx responses pass through untouched, so a real `500` still surfaces as `.http`, not a validation failure.
+A `2xx` can still be the *wrong* response — the server might return the wrong content-type or a malformed envelope. `ResponseValidatorInterceptor` runs your check on each successful response and turns a failure into a typed `NetworkingError.validation(reason:_:)` (carrying the response metadata). Everything outside 2xx passes through untouched, so a real `500` still surfaces as `.http`.
 
 ```swift
 await networking.setInterceptors([
@@ -243,7 +243,7 @@ case .failure(let error):
 
 `get` returns Swift's [Result](https://developer.apple.com/documentation/swift/result) with two cases: `.success(let response)` and `.failure(let error)`. The success carries the decoded value, the failure a `NetworkingError`.
 
-`get` is generic over any `Decodable`, so you can decode straight into your own model — no manual JSON digging:
+`get` is generic over any `Decodable`, so you decode straight into your own model and the JSON digging stays here:
 
 ```swift
 struct Recipe: Decodable { let title: String }
@@ -304,9 +304,9 @@ error.responseMetadata // ResponseMetadata? — status, headers, and the full bo
 error.isRetryable      // Bool — conservative: transient transport failures + HTTP 408/429/5xx
 ```
 
-`isRetryable` is deliberately conservative: only transport timeouts/connection failures and a small set of status codes (408, 429, 500, 502, 503, 504). A 4xx (other than 408/429), a decoding failure, or an invalid request is never reported as retryable.
+`isRetryable` is deliberately conservative: only transport timeouts/connection failures and a small set of status codes (408, 429, 500, 502, 503, 504). It reports a 4xx (other than 408/429), a decoding failure and an invalid request as final.
 
-**The core makes no assumption about the error body's shape.** It hands you the complete body in `ResponseMetadata` so you can decode your API's own error envelope into a typed value — `decode(_:)` is a small convenience over `body`:
+**The core treats the error body as opaque.** It hands you the complete body in `ResponseMetadata` so you can decode your API's own error envelope into a typed value — `decode(_:)` is a small convenience over `body`:
 
 ```swift
 struct APIError: Decodable { let errors: [String: [String]] }   // e.g. a Rails/ActiveModel envelope
@@ -320,7 +320,7 @@ if case .failure(.http(let httpError)) = result,
 
 ### Typed request bodies
 
-Just as the response side is generic over any `Decodable`, the request side is generic over any `Encodable`. `post`, `put`, and `patch` take a `body:` that's JSON-encoded for you and sent with `Content-Type: application/json` — so the body you send is compile-checked, never an untyped `[String: Any]` dictionary:
+Just as the response side is generic over any `Decodable`, the request side is generic over any `Encodable`. `post`, `put`, and `patch` take a `body:` that's JSON-encoded for you and sent with `Content-Type: application/json` — so the body you send is compile-checked, a typed value rather than a `[String: Any]` dictionary:
 
 ```swift
 struct Credentials: Encodable {
@@ -342,7 +342,7 @@ let ack: Result<Void, NetworkingError> = await networking.put("/account", body: 
 
 ## Choosing how the body is encoded
 
-Each encoding is a distinct, typed method — the method you call picks the `Content-Type`, so there's no untyped `parameters:`/`parameterType:` pair to get wrong.
+Each encoding is a distinct, typed method, and the method you call picks the `Content-Type` — one decision, rather than a `parameters:`/`parameterType:` pair to keep in step.
 
 ### JSON
 
@@ -356,7 +356,7 @@ let result: Result<JSONResponse, NetworkingError> = await networking.post("/post
 
 ### URL-encoding
 
-Pass `form:` to send `application/x-www-form-urlencoded`; **Networking** percent-encodes it for you ([`Percent-encoding` / `URL-encoding`](https://en.wikipedia.org/wiki/Percent-encoding#The_application.2Fx-www-form-urlencoded_type)). `form:` takes any flat `Encodable` — a `[String: String]` or your own model — and stringifies scalars for you (`Bool` → `"true"`, not `"1"`):
+Pass `form:` to send `application/x-www-form-urlencoded`; **Networking** percent-encodes it for you ([`Percent-encoding` / `URL-encoding`](https://en.wikipedia.org/wiki/Percent-encoding#The_application.2Fx-www-form-urlencoded_type)). `form:` takes any flat `Encodable` — a `[String: String]` or your own model — and stringifies scalars for you, so a `Bool` becomes `"true"`:
 
 ```swift
 let networking = Networking(baseURL: "http://example.com")
@@ -394,7 +394,7 @@ let result: Result<JSONResponse, NetworkingError> = await networking.post("/imag
 
 **FormDataPart Content-Type**:
 
-Each part's `Content-Type` comes from its `FormDataPartType`, which simply carries the MIME string. The default is `.octetStream` (`application/octet-stream`); `.png` and `.jpeg` are provided as conveniences. For anything else, construct one directly — `FormDataPart(type: FormDataPartType("application/pdf"), data: …, parameterName: …)`.
+Each part's `Content-Type` comes from its `FormDataPartType`, which carries the MIME string. The default is `.octetStream` (`application/octet-stream`); `.png` and `.jpeg` are provided as conveniences. For anything else, construct one directly — `FormDataPart(type: FormDataPartType("application/pdf"), data: …, parameterName: …)`.
 
 ### Raw data
 
@@ -454,7 +454,7 @@ let result: Result<[Story], NetworkingError> = await networking.get("/stories")
 
 **Faking with contents of a file**:
 
-If your file is not located in the main bundle you have to specify using the bundle parameters, otherwise `NSBundle.mainBundle()` will be used.
+A file outside the main bundle takes the bundle parameter; everything else uses `Bundle.main`.
 
 ```swift
 let networking = Networking(baseURL: baseURL)
@@ -465,9 +465,9 @@ let result: Result<JSONResponse, NetworkingError> = await networking.get("/entri
 
 **Faking with status code**:
 
-If you do not provide a status code for this fake request, the default returned one will be 200 (SUCCESS), but if you do provide a status code that is not 2xx, then **Networking** returns `.failure(.http(HTTPError))` carrying that status code, with the fake's body in `metadata` for you to `decode` — see [Handling errors](#handling-errors).
+A fake request defaults to 200 (SUCCESS). Give it a status code outside 2xx and **Networking** returns `.failure(.http(HTTPError))` carrying that status code, with the fake's body in `metadata` for you to `decode` — see [Handling errors](#handling-errors).
 
-Use the no-body overload (omit `response:`) for a status-code-only fake:
+Omit `response:` for a status-code-only fake:
 
 ```swift
 let networking = Networking(baseURL: "https://example.com")
@@ -524,11 +524,11 @@ let _: Result<Image, NetworkingError> = await networking.downloadImage("/image/p
 // Image from cache
 ```
 
-**Clearing and expiring the cache.** Call `await networking.clearCache()` to empty it — **both** the in-memory layer and the on-disk files. (`reset()` does the same, plus wiping credentials.) There's no per-path purge: `clearCache()` clears everything, and stale entries expire on their own (below). For a download, `downloadImage`/`downloadData` with `cachingLevel: .none` force a fresh fetch and drop that cached copy; for the verbs, `.none` simply bypasses the cache (it neither reads nor writes — and is the default, so it never disturbs an entry you cached deliberately).
+**Clearing and expiring the cache.** Call `await networking.clearCache()` to empty it — **both** the in-memory layer and the on-disk files. (`reset()` does the same, plus wiping credentials.) `clearCache()` takes the whole cache at once: it clears everything, and stale entries expire on their own (below). For a download, `downloadImage`/`downloadData` with `cachingLevel: .none` force a fresh fetch and drop that cached copy; for the verbs, `.none` bypasses the cache and is the default, so an entry you cached deliberately stays where it is.
 
-On-disk entries expire on their own, so a long-lived cache can't grow without bound. An entry whose **on-disk last use** is older than `cacheTTL` (default **7 days**; set it via `init(…, cacheTTL:)` or `setCacheTTL(_:)`) is swept. The persisted clock is the cache file's modification date, refreshed by **disk reads and writes** — caching an entry, or reading one back after it's left the in-memory layer, re-warms it; only genuinely idle entries are removed. The in-memory layer is the warm tier (served fast, left to `NSCache`'s own memory-pressure eviction) and does **not** re-stamp the disk file on a hit, so an entry kept warm *only* in memory for longer than `cacheTTL` may be re-fetched once it's evicted — in normal use it would have hit disk again first and stayed warm.
+On-disk entries expire on their own, so a long-lived cache stays bounded. An entry whose **on-disk last use** is older than `cacheTTL` (default **7 days**; set it via `init(…, cacheTTL:)` or `setCacheTTL(_:)`) is swept. The persisted clock is the cache file's modification date, refreshed by **disk reads and writes** — caching an entry, or reading one back after it's left the in-memory layer, re-warms it; only genuinely idle entries are removed. The in-memory layer is the warm tier (served fast, left to `NSCache`'s own memory-pressure eviction) and leaves the disk file's date alone on a hit, so an entry kept warm *only* in memory for longer than `cacheTTL` may be re-fetched once it's evicted — in normal use it would have hit disk again first and stayed warm.
 
-> **This is a key→blob store, not HTTP caching.** `cachingLevel` caches the downloaded bytes *unconditionally* by path (or `cacheName:`), ignoring `Cache-Control`/`ETag`/`Expires` — which is what you usually want for images and other assets whose hosts often send no cache headers at all. It deliberately does **not** implement HTTP cache semantics (freshness, conditional `304` revalidation, eviction). If you want those, configure a `URLCache` on the session and let `URLSession` handle it per the response headers — it composes with the verb requests:
+> **This is a key→blob store rather than HTTP caching.** `cachingLevel` caches the downloaded bytes *unconditionally* by path (or `cacheName:`), ignoring `Cache-Control`/`ETag`/`Expires` — which is what you usually want for images and other assets whose hosts often omit cache headers entirely. HTTP cache semantics — freshness, conditional `304` revalidation, eviction — are deliberately out of scope. For those, configure a `URLCache` on the session and let `URLSession` handle it per the response headers — it composes with the verb requests:
 >
 > ```swift
 > let configuration = URLSessionConfiguration.default
@@ -551,7 +551,7 @@ let result: Result<Image, NetworkingError> = await networking.downloadImage("/im
 
 **Networking** doesn't print to the console. Two separate things give you visibility: a **failure log** that's on by default (next section), and an **event stream** you can hook for the full lifecycle.
 
-`events()` returns an `AsyncStream<NetworkingEvent>` — one `.started` then one `.completed` for **every** request (verbs *and* downloads). Iterate it with `for await`, accumulating into plain local state (no callback-capture gymnastics):
+`events()` returns an `AsyncStream<NetworkingEvent>` — one `.started` then one `.completed` for **every** request (verbs *and* downloads). Iterate it with `for await`, accumulating into plain local state:
 
 ```swift
 let stream = await networking.events()
@@ -585,7 +585,7 @@ await networking.setRedactedHeaderFields(["Authorization", "X-Api-Key"])
 
 ### Built-in logging
 
-Out of the box — no setup — the library logs **failures** (HTTP 4xx/5xx, decoding, transport, invalid-request) to Apple's unified logging (`os.Logger`, subsystem `com.elvisnunez.networking`), tagged with the request id. This is the modern replacement for console `print`: it appears automatically in the Xcode console and Console.app, is filterable, and honors privacy annotations.
+Straight out of the box the library logs **failures** (HTTP 4xx/5xx, decoding, transport, invalid-request) to Apple's unified logging (`os.Logger`, subsystem `com.elvisnunez.networking`), tagged with the request id. This is the modern replacement for console `print`: it appears automatically in the Xcode console and Console.app, is filterable, and honors privacy annotations.
 
 `setLogLevel` chooses **which requests** are logged — logged requests always get full detail (line, request + response headers, request + response bodies, truncated):
 
@@ -597,7 +597,7 @@ await networking.setLogLevel(.all)       // every request too, success or failur
 
 `.failures` is the default: failures are rare, so logging them in full is cheap and it's the case you debug — including the **request body**, the quickest way to catch a wrong-shaped payload. `.all` adds successful requests (with their response body, for "succeeded but returned the wrong thing"). The level gates *only* the built-in logging — `events()` always delivers full structured events regardless. (Downloads — `downloadImage`/`downloadData` — log the line + request headers; their response headers/body are omitted since the payload is binary.)
 
-**Privacy — one rule: debug shows, release redacts.** Requests carry sensitive data (logins, payments, profiles, `Authorization`/`Cookie` headers). `redactsLogs` governs the built-in **logs**: in **debug** builds it shows everything (you're debugging — "is my auth header set?" must be answerable); in **release** it replaces both the body lines *and* the `setRedactedHeaderFields` header values (`Authorization`/`Cookie`/`Set-Cookie` by default) with `<redacted>`. Override either way with `setRedactsLogs(_:)`. One caveat on what redaction does **not** cover: `events()` always carries the **real** headers — it's your own request data, and redaction is a logging concern, not an observation one. Need more control? `setLogLevel(.none)` or filter `events()` yourself.
+**Privacy — one rule: debug shows, release redacts.** Requests carry sensitive data (logins, payments, profiles, `Authorization`/`Cookie` headers). `redactsLogs` governs the built-in **logs**: in **debug** builds it shows everything (you're debugging — "is my auth header set?" must be answerable); in **release** it replaces both the body lines *and* the `setRedactedHeaderFields` header values (`Authorization`/`Cookie`/`Set-Cookie` by default) with `<redacted>`. Override either way with `setRedactsLogs(_:)`. One boundary worth knowing: `events()` always carries the **real** headers — it's your own request data, and redaction is a logging concern rather than an observation one. For more control, `setLogLevel(.none)` or filter `events()` yourself.
 
 **Reading logs from a CLI / test / headless run.** `os.Logger` isn't visible in `swift test` / `swift run` stdout. Point the library at a file and it mirrors the same diagnostics there as plain text:
 
@@ -605,7 +605,7 @@ await networking.setLogLevel(.all)       // every request too, success or failur
 await networking.setLogFileURL(URL(fileURLWithPath: "/tmp/networking.log"))
 ```
 
-Or set it with **no code change** via the `NETWORKING_LOG_FILE` environment variable — handy for CI or an automated agent:
+Or set it from the environment with **`NETWORKING_LOG_FILE`**, leaving the code untouched — handy for CI or an automated agent:
 
 ```shell
 NETWORKING_LOG_FILE=/tmp/networking.log swift test
@@ -624,7 +624,7 @@ dir=$(xcrun simctl get_app_container <device> <bundle-id> data)
 cat "$dir/Library/Caches/networking.log"
 ```
 
-(On a physical device there's no `simctl`; fall back to Console.app / `os.Logger`.)
+(A physical device has Console.app / `os.Logger` in place of `simctl`.)
 
 ## Installing
 
@@ -656,7 +656,7 @@ swift test
 make httpbin-stop
 ```
 
-Tests default to `http://127.0.0.1:8080`; set `HTTPBIN_BASE_URL` to point elsewhere. The offline (faked) suites need no server.
+Tests default to `http://127.0.0.1:8080`; set `HTTPBIN_BASE_URL` to point elsewhere. The offline (faked) suites run on their own.
 
 ## Author
 

@@ -31,14 +31,19 @@ public struct FormDataPart {
         body += "Content-Type: \(type.contentType)\r\n\r\n"
 
         var bodyData = Data()
-        bodyData.append(body.data(using: .utf8)!)
+        bodyData.append(Data(body.utf8))
         bodyData.append(data)
-        bodyData.append("\r\n".data(using: .utf8)!)
+        bodyData.append(Data("\r\n".utf8))
 
         return bodyData as Data
     }
 
-    public init(type: FormDataPartType = .octetStream, data: Data, parameterName: String, filename: String? = nil) {
+    public init(
+        type: FormDataPartType = .octetStream,
+        data: Data,
+        parameterName: String,
+        filename: String? = nil
+    ) {
         self.type = type
         self.data = data
         self.parameterName = parameterName

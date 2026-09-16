@@ -53,7 +53,11 @@ func httpbinEchoedMap(_ response: JSONResponse, _ key: String) -> [String: Strin
 
 struct Helper {
 
-    static func removeFileIfNeeded(_ networking: Networking, path: String, cacheName: String? = nil) throws {
+    static func removeFileIfNeeded(
+        _ networking: Networking,
+        path: String,
+        cacheName: String? = nil
+    ) throws {
         let destinationURL = try networking.destinationURL(for: path, cacheName: cacheName)
         if FileManager.default.exists(at: destinationURL) {
             try FileManager.default.remove(at: destinationURL)

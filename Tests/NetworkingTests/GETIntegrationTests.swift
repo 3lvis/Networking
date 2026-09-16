@@ -3,7 +3,7 @@ import XCTest
 
 @testable import Networking
 
-class GETIntegrationTests: XCTestCase {
+final class GETIntegrationTests: XCTestCase {
     let baseURL = TestConfig.httpbinBaseURL
 
     func testGET() async throws {
@@ -47,7 +47,7 @@ class GETIntegrationTests: XCTestCase {
         let result: Result<JSONResponse, NetworkingError> = await networking.get("/invalidpath")
         switch result {
         case .success:
-            XCTFail()
+            XCTFail("a GET to a path that does not exist must fail")
         case .failure(let error):
             guard case .http(let httpError) = error else {
                 return XCTFail("expected an HTTP error, got \(error)")
@@ -166,9 +166,15 @@ class GETIntegrationTests: XCTestCase {
         let networking = Networking(baseURL: baseURL, cache: cache)
 
         let first: Result<JSONResponse, NetworkingError> = await networking.get(
-            "/get", query: [URLQueryItem(name: "value", value: "1")], cachingLevel: .memory)
+            "/get",
+            query: [URLQueryItem(name: "value", value: "1")],
+            cachingLevel: .memory
+        )
         let second: Result<JSONResponse, NetworkingError> = await networking.get(
-            "/get", query: [URLQueryItem(name: "value", value: "2")], cachingLevel: .memory)
+            "/get",
+            query: [URLQueryItem(name: "value", value: "2")],
+            cachingLevel: .memory
+        )
 
         guard case .success(let firstResponse) = first, case .success(let secondResponse) = second else {
             return XCTFail("expected both requests to succeed")
@@ -185,10 +191,15 @@ class GETIntegrationTests: XCTestCase {
         let networking = Networking(baseURL: baseURL, cache: cache)
 
         let _: Result<JSONResponse, NetworkingError> = await networking.get(
-            "/get", query: [URLQueryItem(name: "a", value: "1&b=2")], cachingLevel: .memory)
+            "/get",
+            query: [URLQueryItem(name: "a", value: "1&b=2")],
+            cachingLevel: .memory
+        )
         let second: Result<JSONResponse, NetworkingError> = await networking.get(
-            "/get", query: [URLQueryItem(name: "a", value: "1"), URLQueryItem(name: "b", value: "2")],
-            cachingLevel: .memory)
+            "/get",
+            query: [URLQueryItem(name: "a", value: "1"), URLQueryItem(name: "b", value: "2")],
+            cachingLevel: .memory
+        )
 
         guard case .success(let secondResponse) = second else {
             return XCTFail("expected the second request to succeed")

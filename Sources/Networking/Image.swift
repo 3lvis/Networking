@@ -9,20 +9,29 @@
 extension Image {
     static func find(named name: String, inBundle bundle: Bundle) -> Image {
         #if os(macOS)
-            return bundle.image(forResource: name)!
+            let found = bundle.image(forResource: name)
         #elseif os(watchOS)
-            return UIImage(named: name)!
+            let found = UIImage(named: name)
         #else
-            return UIImage(named: name, in: bundle, compatibleWith: nil)!
+            let found = UIImage(
+                named: name,
+                in: bundle,
+                compatibleWith: nil
+            )
         #endif
+        guard let found else {
+            // The asset ships inside the bundle, so its absence is a packaging fault, not a caller's.
+            fatalError("\(bundle.bundleURL.lastPathComponent) carries no image named \(name)")
+        }
+        return found
     }
 
     #if os(macOS)
         func data(_ type: NSBitmapImageRep.FileType) -> Data? {
-            let imageData = tiffRepresentation!
-            let bitmapImageRep = NSBitmapImageRep(data: imageData)!
-            let data = bitmapImageRep.representation(using: type, properties: [NSBitmapImageRep.PropertyKey: Any]())
-            return data
+            guard let imageData = tiffRepresentation, let bitmapImageRep = NSBitmapImageRep(data: imageData) else {
+                return nil
+            }
+            return bitmapImageRep.representation(using: type, properties: [NSBitmapImageRep.PropertyKey: Any]())
         }
     #endif
 

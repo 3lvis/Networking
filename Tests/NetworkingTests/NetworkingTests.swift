@@ -3,7 +3,7 @@ import XCTest
 
 @testable import Networking
 
-class NetworkingTests: XCTestCase {
+final class NetworkingTests: XCTestCase {
     let baseURL = "http://example.com"
 
     func setAuthorizationHeaderCustomValue() async throws {
