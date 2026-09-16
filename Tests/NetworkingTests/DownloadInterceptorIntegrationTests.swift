@@ -20,9 +20,7 @@ final class DownloadInterceptorIntegrationTests: XCTestCase {
         func intercept(
             _ request: URLRequest,
             next: @Sendable (URLRequest) async throws -> HTTPExchange
-        ) async throws
-            -> HTTPExchange
-        {
+        ) async throws -> HTTPExchange {
             await counter.tick()
             return try await next(request)
         }

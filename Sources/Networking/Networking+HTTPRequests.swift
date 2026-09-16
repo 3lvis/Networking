@@ -6,9 +6,7 @@ extension Networking {
         _ path: String,
         query: [URLQueryItem]? = nil,
         cachingLevel: CachingLevel = .none
-    )
-        async -> Result<T, NetworkingError>
-    {
+    ) async -> Result<T, NetworkingError> {
         return await handle(
             .get,
             path: path,
@@ -21,9 +19,7 @@ extension Networking {
         _ path: String,
         query: Q,
         cachingLevel: CachingLevel = .none
-    ) async
-        -> Result<T, NetworkingError>
-    {
+    ) async -> Result<T, NetworkingError> {
         return await queryEncodeAndHandle(
             .get,
             path: path,
@@ -81,9 +77,7 @@ extension Networking {
         _ path: String,
         parts: [FormDataPart],
         fields: [String: String] = [:]
-    ) async
-        -> Result<T, NetworkingError>
-    {
+    ) async -> Result<T, NetworkingError> {
         return await handle(
             .post,
             path: path,
@@ -178,9 +172,7 @@ extension Networking {
         _ path: String,
         parts: [FormDataPart],
         fields: [String: String] = [:]
-    ) async
-        -> Result<T, NetworkingError>
-    {
+    ) async -> Result<T, NetworkingError> {
         return await handle(
             .put,
             path: path,
@@ -275,9 +267,7 @@ extension Networking {
         _ path: String,
         parts: [FormDataPart],
         fields: [String: String] = [:]
-    ) async
-        -> Result<T, NetworkingError>
-    {
+    ) async -> Result<T, NetworkingError> {
         return await handle(
             .patch,
             path: path,
@@ -410,9 +400,7 @@ extension Networking {
         _ requestType: RequestType,
         path: String,
         form: some Encodable
-    ) async
-        -> Result<T, NetworkingError>
-    {
+    ) async -> Result<T, NetworkingError> {
         let fields: [String: String]
         do {
             fields = try formFields(from: form)
