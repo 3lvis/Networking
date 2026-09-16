@@ -4,8 +4,5 @@
   "indentation": {
     "spaces": 4
   },
-  "maximumBlankLines": 1,
-  "multiElementCollectionTrailingCommas": false,
-  "respectsExistingLineBreaks": true,
-  "lineBreakBeforeEachArgument": false
+  "multiElementCollectionTrailingCommas": false
 }

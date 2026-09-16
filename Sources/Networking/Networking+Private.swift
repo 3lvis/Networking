@@ -65,9 +65,7 @@ extension Networking {
         path: String,
         cacheName: String?,
         cachingLevel: CachingLevel
-    )
-        throws -> (HTTPURLResponse, NSError?)
-    {
+    ) throws -> (HTTPURLResponse, NSError?) {
         var error: NSError?
         let url = try composedURL(with: path)
         let response = HTTPURLResponse(
@@ -396,9 +394,7 @@ extension Networking {
         path: String,
         cacheName: String?,
         cachingLevel: CachingLevel
-    ) throws
-        -> Image?
-    {
+    ) throws -> Image? {
         try cacheStore.storeImage(
             data: data,
             forResource: cacheResource(for: path, cacheName: cacheName),

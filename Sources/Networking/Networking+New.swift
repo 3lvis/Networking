@@ -186,9 +186,7 @@ extension Networking {
         _ request: URLRequest,
         collector: MetricsCollector? = nil,
         cached: HTTPExchange? = nil
-    ) async throws
-        -> HTTPExchange
-    {
+    ) async throws -> HTTPExchange {
         let session = self.session
         let base: @Sendable (URLRequest) async throws -> HTTPExchange = { request in
             if let cached { return cached }
@@ -364,9 +362,7 @@ extension Networking {
         _ fakeRequest: FakeRequest,
         path: String,
         requestType: RequestType
-    )
-        async throws -> (Result<T, NetworkingError>, statusCode: Int, byteCount: Int)
-    {
+    ) async throws -> (Result<T, NetworkingError>, statusCode: Int, byteCount: Int) {
         let (response, _) = try handleFakeRequest(
             fakeRequest,
             path: path,
@@ -398,9 +394,7 @@ extension Networking {
         requestType: RequestType,
         body: RequestBody,
         query: [URLQueryItem]
-    ) throws
-        -> URLRequest
-    {
+    ) throws -> URLRequest {
         // Split a query embedded in the path so it survives URL building instead of being
         // percent-encoded into the path (encodeUTF8 uses .urlPathAllowed, which escapes "?").
         let pathParts = path.split(
@@ -506,9 +500,7 @@ extension Networking {
         responseData: Data,
         path: String,
         httpResponse: HTTPURLResponse
-    )
-        -> Result<T, NetworkingError>
-    {
+    ) -> Result<T, NetworkingError> {
         if T.self == Data.self {
             // Guarded by the test on the line above: T is Data here.
             // oida:disable:next force_cast
