@@ -130,10 +130,7 @@ public actor Networking {
     func record(_ message: String, level: OSLogType) {
         guard logLevel != .none else { return }
         logger.log(level: level, "\(message, privacy: .public)")
-        appendToLogFile(message)
-    }
 
-    private func appendToLogFile(_ message: String) {
         guard let logFileURL else { return }
         let entry = "\(Date().ISO8601Format()) \(message)\n"
         guard let data = entry.data(using: .utf8) else { return }
