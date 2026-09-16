@@ -30,7 +30,7 @@ final class NewNetworkingIntegrationTests: XCTestCase {
             URLQueryItem(name: "pickup_latitude", value: "\(pickupCoordinate.latitude)"),
             URLQueryItem(name: "pickup_longitude", value: "\(pickupCoordinate.longitude)"),
             URLQueryItem(name: "delivery_latitude", value: "\(deliveryCoordinate.latitude)"),
-            URLQueryItem(name: "delivery_longitude", value: "\(deliveryCoordinate.longitude)")
+            URLQueryItem(name: "delivery_longitude", value: "\(deliveryCoordinate.longitude)"),
         ]
 
         let result: Result<Friend, NetworkingError> = await networking.get("/get", query: query)
