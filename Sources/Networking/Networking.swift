@@ -34,10 +34,6 @@ public actor Networking {
         case delete = "DELETE"
     }
 
-    enum SessionTaskType: String {
-        case data, upload, download
-    }
-
     enum ResponseType {
         case json
         case data
