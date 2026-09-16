@@ -73,8 +73,7 @@ public actor Networking {
     /// A stream of observability events — one `.started` then one `.completed` per request. Each call
     /// returns its own multicast stream; the buffer keeps the newest 256 events for a slow consumer.
     public func events() -> AsyncStream<NetworkingEvent> {
-        let (stream, continuation) = AsyncStream.makeStream(
-            of: NetworkingEvent.self, bufferingPolicy: .bufferingNewest(256))
+        let (stream, continuation) = AsyncStream.makeStream(of: NetworkingEvent.self, bufferingPolicy: .bufferingNewest(256))
         let id = UUID()
         streamContinuations[id] = continuation
         continuation.onTermination = { [weak self] _ in
@@ -208,8 +207,7 @@ public actor Networking {
             folderName: Networking.domain
         )
         self.logger = logger ?? Networking.defaultLogger
-        self.logFileURL = ProcessInfo.processInfo.environment["NETWORKING_LOG_FILE"].flatMap(
-            Networking.resolveLogFileURL)
+        self.logFileURL = ProcessInfo.processInfo.environment["NETWORKING_LOG_FILE"].flatMap(Networking.resolveLogFileURL)
         // Sweep aged-out files off the request path so the disk cache can't grow without bound (one shard
         // per launch — see `CacheStore.sweepExpired`).
         let store = self.cacheStore

@@ -8,8 +8,7 @@ final class PATCHIntegrationTests: XCTestCase {
 
     func testPATCH() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result: Result<JSONResponse, NetworkingError> = await networking.patch(
-            "/patch", body: ["username": "jameson", "password": "secret"])
+        let result: Result<JSONResponse, NetworkingError> = await networking.patch("/patch", body: ["username": "jameson", "password": "secret"])
         switch result {
         case .success(let response):
             let json = httpbinEchoedMap(response, "json")
@@ -37,8 +36,7 @@ final class PATCHIntegrationTests: XCTestCase {
 
     func testPATCHWithIvalidPath() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result: Result<JSONResponse, NetworkingError> = await networking.patch(
-            "/posdddddt", body: ["username": "jameson", "password": "secret"])
+        let result: Result<JSONResponse, NetworkingError> = await networking.patch("/posdddddt", body: ["username": "jameson", "password": "secret"])
         switch result {
         case .success:
             XCTFail("a PATCH to a path that does not exist must fail")

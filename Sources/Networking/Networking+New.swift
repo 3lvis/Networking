@@ -98,8 +98,7 @@ extension Networking {
                     )
                 {
                     // Run the cache hit back out through the interceptor chain so validators apply to it too.
-                    let exchange = try await perform(
-                        request, cached: HTTPExchange(data: cached.body, response: cachedResponse))
+                    let exchange = try await perform(request, cached: HTTPExchange(data: cached.body, response: cachedResponse))
                     result = handleResponse(
                         responseData: exchange.data,
                         response: exchange.response,
@@ -490,8 +489,7 @@ extension Networking {
         case .cancelled:
             return .failure(.cancelled)
         case .redirection, .clientError, .serverError, .unknown:
-            let error = HTTPError(
-                statusCode: statusCode, metadata: ResponseMetadata(response: httpResponse, body: responseData))
+            let error = HTTPError(statusCode: statusCode, metadata: ResponseMetadata(response: httpResponse, body: responseData))
             return .failure(.http(error))
         }
     }

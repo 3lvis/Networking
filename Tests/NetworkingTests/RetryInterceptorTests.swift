@@ -27,10 +27,7 @@ final class RetryInterceptorTests: XCTestCase {
         let counter: CallCounter
         let outcomeForAttempt: @Sendable (Int) -> ScriptedOutcome
 
-        func intercept(
-            _ request: URLRequest,
-            next: @Sendable (URLRequest) async throws -> HTTPExchange
-        ) async throws -> HTTPExchange {
+        func intercept(_ request: URLRequest, next: @Sendable (URLRequest) async throws -> HTTPExchange) async throws -> HTTPExchange {
             let attempt = await counter.tick()
             switch outcomeForAttempt(attempt) {
             case .status(let code, let headers):

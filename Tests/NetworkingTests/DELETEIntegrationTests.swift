@@ -46,8 +46,7 @@ final class DELETEIntegrationTests: XCTestCase {
 
     func testDELETEWithURLEncodedParameters() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result: Result<JSONResponse, NetworkingError> = await networking.delete(
-            "/delete", query: [URLQueryItem(name: "userId", value: "25")])
+        let result: Result<JSONResponse, NetworkingError> = await networking.delete("/delete", query: [URLQueryItem(name: "userId", value: "25")])
         switch result {
         case .success(let response):
             XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/delete?userId=25")

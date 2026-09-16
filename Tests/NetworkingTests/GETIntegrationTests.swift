@@ -82,8 +82,7 @@ final class GETIntegrationTests: XCTestCase {
 
     func testGETWithURLEncodedParameters() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result: Result<JSONResponse, NetworkingError> = await networking.get(
-            "/get", query: [URLQueryItem(name: "count", value: "25")])
+        let result: Result<JSONResponse, NetworkingError> = await networking.get("/get", query: [URLQueryItem(name: "count", value: "25")])
         switch result {
         case .success(let response):
             XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/get?count=25")
@@ -94,8 +93,7 @@ final class GETIntegrationTests: XCTestCase {
 
     func testGETWithURLEncodedParametersWithExistingQuery() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result: Result<JSONResponse, NetworkingError> = await networking.get(
-            "/get?accountId=123", query: [URLQueryItem(name: "userId", value: "5")])
+        let result: Result<JSONResponse, NetworkingError> = await networking.get("/get?accountId=123", query: [URLQueryItem(name: "userId", value: "5")])
         switch result {
         case .success(let response):
             XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/get?accountId=123&userId=5")
@@ -106,8 +104,7 @@ final class GETIntegrationTests: XCTestCase {
 
     func testGETWithURLEncodedParametersWithPercentEncoding() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result: Result<JSONResponse, NetworkingError> = await networking.get(
-            "/get", query: [URLQueryItem(name: "name", value: "Elvis Nuñez")])
+        let result: Result<JSONResponse, NetworkingError> = await networking.get("/get", query: [URLQueryItem(name: "name", value: "Elvis Nuñez")])
         switch result {
         case .success(let response):
             XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/get?name=Elvis%20Nu%C3%B1ez")
@@ -146,8 +143,7 @@ final class GETIntegrationTests: XCTestCase {
 
         let primed: Result<JSONResponse, NetworkingError> = await networking.get("/uuid", cachingLevel: .memoryAndFile)
         let _: Result<JSONResponse, NetworkingError> = await networking.get("/uuid", cachingLevel: .none)
-        let afterwards: Result<JSONResponse, NetworkingError> = await networking.get(
-            "/uuid", cachingLevel: .memoryAndFile)
+        let afterwards: Result<JSONResponse, NetworkingError> = await networking.get("/uuid", cachingLevel: .memoryAndFile)
 
         guard case .success(let primedResponse) = primed, case .success(let afterwardsResponse) = afterwards else {
             return XCTFail("expected both cached requests to succeed")
@@ -206,9 +202,7 @@ final class GETIntegrationTests: XCTestCase {
         }
         let url = secondResponse.body.string(for: "url") ?? ""
         XCTAssertFalse(url.contains("%26"), "the second request must not be served the first request's cached body")
-        XCTAssertTrue(
-            url.contains("a=1") && url.contains("b=2"),
-            "the second request must reflect its own parameters, got: \(url)")
+        XCTAssertTrue(url.contains("a=1") && url.contains("b=2"), "the second request must reflect its own parameters, got: \(url)")
     }
 
     // Full-URL GETs to different hosts but the same path must not collide. A key built from only
@@ -237,9 +231,7 @@ final class GETIntegrationTests: XCTestCase {
             return XCTFail("expected the second request to succeed")
         }
         let url = secondResponse.body.string(for: "url") ?? ""
-        XCTAssertTrue(
-            url.contains(aliasHost),
-            "a request to a different host must not receive the first host's cached body, got: \(url)")
+        XCTAssertTrue(url.contains(aliasHost), "a request to a different host must not receive the first host's cached body, got: \(url)")
     }
 
     // A cache hit must carry the original response's status code and headers, not fabricated ones.

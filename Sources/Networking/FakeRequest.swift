@@ -39,9 +39,7 @@ struct FakeRequest {
         let lookupPathParts = evaluatedPath.components(separatedBy: "/")
 
         for (originalFakedPath, fakeRequest) in requests {
-            guard let replacedValues = captures(from: originalFakedPath, matching: lookupPathParts),
-                originalFakedPath.replacing(replacedValues) == path
-            else { continue }
+            guard let replacedValues = captures(from: originalFakedPath, matching: lookupPathParts), originalFakedPath.replacing(replacedValues) == path else { continue }
 
             guard case .data(let data) = fakeRequest.payload, let responseString = String(data: data, encoding: .utf8)
             else { continue }

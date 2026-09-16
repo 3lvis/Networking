@@ -37,9 +37,7 @@ final class CacheStore: @unchecked Sendable {
         let folderPath = "\(folderName)/\(Self.shardName(for: component))"
         let finalPath = "\(folderPath)/\(component)"
 
-        guard let url = URL(string: finalPath),
-            let cachesURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
-        else {
+        guard let url = URL(string: finalPath), let cachesURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else {
             throw NSError(
                 domain: folderName,
                 code: 9999,
@@ -126,8 +124,7 @@ final class CacheStore: @unchecked Sendable {
                     memory.setObject(returnedObject as AnyObject, forKey: key as AnyObject)
                     // Re-warm: bump the file's mtime so an entry in active use never expires. Only happens
                     // on a memory miss, so it's ~once per entry per launch — no explicit debounce needed.
-                    try? FileManager.default.setAttributes(
-                        [.modificationDate: Date()], ofItemAtPath: destinationURL.path)
+                    try? FileManager.default.setAttributes([.modificationDate: Date()], ofItemAtPath: destinationURL.path)
                 }
 
                 return returnedObject

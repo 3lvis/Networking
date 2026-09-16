@@ -446,8 +446,7 @@ extension FakeRequestTests {
 
         await networking.fakePOST("/story", response: [["name": "Elvis"]])
 
-        let result: Result<[[String: AnyCodable]], NetworkingError> = await networking.post(
-            "/story", body: ["username": "jameson", "password": "secret"])
+        let result: Result<[[String: AnyCodable]], NetworkingError> = await networking.post("/story", body: ["username": "jameson", "password": "secret"])
         switch result {
         case .success(let stories):
             XCTAssertEqual(stories.first?.string(for: "name"), "Elvis")
@@ -536,8 +535,7 @@ extension FakeRequestTests {
 
         await networking.fakePUT("/story", response: [["name": "Elvis"]])
 
-        let result: Result<[[String: AnyCodable]], NetworkingError> = await networking.put(
-            "/story", body: ["username": "jameson", "password": "secret"])
+        let result: Result<[[String: AnyCodable]], NetworkingError> = await networking.put("/story", body: ["username": "jameson", "password": "secret"])
         switch result {
         case .success(let stories):
             XCTAssertEqual(stories.first?.string(for: "name"), "Elvis")
@@ -603,8 +601,7 @@ extension FakeRequestTests {
 
         await networking.fakePATCH("/story", response: [["name": "Elvis"]])
 
-        let result: Result<[[String: AnyCodable]], NetworkingError> = await networking.patch(
-            "/story", body: ["username": "jameson", "password": "secret"])
+        let result: Result<[[String: AnyCodable]], NetworkingError> = await networking.patch("/story", body: ["username": "jameson", "password": "secret"])
         switch result {
         case .success(let stories):
             XCTAssertEqual(stories.first?.string(for: "name"), "Elvis")
@@ -856,8 +853,7 @@ extension FakeRequestTests {
             "confirmation_code": "confirmationCode"
         ]
 
-        let result: Result<JSONResponse, NetworkingError> = await networking.post(
-            "/auth/verify_confirmation_code", body: parameters)
+        let result: Result<JSONResponse, NetworkingError> = await networking.post("/auth/verify_confirmation_code", body: parameters)
         switch result {
         case .success(let response):
             let headers = response.headers

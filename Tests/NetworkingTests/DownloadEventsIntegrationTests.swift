@@ -21,9 +21,7 @@ final class DownloadEventsIntegrationTests: XCTestCase {
             2,
             "downloadImage should emit .started and .completed; got \(events)"
         )
-        guard case .started(let startContext) = events.first,
-            case .completed(let endContext, let outcome, _, _) = events.last
-        else {
+        guard case .started(let startContext) = events.first, case .completed(let endContext, let outcome, _, _) = events.last else {
             return XCTFail("expected .started then .completed, got \(events)")
         }
         XCTAssertEqual(startContext.id, endContext.id)

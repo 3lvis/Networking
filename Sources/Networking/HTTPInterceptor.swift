@@ -15,10 +15,7 @@ public struct HTTPExchange: Sendable {
 /// A composable hook wrapping every verb request. `next` runs the rest of the chain (innermost is the real
 /// network call); calling it again replays the request — the basis for retry and auth-refresh.
 public protocol HTTPInterceptor: Sendable {
-    func intercept(
-        _ request: URLRequest,
-        next: @Sendable (URLRequest) async throws -> HTTPExchange
-    ) async throws
+    func intercept(_ request: URLRequest, next: @Sendable (URLRequest) async throws -> HTTPExchange) async throws
         -> HTTPExchange
 }
 
@@ -40,10 +37,7 @@ public struct AuthRefreshInterceptor: HTTPInterceptor {
         self.coordinator = RefreshCoordinator(refresh)
     }
 
-    public func intercept(
-        _ request: URLRequest,
-        next: @Sendable (URLRequest) async throws -> HTTPExchange
-    ) async throws -> HTTPExchange {
+    public func intercept(_ request: URLRequest, next: @Sendable (URLRequest) async throws -> HTTPExchange) async throws -> HTTPExchange {
         let exchange = try await next(request)
         guard triggeringStatusCodes.contains(exchange.response.statusCode) else { return exchange }
         guard let refreshedValue = try await coordinator.refreshOnce() else { return exchange }
@@ -81,10 +75,7 @@ public struct RetryInterceptor: HTTPInterceptor {
         self.retryableMethods = Set(retryableMethods.map { $0.uppercased() })
     }
 
-    public func intercept(
-        _ request: URLRequest,
-        next: @Sendable (URLRequest) async throws -> HTTPExchange
-    ) async throws -> HTTPExchange {
+    public func intercept(_ request: URLRequest, next: @Sendable (URLRequest) async throws -> HTTPExchange) async throws -> HTTPExchange {
         let methodAllowsRetry = retryableMethods.contains((request.httpMethod ?? "GET").uppercased())
         var attempt = 1
         while true {
@@ -115,9 +106,7 @@ public struct RetryInterceptor: HTTPInterceptor {
 
     // Retry-After is either a count of seconds or an HTTP-date (RFC 9110).
     static func retryAfterDelay(from response: HTTPURLResponse) -> Duration? {
-        guard let value = response.value(forHTTPHeaderField: "Retry-After")?.trimmingCharacters(in: .whitespaces),
-            !value.isEmpty
-        else { return nil }
+        guard let value = response.value(forHTTPHeaderField: "Retry-After")?.trimmingCharacters(in: .whitespaces), !value.isEmpty else { return nil }
         if let seconds = Int(value) {
             return .seconds(max(0, seconds))
         }
@@ -145,18 +134,14 @@ public struct ResponseValidatorInterceptor: HTTPInterceptor {
         self.validate = validate
     }
 
-    public func intercept(
-        _ request: URLRequest,
-        next: @Sendable (URLRequest) async throws -> HTTPExchange
-    ) async throws -> HTTPExchange {
+    public func intercept(_ request: URLRequest, next: @Sendable (URLRequest) async throws -> HTTPExchange) async throws -> HTTPExchange {
         let exchange = try await next(request)
         guard (200..<300).contains(exchange.response.statusCode) else { return exchange }
         switch validate(exchange) {
         case .valid:
             return exchange
         case .invalid(let reason):
-            throw NetworkingError.validation(
-                reason: reason, ResponseMetadata(response: exchange.response, body: exchange.data))
+            throw NetworkingError.validation(reason: reason, ResponseMetadata(response: exchange.response, body: exchange.data))
         }
     }
 }
