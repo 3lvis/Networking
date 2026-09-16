@@ -735,11 +735,12 @@ extension Networking {
     /// Completes the in-flight download for `path` with `URLError.cancelled`.
     public func cancelImageDownload(_ path: String) async throws {
         let url = try composedURL(with: path)
-        await cancelRequest(
-            .data,
-            requestType: .get,
-            url: url
-        )
+        let (dataTasks, _, _) = await session.tasks
+        Self.firstTask(
+            matching: .get,
+            url: url,
+            among: dataTasks
+        )?.cancel()
     }
 
     public func fakeImageDownload(

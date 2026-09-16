@@ -347,31 +347,14 @@ extension Networking {
         return (exchange.data, exchange.response)
     }
 
-    // The cancel path is Networking's own, reached from the verbs in another file.
-    // oida:disable:next no_single_use_void_functions
-    func cancelRequest(
-        _ sessionTaskType: SessionTaskType,
-        requestType: RequestType,
-        url: URL
-    ) async {
-        let (dataTasks, uploadTasks, downloadTasks) = await session.tasks
-        var sessionTasks = [URLSessionTask]()
-        switch sessionTaskType {
-        case .data:
-            sessionTasks = dataTasks
-        case .download:
-            sessionTasks = downloadTasks
-        case .upload:
-            sessionTasks = uploadTasks
-        }
-
-        for sessionTask in sessionTasks {
-            if sessionTask.originalRequest?.httpMethod == requestType.rawValue
-                && sessionTask.originalRequest?.url?.absoluteString == url.absoluteString
-            {
-                sessionTask.cancel()
-                break
-            }
+    static func firstTask(
+        matching requestType: RequestType,
+        url: URL,
+        among tasks: [URLSessionTask]
+    ) -> URLSessionTask? {
+        tasks.first {
+            $0.originalRequest?.httpMethod == requestType.rawValue
+                && $0.originalRequest?.url?.absoluteString == url.absoluteString
         }
     }
 
