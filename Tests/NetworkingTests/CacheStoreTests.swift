@@ -97,8 +97,7 @@ final class CacheStoreTests: XCTestCase {
                 level: .memoryAndFile,
                 asImage: false
             ))
-        let mtime = try XCTUnwrap(
-            url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate)
+        let mtime = try XCTUnwrap(url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate)
         XCTAssertLessThan(
             Date().timeIntervalSince(mtime),
             5,

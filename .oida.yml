@@ -16,6 +16,7 @@ opt_in_rules:
   # word is already in the code below it, a banner naming what the declarations already name.
   - comment_adds_no_word
   - no_mark_comments
+  - no_single_use_void_functions
   # Auto-fixable and mechanical — `bin/lint --fix` applies these, no judgement needed.
   - modifier_order
   - self_binding
@@ -58,13 +59,6 @@ disabled_rules:
   - sorted_imports
   - todo # work is tracked in PRs and LEARNINGS, not in-code markers
   - unused_closure_parameter
-  # Length is not a defect. A long function is refactored for a reason, never for a count.
-  - file_length
-  - type_body_length
-  - line_length
-  - function_body_length
-  - large_tuple
-  - function_parameter_count
 
 excluded:
   # Never lint vendored or generated code, wherever the build puts it. Matched by location, not path,
@@ -83,13 +77,11 @@ comment_adds_no_word:
 no_mark_comments:
   severity: error
 
-cyclomatic_complexity:
-  ignores_case_statements: true
-
 opening_brace:
-  # A condition spanning several lines gets its brace on its own line, so the body is not mistaken
-  # for another condition. That is what the formatter emits.
+  # A condition or a signature that spans several lines gets its brace on its own line — that is what
+  # the formatter emits, and asking for anything else is asking for a shape it will undo.
   ignore_multiline_statement_conditions: true
+  ignore_multiline_function_signatures: true
 
 identifier_name:
   min_length: 1
@@ -97,10 +89,6 @@ identifier_name:
 
 type_name:
   max_length: 45
-
-nesting:
-  type_level:
-    warning: 2
 
 file_header:
   severity: error
@@ -111,15 +99,12 @@ force_unwrapping:
 
 multiline_call_arguments:
   max_number_of_single_line_parameters: 2
-  requires_single_line: true
 
 multiline_parameters:
   max_number_of_single_line_parameters: 2
-  requires_single_line: true
 
 multiline_conditions:
   max_number_of_single_line_parameters: 2
-  requires_single_line: true
 
 grouped_imports:
   # This package ships one product and takes no dependencies, so "ours" is the module itself and its

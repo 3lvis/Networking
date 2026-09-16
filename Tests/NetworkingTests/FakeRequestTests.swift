@@ -70,8 +70,12 @@ final class FakeRequestTests: XCTestCase {
             "name": "Name {userID}"
         ]
         let request = FakeRequest(
-            payload: .data(try JSONSerialization.data(withJSONObject: json)), responseType: .json, headerFields: nil,
-            statusCode: 200, delay: 0)
+            payload: .data(try JSONSerialization.data(withJSONObject: json)),
+            responseType: .json,
+            headerFields: nil,
+            statusCode: 200,
+            delay: 0
+        )
         let existingRequests = [Networking.RequestType.get: ["/users/{userID}": request]]
         let result = try FakeRequest.find(
             ofType: .get,
@@ -91,8 +95,12 @@ final class FakeRequestTests: XCTestCase {
             "name": "Name {userID}"
         ]
         let request = FakeRequest(
-            payload: .data(try JSONSerialization.data(withJSONObject: json)), responseType: .json, headerFields: nil,
-            statusCode: 200, delay: 0)
+            payload: .data(try JSONSerialization.data(withJSONObject: json)),
+            responseType: .json,
+            headerFields: nil,
+            statusCode: 200,
+            delay: 0
+        )
         let existingRequests = [
             Networking.RequestType.get: [
                 "/users/ados": request,
@@ -122,8 +130,12 @@ final class FakeRequestTests: XCTestCase {
             "company": "Company {companyID}"
         ]
         let request = FakeRequest(
-            payload: .data(try JSONSerialization.data(withJSONObject: json)), responseType: .json, headerFields: nil,
-            statusCode: 200, delay: 0)
+            payload: .data(try JSONSerialization.data(withJSONObject: json)),
+            responseType: .json,
+            headerFields: nil,
+            statusCode: 200,
+            delay: 0
+        )
         let existingRequests = [Networking.RequestType.get: ["/users/{userID}/companies/{companyID}": request]]
         let result = try FakeRequest.find(
             ofType: .get,
@@ -146,8 +158,12 @@ final class FakeRequestTests: XCTestCase {
             "product": "Product {productID}"
         ]
         let request = FakeRequest(
-            payload: .data(try JSONSerialization.data(withJSONObject: json)), responseType: .json, headerFields: nil,
-            statusCode: 200, delay: 0)
+            payload: .data(try JSONSerialization.data(withJSONObject: json)),
+            responseType: .json,
+            headerFields: nil,
+            statusCode: 200,
+            delay: 0
+        )
         let existingRequests = [
             Networking.RequestType.get: [
                 "/users/{userID}/companies/{companyID}/products/a": request,
@@ -161,7 +177,10 @@ final class FakeRequestTests: XCTestCase {
             ]
         ]
         let result = try FakeRequest.find(
-            ofType: .get, forPath: "/users/10/companies/20/products/30", in: existingRequests)
+            ofType: .get,
+            forPath: "/users/10/companies/20/products/30",
+            in: existingRequests
+        )
 
         let expected = [
             "user": "User 10",
@@ -187,8 +206,12 @@ final class FakeRequestTests: XCTestCase {
         ]
 
         let request = FakeRequest(
-            payload: .data(try JSONSerialization.data(withJSONObject: json)), responseType: .json, headerFields: nil,
-            statusCode: 200, delay: 0)
+            payload: .data(try JSONSerialization.data(withJSONObject: json)),
+            responseType: .json,
+            headerFields: nil,
+            statusCode: 200,
+            delay: 0
+        )
         let existingRequests = [
             Networking.RequestType.get: [
                 "resource1/{resourceID1}/resource2/{resourceID2}/resource3/{resourceID3}/resource4/{resourceID4}/resource5/{resourceID5}/resource6/{resourceID6}/resource7/{resourceID7}/resource8/{resourceID8}/resource9/{resourceID9}/resource10/{resourceID10}":
@@ -318,7 +341,10 @@ extension FakeRequestTests {
         XCTAssertGreaterThan(httpError.metadata.body.count, 512)
         XCTAssertEqual(try httpError.metadata.decode(ServerError.self).error, longMessage)
         XCTAssertEqual(
-            httpError.metadata.bodySnippet?.hasSuffix("… (truncated)"), true, "the snippet stays a log excerpt")
+            httpError.metadata.bodySnippet?.hasSuffix("… (truncated)"),
+            true,
+            "the snippet stays a log excerpt"
+        )
     }
 
     func testFakeGETUsingFile() async throws {

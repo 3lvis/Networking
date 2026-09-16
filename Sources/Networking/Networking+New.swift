@@ -46,7 +46,11 @@ extension Networking {
                 in: fakeRequests
             ) {
                 let fakeContext = RequestContext(
-                    id: requestID, requestType: requestType, url: try? composedURL(with: path), headers: headerFields)
+                    id: requestID,
+                    requestType: requestType,
+                    url: try? composedURL(with: path),
+                    headers: headerFields
+                )
                 context = fakeContext
                 emit(.started(fakeContext))
                 let (fakeResult, fakeStatus, fakeBytes): (Result<T, NetworkingError>, Int, Int) =
@@ -66,7 +70,11 @@ extension Networking {
                     query: query
                 )
                 let requestContext = RequestContext(
-                    id: requestID, requestType: requestType, url: request.url, headers: request.allHTTPHeaderFields)
+                    id: requestID,
+                    requestType: requestType,
+                    url: request.url,
+                    headers: request.allHTTPHeaderFields
+                )
                 context = requestContext
                 emit(.started(requestContext))
 
@@ -75,11 +83,19 @@ extension Networking {
                 let cacheKey = cacheKey(for: request, fallbackPath: path)
                 if cachingLevel != .none,
                     let cachedData = try objectFromCache(
-                        for: path, cacheName: cacheKey, cachingLevel: cachingLevel, responseType: .json) as? Data,
+                        for: path,
+                        cacheName: cacheKey,
+                        cachingLevel: cachingLevel,
+                        responseType: .json
+                    ) as? Data,
                     let cached = try? JSONDecoder().decode(CachedResponse.self, from: cachedData),
                     let url = request.url,
                     let cachedResponse = HTTPURLResponse(
-                        url: url, statusCode: cached.statusCode, httpVersion: nil, headerFields: cached.headers)
+                        url: url,
+                        statusCode: cached.statusCode,
+                        httpVersion: nil,
+                        headerFields: cached.headers
+                    )
                 {
                     // Run the cache hit back out through the interceptor chain so validators apply to it too.
                     let exchange = try await perform(
@@ -98,7 +114,10 @@ extension Networking {
                     let responseData = exchange.data
                     let response: URLResponse = exchange.response
                     let networkResult: Result<T, NetworkingError> = handleResponse(
-                        responseData: responseData, response: response, path: path)
+                        responseData: responseData,
+                        response: response,
+                        path: path
+                    )
                     if cachingLevel != .none,
                         case .success = networkResult,
                         let httpResponse = response as? HTTPURLResponse
@@ -108,10 +127,17 @@ extension Networking {
                                 (key as? String).map { ($0, "\(value)") }
                             })
                         let envelope = CachedResponse(
-                            statusCode: httpResponse.statusCode, headers: headers, body: responseData)
+                            statusCode: httpResponse.statusCode,
+                            headers: headers,
+                            body: responseData
+                        )
                         if let encoded = try? JSONEncoder().encode(envelope) {
                             try? cacheOrPurgeData(
-                                data: encoded, path: path, cacheName: cacheKey, cachingLevel: cachingLevel)
+                                data: encoded,
+                                path: path,
+                                cacheName: cacheKey,
+                                cachingLevel: cachingLevel
+                            )
                         }
                     }
                     result = networkResult
@@ -128,7 +154,11 @@ extension Networking {
             // .started/.completed so observers see every request.
             if context == nil {
                 let errorContext = RequestContext(
-                    id: requestID, requestType: requestType, url: nil, headers: headerFields)
+                    id: requestID,
+                    requestType: requestType,
+                    url: nil,
+                    headers: headerFields
+                )
                 context = errorContext
                 emit(.started(errorContext))
             }
@@ -138,8 +168,15 @@ extension Networking {
         let duration = clock.now - startInstant
         guard let context else { return result }
         return complete(
-            result, context: context, statusCode: statusCode, byteCount: byteCount, metrics: metrics,
-            duration: duration, requestBody: body, responseMetadata: responseMetadata)
+            result,
+            context: context,
+            statusCode: statusCode,
+            byteCount: byteCount,
+            metrics: metrics,
+            duration: duration,
+            requestBody: body,
+            responseMetadata: responseMetadata
+        )
     }
 
     // Runs the interceptor chain. On a cache hit, `cached` is the base result the chain folds around (no
@@ -192,8 +229,14 @@ extension Networking {
             outcome = .failure(error)
         }
         logCompletion(
-            context: context, result: result, statusCode: statusCode, byteCount: byteCount, duration: duration,
-            requestBody: requestBody, responseMetadata: responseMetadata)
+            context: context,
+            result: result,
+            statusCode: statusCode,
+            byteCount: byteCount,
+            duration: duration,
+            requestBody: requestBody,
+            responseMetadata: responseMetadata
+        )
         emit(
             .completed(
                 context,
@@ -279,7 +322,11 @@ extension Networking {
     > {
         let requestID = UUID()
         let context = RequestContext(
-            id: requestID, requestType: requestType, url: try? composedURL(with: path), headers: headerFields)
+            id: requestID,
+            requestType: requestType,
+            url: try? composedURL(with: path),
+            headers: headerFields
+        )
         emit(.started(context))
         return complete(
             .failure(error),
@@ -336,7 +383,10 @@ extension Networking {
             responseData = Data()
         }
         let result: Result<T, NetworkingError> = handleResponse(
-            responseData: responseData, response: response, path: path)
+            responseData: responseData,
+            response: response,
+            path: path
+        )
         return (result, response.statusCode, responseData.count)
     }
 

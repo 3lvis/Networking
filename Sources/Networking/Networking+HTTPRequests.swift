@@ -99,7 +99,10 @@ extension Networking {
         Void, NetworkingError
     > {
         let result: Result<Data, NetworkingError> = await handle(
-            .post, path: path, body: .multipart(fields: fields, parts: parts))
+            .post,
+            path: path,
+            body: .multipart(fields: fields, parts: parts)
+        )
         return result.map { _ in () }
     }
 
@@ -121,7 +124,10 @@ extension Networking {
         contentType: String
     ) async -> Result<Void, NetworkingError> {
         let result: Result<Data, NetworkingError> = await handle(
-            .post, path: path, body: .raw(data, contentType: contentType))
+            .post,
+            path: path,
+            body: .raw(data, contentType: contentType)
+        )
         return result.map { _ in () }
     }
 
@@ -190,7 +196,10 @@ extension Networking {
         Void, NetworkingError
     > {
         let result: Result<Data, NetworkingError> = await handle(
-            .put, path: path, body: .multipart(fields: fields, parts: parts))
+            .put,
+            path: path,
+            body: .multipart(fields: fields, parts: parts)
+        )
         return result.map { _ in () }
     }
 
@@ -212,7 +221,10 @@ extension Networking {
         contentType: String
     ) async -> Result<Void, NetworkingError> {
         let result: Result<Data, NetworkingError> = await handle(
-            .put, path: path, body: .raw(data, contentType: contentType))
+            .put,
+            path: path,
+            body: .raw(data, contentType: contentType)
+        )
         return result.map { _ in () }
     }
 
@@ -281,7 +293,10 @@ extension Networking {
         Void, NetworkingError
     > {
         let result: Result<Data, NetworkingError> = await handle(
-            .patch, path: path, body: .multipart(fields: fields, parts: parts))
+            .patch,
+            path: path,
+            body: .multipart(fields: fields, parts: parts)
+        )
         return result.map { _ in () }
     }
 
@@ -303,7 +318,10 @@ extension Networking {
         contentType: String
     ) async -> Result<Void, NetworkingError> {
         let result: Result<Data, NetworkingError> = await handle(
-            .patch, path: path, body: .raw(data, contentType: contentType))
+            .patch,
+            path: path,
+            body: .raw(data, contentType: contentType)
+        )
         return result.map { _ in () }
     }
 
@@ -335,7 +353,11 @@ extension Networking {
 
     public func delete<Q: Encodable>(_ path: String, query: Q) async -> Result<Void, NetworkingError> {
         let result: Result<Data, NetworkingError> = await queryEncodeAndHandle(
-            .delete, path: path, query: query, cachingLevel: .none)
+            .delete,
+            path: path,
+            query: query,
+            cachingLevel: .none
+        )
         return result.map { _ in () }
     }
 }
@@ -360,8 +382,10 @@ extension Networking {
             data = try Self.requestBodyEncoder.encode(body)
         } catch {
             return emitPreflightFailure(
-                requestType, path: path,
-                error: .invalidRequest(.bodyEncodingFailed(message: error.localizedDescription)))
+                requestType,
+                path: path,
+                error: .invalidRequest(.bodyEncodingFailed(message: error.localizedDescription))
+            )
         }
         return await handle(
             requestType,
@@ -394,8 +418,10 @@ extension Networking {
             fields = try formFields(from: form)
         } catch {
             return emitPreflightFailure(
-                requestType, path: path,
-                error: .invalidRequest(.parameterEncodingFailed(message: error.localizedDescription)))
+                requestType,
+                path: path,
+                error: .invalidRequest(.parameterEncodingFailed(message: error.localizedDescription))
+            )
         }
         return await handle(
             requestType,
@@ -415,8 +441,10 @@ extension Networking {
             items = try formFields(from: query).map { URLQueryItem(name: $0.key, value: $0.value) }
         } catch {
             return emitPreflightFailure(
-                requestType, path: path,
-                error: .invalidRequest(.parameterEncodingFailed(message: error.localizedDescription)))
+                requestType,
+                path: path,
+                error: .invalidRequest(.parameterEncodingFailed(message: error.localizedDescription))
+            )
         }
         return await handle(
             requestType,
@@ -436,8 +464,14 @@ extension Networking {
         delay: Double = 0
     ) {
         registerFake(
-            requestType: .get, path: path, headerFields: headerFields, payload: fakePayload(response),
-            responseType: .json, statusCode: statusCode, delay: delay)
+            requestType: .get,
+            path: path,
+            headerFields: headerFields,
+            payload: fakePayload(response),
+            responseType: .json,
+            statusCode: statusCode,
+            delay: delay
+        )
     }
 
     public func fakeGET(
@@ -447,8 +481,14 @@ extension Networking {
         delay: Double = 0
     ) {
         registerFake(
-            requestType: .get, path: path, headerFields: headerFields, payload: .none, responseType: .json,
-            statusCode: statusCode, delay: delay)
+            requestType: .get,
+            path: path,
+            headerFields: headerFields,
+            payload: .none,
+            responseType: .json,
+            statusCode: statusCode,
+            delay: delay
+        )
     }
 
     public func fakeGET(
@@ -459,7 +499,13 @@ extension Networking {
         delay: Double = 0
     ) {
         registerFake(
-            requestType: .get, path: path, fileName: fileName, bundle: bundle, statusCode: statusCode, delay: delay)
+            requestType: .get,
+            path: path,
+            fileName: fileName,
+            bundle: bundle,
+            statusCode: statusCode,
+            delay: delay
+        )
     }
 
     public func fakePOST(
@@ -470,8 +516,14 @@ extension Networking {
         delay: Double = 0
     ) {
         registerFake(
-            requestType: .post, path: path, headerFields: headerFields, payload: fakePayload(response),
-            responseType: .json, statusCode: statusCode, delay: delay)
+            requestType: .post,
+            path: path,
+            headerFields: headerFields,
+            payload: fakePayload(response),
+            responseType: .json,
+            statusCode: statusCode,
+            delay: delay
+        )
     }
 
     public func fakePOST(
@@ -481,8 +533,14 @@ extension Networking {
         delay: Double = 0
     ) {
         registerFake(
-            requestType: .post, path: path, headerFields: headerFields, payload: .none, responseType: .json,
-            statusCode: statusCode, delay: delay)
+            requestType: .post,
+            path: path,
+            headerFields: headerFields,
+            payload: .none,
+            responseType: .json,
+            statusCode: statusCode,
+            delay: delay
+        )
     }
 
     public func fakePOST(
@@ -493,7 +551,13 @@ extension Networking {
         delay: Double = 0
     ) {
         registerFake(
-            requestType: .post, path: path, fileName: fileName, bundle: bundle, statusCode: statusCode, delay: delay)
+            requestType: .post,
+            path: path,
+            fileName: fileName,
+            bundle: bundle,
+            statusCode: statusCode,
+            delay: delay
+        )
     }
 
     public func fakePUT(
@@ -504,8 +568,14 @@ extension Networking {
         delay: Double = 0
     ) {
         registerFake(
-            requestType: .put, path: path, headerFields: headerFields, payload: fakePayload(response),
-            responseType: .json, statusCode: statusCode, delay: delay)
+            requestType: .put,
+            path: path,
+            headerFields: headerFields,
+            payload: fakePayload(response),
+            responseType: .json,
+            statusCode: statusCode,
+            delay: delay
+        )
     }
 
     public func fakePUT(
@@ -515,8 +585,14 @@ extension Networking {
         delay: Double = 0
     ) {
         registerFake(
-            requestType: .put, path: path, headerFields: headerFields, payload: .none, responseType: .json,
-            statusCode: statusCode, delay: delay)
+            requestType: .put,
+            path: path,
+            headerFields: headerFields,
+            payload: .none,
+            responseType: .json,
+            statusCode: statusCode,
+            delay: delay
+        )
     }
 
     public func fakePUT(
@@ -527,7 +603,13 @@ extension Networking {
         delay: Double = 0
     ) {
         registerFake(
-            requestType: .put, path: path, fileName: fileName, bundle: bundle, statusCode: statusCode, delay: delay)
+            requestType: .put,
+            path: path,
+            fileName: fileName,
+            bundle: bundle,
+            statusCode: statusCode,
+            delay: delay
+        )
     }
 
     public func fakePATCH(
@@ -538,8 +620,14 @@ extension Networking {
         delay: Double = 0
     ) {
         registerFake(
-            requestType: .patch, path: path, headerFields: headerFields, payload: fakePayload(response),
-            responseType: .json, statusCode: statusCode, delay: delay)
+            requestType: .patch,
+            path: path,
+            headerFields: headerFields,
+            payload: fakePayload(response),
+            responseType: .json,
+            statusCode: statusCode,
+            delay: delay
+        )
     }
 
     public func fakePATCH(
@@ -549,8 +637,14 @@ extension Networking {
         delay: Double = 0
     ) {
         registerFake(
-            requestType: .patch, path: path, headerFields: headerFields, payload: .none, responseType: .json,
-            statusCode: statusCode, delay: delay)
+            requestType: .patch,
+            path: path,
+            headerFields: headerFields,
+            payload: .none,
+            responseType: .json,
+            statusCode: statusCode,
+            delay: delay
+        )
     }
 
     public func fakePATCH(
@@ -561,7 +655,13 @@ extension Networking {
         delay: Double = 0
     ) {
         registerFake(
-            requestType: .patch, path: path, fileName: fileName, bundle: bundle, statusCode: statusCode, delay: delay)
+            requestType: .patch,
+            path: path,
+            fileName: fileName,
+            bundle: bundle,
+            statusCode: statusCode,
+            delay: delay
+        )
     }
 
     public func fakeDELETE(
@@ -572,8 +672,14 @@ extension Networking {
         delay: Double = 0
     ) {
         registerFake(
-            requestType: .delete, path: path, headerFields: headerFields, payload: fakePayload(response),
-            responseType: .json, statusCode: statusCode, delay: delay)
+            requestType: .delete,
+            path: path,
+            headerFields: headerFields,
+            payload: fakePayload(response),
+            responseType: .json,
+            statusCode: statusCode,
+            delay: delay
+        )
     }
 
     public func fakeDELETE(
@@ -583,8 +689,14 @@ extension Networking {
         delay: Double = 0
     ) {
         registerFake(
-            requestType: .delete, path: path, headerFields: headerFields, payload: .none, responseType: .json,
-            statusCode: statusCode, delay: delay)
+            requestType: .delete,
+            path: path,
+            headerFields: headerFields,
+            payload: .none,
+            responseType: .json,
+            statusCode: statusCode,
+            delay: delay
+        )
     }
 
     public func fakeDELETE(
@@ -595,7 +707,13 @@ extension Networking {
         delay: Double = 0
     ) {
         registerFake(
-            requestType: .delete, path: path, fileName: fileName, bundle: bundle, statusCode: statusCode, delay: delay)
+            requestType: .delete,
+            path: path,
+            fileName: fileName,
+            bundle: bundle,
+            statusCode: statusCode,
+            delay: delay
+        )
     }
 }
 
@@ -603,7 +721,11 @@ extension Networking {
 
     nonisolated public func imageFromCache(_ path: String, cacheName: String? = nil) throws -> Image? {
         let object = try objectFromCache(
-            for: path, cacheName: cacheName, cachingLevel: .memoryAndFile, responseType: .image)
+            for: path,
+            cacheName: cacheName,
+            cachingLevel: .memoryAndFile,
+            responseType: .image
+        )
 
         return object as? Image
     }
@@ -614,7 +736,12 @@ extension Networking {
         cachingLevel: CachingLevel = .memoryAndFile
     ) async -> Result<T, NetworkingError> {
         return await handleImageRequest(
-            .get, path: path, cacheName: cacheName, cachingLevel: cachingLevel, responseType: .image)
+            .get,
+            path: path,
+            cacheName: cacheName,
+            cachingLevel: cachingLevel,
+            responseType: .image
+        )
     }
 
     /// Completes the in-flight download for `path` with `URLError.cancelled`.
@@ -635,8 +762,14 @@ extension Networking {
         delay: Double = 0
     ) {
         registerFake(
-            requestType: .get, path: path, headerFields: headerFields, payload: .image(image), responseType: .image,
-            statusCode: statusCode, delay: delay)
+            requestType: .get,
+            path: path,
+            headerFields: headerFields,
+            payload: .image(image),
+            responseType: .image,
+            statusCode: statusCode,
+            delay: delay
+        )
     }
 
     public func downloadData<T: DataDownloadable>(
@@ -645,12 +778,21 @@ extension Networking {
         cachingLevel: CachingLevel = .memoryAndFile
     ) async -> Result<T, NetworkingError> {
         return await handleDataRequest(
-            .get, path: path, cacheName: cacheName, cachingLevel: cachingLevel, responseType: .data)
+            .get,
+            path: path,
+            cacheName: cacheName,
+            cachingLevel: cachingLevel,
+            responseType: .data
+        )
     }
 
     nonisolated public func dataFromCache(_ path: String, cacheName: String? = nil) throws -> Data? {
         let object = try objectFromCache(
-            for: path, cacheName: cacheName, cachingLevel: .memoryAndFile, responseType: .data)
+            for: path,
+            cacheName: cacheName,
+            cachingLevel: .memoryAndFile,
+            responseType: .data
+        )
 
         return object as? Data
     }

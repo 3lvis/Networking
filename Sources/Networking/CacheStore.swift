@@ -39,14 +39,18 @@ final class CacheStore: @unchecked Sendable {
             let cachesURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
         else {
             throw NSError(
-                domain: folderName, code: 9999,
-                userInfo: [NSLocalizedDescriptionKey: "Couldn't build a cache URL for: \(finalPath)"])
+                domain: folderName,
+                code: 9999,
+                userInfo: [NSLocalizedDescriptionKey: "Couldn't build a cache URL for: \(finalPath)"]
+            )
         }
 
         guard let folderComponent = URL(string: folderPath)?.absoluteString else {
             throw NSError(
-                domain: folderName, code: 9999,
-                userInfo: [NSLocalizedDescriptionKey: "Couldn't build a cache URL for: \(folderPath)"])
+                domain: folderName,
+                code: 9999,
+                userInfo: [NSLocalizedDescriptionKey: "Couldn't build a cache URL for: \(folderPath)"]
+            )
         }
         let folderURL = cachesURL.appendingPathComponent(folderComponent)
         if FileManager.default.exists(at: folderURL) == false {
@@ -233,8 +237,10 @@ final class CacheStore: @unchecked Sendable {
         let shardURL = domainURL.appendingPathComponent(String(cursor % Self.shardCount, radix: 16))
 
         if let files = try? FileManager.default.contentsOfDirectory(
-            at: shardURL, includingPropertiesForKeys: [.contentModificationDateKey], options: [])
-        {
+            at: shardURL,
+            includingPropertiesForKeys: [.contentModificationDateKey],
+            options: []
+        ) {
             for file in files {
                 guard
                     let modified = try? file.resourceValues(forKeys: [.contentModificationDateKey])
@@ -249,8 +255,10 @@ final class CacheStore: @unchecked Sendable {
         // Pre-sharding versions wrote files directly under the domain root; clear those strays (the cursor
         // file and the shard subdirectories stay).
         if let rootEntries = try? FileManager.default.contentsOfDirectory(
-            at: domainURL, includingPropertiesForKeys: [.isRegularFileKey], options: [])
-        {
+            at: domainURL,
+            includingPropertiesForKeys: [.isRegularFileKey],
+            options: []
+        ) {
             for entry in rootEntries where entry.lastPathComponent != Self.sweepCursorFileName {
                 if (try? entry.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile) == true {
                     try? FileManager.default.removeItem(at: entry)

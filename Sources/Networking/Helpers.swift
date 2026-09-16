@@ -31,8 +31,10 @@ extension Dictionary where Key: ExpressibleByStringLiteral {
                 return current + ["\(keyValuePair.key)=\(encodedValue)"]
             } else {
                 throw NSError(
-                    domain: Networking.domain, code: 0,
-                    userInfo: [NSLocalizedDescriptionKey: "Couldn't encode \(keyValuePair.value)"])
+                    domain: Networking.domain,
+                    code: 0,
+                    userInfo: [NSLocalizedDescriptionKey: "Couldn't encode \(keyValuePair.value)"]
+                )
             }
         }
 
@@ -115,15 +117,23 @@ extension HTTPURLResponse {
     ) {
         // composedURL has already parsed this URL and thrown on anything that would not, so the only
         // input Foundation refuses cannot reach here.
-        // oida:disable:next force_unwrapping
-        self.init(url: url, statusCode: statusCode, httpVersion: nil, headerFields: headerFields)!
+        // oida:disable force_unwrapping
+        self.init(
+            url: url,
+            statusCode: statusCode,
+            httpVersion: nil,
+            headerFields: headerFields
+        )!
+        // oida:enable force_unwrapping
     }
 }
 
 extension NSError {
     convenience init(statusCode: Int) {
         self.init(
-            domain: Networking.domain, code: statusCode,
-            userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: statusCode)])
+            domain: Networking.domain,
+            code: statusCode,
+            userInfo: [NSLocalizedDescriptionKey: HTTPURLResponse.localizedString(forStatusCode: statusCode)]
+        )
     }
 }

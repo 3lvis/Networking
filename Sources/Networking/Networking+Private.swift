@@ -8,8 +8,10 @@ extension Networking {
         responseType: ResponseType
     ) throws -> Any? {
         try cacheStore.object(
-            forResource: cacheResource(for: path, cacheName: cacheName), level: cachingLevel,
-            asImage: responseType == .image)
+            forResource: cacheResource(for: path, cacheName: cacheName),
+            level: cachingLevel,
+            asImage: responseType == .image
+        )
     }
 
     func registerFake(
@@ -28,8 +30,14 @@ extension Networking {
             fatalError("We couldn't find \(fileName), are you sure is there?")
         }
         registerFake(
-            requestType: requestType, path: path, headerFields: nil, payload: .data(data), responseType: .json,
-            statusCode: statusCode, delay: delay)
+            requestType: requestType,
+            path: path,
+            headerFields: nil,
+            payload: .data(data),
+            responseType: .json,
+            statusCode: statusCode,
+            delay: delay
+        )
     }
 
     func registerFake(
@@ -43,8 +51,12 @@ extension Networking {
     ) {
         var requests = fakeRequests[requestType] ?? [String: FakeRequest]()
         requests[path] = FakeRequest(
-            payload: payload, responseType: responseType, headerFields: headerFields, statusCode: statusCode,
-            delay: delay)
+            payload: payload,
+            responseType: responseType,
+            headerFields: headerFields,
+            statusCode: statusCode,
+            delay: delay
+        )
         fakeRequests[requestType] = requests
     }
 
@@ -59,7 +71,10 @@ extension Networking {
         var error: NSError?
         let url = try composedURL(with: path)
         let response = HTTPURLResponse(
-            url: url, headerFields: fakeRequest.headerFields, statusCode: fakeRequest.statusCode)
+            url: url,
+            headerFields: fakeRequest.headerFields,
+            statusCode: fakeRequest.statusCode
+        )
 
         if StatusCodeType(statusCode: fakeRequest.statusCode) != .successful {
             error = NSError(statusCode: fakeRequest.statusCode)
@@ -97,7 +112,11 @@ extension Networking {
         let clock = ContinuousClock()
         let startInstant = clock.now
         let context = RequestContext(
-            id: requestID, requestType: requestType, url: try? composedURL(with: path), headers: headerFields)
+            id: requestID,
+            requestType: requestType,
+            url: try? composedURL(with: path),
+            headers: headerFields
+        )
         emit(.started(context))
 
         let result: Result<T, NetworkingError>
@@ -106,7 +125,11 @@ extension Networking {
         do {
             if let fakeRequests = fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
                 let (fakeResponse, _) = try handleFakeRequest(
-                    fakeRequest, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
+                    fakeRequest,
+                    path: path,
+                    cacheName: cacheName,
+                    cachingLevel: cachingLevel
+                )
                 if fakeRequest.delay > 0 {
                     try? await Task.sleep(nanoseconds: UInt64(fakeRequest.delay * 1_000_000_000))
                 }
@@ -117,14 +140,19 @@ extension Networking {
                     byteCount = fakeData.count
                     result = .success(
                         T.makeDownloadResult(
-                            data: fakeData, statusCode: fakeResponse.statusCode,
-                            headers: headerFields(from: fakeResponse)))
+                            data: fakeData,
+                            statusCode: fakeResponse.statusCode,
+                            headers: headerFields(from: fakeResponse)
+                        ))
                 } else {
                     result = .failure(.invalidResponse)
                 }
             } else if let cached = try objectFromCache(
-                for: path, cacheName: cacheName, cachingLevel: cachingLevel, responseType: responseType) as? Data
-            {
+                for: path,
+                cacheName: cacheName,
+                cachingLevel: cachingLevel,
+                responseType: responseType
+            ) as? Data {
                 let response = HTTPURLResponse(url: try composedURL(with: path), statusCode: 200)
                 statusCode = 200
                 result = .success(
@@ -135,7 +163,10 @@ extension Networking {
                     ))
             } else {
                 let (downloaded, networkResponse) = try await requestData(
-                    requestType, path: path, responseType: responseType)
+                    requestType,
+                    path: path,
+                    responseType: responseType
+                )
                 try cacheOrPurgeData(
                     data: downloaded,
                     path: path,
@@ -149,16 +180,23 @@ extension Networking {
                     byteCount = downloaded.count
                     result = .success(
                         T.makeDownloadResult(
-                            data: downloaded, statusCode: networkResponse.statusCode,
-                            headers: headerFields(from: networkResponse)))
+                            data: downloaded,
+                            statusCode: networkResponse.statusCode,
+                            headers: headerFields(from: networkResponse)
+                        ))
                 }
             }
         } catch {
             result = .failure(downloadError(error))
         }
         return complete(
-            result, context: context, statusCode: statusCode, byteCount: byteCount, metrics: nil,
-            duration: clock.now - startInstant)
+            result,
+            context: context,
+            statusCode: statusCode,
+            byteCount: byteCount,
+            metrics: nil,
+            duration: clock.now - startInstant
+        )
     }
 
     func handleImageRequest<T: ImageDownloadable>(
@@ -172,7 +210,11 @@ extension Networking {
         let clock = ContinuousClock()
         let startInstant = clock.now
         let context = RequestContext(
-            id: requestID, requestType: requestType, url: try? composedURL(with: path), headers: headerFields)
+            id: requestID,
+            requestType: requestType,
+            url: try? composedURL(with: path),
+            headers: headerFields
+        )
         emit(.started(context))
 
         let result: Result<T, NetworkingError>
@@ -181,7 +223,11 @@ extension Networking {
         do {
             if let fakeRequests = fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
                 let (fakeResponse, _) = try handleFakeRequest(
-                    fakeRequest, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
+                    fakeRequest,
+                    path: path,
+                    cacheName: cacheName,
+                    cachingLevel: cachingLevel
+                )
                 if fakeRequest.delay > 0 {
                     try? await Task.sleep(nanoseconds: UInt64(fakeRequest.delay * 1_000_000_000))
                 }
@@ -191,14 +237,19 @@ extension Networking {
                 } else if case .image(let fakeImage) = fakeRequest.payload {
                     result = .success(
                         T.makeDownloadResult(
-                            image: fakeImage, statusCode: fakeResponse.statusCode,
-                            headers: headerFields(from: fakeResponse)))
+                            image: fakeImage,
+                            statusCode: fakeResponse.statusCode,
+                            headers: headerFields(from: fakeResponse)
+                        ))
                 } else {
                     result = .failure(.invalidResponse)
                 }
             } else if let cached = try objectFromCache(
-                for: path, cacheName: cacheName, cachingLevel: cachingLevel, responseType: responseType) as? Image
-            {
+                for: path,
+                cacheName: cacheName,
+                cachingLevel: cachingLevel,
+                responseType: responseType
+            ) as? Image {
                 let response = HTTPURLResponse(url: try composedURL(with: path), statusCode: 200)
                 statusCode = 200
                 result = .success(
@@ -217,13 +268,18 @@ extension Networking {
                 if StatusCodeType(statusCode: networkResponse.statusCode) != .successful {
                     result = .failure(downloadError(forStatusCode: networkResponse.statusCode))
                 } else if let downloaded = try cacheOrPurgeImage(
-                    data: data, path: path, cacheName: cacheName, cachingLevel: cachingLevel)
-                {
+                    data: data,
+                    path: path,
+                    cacheName: cacheName,
+                    cachingLevel: cachingLevel
+                ) {
                     byteCount = data.count
                     result = .success(
                         T.makeDownloadResult(
-                            image: downloaded, statusCode: networkResponse.statusCode,
-                            headers: headerFields(from: networkResponse)))
+                            image: downloaded,
+                            statusCode: networkResponse.statusCode,
+                            headers: headerFields(from: networkResponse)
+                        ))
                 } else {
                     result = .failure(.invalidResponse)
                 }
@@ -232,8 +288,13 @@ extension Networking {
             result = .failure(downloadError(error))
         }
         return complete(
-            result, context: context, statusCode: statusCode, byteCount: byteCount, metrics: nil,
-            duration: clock.now - startInstant)
+            result,
+            context: context,
+            statusCode: statusCode,
+            byteCount: byteCount,
+            metrics: nil,
+            duration: clock.now - startInstant
+        )
     }
 
     private func headerFields(from response: HTTPURLResponse) -> [String: AnyCodable] {
@@ -271,9 +332,15 @@ extension Networking {
         Data, HTTPURLResponse
     ) {
         let request = URLRequest(
-            url: try composedURL(with: path), requestType: requestType, contentType: nil, responseType: responseType,
-            authorizationHeaderValue: authorizationHeaderValue, token: token,
-            authorizationHeaderKey: authorizationHeaderKey, headerFields: headerFields)
+            url: try composedURL(with: path),
+            requestType: requestType,
+            contentType: nil,
+            responseType: responseType,
+            authorizationHeaderValue: authorizationHeaderValue,
+            token: token,
+            authorizationHeaderKey: authorizationHeaderKey,
+            headerFields: headerFields
+        )
 
         // Route through the interceptor chain so retry/auth-refresh apply to downloads too. Caching is the
         // caller's job (handleDataRequest/handleImageRequest write under the real cacheName) — writing here
@@ -331,6 +398,9 @@ extension Networking {
         -> Image?
     {
         try cacheStore.storeImage(
-            data: data, forResource: cacheResource(for: path, cacheName: cacheName), level: cachingLevel)
+            data: data,
+            forResource: cacheResource(for: path, cacheName: cacheName),
+            level: cachingLevel
+        )
     }
 }

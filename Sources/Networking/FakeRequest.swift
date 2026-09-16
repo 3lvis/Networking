@@ -43,15 +43,17 @@ struct FakeRequest {
                 originalFakedPath.replacing(replacedValues) == path
             else { continue }
 
-            guard case .data(let data) = fakeRequest.payload,
-                let responseString = String(data: data, encoding: .utf8)
+            guard case .data(let data) = fakeRequest.payload, let responseString = String(data: data, encoding: .utf8)
             else { continue }
 
             let substituted = responseString.replacing(replacedValues)
             guard let stringData = substituted.data(using: .utf8) else { continue }
             return FakeRequest(
-                payload: .data(stringData), responseType: fakeRequest.responseType,
-                headerFields: fakeRequest.headerFields, statusCode: fakeRequest.statusCode, delay: fakeRequest.delay
+                payload: .data(stringData),
+                responseType: fakeRequest.responseType,
+                headerFields: fakeRequest.headerFields,
+                statusCode: fakeRequest.statusCode,
+                delay: fakeRequest.delay
             )
         }
 

@@ -114,7 +114,10 @@ final class POSTIntegrationTests: XCTestCase {
             "bool": "true"
         ]
         let result: Result<JSONResponse, NetworkingError> = await networking.post(
-            "/post", parts: [part1, part2], fields: fields)
+            "/post",
+            parts: [part1, part2],
+            fields: fields
+        )
         switch result {
         case .success(let response):
             XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/post")
@@ -172,7 +175,10 @@ final class POSTIntegrationTests: XCTestCase {
         )
 
         let result: Result<JSONResponse, NetworkingError> = await networking.post(
-            "/post", parts: [imagePart], fields: ["public_id": "pig"])
+            "/post",
+            parts: [imagePart],
+            fields: ["public_id": "pig"]
+        )
         switch result {
         case .success(let response):
             XCTAssertEqual(response.body.string(for: "url"), "\(TestConfig.httpbinBaseURL)/post")

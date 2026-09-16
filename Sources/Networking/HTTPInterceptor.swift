@@ -15,7 +15,10 @@ public struct HTTPExchange: Sendable {
 /// A composable hook wrapping every verb request. `next` runs the rest of the chain (innermost is the real
 /// network call); calling it again replays the request — the basis for retry and auth-refresh.
 public protocol HTTPInterceptor: Sendable {
-    func intercept(_ request: URLRequest, next: @Sendable (URLRequest) async throws -> HTTPExchange) async throws
+    func intercept(
+        _ request: URLRequest,
+        next: @Sendable (URLRequest) async throws -> HTTPExchange
+    ) async throws
         -> HTTPExchange
 }
 
@@ -37,7 +40,10 @@ public struct AuthRefreshInterceptor: HTTPInterceptor {
         self.coordinator = RefreshCoordinator(refresh)
     }
 
-    public func intercept(_ request: URLRequest, next: @Sendable (URLRequest) async throws -> HTTPExchange) async throws
+    public func intercept(
+        _ request: URLRequest,
+        next: @Sendable (URLRequest) async throws -> HTTPExchange
+    ) async throws
         -> HTTPExchange
     {
         let exchange = try await next(request)
@@ -77,7 +83,10 @@ public struct RetryInterceptor: HTTPInterceptor {
         self.retryableMethods = Set(retryableMethods.map { $0.uppercased() })
     }
 
-    public func intercept(_ request: URLRequest, next: @Sendable (URLRequest) async throws -> HTTPExchange) async throws
+    public func intercept(
+        _ request: URLRequest,
+        next: @Sendable (URLRequest) async throws -> HTTPExchange
+    ) async throws
         -> HTTPExchange
     {
         let methodAllowsRetry = retryableMethods.contains((request.httpMethod ?? "GET").uppercased())
@@ -140,7 +149,10 @@ public struct ResponseValidatorInterceptor: HTTPInterceptor {
         self.validate = validate
     }
 
-    public func intercept(_ request: URLRequest, next: @Sendable (URLRequest) async throws -> HTTPExchange) async throws
+    public func intercept(
+        _ request: URLRequest,
+        next: @Sendable (URLRequest) async throws -> HTTPExchange
+    ) async throws
         -> HTTPExchange
     {
         let exchange = try await next(request)

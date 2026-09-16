@@ -27,14 +27,21 @@ final class RetryInterceptorTests: XCTestCase {
         let counter: CallCounter
         let outcomeForAttempt: @Sendable (Int) -> ScriptedOutcome
 
-        func intercept(_ request: URLRequest, next: @Sendable (URLRequest) async throws -> HTTPExchange) async throws
+        func intercept(
+            _ request: URLRequest,
+            next: @Sendable (URLRequest) async throws -> HTTPExchange
+        ) async throws
             -> HTTPExchange
         {
             let attempt = await counter.tick()
             switch outcomeForAttempt(attempt) {
             case .status(let code, let headers):
                 let url = request.url ?? URL(string: "https://example.com")!
-                let response = HTTPURLResponse(url: url, headerFields: headers, statusCode: code)
+                let response = HTTPURLResponse(
+                    url: url,
+                    headerFields: headers,
+                    statusCode: code
+                )
                 return HTTPExchange(data: Data(), response: response)
             case .throwTransport(let code):
                 throw URLError(code)
@@ -115,7 +122,10 @@ final class RetryInterceptorTests: XCTestCase {
 
         if case .failure(let error) = result { XCTFail("expected success after honoring Retry-After, got \(error)") }
         XCTAssertGreaterThanOrEqual(
-            elapsed, .milliseconds(900), "Retry-After: 1 should pace the retry ~1s, not the 1ms base backoff")
+            elapsed,
+            .milliseconds(900),
+            "Retry-After: 1 should pace the retry ~1s, not the 1ms base backoff"
+        )
     }
 
     // Retrying a non-idempotent request after a timeout/5xx can duplicate a side effect (a second charge,
@@ -150,8 +160,11 @@ final class RetryInterceptorTests: XCTestCase {
         let counter = CallCounter()
         let networking = await networking(
             RetryInterceptor(
-                maxAttempts: 3, baseDelay: .milliseconds(1), maxDelay: .milliseconds(2),
-                retryableMethods: ["POST"]),
+                maxAttempts: 3,
+                baseDelay: .milliseconds(1),
+                maxDelay: .milliseconds(2),
+                retryableMethods: ["POST"]
+            ),
             ScriptedInterceptor(counter: counter) { _ in .status(503) }
         )
 
