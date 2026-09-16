@@ -25,9 +25,7 @@ extension Dictionary where Key: ExpressibleByStringLiteral {
     public func urlEncodedString() throws -> String {
 
         let pairs = try reduce([]) { current, keyValuePair -> [String] in
-            if let encodedValue = "\(keyValuePair.value)".addingPercentEncoding(
-                withAllowedCharacters: .urlQueryParametersAllowed)
-            {
+            if let encodedValue = "\(keyValuePair.value)".addingPercentEncoding(withAllowedCharacters: .urlQueryParametersAllowed) {
                 return current + ["\(keyValuePair.key)=\(encodedValue)"]
             } else {
                 throw NSError(

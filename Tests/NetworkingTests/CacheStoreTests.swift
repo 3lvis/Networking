@@ -63,8 +63,7 @@ final class CacheStoreTests: XCTestCase {
 
         let url = try store.destinationURL(forResource: resource)
         memory.removeObject(forKey: url.absoluteString as AnyObject)  // force the disk path
-        try FileManager.default.setAttributes(
-            [.modificationDate: Date(timeIntervalSinceNow: -120)], ofItemAtPath: url.path)
+        try FileManager.default.setAttributes([.modificationDate: Date(timeIntervalSinceNow: -120)], ofItemAtPath: url.path)
 
         XCTAssertNil(
             try store.object(
@@ -88,8 +87,7 @@ final class CacheStoreTests: XCTestCase {
 
         let url = try store.destinationURL(forResource: resource)
         memory.removeObject(forKey: url.absoluteString as AnyObject)  // force the disk path
-        try FileManager.default.setAttributes(
-            [.modificationDate: Date(timeIntervalSinceNow: -30)], ofItemAtPath: url.path)
+        try FileManager.default.setAttributes([.modificationDate: Date(timeIntervalSinceNow: -30)], ofItemAtPath: url.path)
 
         XCTAssertNotNil(
             try store.object(

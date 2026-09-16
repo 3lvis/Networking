@@ -8,8 +8,7 @@ final class PUTIntegrationTests: XCTestCase {
 
     func testPUT() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result: Result<JSONResponse, NetworkingError> = await networking.put(
-            "/put", body: ["username": "jameson", "password": "secret"])
+        let result: Result<JSONResponse, NetworkingError> = await networking.put("/put", body: ["username": "jameson", "password": "secret"])
         switch result {
         case .success(let response):
             let json = httpbinEchoedMap(response, "json")
@@ -37,8 +36,7 @@ final class PUTIntegrationTests: XCTestCase {
 
     func testPUTWithIvalidPath() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result: Result<JSONResponse, NetworkingError> = await networking.put(
-            "/posdddddt", body: ["username": "jameson", "password": "secret"])
+        let result: Result<JSONResponse, NetworkingError> = await networking.put("/posdddddt", body: ["username": "jameson", "password": "secret"])
         switch result {
         case .success:
             XCTFail("a PUT to a path that does not exist must fail")

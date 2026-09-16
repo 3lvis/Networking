@@ -18,9 +18,7 @@ final class ObservabilityIntegrationTests: XCTestCase {
             2,
             "expected a .started and a .completed event"
         )
-        guard case .started(let startContext) = events.first,
-            case .completed(let endContext, let outcome, let duration, let metrics) = events.last
-        else {
+        guard case .started(let startContext) = events.first, case .completed(let endContext, let outcome, let duration, let metrics) = events.last else {
             return XCTFail("expected .started then .completed, got \(events)")
         }
         XCTAssertEqual(
@@ -92,9 +90,7 @@ final class ObservabilityIntegrationTests: XCTestCase {
             2,
             "an encode failure must still emit .started and .completed; got \(events)"
         )
-        guard case .started(let startContext) = events.first,
-            case .completed(let endContext, let outcome, _, _) = events.last
-        else {
+        guard case .started(let startContext) = events.first, case .completed(let endContext, let outcome, _, _) = events.last else {
             return XCTFail("expected .started then .completed, got \(events)")
         }
         XCTAssertEqual(

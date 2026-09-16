@@ -213,8 +213,7 @@ final class POSTIntegrationTests: XCTestCase {
 
     func testPOSTWithIvalidPath() async throws {
         let networking = Networking(baseURL: baseURL)
-        let result: Result<JSONResponse, NetworkingError> = await networking.post(
-            "/posdddddt", body: ["username": "jameson", "password": "secret"])
+        let result: Result<JSONResponse, NetworkingError> = await networking.post("/posdddddt", body: ["username": "jameson", "password": "secret"])
         switch result {
         case .success:
             XCTFail("a POST to a path that does not exist must fail")

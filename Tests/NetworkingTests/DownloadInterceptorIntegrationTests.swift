@@ -17,10 +17,7 @@ final class DownloadInterceptorIntegrationTests: XCTestCase {
     private struct CountingPassthroughInterceptor: HTTPInterceptor {
         let counter: Counter
 
-        func intercept(
-            _ request: URLRequest,
-            next: @Sendable (URLRequest) async throws -> HTTPExchange
-        ) async throws -> HTTPExchange {
+        func intercept(_ request: URLRequest, next: @Sendable (URLRequest) async throws -> HTTPExchange) async throws -> HTTPExchange {
             await counter.tick()
             return try await next(request)
         }

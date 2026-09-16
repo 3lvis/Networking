@@ -29,9 +29,7 @@ final class CacheWriteAndDataBodyRegressionTests: XCTestCase {
         guard case .success = result else { return XCTFail("expected a successful download, got \(result)") }
 
         let orphanURL = try networking.destinationURL(for: path, cacheName: nil)
-        XCTAssertFalse(
-            FileManager.default.exists(at: orphanURL),
-            "downloadData wrote a stray cache file under the path key that no read path uses")
+        XCTAssertFalse(FileManager.default.exists(at: orphanURL), "downloadData wrote a stray cache file under the path key that no read path uses")
     }
 
     // The `.memory`/`.none` pure-read contracts (a read must not destroy a durable `.memoryAndFile` copy)

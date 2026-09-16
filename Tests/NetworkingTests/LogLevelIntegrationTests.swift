@@ -9,8 +9,7 @@ final class LogLevelIntegrationTests: XCTestCase {
     let baseURL = TestConfig.httpbinBaseURL
 
     private func log(level: Networking.LogLevel, _ body: (Networking) async -> Void) async -> String {
-        let url = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(
-            "networking-\(UUID().uuidString).log")
+        let url = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("networking-\(UUID().uuidString).log")
         defer { try? FileManager.default.removeItem(at: url) }
         let networking = Networking(baseURL: baseURL)
         await networking.setLogFileURL(url)
@@ -28,13 +27,11 @@ final class LogLevelIntegrationTests: XCTestCase {
 
     func testFailuresLevelLogsFailureWithFullDetail() async {
         let contents = await log(level: .failures) { networking in
-            let _: Result<JSONResponse, NetworkingError> = await networking.post(
-                "/status/400", body: ["shape": "wrong"])
+            let _: Result<JSONResponse, NetworkingError> = await networking.post("/status/400", body: ["shape": "wrong"])
         }
         XCTAssertTrue(contents.contains("✗ POST"), "expected the failure line; got:\n\(contents)")
         XCTAssertTrue(contents.contains("→ Content-Type"), "expected request headers; got:\n\(contents)")
-        XCTAssertTrue(
-            contents.contains("→ body:") && contents.contains("shape"), "expected the request body; got:\n\(contents)")
+        XCTAssertTrue(contents.contains("→ body:") && contents.contains("shape"), "expected the request body; got:\n\(contents)")
         XCTAssertTrue(contents.contains("← Content-Type"), "expected response headers; got:\n\(contents)")
     }
 
@@ -43,8 +40,7 @@ final class LogLevelIntegrationTests: XCTestCase {
             let _: Result<JSONResponse, NetworkingError> = await networking.post("/post", body: ["shape": "right"])
         }
         XCTAssertTrue(contents.contains("✓ POST"), "expected a success line at .all; got:\n\(contents)")
-        XCTAssertTrue(
-            contents.contains("→ body:") && contents.contains("shape"), "expected the request body; got:\n\(contents)")
+        XCTAssertTrue(contents.contains("→ body:") && contents.contains("shape"), "expected the request body; got:\n\(contents)")
         XCTAssertTrue(contents.contains("← body:"), "expected the response body; got:\n\(contents)")
     }
 
@@ -52,8 +48,7 @@ final class LogLevelIntegrationTests: XCTestCase {
     // the line still logs, but the payload and Authorization/Cookie values are replaced with <redacted> so
     // they can't leak to prod logs.
     func testBodiesAndHeadersRedactedWhenEnabled() async {
-        let url = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(
-            "networking-\(UUID().uuidString).log")
+        let url = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("networking-\(UUID().uuidString).log")
         defer { try? FileManager.default.removeItem(at: url) }
         let networking = Networking(baseURL: baseURL)
         await networking.setLogFileURL(url)
@@ -61,14 +56,12 @@ final class LogLevelIntegrationTests: XCTestCase {
         await networking.setRedactsLogs(true)
         await networking.setAuthorizationHeader(token: "supersecret")
 
-        let _: Result<JSONResponse, NetworkingError> = await networking.post(
-            "/status/400", body: ["shape": "secret-value"])
+        let _: Result<JSONResponse, NetworkingError> = await networking.post("/status/400", body: ["shape": "secret-value"])
 
         let contents = (try? String(contentsOf: url, encoding: .utf8)) ?? ""
         XCTAssertTrue(contents.contains("✗ POST"), "the failure line should still log; got:\n\(contents)")
         XCTAssertTrue(contents.contains("→ body: <redacted>"), "the request body should be redacted; got:\n\(contents)")
-        XCTAssertTrue(
-            contents.contains("→ Authorization: <redacted>"), "the auth header should be redacted; got:\n\(contents)")
+        XCTAssertTrue(contents.contains("→ Authorization: <redacted>"), "the auth header should be redacted; got:\n\(contents)")
         XCTAssertFalse(contents.contains("secret-value"), "the body contents must not leak; got:\n\(contents)")
         XCTAssertFalse(contents.contains("supersecret"), "the auth token must not leak; got:\n\(contents)")
     }
@@ -80,9 +73,7 @@ final class LogLevelIntegrationTests: XCTestCase {
             await networking.setAuthorizationHeader(token: "supersecret")
             let _: Result<JSONResponse, NetworkingError> = await networking.get("/status/401")
         }
-        XCTAssertTrue(
-            contents.contains("→ Authorization: Bearer supersecret"),
-            "debug logs should show the real header; got:\n\(contents)")
+        XCTAssertTrue(contents.contains("→ Authorization: Bearer supersecret"), "debug logs should show the real header; got:\n\(contents)")
     }
 
     func testNoneSilencesEvenFailures() async {
