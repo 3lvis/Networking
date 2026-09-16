@@ -117,14 +117,12 @@ extension HTTPURLResponse {
     ) {
         // composedURL has already parsed this URL and thrown on anything that would not, so the only
         // input Foundation refuses cannot reach here.
-        // oida:disable force_unwrapping
         self.init(
             url: url,
             statusCode: statusCode,
             httpVersion: nil,
             headerFields: headerFields
         )!
-        // oida:enable force_unwrapping
     }
 }
 

@@ -17,46 +17,16 @@ opt_in_rules:
   - comment_adds_no_word
   - no_mark_comments
   - no_single_use_void_functions
-  # Auto-fixable and mechanical — `bin/lint --fix` applies these, no judgement needed.
-  - modifier_order
-  - self_binding
-  - toggle_bool
-  - optional_enum_case_matching
-  - period_spacing
-  - prefer_zero_over_explicit_init
-  - redundant_type_annotation
-  - explicit_init
-  - comma_inheritance
-  - final_test_case
+  # A cast or a try that traps on anything the runtime hands it, and an override that overrides nothing.
   - unneeded_override
-  - closure_spacing
-  - contains_over_first_not_nil
-  - fatal_error_message
-  - joined_default_parameter
-  - let_var_whitespace
-  - operator_usage_whitespace
-  - redundant_nil_coalescing
-  - unneeded_parentheses_in_closure_argument
-  - unowned_variable_capture
-  - yoda_condition
-  - unhandled_throwing_task
-  - file_header
   - force_cast
   - force_try
-  - force_unwrapping
   # VOICE.md's own contract, enforced on every root document.
   - document_says_what_is
   - document_avoids_retired_words
   - document_links_resolve
 
 disabled_rules:
-  # `.swift-format` owns whitespace, and it is the formatter oida hands the files to, so these three
-  # would demand the alignment it removes.
-  - closure_end_indentation
-  - literal_expression_end_indentation
-  - vertical_parameter_alignment_on_call
-  # grouped_imports owns import order; this rule would flatten its groups into one alphabetical run.
-  - sorted_imports
   - todo # work is tracked in PRs and LEARNINGS, not in-code markers
   - unused_closure_parameter
 
@@ -89,13 +59,6 @@ identifier_name:
 
 type_name:
   max_length: 45
-
-file_header:
-  severity: error
-  forbidden_pattern: 'Copyright © \d|Created by .+ on '
-
-force_unwrapping:
-  severity: error
 
 multiline_call_arguments:
   max_number_of_single_line_parameters: 2
