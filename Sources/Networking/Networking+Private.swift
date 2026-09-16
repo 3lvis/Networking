@@ -349,6 +349,8 @@ extension Networking {
         return (exchange.data, exchange.response)
     }
 
+    // The cancel path is Networking's own, reached from the verbs in another file.
+    // oida:disable:next no_single_use_void_functions
     func cancelRequest(
         _ sessionTaskType: SessionTaskType,
         requestType: RequestType,

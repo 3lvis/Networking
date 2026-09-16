@@ -24,6 +24,8 @@ final class CacheStore: @unchecked Sendable {
 
     var ttl: Duration { expiry.ttl }
 
+    // Forwards to an expiry the caller cannot reach, since it is private to the store.
+    // oida:disable:next no_single_use_void_functions
     func setTTL(_ ttl: Duration) { expiry.setTTL(ttl) }
 
     /// The on-disk URL for a resolved resource key, laid out under `folderName/<shard>/<file>`. Creates the
@@ -137,6 +139,8 @@ final class CacheStore: @unchecked Sendable {
         }
     }
 
+    // The store's write seam, reached from Networking and driven directly by six tests.
+    // oida:disable:next no_single_use_void_functions
     func storeData(
         _ data: Data?,
         forResource resource: String,
@@ -197,6 +201,8 @@ final class CacheStore: @unchecked Sendable {
     static let mutationLock = NSLock()
     static let sweepCursorFileName = ".sweep-shard"
 
+    // The store's clear seam, reached from Networking and driven directly by three tests.
+    // oida:disable no_single_use_void_functions
     /// Empties **both** tiers (clearing only one would leave the other serving deleted data). Scoped to the
     /// networking folder; unrelated files in Caches are untouched.
     func clear() throws {
@@ -208,6 +214,7 @@ final class CacheStore: @unchecked Sendable {
             _ = try FileManager.default.remove(at: folderURL)
         }
     }
+    // oida:enable no_single_use_void_functions
 
     private static func folderURL(named folderName: String) -> URL? {
         guard let cachesURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else {
@@ -222,6 +229,8 @@ final class CacheStore: @unchecked Sendable {
     // Deletes expired files from **one** shard per call (rotated via a tiny cursor file), so each launch's
     // sweep is O(N / shardCount) and everything gets visited over `shardCount` launches. Age is judged by
     // the file's modification date. Best-effort and off the request path.
+    // The store's sweep seam, reached from Networking on a detached task.
+    // oida:disable:next no_single_use_void_functions
     func sweepExpired() {
         Self.mutationLock.lock()
         defer { Self.mutationLock.unlock() }

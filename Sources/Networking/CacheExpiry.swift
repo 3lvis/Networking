@@ -18,6 +18,8 @@ final class CacheExpiry: @unchecked Sendable {
         return .seconds(ttlSeconds)
     }
 
+    // The lock-guarded write itself; the lock is the reason this is a function.
+    // oida:disable:next no_single_use_void_functions
     func setTTL(_ ttl: Duration) {
         lock.lock()
         defer { lock.unlock() }

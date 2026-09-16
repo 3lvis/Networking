@@ -247,6 +247,9 @@ extension Networking {
         return result
     }
 
+    // Fifty lines of logging behind a name, and three early exits the caller must never inherit —
+    // returning from complete would skip emit and the result.
+    // oida:disable:next no_single_use_void_functions
     private func logCompletion<T>(
         context: RequestContext,
         result: Result<T, NetworkingError>,
