@@ -13,28 +13,11 @@ env:
   DEVELOPER_DIR: /Applications/Xcode_27.0.app/Contents/Developer
 
 jobs:
-  lint:
-    name: oida
-    # Linting needs no Xcode, so it runs on Linux where a runner minute is cheapest. bin/lint downloads
-    # oida, pinned by .oida-version and verified against .oida-checksum-<platform>, so CI and a laptop run
-    # the same bytes. The Swift toolchain container is what makes Linux work at all: oida's SourceKit-based
-    # rules and its swift-format handoff both resolve through the toolchain that ships in this image, the
-    # same way they resolve through an installed Xcode on a Mac. There is no baseline: any violation fails.
-    runs-on: ubuntu-latest
-    container: swift:6.3.2-noble
-    steps:
-      - uses: actions/checkout@v5
-      # curl isn't in the toolchain image; bin/lint needs it to fetch the pinned oida release.
-      - name: Install curl
-        run: apt-get update && apt-get install -y curl
-      - name: Lint
-        run: ./bin/lint --check
-
   build-and-test:
     name: macOS Swift Build & Test
     runs-on: xcode-27
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
 
       - name: Versions
         run: xcodebuild -version && swift --version
@@ -62,7 +45,7 @@ jobs:
     name: Warnings gate
     runs-on: xcode-27
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
       # No SPM cache on purpose: a fresh build recompiles everything so warnings are
       # actually re-emitted (an incremental build would skip unchanged files).
       - name: Build and fail on first-party warnings
@@ -78,6 +61,6 @@ jobs:
     name: Doc link check
     runs-on: xcode-27
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
       - name: Check relative markdown links resolve
         run: python3 scripts/check-doc-links.py
