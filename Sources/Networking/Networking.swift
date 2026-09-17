@@ -80,7 +80,6 @@ public actor Networking {
 
     // The hop that makes an actor-isolated write legal from a nonisolated termination handler.
     // Inlining it fails to compile: 'actor-isolated property ... can not be mutated'.
-    // oida:disable:next no_single_use_void_functions
     private func removeContinuation(_ id: UUID) {
         streamContinuations[id] = nil
     }
