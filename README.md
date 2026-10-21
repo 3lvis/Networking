@@ -452,6 +452,20 @@ let result: Result<[Story], NetworkingError> = await networking.get("/stories")
 // .success carrying the stories
 ```
 
+Register a response sequence when the same path returns different pages. Calls use each response in order, then repeat the last response:
+
+```swift
+struct Story: Codable { let id: Int; let title: String }
+
+let networking = Networking(baseURL: "https://example.com")
+await networking.fakeGET("/stories", responses: [
+    [Story(id: 1, title: "First page")],
+    [Story(id: 2, title: "Second page")]
+])
+let first: Result<[Story], NetworkingError> = await networking.get("/stories")
+let second: Result<[Story], NetworkingError> = await networking.get("/stories")
+```
+
 **Faking with contents of a file**:
 
 A file outside the main bundle takes the bundle parameter; everything else uses `Bundle.main`.

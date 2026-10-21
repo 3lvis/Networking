@@ -40,7 +40,7 @@ extension Networking {
         var responseMetadata: ResponseMetadata?
 
         do {
-            if let fakeRequest = try FakeRequest.find(
+            if let fakeResponse = try FakeRequest.takeNext(
                 ofType: requestType,
                 forPath: path,
                 in: fakeRequests
@@ -55,7 +55,7 @@ extension Networking {
                 emit(.started(fakeContext))
                 let (fakeResult, fakeStatus, fakeBytes): (Result<T, NetworkingError>, Int, Int) =
                     try await handleFakeRequest(
-                        fakeRequest,
+                        fakeResponse,
                         path: path,
                         requestType: requestType
                     )
@@ -358,7 +358,7 @@ extension Networking {
     }
 
     private func handleFakeRequest<T: Decodable>(
-        _ fakeRequest: FakeRequest,
+        _ fakeRequest: FakeRequest.Response,
         path: String,
         requestType: RequestType
     ) async throws -> (Result<T, NetworkingError>, statusCode: Int, byteCount: Int) {

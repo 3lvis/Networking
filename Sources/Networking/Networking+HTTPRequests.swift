@@ -462,6 +462,28 @@ extension Networking {
         )
     }
 
+    public func fakeGET<Response: Encodable>(
+        _ path: String,
+        responses: [Response],
+        headerFields: [String: String]? = nil,
+        statusCode: Int = 200,
+        delay: Double = 0
+    ) {
+        registerFake(
+            requestType: .get,
+            path: path,
+            responses: responses.map { response in
+                FakeRequest.Response(
+                    payload: fakePayload(response),
+                    responseType: .json,
+                    headerFields: headerFields,
+                    statusCode: statusCode,
+                    delay: delay
+                )
+            }
+        )
+    }
+
     public func fakeGET(
         _ path: String,
         headerFields: [String: String]? = nil,

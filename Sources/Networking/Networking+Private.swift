@@ -60,8 +60,18 @@ extension Networking {
         fakeRequests[requestType] = requests
     }
 
+    func registerFake(
+        requestType: RequestType,
+        path: String,
+        responses: [FakeRequest.Response]
+    ) {
+        var requests = fakeRequests[requestType] ?? [String: FakeRequest]()
+        requests[path] = FakeRequest(responses: responses)
+        fakeRequests[requestType] = requests
+    }
+
     func handleFakeRequest(
-        _ fakeRequest: FakeRequest,
+        _ fakeRequest: FakeRequest.Response,
         path: String,
         cacheName: String?,
         cachingLevel: CachingLevel
@@ -121,7 +131,7 @@ extension Networking {
         var statusCode: Int?
         var byteCount = 0
         do {
-            if let fakeRequests = fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
+            if let fakeRequest = try FakeRequest.takeNext(ofType: requestType, forPath: path, in: fakeRequests) {
                 let (fakeResponse, _) = try handleFakeRequest(
                     fakeRequest,
                     path: path,
@@ -219,7 +229,7 @@ extension Networking {
         var statusCode: Int?
         var byteCount = 0
         do {
-            if let fakeRequests = fakeRequests[requestType], let fakeRequest = fakeRequests[path] {
+            if let fakeRequest = try FakeRequest.takeNext(ofType: requestType, forPath: path, in: fakeRequests) {
                 let (fakeResponse, _) = try handleFakeRequest(
                     fakeRequest,
                     path: path,
