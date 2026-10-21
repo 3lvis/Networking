@@ -255,6 +255,24 @@ extension FakeRequestTests {
         }
     }
 
+    func testFakeGETWithResponseSequenceRepeatsLastResponse() async throws {
+        let networking = Networking(baseURL: baseURL)
+        await networking.fakeGET("/stories", responses: [["page": "first"], ["page": "second"]])
+
+        let first: Result<JSONResponse, NetworkingError> = await networking.get("/stories")
+        let second: Result<JSONResponse, NetworkingError> = await networking.get("/stories")
+        let third: Result<JSONResponse, NetworkingError> = await networking.get("/stories")
+
+        for (result, expectedPage) in [(first, "first"), (second, "second"), (third, "second")] {
+            switch result {
+            case .success(let response):
+                XCTAssertEqual(response.body.string(for: "page"), expectedPage)
+            case .failure(let error):
+                XCTFail(error.localizedDescription)
+            }
+        }
+    }
+
     func testGETWithDelay() async throws {
         let networking = Networking(baseURL: baseURL)
         let delay: Double = 2.0
